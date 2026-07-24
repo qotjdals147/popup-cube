@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
+import { ViewModeToggle } from '../components/ViewModeToggle';
+import { useViewMode } from '../context/ViewModeContext';
 import { t } from '../i18n';
 
 export function LandingPage() {
   const navigate = useNavigate();
+  const { isMobile } = useViewMode();
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
+    <div style={styles.page} className={isMobile ? 'page-mobile' : undefined}>
+      <div style={styles.card} className="landing-card">
         <h1 style={styles.title}>{t('landing.title')}</h1>
         <p style={styles.subtitle}>{t('landing.subtitle')}</p>
         <p style={styles.tagline}>{t('landing.tagline')}</p>
@@ -18,6 +21,8 @@ export function LandingPage() {
         <button style={styles.secondaryButton} onClick={() => navigate('/login?role=owner')}>
           {t('landing.ownerButton')} <span style={styles.hint}>{t('landing.ownerHint')}</span>
         </button>
+
+        <ViewModeToggle />
       </div>
     </div>
   );

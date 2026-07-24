@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ViewModeToggle } from '../components/ViewModeToggle';
+import { useViewMode } from '../context/ViewModeContext';
 import { useAuth } from '../context/AuthContext';
 import { t, getAuthErrorMessage } from '../i18n';
 import { checkNicknameAvailable, isNicknameLengthValid } from '../lib/nickname';
@@ -11,6 +13,7 @@ export function LoginPage() {
   const [searchParams] = useSearchParams();
   const role = searchParams.get('role') === 'owner' ? 'owner' : 'shopper';
   const navigate = useNavigate();
+  const { isMobile } = useViewMode();
   const { signInWithPassword, signUp } = useAuth();
 
   const [mode, setMode] = useState<Mode>('login');
@@ -108,9 +111,10 @@ export function LoginPage() {
           : null;
 
   return (
-    <div style={styles.page}>
+    <div style={styles.page} className={isMobile ? 'page-mobile' : undefined}>
       <form
         style={styles.card}
+        className="login-card"
         onSubmit={mode === 'login' ? handleLoginSubmit : handleSignupSubmit}
       >
         <h2 style={styles.title}>
@@ -184,6 +188,8 @@ export function LoginPage() {
         <button style={styles.backButton} type="button" onClick={() => navigate('/')}>
           {t('common.back')}
         </button>
+
+        <ViewModeToggle />
       </form>
     </div>
   );

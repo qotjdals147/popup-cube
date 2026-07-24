@@ -4,10 +4,13 @@ import type { StoreSummary } from '@popup-cube/shared';
 import { useAuth } from '../context/AuthContext';
 import { listPublishedStores } from '../lib/stores';
 import { StoreEnterModal } from '../components/StoreEnterModal';
+import { ViewModeToggle } from '../components/ViewModeToggle';
+import { useViewMode } from '../context/ViewModeContext';
 import { t } from '../i18n';
 
 export function HomePage() {
   const { userId, role, loading: authLoading, signOut } = useAuth();
+  const { isMobile } = useViewMode();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -65,8 +68,11 @@ export function HomePage() {
   }
 
   return (
-    <div style={styles.page}>
-      <header style={styles.header}>
+    <div
+      style={styles.page}
+      className={isMobile ? 'page-mobile home-page-mobile' : undefined}
+    >
+      <header style={styles.header} className={isMobile ? 'home-header-mobile' : undefined}>
         <div style={styles.headerTitles}>
           <h1 style={styles.title}>{t('home.title')}</h1>
           <p style={styles.tagline}>{t('home.tagline')}</p>
@@ -109,7 +115,7 @@ export function HomePage() {
         )}
 
         {!loading && !error && stores.length > 0 && (
-          <div style={styles.grid}>
+          <div style={styles.grid} className={isMobile ? 'home-grid-mobile' : undefined}>
             {stores.map((store) => (
               <button
                 key={store.id}
@@ -136,6 +142,12 @@ export function HomePage() {
           </div>
         )}
       </main>
+
+      {isMobile && (
+        <footer style={{ padding: '0 16px 20px' }}>
+          <ViewModeToggle />
+        </footer>
+      )}
 
       {selectedStore && (
         <StoreEnterModal

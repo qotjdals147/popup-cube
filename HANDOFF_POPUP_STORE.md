@@ -257,7 +257,9 @@
 | AD-040 | **(계획) 점주 전용 내장 AI 에이전트** — 매장 만들기/수정 시 **실사 사진 첨부** 또는 **자연어**로 레이아웃·진열 가구(슬롯 수·옷걸이 용량 등 **실제 동작하는 fixture**)까지 제안. LLM→**구조화 JSON**→2D 미리보기→**점주 승인** 후 저장. 이미지 생성 API는 **보조·quota·캐시**. 단순 SD 일괄 변환(AD-012)보다 **에이전트+템플릿 카탈로그**가 현실적. 상세 §40 | User 2026-07-24: 점주 편의·API 사용량 내 에이전트 가능 여부 | 2026-07-24 |
 | AD-041 | **실매장 유사도 = 제품 핵심** — 단순 게임 맵·제네릭 쇼룸 **아님**. 점주는 **본인 오프라인 팝업**과 최대한 비슷한 온라인 공간을 원함. **브랜드 색·사진·존 배치·실물 상품 픽셀**로 「우리 팝업」이 보여야 함. 기술=**레고(슬롯 fixture) + 점주 브랜딩(실사·팔레트·레이아웃)** — §41 | User 2026-07-24: 게임 아닌 실제 팝업 연계, 점주 실매장 닮기 | 2026-07-24 |
 | AD-042 | **점주 온보딩 = 「팝업 사진으로 시작」3단 wizard** — (1) 실사 1~3장 (2) vision+LLM으로 palette·배치 **초안** (3) 2D 미리보기 **손 수정**→승인. **매장 전체 image gen 금지(v1)**. 비용·편의·유사도 실행 **§42** | User 2026-07-24: 비용 아끼면서 현실적으로 어떻게? | 2026-07-24 |
-| AD-043 | **GUCCI 데모 등각 월드 = `generated` visualStyle** — PDF 시안과 **동일 AI 이미지 생성 파이프라인**으로 room/avatar PNG 생성 → Phaser 2:1 dimetric **타일 그리드**에 조립(목업 PNG 통째 붙이기·Graphics 사각형 placeholder **금지**). **지금:** CEO 데모용 하드코드 앵커·충돌·NPC (`generatedWorldAssets.ts`). **정식:** `display_fixtures` + walkability 마스크 + 점주 에디터 배치(AD-033). 상세 **§43** | User 2026-07-24: 시안 품질대로 월드 + 정식 경로 질문 | 2026-07-24 |
+| AD-043 | **GUCCI 데모 등각 월드 = `generated` visualStyle** — PDF 시안과 **동일 AI 이미지 생성 파이프라인**으로 room/avatar PNG 생성 → Phaser 2:1 dimetric **타일 그리드**에 조립(목업 PNG 통째 붙이기·Graphics 사각형 placeholder **금지**). **지금:** CEO 데모용 하드코드 앵커·충돌·NPC (`generatedWorldAssets.ts`). **정식:** §44 Grid Occupancy + `display_fixtures`(AD-033). 상세 **§43·§44** | User 2026-07-24: 시안 품질대로 월드 + 정식 경로 질문 | 2026-07-24 |
+| AD-044 | **Grid Occupancy 표준 (등각 타일 맵)** — 타일 그리드 `grid[x][y]` + fixture **다중 타일 점유**(`origin` + `width`×`depth`) + **Y-sort** `(tx+ty)` + 충돌=occupied·벽 + 문=transition(AD-025). **데모(GUCCI):** 이동·depth만 타일, 충돌은 PNG 픽셀 보정(§43). **정식:** occupied가 단일 진실 소스 — §44 | User 2026-07-24: Gemini 등각 도면 스펙 ↔ 우리 정식 방향 정리 요청 | 2026-07-24 |
+| AD-045 | **점주 AI = 매장 전체 생성 ❌ → 리소스 추출 + 도면 에디터** — 실사 업로드 시 **타일·가구·소품·재고 픽셀**만 API로 분리 추출 → **점주 계정 귀속 라이브러리**. 꾸미기 전 **픽셀 도면(벽·문·구조)** 편집 → 바닥 **칠하기**·fixture **점유 배치**(§44). 전체 room gen 금지(GUCCI 충돌 이슈 회피). **§45** | User 2026-07-24: API 절약 + 좌표/충돌 문제 근본 해결 | 2026-07-24 |
 
 ---
 
@@ -469,6 +471,16 @@ popup_store/                          # Turborepo root
 - **Author:** User + Cursor Agent
 - **Changed:** AD-041, §41 — 점주 「본인 팝업 닮기」= 성공 조건, 레고+스킨 모델, published 최소 기준
 - **Notes:** §40 카탈로그 ≠ 제네릭 쇼룸 — **점주 브랜딩 레이어**가 핵심
+
+### 2026-07-24 — §45 리소스 추출 + 픽셀 도면 에디터 (AD-045)
+- **Author:** User + Cursor Agent
+- **Changed:** AD-045, §45 — 매장 전체 AI gen 폐기 방향 확정; 실사→**개별 리소스** 추출·점주 라이브러리; **도면 먼저 → 칠하기·점유 배치** 2단 에디터
+- **Notes:** GUCCI 데모(§43) 충돌 문제의 **정식 해결책**. §40·§42 AI 파이프라인을 **보완·정교화** (대체 아님 — agent는 배치 제안·추출 보조)
+
+### 2026-07-24 — §44 Grid Occupancy 표준 (AD-044)
+- **Author:** User(Gemini 등각 도면 스펙 공유) + Cursor Agent
+- **Changed:** AD-044, §44 — 타일 점유·Y-sort·충돌·다방(AD-025) 정식 명세; Gemini 스펙 ↔ AD-033/§43 매핑표
+- **Notes:** GUCCI 데모는 §43 하이브리드(타일 이동 + 픽셀 충돌). Phase 4부터 §44가 단일 진실 소스
 
 ### 2026-07-24 — §43 GUCCI 등각 월드(generated) + 테이블 상호작용 데모 (AD-043)
 - **Author:** User(CEO 데모 품질 요구) + Cursor Agent
@@ -1225,6 +1237,7 @@ gacha_rolls            (누가 언제 뭘 뽑았는지 기록)
 ```sql
 -- display_fixtures: 매장에 놓인 조형물 1개
 -- id, store_id, kind ('table_3'|'hanger'|'shelf'|...), x, y, slot_count, label
+-- Phase 4: size_w, size_d (또는 kind→템플릿 카탈로그 lookup) — §44 multi-tile occupancy
 
 -- display_slots: 조형물 칸별 상품
 -- fixture_id, slot_index (0..n-1), product_id NULLABLE, sort_order
@@ -2536,6 +2549,9 @@ union all select 'profiles', count(*) from public.profiles;
 - **§40** — 점주 AI 매장 에이전트 (AD-040)
 - **§41** — 실매장 유사도 제품 원칙 (AD-041)
 - **§42** — 비용·편의 실행안 wizard (AD-042)
+- **§43** — GUCCI 데모 등각 월드 — 지금 vs 정식 (AD-043)
+- **§44** — Grid Occupancy 표준 (AD-044)
+- **§45** — 리소스 추출 + 픽셀 도면 에디터 (AD-045)
 
 ---
 
@@ -2568,6 +2584,7 @@ union all select 'profiles', count(*) from public.profiles;
 
 ### 구현 체크리스트 (Phase 4)
 - [ ] DB: `display_fixtures` / `display_slots` (또는 `map_config` 확장) + RLS
+- [ ] **§44 Grid Occupancy** — `buildOccupancyGrid()`, fixture w×d 점유, walkable mask
 - [x] Phaser: 조형물 proximity + Interact (GUCCI 데모 — `onNearInteractZone`, §43)
 - [x] `DisplayProductModal` — **데모:** 슬롯 상품 3종 + 담기 + 착용 **플레이스홀더** (바로구매·실착용 ⬜)
 - [ ] `TryOnPreview` — 우측 아바타 착용 전·후
@@ -3027,7 +3044,8 @@ User 아이디어는 **매장 단위 copilot** — 범위가 넓지만 **AD-033(
 | 상품 실사 → **픽셀 스프라이트** (기존 AD-020) | ✅ | 중 | 중 (장당) | **상품별** 캐시·승인 — 유지 |
 | 에이전트가 **승인 없이** 손님에게 노출 | ❌ | — | — | **금지** — draft→승인→publish (AD-021) |
 
-**결론:** User vision **전체는 로드맵으로 타당**. **런칭 v1**은 「AI가 매장 전체를 그려준다」보다 **「AI가 레이아웃 초안을 짜주고, 점주가 미리보기에서 고친 뒤 승인」**이 현실적.
+**결론:** User vision **전체는 로드맵으로 타당**. **런칭 v1**은 「AI가 매장 전체를 그려준다」보다 **「AI가 레이아웃 초안을 짜주고, 점주가 미리보기에서 고친 뒤 승인」**이 현실적.  
+→ **2026-07-24 보완 (AD-045, §45):** v1 최종 방향은 **리소스 추출 + 도면 에디터** — scene gen은 **하지 않음**.
 
 ### 40.3 권장 아키텍처 — 「에이전트 + 템플릿 카탈로그」
 
@@ -3324,7 +3342,7 @@ STEP 4  상품 등록 — 실사 + (선택) 월드용 픽셀 1장/상품
 | 상품 픽셀 | 실사→픽셀, hash 캐시 | ~백 원/상품 1회 | ✅ |
 | **매장 전체 gen** | SD 등 | 비쌈 | ❌ **금지** |
 
-**원칙:** **생성 최소 · 추출+조합 최대**
+**원칙:** **생성 최소 · 추출+조합 최대** — 상세 워크플로 **§45**
 
 ### 42.3 Fixture 8종 (런칭)
 
@@ -3410,19 +3428,402 @@ AI 실패 시 → **수동 palette + 드래그** fallback (막히지 않음).
 | 데모 (지금) | 정식 |
 |---|---|
 | GUCCI 하드코드 room PNG | 점주 **템플릿 room + palette** 또는 승인된 픽셀 에셋 (§41·§42) |
-| `isGeneratedBlockedTile()` 수동 zones | **fixture footprint** + **walkability 마스크** (에디터/AI 배치) |
+| `isGeneratedBlockedTile()` 수동 zones | **§44 Grid Occupancy** — fixture footprint + walkability 마스크 |
 | `GENERATED_NPCS` 고정 | 실제 접속 유저 only (또는 이벤트 NPC 설정) |
 | `DisplayProductModal` → products API 3종 | **`display_slots`** → fixture별 슬롯 상품 (AD-033) |
 | 착용 미리보기 placeholder | `TryOnPreview` 실구현 |
 | `apps/web` 반응형 데모 | **앱(Expo)** 쇼핑·월드 + **웹** 점주 관리 (AD-037) |
 
-**선행 조건:** AD-033 fixture DB + OwnerDisplayPanel → 그 위에 AI agent(AD-040) optional.
+**선행 조건:** AD-033 fixture DB + OwnerDisplayPanel + **§44 occupancy 빌드** → 그 위에 AI agent(AD-040) optional.
+
+> 정식 충돌·배치 규칙의 **단일 진실 소스**는 **§44**. §43은 데모(GUCCI) 한정 예외.
 
 ### 43.4 다음 에이전트가 이어갈 때
 
 1. §43 Changelog + `generatedWorldAssets.ts` 읽기
 2. 그리드/NPC/충돌 이슈 → **앵커 수치** 조정 (코드 구조 바꾸지 말 것)
-3. Phase 4 착수 시 §32 체크리스트 — DB 슬롯 연동부터
+3. Phase 4 착수 시 §32 + **§44** — occupancy 빌드·DB 슬롯 연동부터
 4. 큰 결정은 AD 테이블에 한 줄 추가 (AD-018)
 
-*Last updated: 2026-07-24 (§43 GUCCI generated world) by Cursor Agent*
+---
+
+## 44. Grid Occupancy 표준 — 등각 타일 맵 (AD-044)
+
+> **User (2026-07-24):** Gemini에 등각뷰 도면 구조를 물어본 결과 — `grid[x][y]` 다중 타일 가구 점유, Y-sort, 벽·가구 충돌, 방+문 — **우리도 이쪽이 맞나?**  
+> **한 줄 답:** **정식(Phase 4+) 아키텍처 = 예, 동일 축.** GUCCI 데모(§43)만 **과도기 하이브리드**(타일 이동 + PNG 픽셀 충돌).
+
+### 44.1 시스템 개요
+
+POP-UP CUBE 월드는 **2D 등각(isometric / 2:1 dimetric) 뷰**이지만, **논리 좌표는 바둑판 타일 그리드**로 관리한다.
+
+| 레이어 | 역할 | 정식 | GUCCI 데모 (§43) |
+|---|---|---|---|
+| **Tile grid `(tx, ty)`** | Socket 이동·멀티플레이·충돌·상호작용 | ✅ 단일 진실 소스 | ✅ 이동·서버 동기화 |
+| **Room pixels `(px, py)`** | 스프라이트·배경 PNG 위치 (투영) | ✅ 렌더만 | ✅ + **임시 픽셀 충돌** |
+| **Fixture occupancy** | 가구가 차지하는 **여러 타일** | ✅ `origin + w×d` | ❌ 하드코드 ellipse/rect |
+| **Y-sort depth** | 앞/뒤 가림 | ✅ `(tx + ty)` | ✅ `generatedDepth()` |
+
+**원칙:** 정식에서는 **PNG·스프라이트는 그림**, **타일 occupied가 게임 규칙**(걷기·충돌·상호작용)의 기준이다.
+
+### 44.2 Gemini 스펙 ↔ POP-UP CUBE 매핑
+
+User가 공유한 Gemini 도면(3방 거실·침실·창고 예시)은 **등각 맵의 일반 패턴**이다. POP-UP CUBE에 그대로 대응하면:
+
+| Gemini / 일반 등각 스펙 | POP-UP CUBE 정식 | 관련 AD·§ |
+|---|---|---|
+| 2D 그리드 `grid[x][y]` | `map_config` + runtime occupancy 빌드 | AD-033, §7 |
+| 가구 **다중 타일** (3×1 소파, 2×2 침대 …) | `display_fixtures`: `origin` + `size.w` × `size.d` | AD-033, §32 |
+| `isOccupied = true` + `placedObject` | `grid[tx][ty].occupied` + `fixture_id` | §44.4 |
+| **Y-Sort** `SortOrder = X + Y` | `isoDepth()` / `generatedDepth()` — `(tileX + tileY) × 1000 + layer` | `isoVisuals.ts`, `generatedWorldAssets.ts` |
+| 벽·가구 = Unwalkable | `walkable: false` 또는 `is_collidable: true` | §44.5 |
+| **문(Door)** = 방 간 통로 | `transitions[]` (door / elevator) | AD-025, §7 |
+| Pathfinding (A*) | Phase 4+ optional — v1은 키보드 직접 이동 | §44.6 |
+| 3개 방 레이아웃 | `map_config v2` — `rooms[]` 각각 20×20 등 | AD-025 |
+
+> Gemini 예시의 「6×5 거실」은 **참고 도면**이지 POP-UP CUBE 고정 크기가 아님. 데모 GUCCI는 **단일 room 20×20** + AI room PNG 1장.
+
+### 44.3 좌표계 (2-layer)
+
+**1) 논리 타일 `(tx, ty)`** — 정수 그리드, Socket·Redis·충돌·상호작용
+
+**2) 화면 픽셀 `(px, py)`** — 등각 투영으로 스프라이트 배치 (데모 GUCCI, 2026-07-24 보정):
+
+```
+px = (tx - ty) × 26 + 580
+py = (tx + ty) × 13 + 601
+```
+
+- 앵커: 테이블 중심 tile `(10, 11)` ↔ pixel `(554, 874)`
+- **정식:** fixture `origin`은 **타일** 기준; 스프라이트 offset은 템플릿 메타데이터
+- **데모:** AI room PNG와 그리드 100% 정합 전까지 §43 **픽셀 ellipse/rect** 보정 레이어 유지
+
+### 44.4 Fixture 점유 (Multi-tile Occupancy)
+
+가구/조형물(display fixture)은 **1×1이 아닐 수 있다.** `(originX, originY)` + `width`(X축 칸 수) + `depth`(Y축 칸 수)로 점유 타일을 계산한다.
+
+**예시 (Gemini 도면과 동일 규칙):**
+
+| 오브젝트 | size (w×d) | origin | 점유 타일 (예) |
+|---|---|---|---|
+| 대형 소파 | 3×1 | (1, 1) | (1,1)(2,1)(3,1) |
+| 더블 침대 | 2×2 | (7, 1) | (7,1)(8,1)(7,2)(8,2) |
+| 세로 수납장 | 1×3 | (0, 6) | (0,6)(0,7)(0,8) |
+| 단일 화분 | 1×1 | (4, 4) | (4,4) |
+| **GUCCI 중앙 테이블 (정식화 시)** | 3×3 (안) | (9, 10) | 9~11 × 10~12 |
+
+**배치 시:** 점유 구간 `[origin.x .. origin.x+w-1] × [origin.y .. origin.y+d-1]` 모든 칸을 `occupied: true`로 마킹.
+
+**삭제·이동 시:** 이전 점유 칸 전부 해제 후 새 origin에 재점유.
+
+**정식 TypeScript (Phase 4 구현 방향):**
+
+```typescript
+interface TileCell {
+  walkable: boolean;       // false = 벽·바닥 밖
+  occupied: boolean;       // fixture가 점유
+  fixtureId?: string;
+}
+
+interface DisplayFixture {
+  id: string;
+  kind: 'table_round_3' | 'sofa_3x1' | 'hanger' | 'shelf' | ...;
+  origin: { x: number; y: number };
+  size: { w: number; d: number };  // width × depth (타일 칸)
+  slot_count: number;
+  label?: string;
+}
+
+function occupyFixture(grid: TileCell[][], fixture: DisplayFixture): void {
+  for (let dx = 0; dx < fixture.size.w; dx++) {
+    for (let dy = 0; dy < fixture.size.d; dy++) {
+      const x = fixture.origin.x + dx;
+      const y = fixture.origin.y + dy;
+      grid[x][y] = { ...grid[x][y], occupied: true, fixtureId: fixture.id };
+    }
+  }
+}
+```
+
+**DB:** §7·§32 초안 — `display_fixtures` (store_id, kind, x, y, slot_count) + `size` 컬럼 또는 kind→템플릿 카탈로그에서 w×d lookup.
+
+### 44.5 충돌 (Collision)
+
+| 타일 상태 | 이동 | 비고 |
+|---|---|---|
+| `walkable: false` | ❌ | 벽, 매장 밖, 바닥 마스크 밖 |
+| `occupied: true` | ❌ | fixture footprint |
+| 문 tile (`transitions`) | ✅ (조건: 해당 transition 활성) | 방 이동 트리거 |
+| 그 외 walkable & !occupied | ✅ | |
+
+**상호작용 (AD-033):** 손님이 fixture **인접 walkable 타일**에 서 있을 때 `E · ○○ 상품 보기` — ellipse ring(데모) 대신 **타일 기준 proximity** (fixture bounding box + 1칸 ring).
+
+**데모 예외 (§43):** `isGeneratedBlockedTile()` — room PNG 픽셀 영역(테이블 ellipse, 소파/카운터 rect, floor bounds). **이중 충돌 금지:** generated 모드에서 `map_config.layers.objects` collidable **무시**.
+
+### 44.6 Y-Sorting (Depth Indexing)
+
+등각뷰에서 **화면 아래(큰 ty, 또는 tx+ty 큼)** 오브젝트가 앞에 그려져야 한다.
+
+```
+depth = (tileX + tileY) × 1000 + layerOffset
+```
+
+- **캐릭터:** layer ≈ 5~6 (`topDownGame.ts`)
+- **가구 스프라이트:** fixture `(origin.x + origin.y + size)` 기준 또는 tile별 depth
+- **말풍선:** layer ≈ 25
+
+구현: `isoDepth()` (`isoVisuals.ts`), `generatedDepth()` (`generatedWorldAssets.ts`) — **정식·데모 동일 공식**.
+
+### 44.7 다방·문 (AD-025)
+
+Gemini 「3방 + 벽 + 문」= POP-UP CUBE **`map_config v2`**:
+
+```json
+{
+  "store_id": "popup_example",
+  "rooms": [
+    {
+      "id": "room_1f",
+      "map_size": { "width": 20, "height": 20 },
+      "layers": { "floor": [...], "objects": [...] },
+      "fixtures": [ { "kind": "sofa_3x1", "origin": { "x": 1, "y": 1 }, "size": { "w": 3, "d": 1 } } ],
+      "transitions": [
+        { "x": 10, "y": 0, "type": "door", "target_room_id": "room_back", "target_x": 5, "target_y": 18 }
+      ]
+    }
+  ]
+}
+```
+
+- 방마다 **독립 occupancy grid** 빌드 → `room:enter` 시 해당 room grid 로드 (Phase 4 설계)
+- **문 타일:** `walkable: true`, `transition_id` — occupied 아님
+
+### 44.8 Pathfinding
+
+| 단계 | 정책 |
+|---|---|
+| v1 (Phase 4 launch) | **키보드/WASD 직접 이동** — occupied·walkable만 검사 |
+| v2+ | A* 또는 grid BFS — NPC patrol, 클릭 이동, AI agent 경로 검증 |
+
+데모·정식 v1 모두 **A* 필수 아님**. Gemini 스펙의 pathfinding은 **정식 v2+** 로드맵.
+
+### 44.9 데모 vs 정식 — 한눈에
+
+| | GUCCI 데모 (지금, §43) | 정식 (Phase 4+, §44) |
+|---|---|---|
+| Room visual | AI PNG 1장 | 템플릿 + palette / 승인 픽셀 (§41·§42) |
+| 이동 좌표 | 20×20 tile | room별 tile grid |
+| 충돌 | PNG pixel ellipse/rect | **`grid occupied` + walkable mask** |
+| 가구 | 하드코드 영역 | `display_fixtures` + 카탈로그 w×d |
+| 상호작용 | pixel ring around table | fixture tile proximity |
+| Y-sort | `(tx+ty)` ✅ | 동일 |
+| 다방 | 1 room | AD-025 `rooms[]` |
+| Pathfinding | 없음 | v2+ optional |
+
+### 44.10 Phase 4 구현 체크리스트
+
+- [ ] `buildOccupancyGrid(map_config | fixtures[])` — room 로드 시 1회 빌드
+- [ ] fixture 카탈로그 — kind별 `size.w`, `size.d`, `slot_count`, 스프라이트 anchor
+- [ ] `OwnerDisplayPanel` — 배치 시 overlap·벽 검사 = occupied 충돌
+- [ ] Phaser — `canWalk(tx,ty)` = walkable && !occupied; generated 픽셀 충돌 **제거**
+- [ ] Interact — fixture bbox + adjacent tile ring
+- [ ] `map_config v2` rooms + transitions (AD-025)
+- [ ] (v2+) A* pathfinding module
+
+### 44.11 관련 파일·§
+
+| 항목 | 위치 |
+|---|---|
+| 데모 투영·픽셀 충돌 | `packages/game-core/src/generatedWorldAssets.ts` |
+| depth sort | `isoVisuals.ts`, `generatedWorldAssets.ts`, `topDownGame.ts` |
+| fixture·슬롯 UX | §32, AD-033 |
+| 다방 | §7 `map_config v2`, AD-025 |
+| 데모 한정 예외 | §43 |
+| 점주 AI 배치 출력 | §40 — LLM JSON = §44 fixture list |
+| **정식 점주 워크플로** | **§45** — 도면 → 리소스 배치 |
+
+*Last updated: 2026-07-24 (§44 Grid Occupancy) by Cursor Agent*
+
+---
+
+## 45. 리소스 추출 + 픽셀 도면 에디터 (AD-045)
+
+> **User (2026-07-24):** 매장 **전체**를 AI로 그리면 API도 많이 쓰고, GUCCI 데모처럼 **충돌·좌표 어긋남** 생길 수 있다.  
+> 차라리 **실사에서 타일·가구·소품·재고만** 뽑아 **점주 계정 라이브러리**에 두고, 필요할 때마다 **리소스만** 추가 생성.  
+> 꾸미기 **전에** 픽셀 **도면**(벽·구조)을 자유롭게 잡고 → 바닥은 **좌클릭 드래그로 칠하기** → 가구·장식은 **칸 점유** 맞게 배치·벽걸이도 점유 공간.  
+> **한 줄 답:** **이해 맞고, 정식 방향으로 채택.** §44 occupancy 위에서 **「도면 먼저, 꾸미기는 그리드에 맞춰」** — GUCCI §43 픽셀 보정을 **구조적으로 제거**하는 설계.
+
+### 45.1 왜 매장 전체 생성을 안 하는가
+
+| 문제 (GUCCI 데모 §43에서 이미 겪음) | 원인 |
+|---|---|
+| 캐릭터가 테이블 위·벽 안으로 들어감 | AI **room PNG**와 **타일 그리드**가 1:1 정합 안 됨 |
+| `isGeneratedBlockedTile()` 픽셀 ellipse 수동 튜닝 | **그림**이 충돌의 기준이 됨 — 유지보수 지옥 |
+| API 비용 | room 1024×1536 **통째 gen** = 호출 1번당 비쌈 |
+| 점주 재사용 | 통째 PNG는 **부분 수정·재배치** 불가 |
+
+**AD-045 원칙:** AI는 **장면(scene)을 만들지 않는다.** **부품(part)** 만 뽑고, **점주가 그리드 에디터**에서 조립한다.
+
+### 45.2 제품 모델 — 「추출 → 라이브러리 → 도면 → 꾸미기」
+
+```
+점주 실사 업로드 (전경 / 진열 / 입구 / 상품)
+        │
+        ▼
+  API: 리소스 추출 (quota, 서버만)
+        │  · 바닥/벽 타일 패턴 (repeatable)
+        │  · 진열 가구 스프라이트 + slot_count 추정
+        │  · 소품·장식 (1×1 또는 w×d)
+        │  · (선택) 재고 상품 ↔ 실물 사진 매칭 픽셀
+        ▼
+  owner_asset_library  ← store/owner 귀속, 영구 보관
+        │
+        ▼
+  STEP A: 픽셀 도면 (Blueprint) — 구조만
+        │  · 방·벽·문·unwalkable 영역 추가/수정/삭제
+        │  · §44 grid walkable 마스크 생성
+        ▼
+  STEP B: 꾸미기 (Decorate)
+        │  · 바닥: 팔레트/추출 타일로 **칸 칠하기** (드래그 페인트)
+        │  · 가구: 라이브러리에서 선택 → **origin + w×d** 스냅 배치
+        │  · 벽걸이: wall layer 점유 (§45.5)
+        │  · 슬롯에 상품 연결 (AD-033)
+        ▼
+  draft → 승인 → published (AD-021)
+        ▼
+  손님 Phaser 월드 — §44 occupancy만, 픽셀 보정 ❌
+```
+
+### 45.3 AI API — 「전체 그림」vs 「리소스 추출」
+
+| | 매장 전체 gen (❌) | 리소스 추출 (✅ AD-045) |
+|---|---|---|
+| 출력 | room PNG 1장 | 타일·가구·소품 **N개 스프라이트** + 메타 |
+| API 비용 | 호출당 **높음** | **작은 crop/segment 단위** — 필요한 만큼만 |
+| 그리드 정합 | ❌ 수동 보정 | ✅ 에디터가 **그리드에 배치** |
+| 충돌 | PNG 픽셀 | §44 **occupied** |
+| 재사용 | 어려움 | 라이브러리에 **영구**, 다른 매장·칸에도 |
+| 추가 요청 | 통째 재생성 | 「이 화분만」「이 테이블만」**1개씩** |
+
+**비용 직관:** 전체 room 1장 ≈ 리소스 5~15개 추출 합과 비슷하거나 더 비쌀 수 있음.  
+하지만 추출은 **캐시·선택적 호출** — 초기 3~5개만 뽑고 나머지는 꾸미다 부족할 때 추가.
+
+### 45.4 점주 에셋 라이브러리 (계정 귀속)
+
+**초안 스키마:**
+
+```sql
+-- owner_assets (또는 store_assets)
+-- id, owner_id, store_id NULLABLE, kind, label,
+-- storage_path, thumb_path,
+-- size_w, size_d,           -- §44 floor occupancy (가구·소품)
+-- slot_count NULLABLE,      -- 진열 fixture만
+-- mount: 'floor'|'wall', wall_face NULLABLE,
+-- source_photo_path, extract_job_id,
+-- created_at
+```
+
+| kind | 예 | 메타 |
+|---|---|---|
+| `floor_tile` | 대리석 패턴, 카펫 칸 | repeat, palette |
+| `wall_tile` | 벽지·브릭 | repeat |
+| `fixture` | 테이블·옷걸이·선반 | w×d, slot_count, interact |
+| `prop` | 화분·박스·소형 장식 | w×d, collidable |
+| `product_pixel` | 내 상품 픽셀 | product_id FK (AD-020) |
+
+- **귀속:** `owner_id` — 점주 계정; `store_id`로 매장별 필터
+- **Storage:** Supabase `store-assets` bucket (§7 TODO)
+- **RLS:** 본인 owner만 CRUD; published 매장에만 손님 read
+
+### 45.5 2단 에디터 UX
+
+#### STEP A — 픽셀 도면 (Blueprint)
+
+점주가 **먼저** 「우리 매장 구조」를 잡는다. **예쁜 그림 아님** — **논리 도면**.
+
+| 도구 | 동작 | grid 반영 |
+|---|---|---|
+| 벽 그리기 | 선/사각형으로 벽 | `walkable: false` |
+| 문 추가 | 벽 위 door tile | `walkable: true` + `transition` (AD-025) |
+| 방 구역 | room id 라벨 (다방) | room별 sub-grid |
+| 지우개 | 벽·문 삭제 | walkable 복원 |
+| (선택) AI 힌트 | 실사 → **벽선·존** 제안 (vision, 저렴) | 점주 **수정 후** 확정 |
+
+- **자유 추가/수정/삭제** — User 요구 그대로
+- 출력: `blueprint` JSON → `buildWalkabilityMask()` → §44 `grid[x][y].walkable`
+
+#### STEP B — 꾸미기 (Decorate)
+
+| 도구 | UX | §44 |
+|---|---|---|
+| **바닥 칠하기** | 라이브러리 타일 선택 → **좌클릭 드래그**로 칸 채움 (페인트) | `layers.floor[tx,ty]=tile_id` |
+| **가구 배치** | 라이브러리 fixture 드래그 | `occupyFixture()` w×d |
+| **소품** | 1×1 또는 다칸 | occupied |
+| **벽걸이** | 벽 타일 클릭 → facing | **wall layer** (§45.6) |
+| **슬롯** | fixture 선택 → 상품 끼우기 | AD-033 |
+
+**플랫폼 카탈로그 8종(§42)** = 라이브러리 **기본 내장**. 추출 리소스 = **같은 슬롯 규격** 맞으면 slot_count·w×d 메타만 검증 후 사용.
+
+### 45.6 벽면 점유 (Wall mount)
+
+바닥 `grid[x][y]`와 **별 레이어**:
+
+```
+wall_slots[x][y][face]  — face ∈ N|E|S|W
+  · occupied, asset_id, depth sort
+  · 바닥 walkable과 독립 — 「벽에 걸린 그림」은 floor 칸을 막지 않음 (또는 얇은 선반은 1칸 점유 정책 선택)
+```
+
+- **벽걸이 옷걸이·선반·액자:** wall slot + (선반류는 floor 1칸 forward 점유 옵션)
+- **Y-sort:** `(tx+ty)` + layer offset (§44.6)
+- Phase 4 v1: **floor fixture 우선**, wall mount v1.1
+
+### 45.7 §40·§42와의 관계 (보완, 대체 아님)
+
+| 기존 (§40·§42) | AD-045로 정교화 |
+|---|---|
+| vision → palette | ✅ 유지 — **타일 매칭**에 사용 |
+| LLM → fixture 배치 초안 | ✅ 유지 — **Blueprint 위** 배치 제안 |
+| 매장 전체 image gen **금지** | ✅ **강화** — room/scene gen **영구 비권장** |
+| 플랫폼 fixture 8종 | ✅ **fallback** — 추출 실패·quota 초과 시 |
+| 상품 픽셀 (AD-020) | ✅ **라이브러리 `product_pixel`** 로 통합 |
+
+**Agent 역할 변경:** 「매장 그려줘」→ 「**이 사진에서 테이블이랑 바닥 타일 뽑아줘**」+ 「**도면 위에 여기 테이블 놓을까?**」
+
+### 45.8 GUCCI 데모 vs 정식 (한 줄)
+
+| GUCCI §43 | AD-045 정식 |
+|---|---|
+| AI **room PNG 통째** | ❌ 사용 안 함 |
+| 픽셀 ellipse 충돌 | ❌ → §44 occupied |
+| 하드코드 NPC·테이블 | → fixture 라이브러리 + 도면 배치 |
+| CEO 시연용 **throwaway visual** | 점주 **Self-serve 에디터** |
+
+### 45.9 API quota (리소스 추출 기준)
+
+| 항목 | v1 제안 |
+|---|---|
+| wizard 최초 추출 | **5 리소스/매장** 무료 (타일1+가구2+소품2) |
+| 추가 추출 | **3회/월** 또는 유료 |
+| 재추출 동일 사진 | hash 캐시 → **0원** |
+| vision 벽선 힌트 | §42 vision quota 공유 |
+| **scene / room gen** | **0** |
+
+### 45.10 Phase 4 구현 체크리스트
+
+- [ ] `owner_assets` 테이블 + Storage + RLS
+- [ ] `extract_resource` API (segment/crop → sprite + w×d + slot 추정)
+- [ ] `BlueprintEditor` — 벽·문·walkable 페인트
+- [ ] `DecorateEditor` — floor drag-paint, fixture snap, overlap 검사
+- [ ] `buildOccupancyGrid(blueprint, fixtures)` — §44
+- [ ] Phaser: generated 픽셀 충돌 경로 **제거**, tile-only
+- [ ] Agent tools: `extract_from_photo`, `suggest_blueprint`, `suggest_placement`
+- [ ] (v1.1) `wall_slots` 벽걸이
+
+### 45.11 Pending User Input
+
+- [ ] 추출 API — **segmentation 전용** vs **image gen crop** 혼합
+- [ ] 추출 fixture **slot_count 자동 추정** vs 점주 수동 지정
+- [ ] 벽걸이 — floor 칸 점유 **안 함** vs **얇은 선반 1칸** 정책
+- [ ] 라이브러리 — **매장별** vs **점주 계정 전역** 공유
+
+*Last updated: 2026-07-24 (§45 resource extract + blueprint editor) by Cursor Agent*

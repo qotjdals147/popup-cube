@@ -1,15 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import type { Socket } from 'socket.io-client';
-import { mountTopDownGame, type GameChatMessage, type GeneratedInteractZone, type TopDownGameController } from '@popup-cube/game-core';
+import {
+  mountTopDownGame,
+  type GameChatMessage,
+  type GeneratedInteractZone,
+  type TopDownGameController,
+  type VirtualDirections,
+} from '@popup-cube/game-core';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useViewMode } from '../context/ViewModeContext';
 import { ShopPanel } from '../components/ShopPanel';
 import { CartDrawer } from '../components/CartDrawer';
 import { DisplayProductModal } from '../components/DisplayProductModal';
 import { OwnerProductPanel } from '../components/OwnerProductPanel';
 import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
 import { DemoToast } from '../components/DemoToast';
+import { VirtualDpad } from '../components/VirtualDpad';
+import { ViewModeToggle } from '../components/ViewModeToggle';
 import { getStoreSummary } from '../lib/stores';
 import { t, getRoleLabel } from '../i18n';
 import { DEMO_STORE_ID } from '@popup-cube/shared';
@@ -45,6 +54,7 @@ export function StorePage() {
     signOut,
   } = useAuth();
   const navigate = useNavigate();
+  const { isMobile } = useViewMode();
   const { totalQuantity } = useCart();
   const worldRef = useRef<HTMLDivElement | null>(null);
   const gameRef = useRef<TopDownGameController | null>(null);
@@ -76,6 +86,7 @@ export function StorePage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [nearInteractZone, setNearInteractZone] = useState<GeneratedInteractZone | null>(null);
   const [displayModalOpen, setDisplayModalOpen] = useState(false);
+  const [gameReady, setGameReady] = useState(false);
 
   function showComingSoon() {
     markActivity();
@@ -115,6 +126,7 @@ export function StorePage() {
     let mounted = true;
     setWorldError(null);
     setMessages([]);
+    setGameReady(false);
     markActivity();
 
     if (!serverUrl || (isLocalhostServerUrl(serverUrl) && !isBrowserOnLocalDev())) {
@@ -165,6 +177,7 @@ export function StorePage() {
           return;
         }
         gameRef.current = controller;
+        setGameReady(true);
         // 게임 로딩이 끝나기 전에 채팅을 이미 열어놨을 수도 있으니 현재 상태로 맞춰준다.
         controller.setMovementEnabled(!chatOpenRef.current);
       })
@@ -177,6 +190,7 @@ export function StorePage() {
 
     return () => {
       mounted = false;
+      setGameReady(false);
       // gameRef보다 먼저 socketRef를 끊어서, 아직 입장이 끝나지 않은 소켓도
       // 서버에 join 요청이 도달하기 전에 확실히 정리한다. (ISS-019)
       socketRef.current?.disconnect();
@@ -272,19 +286,39 @@ export function StorePage() {
     markActivity();
   }
 
+  const handleVirtualDirections = useCallback((dirs: VirtualDirections) => {
+    gameRef.current?.setVirtualDirections(dirs);
+    if (dirs.up || dirs.down || dirs.left || dirs.right) {
+      markActivity();
+    }
+  }, []);
+
   const isGucciDemo = storeId === DEMO_STORE_ID;
 
   return (
-    <div style={styles.page}>
-      <header style={styles.header}>
+    <div
+      style={styles.page}
+      className={isMobile ? 'store-page-mobile page-mobile' : undefined}
+    >
+      <header
+        style={styles.header}
+        className={isMobile ? 'store-header-mobile' : undefined}
+      >
         <div style={styles.headerLeft}>
           <button style={styles.homeButton} onClick={() => navigate('/home')}>
-            {t('store.backToHome')}
+            {isMobile ? '←' : t('store.backToHome')}
           </button>
-          <span>
-            <strong>{storeName ?? storeId}</strong> — {username} ({getRoleLabel(role)})
+          <span className={isMobile ? 'store-title-mobile' : undefined}>
+            <strong>{storeName ?? storeId}</strong>
+            {!isMobile && (
+              <>
+                {' '}
+                — {username} ({getRoleLabel(role)})
+              </>
+            )}
           </span>
         </div>
+        {!isMobile && (
         <div style={styles.headerRight}>
           <button style={styles.cartHeaderButton} onClick={() => setCartOpen(true)}>
             🛒 {totalQuantity > 0 ? totalQuantity : ''}
@@ -296,10 +330,14 @@ export function StorePage() {
             {t('common.logout')}
           </button>
         </div>
+        )}
       </header>
 
-      <main style={styles.gameArea}>
-        <div style={styles.worldStatusRow}>
+      <main
+        style={styles.gameArea}
+        className={isMobile ? 'store-game-area-mobile' : undefined}
+      >
+        <div style={styles.worldStatusRow} className={isMobile ? 'world-status-mobile' : undefined}>
           <span>{worldStatus}</span>
           {!!channelText && <span style={styles.channelBadge}>{channelText}</span>}
         </div>
@@ -313,14 +351,30 @@ export function StorePage() {
           <p style={styles.idleWarning}>{t('store.world.idleWarning', { seconds: idleSecondsLeft })}</p>
         )}
         <div
-          ref={worldRef}
-          style={isGucciDemo ? { ...styles.worldCanvas, ...styles.worldCanvasGucci } : styles.worldCanvas}
+          className={isMobile ? 'world-canvas-wrap-mobile' : undefined}
+          style={isMobile ? { position: 'relative', flex: 1, minHeight: 0 } : undefined}
         >
-          {worldError ? <div style={styles.worldPlaceholder}>{t('store.gamePlaceholder')}</div> : null}
+          <div
+            ref={worldRef}
+            className={isMobile ? 'world-canvas-mobile' : undefined}
+            style={
+              isGucciDemo
+                ? { ...styles.worldCanvas, ...styles.worldCanvasGucci }
+                : styles.worldCanvas
+            }
+          >
+            {worldError ? <div style={styles.worldPlaceholder}>{t('store.gamePlaceholder')}</div> : null}
+          </div>
+          {isMobile && !worldError && (
+            <VirtualDpad onDirectionChange={handleVirtualDirections} disabled={chatOpen || !gameReady} />
+          )}
         </div>
       </main>
 
-      <footer style={styles.hud}>
+      <footer
+        style={styles.hud}
+        className={isMobile ? 'hud-mobile' : undefined}
+      >
         <button
           style={{
             ...styles.hudButton,
@@ -373,7 +427,16 @@ export function StorePage() {
         </button>
       </footer>
 
-      <section style={styles.chatPanel}>
+      {isMobile && <ViewModeToggle />}
+
+      <section
+        style={styles.chatPanel}
+        className={
+          isMobile
+            ? `chat-panel-mobile${chatOpen ? ' chat-open-mobile' : ''}`
+            : undefined
+        }
+      >
         <div style={styles.chatTitle}>{t('store.chat.title')}</div>
         <div style={styles.chatMessages}>
           {messages.length === 0 ? (

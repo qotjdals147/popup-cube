@@ -122,10 +122,19 @@ export interface TopDownGameMountOptions {
   onNearInteractZone?: (zone: GeneratedInteractZone | null) => void;
 }
 
+export interface VirtualDirections {
+  up: boolean;
+  down: boolean;
+  left: boolean;
+  right: boolean;
+}
+
 export interface TopDownGameController {
   sendChat: (message: string) => void;
   /** 채팅 입력창이 열려 있는 동안 false로 호출 — 캐릭터 이동/방향키 입력을 멈춘다. */
   setMovementEnabled: (enabled: boolean) => void;
+  /** 모바일 가상 D-pad — 터치 버튼 상태를 방향키와 동일하게 반영한다. */
+  setVirtualDirections: (dirs: Partial<VirtualDirections>) => void;
   getSelfTile: () => { x: number; y: number };
   destroy: () => void;
 }
@@ -296,6 +305,9 @@ export async function mountTopDownGame(
     setMovementEnabled(enabled: boolean) {
       scene.setMovementEnabled(enabled);
     },
+    setVirtualDirections(dirs: Partial<VirtualDirections>) {
+      scene.setVirtualDirections(dirs);
+    },
     getSelfTile() {
       return scene.getSelfTile();
     },
@@ -375,6 +387,12 @@ class TopDownScene extends Phaser.Scene {
   };
   /** 채팅 입력창이 열려 있는 동안은 false — 캐릭터 이동도, 방향키의 브라우저 기본 동작 가로채기도 멈춤. */
   private movementEnabled = true;
+  private virtualDirections: VirtualDirections = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+  };
   private lastEmitMs = 0;
   private selfTile = { x: 10, y: 10, direction: 'down' as Direction };
   private readonly onNearInteractZone?: (zone: GeneratedInteractZone | null) => void;
@@ -490,10 +508,10 @@ class TopDownScene extends Phaser.Scene {
     let nextY = this.selfTile.y;
     let direction = this.selfTile.direction;
 
-    const upPressed = this.cursors.up.isDown;
-    const downPressed = this.cursors.down.isDown;
-    const leftPressed = this.cursors.left.isDown;
-    const rightPressed = this.cursors.right.isDown;
+    const upPressed = this.cursors.up.isDown || this.virtualDirections.up;
+    const downPressed = this.cursors.down.isDown || this.virtualDirections.down;
+    const leftPressed = this.cursors.left.isDown || this.virtualDirections.left;
+    const rightPressed = this.cursors.right.isDown || this.virtualDirections.right;
 
     if (this.visualStyle === 'generated') {
       const { dx, dy } = generatedMovementDelta(
@@ -630,7 +648,14 @@ class TopDownScene extends Phaser.Scene {
    */
   public setMovementEnabled(enabled: boolean) {
     this.movementEnabled = enabled;
+    if (!enabled) {
+      this.virtualDirections = { up: false, down: false, left: false, right: false };
+    }
     this.applyMovementEnabled();
+  }
+
+  public setVirtualDirections(dirs: Partial<VirtualDirections>) {
+    this.virtualDirections = { ...this.virtualDirections, ...dirs };
   }
 
   private applyMovementEnabled() {

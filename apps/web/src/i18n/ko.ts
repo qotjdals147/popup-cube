@@ -23,6 +23,10 @@ export const ko = {
     ownerButton: '🏪 스토어 관리자 로그인',
     ownerHint: '',
   },
+  viewMode: {
+    switchToMobile: '📱 모바일 버전',
+    switchToPc: '🖥 PC 버전',
+  },
   login: {
     shopperTitle: '👤 일반 회원 로그인',
     ownerTitle: '🏪 스토어 관리자 로그인',
