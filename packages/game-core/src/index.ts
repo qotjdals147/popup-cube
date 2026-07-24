@@ -6,3 +6,5 @@
  */
 export * from './socketClient';
 export * from './topDownGame';
+export type { WorldVisualStyle } from './topDownGame';
+export * from './isoVisuals';

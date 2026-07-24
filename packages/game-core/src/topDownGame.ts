@@ -8,12 +8,32 @@ import {
   type StoreJoinResponse,
 } from '@popup-cube/shared';
 import { createGameSocket, joinStore } from './socketClient';
+import {
+  createIsoPlayerVisual,
+  drawGucciBackdrop,
+  drawIsoFloorTile,
+  drawIsoProp,
+  floorColorsForTile,
+  getIsoMapOrigin,
+  getIsoMapPixelBounds,
+  isoDepth,
+  tileToIsoScreen,
+  type IsoPoint,
+} from './isoVisuals';
+import { DEMO_STORE_ID } from '@popup-cube/shared';
 
 // 타일/캐릭터/글자가 전체적으로 작아 보인다는 피드백 반영 — 타일 크기를 키우고,
 // 지도 전체를 억지로 화면에 눌러 담는 대신 "고정된 카메라 창"만 보여준 뒤 캐릭터를 따라다니게 함.
-const DEFAULT_TILE_SIZE = 56; // 기존 40 → 56 (약 1.4배)
+const DEFAULT_TILE_SIZE = 56; // top-down tile px
 const VIEWPORT_WIDTH_PX = 800;
 const VIEWPORT_HEIGHT_PX = 520;
+
+export type WorldVisualStyle = 'top-down' | 'iso-fake';
+
+function resolveVisualStyle(storeId: string, override?: WorldVisualStyle): WorldVisualStyle {
+  if (override) return override;
+  return storeId === DEMO_STORE_ID ? 'iso-fake' : 'top-down';
+}
 const DEFAULT_MAP_SIZE = { width: 20, height: 20 };
 const MOVE_SPEED_TILES_PER_SEC = 4;
 /** Upstash Redis 무료 한도 — 50ms마다 서버+Redis 쓰기는 과다(ISS-024). 픽셀 이동엔 250ms면 충분. */
@@ -76,6 +96,8 @@ export interface TopDownGameMountOptions {
    * 상대방 것까지 같이 0으로 만들어버리는 문제(ISS-019)를 막을 수 있다.
    */
   onSocketCreated?: (socket: Socket) => void;
+  /** GUCCI 데모 등 — 등각 "인 척" 스킨 (그리드·소켓은 동일) */
+  visualStyle?: WorldVisualStyle;
 }
 
 export interface TopDownGameController {
@@ -93,7 +115,7 @@ interface PlayerVisual {
   direction: Direction;
   x: number;
   y: number;
-  body: Phaser.GameObjects.Rectangle;
+  body: Phaser.GameObjects.Container | Phaser.GameObjects.Rectangle;
   label: Phaser.GameObjects.Text;
   speechBubble: Phaser.GameObjects.Text;
   speechBubbleTimer?: Phaser.Time.TimerEvent;
@@ -135,6 +157,7 @@ export async function mountTopDownGame(
   options.onChannelChange?.(currentChannel);
   options.onStatusChange?.('월드 로딩 중...');
 
+  const visualStyle = resolveVisualStyle(options.storeId, options.visualStyle);
   const scene = new TopDownScene({
     mapConfig: normalizedMap,
     selfUserId: options.userId,
@@ -142,6 +165,7 @@ export async function mountTopDownGame(
     selfIsOwner: joinResponse.self?.isOwner ?? false,
     initialPlayers: joinResponse.players ?? [],
     selfSpawn: joinResponse.self ?? { x: 10, y: 10, direction: 'down' },
+    visualStyle,
   });
 
   const game = new Phaser.Game({
@@ -286,8 +310,11 @@ class TopDownScene extends Phaser.Scene {
   private readonly selfIsOwner: boolean;
   private readonly initialPlayers: PlayerState[];
   private readonly selfSpawn: { x: number; y: number; direction: Direction };
+  private readonly visualStyle: WorldVisualStyle;
+  private readonly isoOrigin: IsoPoint;
   private readonly players = new Map<string, PlayerVisual>();
   private readonly blockedTiles = new Set<string>();
+  private floorGraphics?: Phaser.GameObjects.Graphics;
 
   private cursors?: {
     up: Phaser.Input.Keyboard.Key;
@@ -309,6 +336,7 @@ class TopDownScene extends Phaser.Scene {
     selfIsOwner: boolean;
     initialPlayers: PlayerState[];
     selfSpawn: { x: number; y: number; direction: Direction };
+    visualStyle: WorldVisualStyle;
   }) {
     super({ key: 'TopDownScene' });
     this.mapConfig = config.mapConfig;
@@ -317,13 +345,34 @@ class TopDownScene extends Phaser.Scene {
     this.selfIsOwner = config.selfIsOwner;
     this.initialPlayers = config.initialPlayers;
     this.selfSpawn = config.selfSpawn;
+    this.visualStyle = config.visualStyle;
+    this.isoOrigin = getIsoMapOrigin(
+      config.mapConfig.mapSize.width,
+      config.mapConfig.mapSize.height,
+      VIEWPORT_WIDTH_PX
+    );
+  }
+
+  private tileToScreen(tileX: number, tileY: number): IsoPoint {
+    if (this.visualStyle === 'iso-fake') {
+      return tileToIsoScreen(tileX, tileY, this.isoOrigin.x, this.isoOrigin.y);
+    }
+    return tileToPixels(tileX, tileY);
   }
 
   create() {
-    this.cameras.main.setBackgroundColor('#111629');
-    this.drawGrid();
-    this.drawFloorTiles();
-    this.drawObjects();
+    this.cameras.main.setBackgroundColor(this.visualStyle === 'iso-fake' ? '#0b1020' : '#111629');
+
+    if (this.visualStyle === 'iso-fake') {
+      drawGucciBackdrop(this, VIEWPORT_WIDTH_PX, VIEWPORT_HEIGHT_PX);
+      this.drawIsoFloor();
+      this.drawIsoObjects();
+    } else {
+      this.drawGrid();
+      this.drawFloorTiles();
+      this.drawObjects();
+    }
+
     this.createPlayers();
     this.setupCamera();
 
@@ -382,6 +431,10 @@ class TopDownScene extends Phaser.Scene {
 
     this.selfTile = { x: nextX, y: nextY, direction };
     this.applyPlayerPosition(player, nextX, nextY, direction);
+
+    if (this.visualStyle === 'iso-fake') {
+      player.body.setDepth(isoDepth(nextX, nextY, 5));
+    }
 
     const now = this.time.now;
     if (now - this.lastEmitMs >= MOVE_EMIT_INTERVAL_MS) {
@@ -478,9 +531,19 @@ class TopDownScene extends Phaser.Scene {
 
   /** 카메라를 지도 전체 크기로 제한하고, 내 캐릭터를 부드럽게 따라다니게 한다. */
   private setupCamera() {
-    const mapPixelWidth = this.mapConfig.mapSize.width * DEFAULT_TILE_SIZE;
-    const mapPixelHeight = this.mapConfig.mapSize.height * DEFAULT_TILE_SIZE;
-    this.cameras.main.setBounds(0, 0, mapPixelWidth, mapPixelHeight);
+    if (this.visualStyle === 'iso-fake') {
+      const bounds = getIsoMapPixelBounds(
+        this.mapConfig.mapSize.width,
+        this.mapConfig.mapSize.height,
+        this.isoOrigin.x,
+        this.isoOrigin.y
+      );
+      this.cameras.main.setBounds(bounds.minX, bounds.minY, bounds.width, bounds.height);
+    } else {
+      const mapPixelWidth = this.mapConfig.mapSize.width * DEFAULT_TILE_SIZE;
+      const mapPixelHeight = this.mapConfig.mapSize.height * DEFAULT_TILE_SIZE;
+      this.cameras.main.setBounds(0, 0, mapPixelWidth, mapPixelHeight);
+    }
 
     const self = this.players.get(this.selfUserId);
     if (self) {
@@ -520,19 +583,32 @@ class TopDownScene extends Phaser.Scene {
     direction: Direction,
     isOwner: boolean
   ): PlayerVisual {
-    const px = tileToPixels(tileX, tileY);
-    const body = this.add.rectangle(px.x, px.y, 32, 38, isSelf ? 0xe94560 : 0x3e7bfa);
-    // 닉네임은 발밑에 (왕관 있으면 왼쪽에 붙음) — 머리 위 자리는 채팅 말풍선용으로 비워둠.
+    const px = this.tileToScreen(tileX, tileY);
+
+    let body: Phaser.GameObjects.Container | Phaser.GameObjects.Rectangle;
+    if (this.visualStyle === 'iso-fake') {
+      body = createIsoPlayerVisual(this, tileX, tileY, isSelf, isOwner);
+      body.setPosition(px.x, px.y - 8);
+    } else {
+      body = this.add.rectangle(px.x, px.y, 32, 38, isSelf ? 0xe94560 : 0x3e7bfa);
+    }
+
+    const labelY = this.visualStyle === 'iso-fake' ? px.y + 22 : px.y + 30;
     const label = this.add
-      .text(px.x, px.y + 30, nameplateText(username, isOwner), {
+      .text(px.x, labelY, nameplateText(username, isOwner), {
         fontSize: '14px',
         color: '#ffffff',
         backgroundColor: 'rgba(0,0,0,0.6)',
         padding: { left: 8, right: 8, top: 3, bottom: 3 },
       })
       .setOrigin(0.5);
+    if (this.visualStyle === 'iso-fake') {
+      label.setDepth(isoDepth(tileX, tileY, 6));
+    }
+
+    const bubbleY = this.visualStyle === 'iso-fake' ? px.y - 48 : px.y - 38;
     const speechBubble = this.add
-      .text(px.x, px.y - 38, '', {
+      .text(px.x, bubbleY, '', {
         fontSize: '14px',
         color: '#1a1a2e',
         backgroundColor: '#ffffff',
@@ -542,7 +618,7 @@ class TopDownScene extends Phaser.Scene {
       })
       .setOrigin(0.5, 1)
       .setVisible(false)
-      .setDepth(10);
+      .setDepth(isoDepth(tileX, tileY, 20));
 
     return {
       userId,
@@ -559,10 +635,19 @@ class TopDownScene extends Phaser.Scene {
   }
 
   private applyPlayerPosition(player: PlayerVisual, tileX: number, tileY: number, direction: Direction) {
-    const px = tileToPixels(tileX, tileY);
-    player.body.setPosition(px.x, px.y);
-    player.label.setPosition(px.x, px.y + 30);
-    player.speechBubble.setPosition(px.x, px.y - 38);
+    const px = this.tileToScreen(tileX, tileY);
+    const bodyY = this.visualStyle === 'iso-fake' ? px.y - 8 : px.y;
+    player.body.setPosition(px.x, bodyY);
+    const labelY = this.visualStyle === 'iso-fake' ? px.y + 22 : px.y + 30;
+    player.label.setPosition(px.x, labelY);
+    const bubbleY = this.visualStyle === 'iso-fake' ? px.y - 48 : px.y - 38;
+    player.speechBubble.setPosition(px.x, bubbleY);
+    if (this.visualStyle === 'iso-fake') {
+      const d = isoDepth(tileX, tileY, 5);
+      player.body.setDepth(d);
+      player.label.setDepth(d + 1);
+      player.speechBubble.setDepth(d + 15);
+    }
     player.x = tileX;
     player.y = tileY;
     player.direction = direction;
@@ -609,6 +694,52 @@ class TopDownScene extends Phaser.Scene {
           padding: { left: 5, right: 5, top: 2, bottom: 2 },
         })
         .setOrigin(0.5);
+      if (obj.isCollidable) {
+        this.blockedTiles.add(tileKey(obj.x, obj.y));
+      }
+    });
+  }
+
+  /** GUCCI fake-isometric floor — full grid with stripe carpet + map_config overrides. */
+  private drawIsoFloor() {
+    const floorLookup = new Map<string, string>();
+    this.mapConfig.layers.floor.forEach((tile) => {
+      floorLookup.set(tileKey(tile.x, tile.y), tile.tileId);
+    });
+
+    this.floorGraphics = this.add.graphics().setDepth(0);
+    const { width, height } = this.mapConfig.mapSize;
+
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const key = tileKey(x, y);
+        const tileId =
+          floorLookup.get(key) ??
+          ((x + y) % 4 === 0 || (x + y) % 4 === 3 ? 'carpet_gucci_stripe' : 'carpet_gucci');
+        const colors = floorColorsForTile(tileId);
+        const screen = this.tileToScreen(x, y);
+        drawIsoFloorTile(this.floorGraphics, screen.x, screen.y, colors);
+      }
+    }
+
+    const entrance = this.tileToScreen(Math.floor(width / 2), height - 2);
+    this.add
+      .text(entrance.x, entrance.y - 20, '▲ ENTRANCE', {
+        fontSize: '11px',
+        color: '#c9a962',
+        fontStyle: 'bold',
+      })
+      .setOrigin(0.5)
+      .setDepth(isoDepth(Math.floor(width / 2), height - 2, 1));
+  }
+
+  private drawIsoObjects() {
+    const sorted = [...this.mapConfig.layers.objects].sort(
+      (a, b) => a.x + a.y - (b.x + b.y)
+    );
+    sorted.forEach((obj) => {
+      const screen = this.tileToScreen(obj.x, obj.y);
+      drawIsoProp(this, obj.x, obj.y, obj.assetId, screen.x, screen.y - 10);
       if (obj.isCollidable) {
         this.blockedTiles.add(tileKey(obj.x, obj.y));
       }

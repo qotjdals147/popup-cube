@@ -11,6 +11,7 @@ import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
 import { DemoToast } from '../components/DemoToast';
 import { getStoreSummary } from '../lib/stores';
 import { t, getRoleLabel } from '../i18n';
+import { DEMO_STORE_ID } from '@popup-cube/shared';
 
 const IDLE_TIMEOUT_MS = 10 * 60 * 1000; // 10분간 움직임/채팅 없으면 자동 퇴장
 const IDLE_WARNING_MS = 30 * 1000; // 퇴장 30초 전부터 경고 배너 표시
@@ -265,6 +266,8 @@ export function StorePage() {
     markActivity();
   }
 
+  const isGucciDemo = storeId === DEMO_STORE_ID;
+
   return (
     <div style={styles.page}>
       <header style={styles.header}>
@@ -303,7 +306,10 @@ export function StorePage() {
         {idleSecondsLeft !== null && (
           <p style={styles.idleWarning}>{t('store.world.idleWarning', { seconds: idleSecondsLeft })}</p>
         )}
-        <div ref={worldRef} style={styles.worldCanvas}>
+        <div
+          ref={worldRef}
+          style={isGucciDemo ? { ...styles.worldCanvas, ...styles.worldCanvasGucci } : styles.worldCanvas}
+        >
           {worldError ? <div style={styles.worldPlaceholder}>{t('store.gamePlaceholder')}</div> : null}
         </div>
       </main>
@@ -518,13 +524,16 @@ const styles: Record<string, React.CSSProperties> = {
   worldCanvas: {
     position: 'relative',
     width: '100%',
-    // 카메라가 캐릭터를 따라다니는 고정 뷰포트 방식으로 바뀌면서(game-core) 상자가 커질수록
-    // 화면에 보이는 영역도 더 커 보임 — 기존보다 여유 있게 확대.
     height: 'clamp(380px, 62vh, 640px)',
     border: '1px solid #273a63',
     borderRadius: 12,
     overflow: 'hidden',
-    background: '#111629',
+    background: '#0d1730',
+  },
+  worldCanvasGucci: {
+    border: '2px solid #c9a962',
+    boxShadow: '0 0 24px rgba(201, 169, 98, 0.15), inset 0 0 40px rgba(0,0,0,0.35)',
+    background: '#0b1020',
   },
   worldPlaceholder: {
     position: 'absolute',
