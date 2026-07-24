@@ -16,6 +16,21 @@ const IDLE_TIMEOUT_MS = 10 * 60 * 1000; // 10분간 움직임/채팅 없으면 �
 const IDLE_WARNING_MS = 30 * 1000; // 퇴장 30초 전부터 경고 배너 표시
 const IDLE_CHECK_INTERVAL_MS = 1000;
 
+/** Vercel 등 배포 URL에서 localhost 소켓은 CEO PC의 localhost를 가리켜 영원히 접속 중에 걸린다. */
+function isLocalhostServerUrl(url: string): boolean {
+  try {
+    const host = new URL(url).hostname;
+    return host === 'localhost' || host === '127.0.0.1';
+  } catch {
+    return url.includes('localhost') || url.includes('127.0.0.1');
+  }
+}
+
+function isBrowserOnLocalDev(): boolean {
+  const host = window.location.hostname;
+  return host === 'localhost' || host === '127.0.0.1';
+}
+
 export function StorePage() {
   const { storeId } = useParams();
   const {
@@ -95,9 +110,16 @@ export function StorePage() {
 
     let mounted = true;
     setWorldError(null);
-    setWorldStatus(t('store.world.status.connecting'));
     setMessages([]);
     markActivity();
+
+    if (!serverUrl || (isLocalhostServerUrl(serverUrl) && !isBrowserOnLocalDev())) {
+      setWorldStatus('');
+      setWorldError(t('store.world.offlineHint'));
+      return;
+    }
+
+    setWorldStatus(t('store.world.status.connecting'));
 
     mountTopDownGame({
       container: worldRef.current,
