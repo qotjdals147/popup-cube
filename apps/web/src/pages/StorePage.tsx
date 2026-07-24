@@ -21,6 +21,7 @@ export function StorePage() {
   const {
     role,
     userId,
+    email,
     nickname,
     loading: authLoading,
     storeId: myStoreId,
