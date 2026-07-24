@@ -30,6 +30,7 @@ import {
   generatedMovementDelta,
   generatedLabelY,
   generatedSpeechBubbleY,
+  findGeneratedWalkableTile,
   getGeneratedInteractZone,
   isGeneratedBlockedTile,
   tileToGeneratedScreen,
@@ -150,10 +151,25 @@ export async function mountTopDownGame(
   options.onSocketCreated?.(socket);
   options.onStatusChange?.('서버에 접속 중...');
 
+  const isGucciGenerated =
+    options.storeId === DEMO_STORE_ID &&
+    resolveVisualStyle(options.storeId, options.visualStyle) === 'generated';
+  const gucciSpawn = isGucciGenerated
+    ? findGeneratedWalkableTile(
+        GENERATED_WORLD.defaultSpawn.x,
+        GENERATED_WORLD.defaultSpawn.y,
+        DEFAULT_MAP_SIZE.width,
+        DEFAULT_MAP_SIZE.height
+      )
+    : null;
+
   const joinResponse = await joinStore(socket, {
     storeId: options.storeId,
     userId: options.userId,
     username: options.username,
+    ...(gucciSpawn
+      ? { x: gucciSpawn.x, y: gucciSpawn.y, direction: GENERATED_WORLD.defaultSpawn.direction }
+      : {}),
   });
 
   if (socket.disconnected) {
@@ -439,6 +455,7 @@ class TopDownScene extends Phaser.Scene {
 
     this.createPlayers();
     if (this.isGeneratedDemo) {
+      this.ensureSelfWalkable();
       this.spawnGeneratedNpcs();
     }
     this.setupCamera();
@@ -655,15 +672,29 @@ class TopDownScene extends Phaser.Scene {
     });
   }
 
+  private ensureSelfWalkable() {
+    const player = this.players.get(this.selfUserId);
+    if (!player) return;
+    const { width, height } = this.mapConfig.mapSize;
+    if (!this.isBlocked(this.selfTile.x, this.selfTile.y)) return;
+    const safe = findGeneratedWalkableTile(this.selfTile.x, this.selfTile.y, width, height);
+    this.selfTile = { ...this.selfTile, x: safe.x, y: safe.y };
+    this.applyPlayerPosition(player, safe.x, safe.y, this.selfTile.direction);
+    this.onMove?.(safe.x, safe.y, this.selfTile.direction);
+  }
+
   private spawnGeneratedNpcs() {
+    const mapW = this.mapConfig.mapSize.width;
+    const mapH = this.mapConfig.mapSize.height;
     GENERATED_NPCS.forEach((npc) => {
       if (this.players.has(npc.userId)) return;
+      const pos = findGeneratedWalkableTile(npc.x, npc.y, mapW, mapH);
       const visual = this.createPlayerVisual(
         npc.userId,
         npc.username,
         false,
-        npc.x,
-        npc.y,
+        pos.x,
+        pos.y,
         npc.direction,
         false,
         npc.avatarIndex
@@ -709,17 +740,25 @@ class TopDownScene extends Phaser.Scene {
   }
 
   private createPlayers() {
+    const mapW = this.mapConfig.mapSize.width;
+    const mapH = this.mapConfig.mapSize.height;
     const spawn = this.isGeneratedDemo
-      ? GENERATED_WORLD.defaultSpawn
+      ? findGeneratedWalkableTile(
+          GENERATED_WORLD.defaultSpawn.x,
+          GENERATED_WORLD.defaultSpawn.y,
+          mapW,
+          mapH
+        )
       : {
           x: safeNumber(this.selfSpawn.x, 10),
           y: safeNumber(this.selfSpawn.y, 10),
-          direction: this.selfSpawn.direction ?? 'down',
         };
     this.selfTile = {
       x: safeNumber(spawn.x, 10),
       y: safeNumber(spawn.y, 10),
-      direction: spawn.direction ?? 'down',
+      direction: this.isGeneratedDemo
+        ? GENERATED_WORLD.defaultSpawn.direction
+        : this.selfSpawn.direction ?? 'down',
     };
     const self = this.createPlayerVisual(
       this.selfUserId,

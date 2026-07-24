@@ -18,8 +18,8 @@ export const GENERATED_WORLD = {
   footLiftPx: 6,
   labelBelowFeetPx: 2,
   speechBubbleAboveFeetPx: 132,
-  /** Front marble floor — away from central table */
-  defaultSpawn: { x: 16, y: 17, direction: 'up' as const },
+  /** Front-left marble — verified walkable (not x=16 counter edge) */
+  defaultSpawn: { x: 8, y: 17, direction: 'up' as const },
 };
 
 /** Central display table — interact when adjacent, never stand on top. */
@@ -41,13 +41,13 @@ export interface GeneratedNpc {
   lines: string[];
 }
 
-/** NPCs on open front/side marble — not on table footprint. */
+/** NPCs on open front marble — y≥17 keeps clear of table footprint (y≤14). */
 export const GENERATED_NPCS: GeneratedNpc[] = [
   {
     userId: 'npc:luxelover',
     username: 'luxelover',
-    x: 7,
-    y: 16,
+    x: 6,
+    y: 17,
     direction: 'right',
     avatarIndex: 1,
     lines: ['GG 패턴 진짜 고급스러워요!', '와! 이 가방 예쁘다!'],
@@ -55,8 +55,8 @@ export const GENERATED_NPCS: GeneratedNpc[] = [
   {
     userId: 'npc:stylist_ming',
     username: 'stylist_ming',
-    x: 14,
-    y: 16,
+    x: 13,
+    y: 17,
     direction: 'left',
     avatarIndex: 0,
     lines: ['여기 분위기 너무 좋아요', 'GG 패턴 멋져요!'],
@@ -64,7 +64,7 @@ export const GENERATED_NPCS: GeneratedNpc[] = [
   {
     userId: 'npc:seoul_vibes',
     username: 'seoul_vibes',
-    x: 11,
+    x: 10,
     y: 18,
     direction: 'up',
     avatarIndex: 1,
@@ -115,12 +115,54 @@ export function isGeneratedBlockedTile(
 
   if (x >= 2 && x <= 4 && y >= 16 && y <= 18) return true;
   if (x >= 17 && y >= 15) return true;
-  if (x === 16 && y >= 17) return true;
   if (x <= 2 && y >= 4 && y <= 8) return true;
   if (x >= 18 && y >= 4 && y <= 9) return true;
   if (x <= 4 && y <= 3) return true;
 
   return false;
+}
+
+/** BFS — prefer spawn near (prefX, prefY) that is not blocked. */
+export function findGeneratedWalkableTile(
+  prefX: number,
+  prefY: number,
+  mapWidth: number,
+  mapHeight: number
+): { x: number; y: number } {
+  const startX = Math.round(prefX);
+  const startY = Math.round(prefY);
+  if (!isGeneratedBlockedTile(startX, startY, mapWidth, mapHeight)) {
+    return { x: startX, y: startY };
+  }
+
+  const queue: Array<{ x: number; y: number }> = [{ x: startX, y: startY }];
+  const seen = new Set<string>([`${startX},${startY}`]);
+
+  while (queue.length > 0) {
+    const cur = queue.shift()!;
+    if (!isGeneratedBlockedTile(cur.x, cur.y, mapWidth, mapHeight)) {
+      return { x: cur.x, y: cur.y };
+    }
+    for (const [dx, dy] of [
+      [0, 1],
+      [0, -1],
+      [1, 0],
+      [-1, 0],
+      [1, 1],
+      [1, -1],
+      [-1, 1],
+      [-1, -1],
+    ]) {
+      const nx = cur.x + dx;
+      const ny = cur.y + dy;
+      const key = `${nx},${ny}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      queue.push({ x: nx, y: ny });
+    }
+  }
+
+  return { x: 8, y: 17 };
 }
 
 export function getGeneratedInteractZone(tileX: number, tileY: number): GeneratedInteractZone | null {
