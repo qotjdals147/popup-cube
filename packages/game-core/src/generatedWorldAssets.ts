@@ -1,7 +1,18 @@
 /**
- * PDF 시안과 동일 파이프라인 — AI 생성 게임 에셋 (목업 PNG 통째 붙이기 아님).
- * 2:1 dimetric tile grid — room PNG(1024×1536)에 앵커 보정.
+ * GUCCI generated room — coordinate model (§43 HANDOFF)
+ *
+ * TWO LAYERS (정식에서도 동일 패턴):
+ * 1. **Tile grid** (tx, ty) — Socket.io 이동·멀티플레이·충돌 판정의 논리 좌표 (20×20)
+ * 2. **Room pixels** (px, py) — 1024×1536 PNG 위 발 위치; 2:1 dimetric 투영
+ *
+ *   px = (tx - ty) × (tileWidth/2) + originX
+ *   py = (tx + ty) × (tileHeight/2) + originY
+ *
+ * 가구 충돌·상호작용은 **PNG 픽셀 영역**(ellipse/rect)으로 판정 — AI room 아트와 정합.
+ * 정식: fixture footprint + walkability mask가 DB에서 내려와 이 pixel layer를 대체.
  */
+
+export const GENERATED_ROOM_PX = { width: 1024, height: 1536 };
 
 export const GENERATED_WORLD = {
   room: '/worlds/generated/gucci-iso-room-empty.png',
@@ -9,25 +20,38 @@ export const GENERATED_WORLD = {
     '/worlds/generated/gucci-avatar-chibi-1.png',
     '/worlds/generated/gucci-avatar-chibi-2.png',
   ],
-  /** Calibrated: table center tile (10,11) ≈ pixel (512, 885) in room PNG */
+  /** Anchored: table center tile (10,11) ↔ room pixel (554, 874) */
   tileWidth: 52,
   tileHeight: 26,
-  originX: 538,
-  originY: 612,
+  originX: 580,
+  originY: 601,
   avatarScale: 0.17,
   footLiftPx: 6,
   labelBelowFeetPx: 2,
   speechBubbleAboveFeetPx: 132,
-  /** Front-left marble — verified walkable (not x=16 counter edge) */
-  defaultSpawn: { x: 8, y: 17, direction: 'up' as const },
+  defaultSpawn: { x: 6, y: 18, direction: 'up' as const },
 };
 
-/** Central display table — interact when adjacent, never stand on top. */
+/** Room PNG — central round display table (ellipse). */
+export const TABLE_PIXEL_ELLIPSE = {
+  cx: 554,
+  cy: 874,
+  rx: 200,
+  ry: 155,
+};
+
+/** Interact ring: just outside table, not on top. d = normalized ellipse distance² */
+export const TABLE_INTERACT_INNER = 0.78;
+export const TABLE_INTERACT_OUTER = 1.48;
+
+const ARMCHAIR_RECT = { x1: 120, y1: 980, x2: 320, y2: 1180 };
+const COUNTER_RECT = { x1: 680, y1: 1020, x2: 960, y2: 1240 };
+const FLOOR_BOUNDS = { xMin: 100, xMax: 920, yMin: 680, yMax: 1200 };
+
 export const GUCCI_CENTER_TABLE = {
   id: 'fixture_center_table',
   label: '중앙 디스플레이 테이블',
   center: { x: 10, y: 11 },
-  /** Chebyshev distance from center; player must be outside table footprint */
   interactRadius: 3,
 };
 
@@ -41,12 +65,11 @@ export interface GeneratedNpc {
   lines: string[];
 }
 
-/** NPCs on open front marble — y≥17 keeps clear of table footprint (y≤14). */
 export const GENERATED_NPCS: GeneratedNpc[] = [
   {
     userId: 'npc:luxelover',
     username: 'luxelover',
-    x: 6,
+    x: 8,
     y: 17,
     direction: 'right',
     avatarIndex: 1,
@@ -55,8 +78,8 @@ export const GENERATED_NPCS: GeneratedNpc[] = [
   {
     userId: 'npc:stylist_ming',
     username: 'stylist_ming',
-    x: 13,
-    y: 17,
+    x: 17,
+    y: 11,
     direction: 'left',
     avatarIndex: 0,
     lines: ['여기 분위기 너무 좋아요', 'GG 패턴 멋져요!'],
@@ -90,14 +113,22 @@ export function generatedDepth(tileX: number, tileY: number, layer = 0): number 
   return Math.floor((tileX + tileY) * 10 + layer);
 }
 
-/** Table footprint in tile space — matches visual round display in room PNG. */
-export function isGeneratedTableTile(tileX: number, tileY: number): boolean {
-  const x = Math.round(tileX);
-  const y = Math.round(tileY);
-  return x >= 8 && x <= 12 && y >= 9 && y <= 14;
+function tableEllipseDistSq(px: number, py: number): number {
+  const { cx, cy, rx, ry } = TABLE_PIXEL_ELLIPSE;
+  const dx = (px - cx) / rx;
+  const dy = (py - cy) / ry;
+  return dx * dx + dy * dy;
 }
 
-/** Only furniture + walls — all other tiles are walkable marble floor. */
+export function isOnTablePixels(px: number, py: number): boolean {
+  return tableEllipseDistSq(px, py) <= 1;
+}
+
+function inRect(px: number, py: number, r: typeof ARMCHAIR_RECT): boolean {
+  return px >= r.x1 && px <= r.x2 && py >= r.y1 && py <= r.y2;
+}
+
+/** Tile foot point → room PNG; furniture = pixel regions, floor = open unless bounds. */
 export function isGeneratedBlockedTile(
   tileX: number,
   tileY: number,
@@ -108,21 +139,18 @@ export function isGeneratedBlockedTile(
   const y = Math.round(tileY);
   if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) return true;
 
-  if (x === 0 || y === 0 || x === mapWidth - 1 || y === mapHeight - 1) return true;
-  if (x + y <= 5) return true;
+  const { x: px, y: py } = tileToGeneratedScreen(x, y);
 
-  if (isGeneratedTableTile(x, y)) return true;
+  if (py < FLOOR_BOUNDS.yMin || py > FLOOR_BOUNDS.yMax) return true;
+  if (px < FLOOR_BOUNDS.xMin || px > FLOOR_BOUNDS.xMax) return true;
 
-  if (x >= 2 && x <= 4 && y >= 16 && y <= 18) return true;
-  if (x >= 17 && y >= 15) return true;
-  if (x <= 2 && y >= 4 && y <= 8) return true;
-  if (x >= 18 && y >= 4 && y <= 9) return true;
-  if (x <= 4 && y <= 3) return true;
+  if (isOnTablePixels(px, py)) return true;
+  if (inRect(px, py, ARMCHAIR_RECT)) return true;
+  if (inRect(px, py, COUNTER_RECT)) return true;
 
   return false;
 }
 
-/** BFS — prefer spawn near (prefX, prefY) that is not blocked. */
 export function findGeneratedWalkableTile(
   prefX: number,
   prefY: number,
@@ -162,16 +190,15 @@ export function findGeneratedWalkableTile(
     }
   }
 
-  return { x: 8, y: 17 };
+  return { x: 6, y: 18 };
 }
 
+/** Near table in PNG space (ring), never while standing on table. */
 export function getGeneratedInteractZone(tileX: number, tileY: number): GeneratedInteractZone | null {
-  const x = tileX;
-  const y = tileY;
-  const { center, interactRadius } = GUCCI_CENTER_TABLE;
-  const dist = Math.max(Math.abs(x - center.x), Math.abs(y - center.y));
-  if (dist > interactRadius) return null;
-  if (isGeneratedTableTile(x, y)) return null;
+  const { x: px, y: py } = tileToGeneratedScreen(tileX, tileY);
+  if (isOnTablePixels(px, py)) return null;
+  const d = tableEllipseDistSq(px, py);
+  if (d <= TABLE_INTERACT_INNER || d > TABLE_INTERACT_OUTER) return null;
   return { id: GUCCI_CENTER_TABLE.id, label: GUCCI_CENTER_TABLE.label };
 }
 

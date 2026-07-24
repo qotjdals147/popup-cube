@@ -3389,15 +3389,21 @@ AI 실패 시 → **수동 palette + 드래그** fallback (막히지 않음).
 ### 43.2 아키텍처 (겉면만 등각 아님)
 
 ```
-[AI room PNG]  ── 배경 레이어 (고정)
-[AI avatar PNG] ── 캐릭터 스프라이트 (depth sort)
-[타일 그리드]  ── 이동·충돌·진열 proximity (논리 좌표)
-[Socket.io]    ── 멀티플레이 (정식과 동일)
+[AI room PNG 1024×1536]  ── 배경 (고정)
+[AI avatar PNG]          ── 캐릭터 (depth sort)
+[Tile grid tx,ty]        ── Socket 이동·멀티플레이 논리 좌표
+[Room pixel px,py]       ── 발 위치 = dimetric 투영; 가구 충돌·상호작용은 **픽셀 ellipse/rect**
+[Socket.io]              ── 멀티플레이 (정식과 동일)
 ```
 
+**투영식 (2026-07-24 보정):**  
+`px = (tx - ty) × 26 + 580`, `py = (tx + ty) × 13 + 601`  
+테이블 중심 `(554, 874)` ↔ tile `(10, 11)` 앵커.
+
+**충돌:** 타일 숫자 박스 ❌ → `TABLE_PIXEL_ELLIPSE` + 소파/카운터 rect + 바닥 bounds (`generatedWorldAssets.ts`).  
+**상호작용:** 테이블 **위(ellipse 내부) ❌**, 테이블 **주변 ring(0.78<d≤1.48) ✅**.
+
 - **파일:** `generatedWorldAssets.ts`, `topDownGame.ts` (`visualStyle: 'generated'`)
-- **에셋:** `apps/web/public/worlds/generated/`
-- **보정:** table center `(10,11)` ↔ room PNG 픽셀 앵커 — **데모는 수동 튜닝**, 정식은 자동화
 
 ### 43.3 정식 때 (Phase 4+)
 
