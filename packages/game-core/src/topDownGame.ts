@@ -120,6 +120,8 @@ export interface TopDownGameMountOptions {
   visualStyle?: WorldVisualStyle;
   /** Generated GUCCI — table 등 진열 구역 근처 여부 (React HUD 상호작용) */
   onNearInteractZone?: (zone: GeneratedInteractZone | null) => void;
+  /** 모바일 레이아웃 — 캔버스 ENVELOP·줌 조정 (세로 화면 꽉 채움) */
+  mobileLayout?: boolean;
 }
 
 export interface VirtualDirections {
@@ -136,6 +138,8 @@ export interface TopDownGameController {
   /** 모바일 가상 D-pad — 터치 버튼 상태를 방향키와 동일하게 반영한다. */
   setVirtualDirections: (dirs: Partial<VirtualDirections>) => void;
   getSelfTile: () => { x: number; y: number };
+  /** 부모 컨테이너 크기 변경 시 Phaser 스케일 재계산 */
+  resize: () => void;
   destroy: () => void;
 }
 
@@ -206,6 +210,7 @@ export async function mountTopDownGame(
 
   const visualStyle = resolveVisualStyle(options.storeId, options.visualStyle);
   const isGeneratedDemo = options.storeId === DEMO_STORE_ID && visualStyle === 'generated';
+  const mobileLayout = Boolean(options.mobileLayout);
   const viewportWidth = isGeneratedDemo ? GUCCI_VIEWPORT_WIDTH_PX : VIEWPORT_WIDTH_PX;
   const viewportHeight = isGeneratedDemo ? GUCCI_VIEWPORT_HEIGHT_PX : VIEWPORT_HEIGHT_PX;
   const scene = new TopDownScene({
@@ -217,22 +222,19 @@ export async function mountTopDownGame(
     initialPlayers: joinResponse.players ?? [],
     selfSpawn: joinResponse.self ?? { x: 10, y: 10, direction: 'down' },
     visualStyle,
+    mobileLayout,
     onNearInteractZone: options.onNearInteractZone,
   });
 
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent: options.container,
-    // 지도 전체 크기가 아니라 "고정된 카메라 창" 크기를 캔버스 크기로 사용 — 지도가 커도
-    // 화면에는 이 창만큼만 보이고, 카메라가 캐릭터를 따라다니며 나머지를 보여준다.
     width: viewportWidth,
     height: viewportHeight,
-    backgroundColor: '#111629',
+    backgroundColor: '#0b1020',
     scene: scene,
     scale: {
-      // RESIZE 모드는 부모 높이 계산과 맞물리면 레이아웃이 계속 커질 수 있어
-      // 데모에서는 FIT으로 고정 뷰포트를 안전하게 스케일한다. (ISS-016)
-      mode: Phaser.Scale.FIT,
+      mode: mobileLayout ? Phaser.Scale.ENVELOP : Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
   });
@@ -311,6 +313,9 @@ export async function mountTopDownGame(
     getSelfTile() {
       return scene.getSelfTile();
     },
+    resize() {
+      game.scale.refresh();
+    },
     destroy() {
       socket.disconnect();
       game.destroy(true);
@@ -373,6 +378,7 @@ class TopDownScene extends Phaser.Scene {
   private readonly initialPlayers: PlayerState[];
   private readonly selfSpawn: { x: number; y: number; direction: Direction };
   private readonly visualStyle: WorldVisualStyle;
+  private readonly mobileLayout: boolean;
   private readonly isoOrigin: IsoPoint;
   private readonly npcChatTimers: Phaser.Time.TimerEvent[] = [];
   private readonly players = new Map<string, PlayerVisual>();
@@ -410,6 +416,7 @@ class TopDownScene extends Phaser.Scene {
     initialPlayers: PlayerState[];
     selfSpawn: { x: number; y: number; direction: Direction };
     visualStyle: WorldVisualStyle;
+    mobileLayout?: boolean;
     onNearInteractZone?: (zone: GeneratedInteractZone | null) => void;
   }) {
     super({ key: 'TopDownScene' });
@@ -422,6 +429,7 @@ class TopDownScene extends Phaser.Scene {
     this.initialPlayers = config.initialPlayers;
     this.selfSpawn = config.selfSpawn;
     this.visualStyle = config.visualStyle;
+    this.mobileLayout = config.mobileLayout ?? false;
     this.onNearInteractZone = config.onNearInteractZone;
     const vpW = this.isGeneratedDemo ? GUCCI_VIEWPORT_WIDTH_PX : VIEWPORT_WIDTH_PX;
     this.isoOrigin = getIsoMapOrigin(
@@ -748,7 +756,7 @@ class TopDownScene extends Phaser.Scene {
   private setupCamera() {
     if (this.visualStyle === 'generated') {
       this.cameras.main.setBounds(0, 0, this.generatedTextureWidth, this.generatedTextureHeight);
-      this.cameras.main.setZoom(0.72);
+      this.cameras.main.setZoom(this.mobileLayout ? 0.88 : 0.72);
     } else if (this.visualStyle === 'iso-fake') {
       const bounds = getIsoMapPixelBounds(
         this.mapConfig.mapSize.width,

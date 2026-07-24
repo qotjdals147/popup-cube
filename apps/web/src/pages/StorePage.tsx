@@ -170,6 +170,7 @@ export function StorePage() {
       onNearInteractZone(zone) {
         if (mounted) setNearInteractZone(zone);
       },
+      mobileLayout: isMobile,
     })
       .then((controller) => {
         if (!mounted) {
@@ -198,7 +199,17 @@ export function StorePage() {
       gameRef.current?.destroy();
       gameRef.current = null;
     };
-  }, [storeId, userId, username, serverUrl]);
+  }, [storeId, userId, username, serverUrl, isMobile]);
+
+  useEffect(() => {
+    if (!isMobile || !worldRef.current) return;
+    const el = worldRef.current;
+    const ro = new ResizeObserver(() => {
+      gameRef.current?.resize();
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isMobile, gameReady]);
 
   async function handleSignOut() {
     socketRef.current?.disconnect();
@@ -295,6 +306,73 @@ export function StorePage() {
 
   const isGucciDemo = storeId === DEMO_STORE_ID;
 
+  const hudButtons = (
+    <>
+      <button
+        style={
+          isMobile
+            ? undefined
+            : {
+                ...styles.hudButton,
+                ...(nearInteractZone ? styles.hudButtonActive : {}),
+                ...(!nearInteractZone ? styles.hudButtonDisabled : {}),
+              }
+        }
+        className={
+          isMobile
+            ? `hud-btn-interact${nearInteractZone ? ' hud-btn-active' : ' hud-btn-disabled'}`
+            : undefined
+        }
+        disabled={!nearInteractZone}
+        onClick={() => {
+          if (!nearInteractZone) return;
+          markActivity();
+          setDisplayModalOpen(true);
+        }}
+        title={
+          nearInteractZone
+            ? t('display.interactNear', { label: nearInteractZone.label })
+            : t('display.interactHint')
+        }
+      >
+        {nearInteractZone ? t('display.interactNear') : t('store.hud.interact')}
+      </button>
+      <button
+        style={isMobile ? undefined : styles.hudButton}
+        className={isMobile ? 'hud-btn-chat' : undefined}
+        onClick={() => {
+          markActivity();
+          setChatOpen(true);
+        }}
+      >
+        {t('store.hud.chat')}
+      </button>
+      <button
+        style={isMobile ? undefined : styles.hudButton}
+        className={isMobile ? 'hud-btn-cart' : undefined}
+        onClick={() => {
+          markActivity();
+          setCartOpen(true);
+        }}
+        title="담아 둔 상품 · 결제"
+      >
+        🛒 {t('store.hud.cart')}
+        {totalQuantity > 0 ? ` (${totalQuantity})` : ''}
+      </button>
+      <button
+        style={isMobile ? undefined : styles.shopButton}
+        className={isMobile ? 'hud-btn-shop' : undefined}
+        onClick={() => {
+          markActivity();
+          setShopOpen(true);
+        }}
+        title="매장 전체 상품 목록 (장바구니와 다름)"
+      >
+        {t('store.hud.allProducts')}
+      </button>
+    </>
+  );
+
   return (
     <div
       style={styles.page}
@@ -337,97 +415,79 @@ export function StorePage() {
         style={styles.gameArea}
         className={isMobile ? 'store-game-area-mobile' : undefined}
       >
-        <div style={styles.worldStatusRow} className={isMobile ? 'world-status-mobile' : undefined}>
-          <span>{worldStatus}</span>
-          {!!channelText && <span style={styles.channelBadge}>{channelText}</span>}
-        </div>
-        {worldError ? (
-          <div style={styles.worldOfflineBanner}>
+        {!isMobile && (
+          <>
+            <div style={styles.worldStatusRow}>
+              <span>{worldStatus}</span>
+              {!!channelText && <span style={styles.channelBadge}>{channelText}</span>}
+            </div>
+            {worldError ? (
+              <div style={styles.worldOfflineBanner}>
+                <p style={styles.offlineTitle}>{t('store.world.offlineHint')}</p>
+                <p style={styles.offlineHint}>{t('store.world.demoShopHint')}</p>
+              </div>
+            ) : null}
+            {idleSecondsLeft !== null && (
+              <p style={styles.idleWarning}>{t('store.world.idleWarning', { seconds: idleSecondsLeft })}</p>
+            )}
+          </>
+        )}
+        {isMobile && idleSecondsLeft !== null && (
+          <p style={{ ...styles.idleWarning, margin: '4px 10px', flexShrink: 0 }}>
+            {t('store.world.idleWarning', { seconds: idleSecondsLeft })}
+          </p>
+        )}
+        {isMobile && worldError ? (
+          <div style={{ ...styles.worldOfflineBanner, margin: '8px 10px', flexShrink: 0 }}>
             <p style={styles.offlineTitle}>{t('store.world.offlineHint')}</p>
-            <p style={styles.offlineHint}>{t('store.world.demoShopHint')}</p>
           </div>
         ) : null}
-        {idleSecondsLeft !== null && (
-          <p style={styles.idleWarning}>{t('store.world.idleWarning', { seconds: idleSecondsLeft })}</p>
-        )}
         <div
           className={isMobile ? 'world-canvas-wrap-mobile' : undefined}
-          style={isMobile ? { position: 'relative', flex: 1, minHeight: 0 } : undefined}
+          style={isMobile ? undefined : undefined}
         >
           <div
             ref={worldRef}
             className={isMobile ? 'world-canvas-mobile' : undefined}
             style={
-              isGucciDemo
-                ? { ...styles.worldCanvas, ...styles.worldCanvasGucci }
-                : styles.worldCanvas
+              isMobile
+                ? undefined
+                : isGucciDemo
+                  ? { ...styles.worldCanvas, ...styles.worldCanvasGucci }
+                  : styles.worldCanvas
             }
           >
             {worldError ? <div style={styles.worldPlaceholder}>{t('store.gamePlaceholder')}</div> : null}
           </div>
           {isMobile && !worldError && (
-            <VirtualDpad onDirectionChange={handleVirtualDirections} disabled={chatOpen || !gameReady} />
+            <>
+              <div className="world-overlay-top">
+                <span>{worldStatus}</span>
+                {!!channelText && (
+                  <span className="channel-badge-mobile">{channelText}</span>
+                )}
+              </div>
+              <VirtualDpad
+                onDirectionChange={handleVirtualDirections}
+                disabled={chatOpen || !gameReady}
+              />
+              <footer className="hud-overlay-mobile">{hudButtons}</footer>
+            </>
           )}
         </div>
       </main>
 
-      <footer
-        style={styles.hud}
-        className={isMobile ? 'hud-mobile' : undefined}
-      >
-        <button
-          style={{
-            ...styles.hudButton,
-            ...(nearInteractZone ? styles.hudButtonActive : {}),
-            ...(!nearInteractZone ? styles.hudButtonDisabled : {}),
-          }}
-          disabled={!nearInteractZone}
-          onClick={() => {
-            if (!nearInteractZone) return;
-            markActivity();
-            setDisplayModalOpen(true);
-          }}
-          title={
-            nearInteractZone
-              ? t('display.interactNear', { label: nearInteractZone.label })
-              : t('display.interactHint')
-          }
-        >
-          {nearInteractZone ? t('display.interactNear') : t('store.hud.interact')}
-        </button>
-        <button
-          style={styles.hudButton}
-          onClick={() => {
-            markActivity();
-            setChatOpen(true);
-          }}
-        >
-          {t('store.hud.chat')}
-        </button>
-        <button
-          style={styles.hudButton}
-          onClick={() => {
-            markActivity();
-            setCartOpen(true);
-          }}
-          title="담아 둔 상품 · 결제"
-        >
-          🛒 {t('store.hud.cart')}
-          {totalQuantity > 0 ? ` (${totalQuantity})` : ''}
-        </button>
-        <button
-          style={styles.shopButton}
-          onClick={() => {
-            markActivity();
-            setShopOpen(true);
-          }}
-          title="매장 전체 상품 목록 (장바구니와 다름)"
-        >
-          {t('store.hud.allProducts')}
-        </button>
+      {!isMobile && (
+      <footer style={styles.hud}>
+        {hudButtons}
       </footer>
+      )}
 
-      {isMobile && <ViewModeToggle />}
+      {isMobile && (
+        <div className="store-footer-mobile">
+          <ViewModeToggle />
+        </div>
+      )}
 
       <section
         style={styles.chatPanel}

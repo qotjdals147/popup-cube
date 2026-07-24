@@ -1,16 +1,25 @@
 import type { ReactNode } from 'react';
 import { useViewMode } from '../context/ViewModeContext';
+import { useNativeViewport } from '../hooks/useNativeViewport';
 
 type MobileShellProps = {
   children: ReactNode;
 };
 
-/** PC 모드: 그대로. 모바일 모드: 시안(m01~m10)처럼 폰 폭·다크 톤으로 감싼다. */
+/**
+ * PC에서 「모바일 버전」: 폰 프레임 미리보기.
+ * 실제 스마트폰(좁은 뷰포트): 베zel 없이 풀스크린 — 이중 테두리 방지.
+ */
 export function MobileShell({ children }: MobileShellProps) {
   const { isMobile } = useViewMode();
+  const isNativeViewport = useNativeViewport();
 
   if (!isMobile) {
     return <>{children}</>;
+  }
+
+  if (isNativeViewport) {
+    return <div className="mobile-shell-native">{children}</div>;
   }
 
   return (
