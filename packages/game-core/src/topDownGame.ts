@@ -213,6 +213,7 @@ export async function mountTopDownGame(
   const mobileLayout = Boolean(options.mobileLayout);
   const viewportWidth = isGeneratedDemo ? GUCCI_VIEWPORT_WIDTH_PX : VIEWPORT_WIDTH_PX;
   const viewportHeight = isGeneratedDemo ? GUCCI_VIEWPORT_HEIGHT_PX : VIEWPORT_HEIGHT_PX;
+  const mobileSize = mobileLayout ? readMobileContainerSize(options.container) : null;
   const scene = new TopDownScene({
     mapConfig: normalizedMap,
     storeId: options.storeId,
@@ -229,12 +230,12 @@ export async function mountTopDownGame(
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent: options.container,
-    width: viewportWidth,
-    height: viewportHeight,
+    width: mobileSize?.w ?? viewportWidth,
+    height: mobileSize?.h ?? viewportHeight,
     backgroundColor: '#0b1020',
     scene: scene,
     scale: {
-      mode: mobileLayout ? Phaser.Scale.ENVELOP : Phaser.Scale.FIT,
+      mode: mobileLayout ? Phaser.Scale.RESIZE : Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
   });
@@ -320,6 +321,16 @@ export async function mountTopDownGame(
       socket.disconnect();
       game.destroy(true);
     },
+  };
+}
+
+function readMobileContainerSize(container: HTMLElement): { w: number; h: number } {
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+  if (w > 0 && h > 0) return { w, h };
+  return {
+    w: Math.max(window.innerWidth, 320),
+    h: Math.max(window.innerHeight, 320),
   };
 }
 
@@ -486,7 +497,11 @@ class TopDownScene extends Phaser.Scene {
     }
     this.setupCamera();
 
-    // 이동은 방향키만 사용. createCursorKeys()는 SPACE까지 전역 가로채기(capture)해서
+    if (this.mobileLayout) {
+      this.scale.on('resize', () => this.applyMobileCameraZoom());
+    }
+
+    // 이동은 방향키만 사용.
     // 채팅 입력창에서 띄어쓰기(스페이스바)가 안 먹히는 문제가 생김 — 방향키만 따로 등록.
     const kb = this.input.keyboard;
     if (kb) {
@@ -756,7 +771,11 @@ class TopDownScene extends Phaser.Scene {
   private setupCamera() {
     if (this.visualStyle === 'generated') {
       this.cameras.main.setBounds(0, 0, this.generatedTextureWidth, this.generatedTextureHeight);
-      this.cameras.main.setZoom(this.mobileLayout ? 0.88 : 0.72);
+      if (this.mobileLayout) {
+        this.applyMobileCameraZoom();
+      } else {
+        this.cameras.main.setZoom(0.72);
+      }
     } else if (this.visualStyle === 'iso-fake') {
       const bounds = getIsoMapPixelBounds(
         this.mapConfig.mapSize.width,
@@ -775,6 +794,25 @@ class TopDownScene extends Phaser.Scene {
     if (self) {
       this.cameras.main.startFollow(self.body, true, 0.12, 0.12);
     }
+  }
+
+  /** 모바일 RESIZE — 화면 비율(세로/가로)에 맞춰 줌 조정, 여백 최소화 */
+  private applyMobileCameraZoom() {
+    if (this.visualStyle !== 'generated') return;
+    const w = this.scale.width;
+    const h = this.scale.height;
+    if (w <= 0 || h <= 0) return;
+
+    const isLandscape = w > h;
+    const refW = GUCCI_VIEWPORT_WIDTH_PX;
+    const refH = GUCCI_VIEWPORT_HEIGHT_PX;
+    const scaleX = w / refW;
+    const scaleY = h / refH;
+    const coverScale = Math.max(scaleX, scaleY);
+
+    let zoom = coverScale * (isLandscape ? 0.92 : 0.82);
+    zoom = Phaser.Math.Clamp(zoom, 0.5, 1.35);
+    this.cameras.main.setZoom(zoom);
   }
 
   private createPlayers() {

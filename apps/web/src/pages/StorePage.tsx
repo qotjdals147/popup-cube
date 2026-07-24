@@ -211,6 +211,17 @@ export function StorePage() {
     return () => ro.disconnect();
   }, [isMobile, gameReady]);
 
+  useEffect(() => {
+    if (!isMobile) return;
+    const refresh = () => window.setTimeout(() => gameRef.current?.resize(), 150);
+    window.addEventListener('orientationchange', refresh);
+    window.visualViewport?.addEventListener('resize', refresh);
+    return () => {
+      window.removeEventListener('orientationchange', refresh);
+      window.visualViewport?.removeEventListener('resize', refresh);
+    };
+  }, [isMobile, gameReady]);
+
   async function handleSignOut() {
     socketRef.current?.disconnect();
     socketRef.current = null;
@@ -373,30 +384,171 @@ export function StorePage() {
     </>
   );
 
-  return (
-    <div
-      style={styles.page}
-      className={isMobile ? 'store-page-mobile page-mobile' : undefined}
+  const chatSection = (
+    <section
+      style={isMobile ? undefined : styles.chatPanel}
+      className={
+        isMobile
+          ? `chat-panel-mobile${chatOpen ? ' chat-open-mobile' : ''}`
+          : undefined
+      }
     >
-      <header
-        style={styles.header}
-        className={isMobile ? 'store-header-mobile' : undefined}
-      >
+      {!isMobile && (
+        <>
+          <div style={styles.chatTitle}>{t('store.chat.title')}</div>
+          <div style={styles.chatMessages}>
+            {messages.length === 0 ? (
+              <div style={styles.chatEmpty}>{t('store.chat.empty')}</div>
+            ) : (
+              messages.map((message, idx) => (
+                <div key={`${message.userId}-${message.timestamp}-${idx}`} style={styles.chatLine}>
+                  <span style={styles.chatTime}>[{formatChatTime(message.timestamp)}]</span>{' '}
+                  <strong>{message.username}</strong>: {message.message}
+                </div>
+              ))
+            )}
+          </div>
+          {!chatOpen && (
+            <button style={styles.chatOpenButton} onClick={() => setChatOpen(true)}>
+              {t('store.chat.openHint')}
+            </button>
+          )}
+        </>
+      )}
+      {chatOpen && (
+        <div
+          style={isMobile ? undefined : styles.chatInputRow}
+          className={isMobile ? 'chat-input-mobile' : undefined}
+        >
+          {isMobile && <div className="chat-mobile-title">{t('store.chat.title')}</div>}
+          <input
+            ref={chatInputRef}
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSendChatAndClose();
+              }
+            }}
+            placeholder={t('store.chat.placeholder')}
+            style={isMobile ? undefined : styles.chatInput}
+            className={isMobile ? 'chat-input-field-mobile' : undefined}
+            maxLength={500}
+          />
+          <button
+            style={isMobile ? undefined : styles.chatSendButton}
+            className={isMobile ? 'chat-send-mobile' : undefined}
+            onClick={handleSendChatAndClose}
+          >
+            {t('store.chat.send')}
+          </button>
+        </div>
+      )}
+    </section>
+  );
+
+  const storeModals = (
+    <>
+      {shopOpen && storeId && (
+        <ShopPanel
+          storeId={storeId}
+          onClose={() => setShopOpen(false)}
+          onOpenCart={() => {
+            setShopOpen(false);
+            setCartOpen(true);
+          }}
+        />
+      )}
+      {cartOpen && storeId && (
+        <CartDrawer storeId={storeId} userId={userId} onClose={() => setCartOpen(false)} />
+      )}
+      {displayModalOpen && storeId && nearInteractZone && (
+        <DisplayProductModal
+          storeId={storeId}
+          fixtureLabel={nearInteractZone.label}
+          onClose={() => setDisplayModalOpen(false)}
+          onOpenCart={() => {
+            setDisplayModalOpen(false);
+            setCartOpen(true);
+          }}
+        />
+      )}
+      {ownerProductsOpen && storeId && userId && (
+        <OwnerProductPanel storeId={storeId} userId={userId} onClose={() => setOwnerProductsOpen(false)} />
+      )}
+      {ownerOrdersOpen && storeId && (
+        <OwnerOrdersPanel storeId={storeId} onClose={() => setOwnerOrdersOpen(false)} />
+      )}
+      <DemoToast message={toastMessage} onDismiss={() => setToastMessage(null)} />
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <div className="store-page-mobile store-immersive page-mobile">
+        {idleSecondsLeft !== null && (
+          <div className="mobile-toast-idle">
+            {t('store.world.idleWarning', { seconds: idleSecondsLeft })}
+          </div>
+        )}
+        <div className="world-stage-mobile">
+          <div ref={worldRef} className="world-canvas-mobile">
+            {worldError ? (
+              <div style={styles.worldPlaceholder}>{t('store.gamePlaceholder')}</div>
+            ) : null}
+          </div>
+          {!worldError && (
+            <div className="mobile-game-chrome">
+              <header className="mobile-overlay-header">
+                <button
+                  type="button"
+                  className="mobile-back-btn"
+                  onClick={() => navigate('/home')}
+                  aria-label={t('store.backToHome')}
+                >
+                  ←
+                </button>
+                <span className="store-title-mobile">{storeName ?? storeId}</span>
+                <ViewModeToggle compact />
+              </header>
+              <div className="world-overlay-status">
+                <span>{worldStatus}</span>
+                {!!channelText && (
+                  <span className="channel-badge-mobile">{channelText}</span>
+                )}
+              </div>
+              <VirtualDpad
+                onDirectionChange={handleVirtualDirections}
+                disabled={chatOpen || !gameReady}
+              />
+              <footer className="hud-overlay-mobile">{hudButtons}</footer>
+            </div>
+          )}
+          {worldError && (
+            <div className="mobile-offline-overlay">
+              <p style={styles.offlineTitle}>{t('store.world.offlineHint')}</p>
+              <ViewModeToggle compact />
+            </div>
+          )}
+        </div>
+        {chatSection}
+        {storeModals}
+      </div>
+    );
+  }
+
+  return (
+    <div style={styles.page}>
+      <header style={styles.header}>
         <div style={styles.headerLeft}>
           <button style={styles.homeButton} onClick={() => navigate('/home')}>
-            {isMobile ? '←' : t('store.backToHome')}
+            {t('store.backToHome')}
           </button>
-          <span className={isMobile ? 'store-title-mobile' : undefined}>
-            <strong>{storeName ?? storeId}</strong>
-            {!isMobile && (
-              <>
-                {' '}
-                — {username} ({getRoleLabel(role)})
-              </>
-            )}
+          <span>
+            <strong>{storeName ?? storeId}</strong> — {username} ({getRoleLabel(role)})
           </span>
         </div>
-        {!isMobile && (
         <div style={styles.headerRight}>
           <button style={styles.cartHeaderButton} onClick={() => setCartOpen(true)}>
             🛒 {totalQuantity > 0 ? totalQuantity : ''}
@@ -408,134 +560,37 @@ export function StorePage() {
             {t('common.logout')}
           </button>
         </div>
-        )}
       </header>
 
-      <main
-        style={styles.gameArea}
-        className={isMobile ? 'store-game-area-mobile' : undefined}
-      >
-        {!isMobile && (
-          <>
-            <div style={styles.worldStatusRow}>
-              <span>{worldStatus}</span>
-              {!!channelText && <span style={styles.channelBadge}>{channelText}</span>}
-            </div>
-            {worldError ? (
-              <div style={styles.worldOfflineBanner}>
-                <p style={styles.offlineTitle}>{t('store.world.offlineHint')}</p>
-                <p style={styles.offlineHint}>{t('store.world.demoShopHint')}</p>
-              </div>
-            ) : null}
-            {idleSecondsLeft !== null && (
-              <p style={styles.idleWarning}>{t('store.world.idleWarning', { seconds: idleSecondsLeft })}</p>
-            )}
-          </>
-        )}
-        {isMobile && idleSecondsLeft !== null && (
-          <p style={{ ...styles.idleWarning, margin: '4px 10px', flexShrink: 0 }}>
-            {t('store.world.idleWarning', { seconds: idleSecondsLeft })}
-          </p>
-        )}
-        {isMobile && worldError ? (
-          <div style={{ ...styles.worldOfflineBanner, margin: '8px 10px', flexShrink: 0 }}>
+      <main style={styles.gameArea}>
+        <div style={styles.worldStatusRow}>
+          <span>{worldStatus}</span>
+          {!!channelText && <span style={styles.channelBadge}>{channelText}</span>}
+        </div>
+        {worldError ? (
+          <div style={styles.worldOfflineBanner}>
             <p style={styles.offlineTitle}>{t('store.world.offlineHint')}</p>
+            <p style={styles.offlineHint}>{t('store.world.demoShopHint')}</p>
           </div>
         ) : null}
+        {idleSecondsLeft !== null && (
+          <p style={styles.idleWarning}>{t('store.world.idleWarning', { seconds: idleSecondsLeft })}</p>
+        )}
         <div
-          className={isMobile ? 'world-canvas-wrap-mobile' : undefined}
-          style={isMobile ? undefined : undefined}
+          ref={worldRef}
+          style={
+            isGucciDemo
+              ? { ...styles.worldCanvas, ...styles.worldCanvasGucci }
+              : styles.worldCanvas
+          }
         >
-          <div
-            ref={worldRef}
-            className={isMobile ? 'world-canvas-mobile' : undefined}
-            style={
-              isMobile
-                ? undefined
-                : isGucciDemo
-                  ? { ...styles.worldCanvas, ...styles.worldCanvasGucci }
-                  : styles.worldCanvas
-            }
-          >
-            {worldError ? <div style={styles.worldPlaceholder}>{t('store.gamePlaceholder')}</div> : null}
-          </div>
-          {isMobile && !worldError && (
-            <>
-              <div className="world-overlay-top">
-                <span>{worldStatus}</span>
-                {!!channelText && (
-                  <span className="channel-badge-mobile">{channelText}</span>
-                )}
-              </div>
-              <VirtualDpad
-                onDirectionChange={handleVirtualDirections}
-                disabled={chatOpen || !gameReady}
-              />
-              <footer className="hud-overlay-mobile">{hudButtons}</footer>
-            </>
-          )}
+          {worldError ? <div style={styles.worldPlaceholder}>{t('store.gamePlaceholder')}</div> : null}
         </div>
       </main>
 
-      {!isMobile && (
-      <footer style={styles.hud}>
-        {hudButtons}
-      </footer>
-      )}
+      <footer style={styles.hud}>{hudButtons}</footer>
 
-      {isMobile && (
-        <div className="store-footer-mobile">
-          <ViewModeToggle />
-        </div>
-      )}
-
-      <section
-        style={styles.chatPanel}
-        className={
-          isMobile
-            ? `chat-panel-mobile${chatOpen ? ' chat-open-mobile' : ''}`
-            : undefined
-        }
-      >
-        <div style={styles.chatTitle}>{t('store.chat.title')}</div>
-        <div style={styles.chatMessages}>
-          {messages.length === 0 ? (
-            <div style={styles.chatEmpty}>{t('store.chat.empty')}</div>
-          ) : (
-            messages.map((message, idx) => (
-              <div key={`${message.userId}-${message.timestamp}-${idx}`} style={styles.chatLine}>
-                <span style={styles.chatTime}>[{formatChatTime(message.timestamp)}]</span>{' '}
-                <strong>{message.username}</strong>: {message.message}
-              </div>
-            ))
-          )}
-        </div>
-        {!chatOpen ? (
-          <button style={styles.chatOpenButton} onClick={() => setChatOpen(true)}>
-            {t('store.chat.openHint')}
-          </button>
-        ) : (
-          <div style={styles.chatInputRow}>
-            <input
-              ref={chatInputRef}
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleSendChatAndClose();
-                }
-              }}
-              placeholder={t('store.chat.placeholder')}
-              style={styles.chatInput}
-              maxLength={500}
-            />
-            <button style={styles.chatSendButton} onClick={handleSendChatAndClose}>
-              {t('store.chat.send')}
-            </button>
-          </div>
-        )}
-      </section>
+      {chatSection}
 
       {isOwnerOfThisStore && (
         <div style={styles.ownerToolbar}>
@@ -555,42 +610,7 @@ export function StorePage() {
         </div>
       )}
 
-      {shopOpen && storeId && (
-        <ShopPanel
-          storeId={storeId}
-          onClose={() => setShopOpen(false)}
-          onOpenCart={() => {
-            setShopOpen(false);
-            setCartOpen(true);
-          }}
-        />
-      )}
-
-      {cartOpen && storeId && (
-        <CartDrawer storeId={storeId} userId={userId} onClose={() => setCartOpen(false)} />
-      )}
-
-      {displayModalOpen && storeId && nearInteractZone && (
-        <DisplayProductModal
-          storeId={storeId}
-          fixtureLabel={nearInteractZone.label}
-          onClose={() => setDisplayModalOpen(false)}
-          onOpenCart={() => {
-            setDisplayModalOpen(false);
-            setCartOpen(true);
-          }}
-        />
-      )}
-
-      {ownerProductsOpen && storeId && userId && (
-        <OwnerProductPanel storeId={storeId} userId={userId} onClose={() => setOwnerProductsOpen(false)} />
-      )}
-
-      {ownerOrdersOpen && storeId && (
-        <OwnerOrdersPanel storeId={storeId} onClose={() => setOwnerOrdersOpen(false)} />
-      )}
-
-      <DemoToast message={toastMessage} onDismiss={() => setToastMessage(null)} />
+      {storeModals}
     </div>
   );
 }
