@@ -534,6 +534,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '2px solid #c9a962',
     boxShadow: '0 0 24px rgba(201, 169, 98, 0.15), inset 0 0 40px rgba(0,0,0,0.35)',
     background: '#0b1020',
+    height: 'clamp(420px, 68vh, 720px)',
   },
   worldPlaceholder: {
     position: 'absolute',

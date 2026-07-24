@@ -22,9 +22,12 @@ import {
 } from './isoVisuals';
 import { DEMO_STORE_ID } from '@popup-cube/shared';
 import {
+  GUCCI_DEMO_NPCS,
   GUCCI_WORLD_ASSET,
-  mockupDepth,
-  tileToMockupScreen,
+  gucciIsoDepth,
+  isGucciBlockedTile,
+  tileToGucciIsoScreen,
+  type GucciDemoNpc,
 } from './gucciMockupWorld';
 
 // 타일/캐릭터/글자가 전체적으로 작아 보인다는 피드백 반영 — 타일 크기를 키우고,
@@ -32,6 +35,8 @@ import {
 const DEFAULT_TILE_SIZE = 56; // top-down tile px
 const VIEWPORT_WIDTH_PX = 800;
 const VIEWPORT_HEIGHT_PX = 520;
+const GUCCI_VIEWPORT_WIDTH_PX = 960;
+const GUCCI_VIEWPORT_HEIGHT_PX = 560;
 
 export type WorldVisualStyle = 'top-down' | 'iso-fake' | 'mockup-bg';
 
@@ -163,6 +168,9 @@ export async function mountTopDownGame(
   options.onStatusChange?.('월드 로딩 중...');
 
   const visualStyle = resolveVisualStyle(options.storeId, options.visualStyle);
+  const isGucciMockup = visualStyle === 'mockup-bg';
+  const viewportWidth = isGucciMockup ? GUCCI_VIEWPORT_WIDTH_PX : VIEWPORT_WIDTH_PX;
+  const viewportHeight = isGucciMockup ? GUCCI_VIEWPORT_HEIGHT_PX : VIEWPORT_HEIGHT_PX;
   const scene = new TopDownScene({
     mapConfig: normalizedMap,
     selfUserId: options.userId,
@@ -178,8 +186,8 @@ export async function mountTopDownGame(
     parent: options.container,
     // 지도 전체 크기가 아니라 "고정된 카메라 창" 크기를 캔버스 크기로 사용 — 지도가 커도
     // 화면에는 이 창만큼만 보이고, 카메라가 캐릭터를 따라다니며 나머지를 보여준다.
-    width: VIEWPORT_WIDTH_PX,
-    height: VIEWPORT_HEIGHT_PX,
+    width: viewportWidth,
+    height: viewportHeight,
     backgroundColor: '#111629',
     scene: scene,
     scale: {
@@ -321,6 +329,7 @@ class TopDownScene extends Phaser.Scene {
   private mockupTextureHeight = 900;
   private readonly players = new Map<string, PlayerVisual>();
   private readonly blockedTiles = new Set<string>();
+  private readonly npcChatTimers: Phaser.Time.TimerEvent[] = [];
   private floorGraphics?: Phaser.GameObjects.Graphics;
 
   private cursors?: {
@@ -362,14 +371,7 @@ class TopDownScene extends Phaser.Scene {
 
   private tileToScreen(tileX: number, tileY: number): IsoPoint {
     if (this.visualStyle === 'mockup-bg') {
-      return tileToMockupScreen(
-        tileX,
-        tileY,
-        this.mapConfig.mapSize.width,
-        this.mapConfig.mapSize.height,
-        this.mockupTextureWidth,
-        this.mockupTextureHeight
-      );
+      return tileToGucciIsoScreen(tileX, tileY);
     }
     if (this.visualStyle === 'iso-fake') {
       return tileToIsoScreen(tileX, tileY, this.isoOrigin.x, this.isoOrigin.y);
@@ -405,6 +407,9 @@ class TopDownScene extends Phaser.Scene {
     }
 
     this.createPlayers();
+    if (this.visualStyle === 'mockup-bg') {
+      this.spawnGucciDemoNpcs();
+    }
     this.setupCamera();
 
     // 이동은 방향키만 사용. createCursorKeys()는 SPACE까지 전역 가로채기(capture)해서
@@ -466,7 +471,7 @@ class TopDownScene extends Phaser.Scene {
     if (this.visualStyle === 'iso-fake' || this.visualStyle === 'mockup-bg') {
       const depth =
         this.visualStyle === 'mockup-bg'
-          ? mockupDepth(nextX, nextY)
+          ? gucciIsoDepth(nextX, nextY, 5)
           : isoDepth(nextX, nextY, 5);
       player.body.setDepth(depth);
     }
@@ -501,6 +506,7 @@ class TopDownScene extends Phaser.Scene {
   }
 
   public removeRemotePlayer(userId: string) {
+    if (userId.startsWith('npc:')) return;
     const player = this.players.get(userId);
     if (!player || player.isSelf) return;
     player.speechBubbleTimer?.remove(false);
@@ -551,23 +557,62 @@ class TopDownScene extends Phaser.Scene {
     }
   }
 
-  /** 채팅 시 머리 위 말풍선 표시 — 5초 후 자동 숨김, 그 전에 새 메시지가 오면 교체 후 다시 5초(최신 메시지만 표시). */
+  /** 채팅 시 머리 위 말풍선 — 나타났다 5초 후 페이드아웃 */
   public showSpeechBubble(userId: string, message: string) {
     const player = this.players.get(userId);
     if (!player) return;
 
     player.speechBubbleTimer?.remove(false);
+    this.tweens.killTweensOf(player.speechBubble);
+    player.speechBubble.setAlpha(1);
     player.speechBubble.setText(truncateForBubble(message));
     player.speechBubble.setVisible(true);
-    player.speechBubbleTimer = this.time.delayedCall(SPEECH_BUBBLE_DURATION_MS, () => {
-      player.speechBubble.setVisible(false);
+    player.speechBubbleTimer = this.time.delayedCall(SPEECH_BUBBLE_DURATION_MS - 600, () => {
+      this.tweens.add({
+        targets: player.speechBubble,
+        alpha: 0,
+        duration: 600,
+        onComplete: () => {
+          player.speechBubble.setVisible(false);
+          player.speechBubble.setAlpha(1);
+        },
+      });
     });
+  }
+
+  private spawnGucciDemoNpcs() {
+    GUCCI_DEMO_NPCS.forEach((npc) => {
+      if (this.players.has(npc.userId)) return;
+      const visual = this.createPlayerVisual(
+        npc.userId,
+        npc.username,
+        false,
+        npc.x,
+        npc.y,
+        npc.direction,
+        false
+      );
+      this.players.set(npc.userId, visual);
+      this.scheduleNpcChatter(npc);
+    });
+  }
+
+  private scheduleNpcChatter(npc: GucciDemoNpc) {
+    const delayMs = 6000 + Math.floor(Math.random() * 8000);
+    const timer = this.time.delayedCall(delayMs, () => {
+      const line = npc.lines[Math.floor(Math.random() * npc.lines.length)];
+      this.showSpeechBubble(npc.userId, line);
+      this.scheduleNpcChatter(npc);
+    });
+    this.npcChatTimers.push(timer);
   }
 
   /** 카메라를 지도 전체 크기로 제한하고, 내 캐릭터를 부드럽게 따라다니게 한다. */
   private setupCamera() {
     if (this.visualStyle === 'mockup-bg') {
       this.cameras.main.setBounds(0, 0, this.mockupTextureWidth, this.mockupTextureHeight);
+      // 뷰포트(960px)가 배경(682px)보다 넓으면 카메라가 안 움직임 — 줌으로 맵 전체 탐색 가능하게.
+      this.cameras.main.setZoom(1.45);
     } else if (this.visualStyle === 'iso-fake') {
       const bounds = getIsoMapPixelBounds(
         this.mapConfig.mapSize.width,
@@ -584,7 +629,7 @@ class TopDownScene extends Phaser.Scene {
 
     const self = this.players.get(this.selfUserId);
     if (self) {
-      this.cameras.main.startFollow(self.body, true, 0.15, 0.15);
+      this.cameras.main.startFollow(self.body, true, 0.12, 0.12);
     }
   }
 
@@ -625,8 +670,8 @@ class TopDownScene extends Phaser.Scene {
     let body: Phaser.GameObjects.Container | Phaser.GameObjects.Rectangle;
     if (this.visualStyle === 'mockup-bg') {
       body = createIsoPlayerVisual(this, tileX, tileY, isSelf, isOwner);
-      body.setScale(0.72);
-      body.setPosition(px.x, px.y - 6);
+      body.setScale(0.85);
+      body.setPosition(px.x, px.y - 10);
     } else if (this.visualStyle === 'iso-fake') {
       body = createIsoPlayerVisual(this, tileX, tileY, isSelf, isOwner);
       body.setPosition(px.x, px.y - 8);
@@ -635,23 +680,23 @@ class TopDownScene extends Phaser.Scene {
     }
 
     const labelY =
-      this.visualStyle === 'mockup-bg' ? px.y + 14 : this.visualStyle === 'iso-fake' ? px.y + 22 : px.y + 30;
+      this.visualStyle === 'mockup-bg' ? px.y + 18 : this.visualStyle === 'iso-fake' ? px.y + 22 : px.y + 30;
     const label = this.add
       .text(px.x, labelY, nameplateText(username, isOwner), {
-        fontSize: this.visualStyle === 'mockup-bg' ? '11px' : '14px',
+        fontSize: this.visualStyle === 'mockup-bg' ? '12px' : '14px',
         color: '#ffffff',
-        backgroundColor: 'rgba(0,0,0,0.65)',
+        backgroundColor: 'rgba(0,0,0,0.7)',
         padding: { left: 6, right: 6, top: 2, bottom: 2 },
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5, 0);
     if (this.visualStyle === 'mockup-bg') {
-      label.setDepth(mockupDepth(tileX, tileY) + 1);
+      label.setDepth(gucciIsoDepth(tileX, tileY, 6));
     } else if (this.visualStyle === 'iso-fake') {
       label.setDepth(isoDepth(tileX, tileY, 6));
     }
 
     const bubbleY =
-      this.visualStyle === 'mockup-bg' ? px.y - 36 : this.visualStyle === 'iso-fake' ? px.y - 48 : px.y - 38;
+      this.visualStyle === 'mockup-bg' ? px.y - 42 : this.visualStyle === 'iso-fake' ? px.y - 48 : px.y - 38;
     const speechBubble = this.add
       .text(px.x, bubbleY, '', {
         fontSize: '12px',
@@ -663,9 +708,10 @@ class TopDownScene extends Phaser.Scene {
       })
       .setOrigin(0.5, 1)
       .setVisible(false)
+      .setAlpha(1)
       .setDepth(
         this.visualStyle === 'mockup-bg'
-          ? mockupDepth(tileX, tileY) + 20
+          ? gucciIsoDepth(tileX, tileY, 25)
           : isoDepth(tileX, tileY, 20)
       );
 
@@ -686,19 +732,19 @@ class TopDownScene extends Phaser.Scene {
   private applyPlayerPosition(player: PlayerVisual, tileX: number, tileY: number, direction: Direction) {
     const px = this.tileToScreen(tileX, tileY);
     const bodyY =
-      this.visualStyle === 'mockup-bg' ? px.y - 6 : this.visualStyle === 'iso-fake' ? px.y - 8 : px.y;
+      this.visualStyle === 'mockup-bg' ? px.y - 10 : this.visualStyle === 'iso-fake' ? px.y - 8 : px.y;
     player.body.setPosition(px.x, bodyY);
     const labelY =
-      this.visualStyle === 'mockup-bg' ? px.y + 14 : this.visualStyle === 'iso-fake' ? px.y + 22 : px.y + 30;
+      this.visualStyle === 'mockup-bg' ? px.y + 18 : this.visualStyle === 'iso-fake' ? px.y + 22 : px.y + 30;
     player.label.setPosition(px.x, labelY);
     const bubbleY =
-      this.visualStyle === 'mockup-bg' ? px.y - 36 : this.visualStyle === 'iso-fake' ? px.y - 48 : px.y - 38;
+      this.visualStyle === 'mockup-bg' ? px.y - 42 : this.visualStyle === 'iso-fake' ? px.y - 48 : px.y - 38;
     player.speechBubble.setPosition(px.x, bubbleY);
     if (this.visualStyle === 'mockup-bg') {
-      const d = mockupDepth(tileX, tileY);
+      const d = gucciIsoDepth(tileX, tileY, 5);
       player.body.setDepth(d);
-      player.label.setDepth(d + 1);
-      player.speechBubble.setDepth(d + 20);
+      player.label.setDepth(gucciIsoDepth(tileX, tileY, 6));
+      player.speechBubble.setDepth(gucciIsoDepth(tileX, tileY, 25));
     } else if (this.visualStyle === 'iso-fake') {
       const d = isoDepth(tileX, tileY, 5);
       player.body.setDepth(d);
@@ -804,7 +850,17 @@ class TopDownScene extends Phaser.Scene {
   }
 
   private isBlocked(tileX: number, tileY: number): boolean {
-    return this.blockedTiles.has(tileKey(Math.round(tileX), Math.round(tileY)));
+    const key = tileKey(Math.round(tileX), Math.round(tileY));
+    if (this.blockedTiles.has(key)) return true;
+    if (this.visualStyle === 'mockup-bg') {
+      return isGucciBlockedTile(
+        tileX,
+        tileY,
+        this.mapConfig.mapSize.width,
+        this.mapConfig.mapSize.height
+      );
+    }
+    return false;
   }
 }
 
