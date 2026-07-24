@@ -30,10 +30,14 @@ import {
   generatedMovementDelta,
   generatedLabelY,
   generatedSpeechBubbleY,
+  getGeneratedInteractZone,
   isGeneratedBlockedTile,
   tileToGeneratedScreen,
+  type GeneratedInteractZone,
   type GeneratedNpc,
 } from './generatedWorldAssets';
+
+export type { GeneratedInteractZone } from './generatedWorldAssets';
 
 // 타일/캐릭터/글자가 전체적으로 작아 보인다는 피드백 반영 — 타일 크기를 키우고,
 // 지도 전체를 억지로 화면에 눌러 담는 대신 "고정된 카메라 창"만 보여준 뒤 캐릭터를 따라다니게 함.
@@ -113,12 +117,15 @@ export interface TopDownGameMountOptions {
   onSocketCreated?: (socket: Socket) => void;
   /** GUCCI 데모 등 — 등각 "인 척" 스킨 (그리드·소켓은 동일) */
   visualStyle?: WorldVisualStyle;
+  /** Generated GUCCI — table 등 진열 구역 근처 여부 (React HUD 상호작용) */
+  onNearInteractZone?: (zone: GeneratedInteractZone | null) => void;
 }
 
 export interface TopDownGameController {
   sendChat: (message: string) => void;
   /** 채팅 입력창이 열려 있는 동안 false로 호출 — 캐릭터 이동/방향키 입력을 멈춘다. */
   setMovementEnabled: (enabled: boolean) => void;
+  getSelfTile: () => { x: number; y: number };
   destroy: () => void;
 }
 
@@ -185,6 +192,7 @@ export async function mountTopDownGame(
     initialPlayers: joinResponse.players ?? [],
     selfSpawn: joinResponse.self ?? { x: 10, y: 10, direction: 'down' },
     visualStyle,
+    onNearInteractZone: options.onNearInteractZone,
   });
 
   const game = new Phaser.Game({
@@ -272,6 +280,9 @@ export async function mountTopDownGame(
     setMovementEnabled(enabled: boolean) {
       scene.setMovementEnabled(enabled);
     },
+    getSelfTile() {
+      return scene.getSelfTile();
+    },
     destroy() {
       socket.disconnect();
       game.destroy(true);
@@ -350,6 +361,9 @@ class TopDownScene extends Phaser.Scene {
   private movementEnabled = true;
   private lastEmitMs = 0;
   private selfTile = { x: 10, y: 10, direction: 'down' as Direction };
+  private readonly onNearInteractZone?: (zone: GeneratedInteractZone | null) => void;
+  private lastInteractEmitMs = 0;
+  private lastInteractZoneId: string | null = null;
   public onMove?: (x: number, y: number, direction: Direction) => void;
   public onReady?: () => void;
 
@@ -362,6 +376,7 @@ class TopDownScene extends Phaser.Scene {
     initialPlayers: PlayerState[];
     selfSpawn: { x: number; y: number; direction: Direction };
     visualStyle: WorldVisualStyle;
+    onNearInteractZone?: (zone: GeneratedInteractZone | null) => void;
   }) {
     super({ key: 'TopDownScene' });
     this.mapConfig = config.mapConfig;
@@ -373,6 +388,7 @@ class TopDownScene extends Phaser.Scene {
     this.initialPlayers = config.initialPlayers;
     this.selfSpawn = config.selfSpawn;
     this.visualStyle = config.visualStyle;
+    this.onNearInteractZone = config.onNearInteractZone;
     const vpW = this.isGeneratedDemo ? GUCCI_VIEWPORT_WIDTH_PX : VIEWPORT_WIDTH_PX;
     this.isoOrigin = getIsoMapOrigin(
       config.mapConfig.mapSize.width,
@@ -443,9 +459,12 @@ class TopDownScene extends Phaser.Scene {
     this.applyMovementEnabled();
 
     this.onReady?.();
+    this.emitInteractZoneIfNeeded(true);
   }
 
   update(_time: number, delta: number) {
+    this.emitInteractZoneIfNeeded(false);
+
     const player = this.players.get(this.selfUserId);
     if (!player || !this.cursors || !this.movementEnabled) return;
 
@@ -519,6 +538,23 @@ class TopDownScene extends Phaser.Scene {
     if (now - this.lastEmitMs >= MOVE_EMIT_INTERVAL_MS) {
       this.lastEmitMs = now;
       this.onMove?.(nextX, nextY, direction);
+    }
+  }
+
+  public getSelfTile(): { x: number; y: number } {
+    return { x: this.selfTile.x, y: this.selfTile.y };
+  }
+
+  private emitInteractZoneIfNeeded(force: boolean) {
+    if (!this.isGeneratedDemo || !this.onNearInteractZone) return;
+    const now = this.time?.now ?? 0;
+    if (!force && now - this.lastInteractEmitMs < 150) return;
+    this.lastInteractEmitMs = now;
+    const zone = getGeneratedInteractZone(this.selfTile.x, this.selfTile.y);
+    const id = zone?.id ?? null;
+    if (force || id !== this.lastInteractZoneId) {
+      this.lastInteractZoneId = id;
+      this.onNearInteractZone(zone);
     }
   }
 
@@ -904,8 +940,6 @@ class TopDownScene extends Phaser.Scene {
   }
 
   private isBlocked(tileX: number, tileY: number): boolean {
-    const key = tileKey(Math.round(tileX), Math.round(tileY));
-    if (this.blockedTiles.has(key)) return true;
     if (this.isGeneratedDemo) {
       return isGeneratedBlockedTile(
         tileX,
@@ -914,6 +948,8 @@ class TopDownScene extends Phaser.Scene {
         this.mapConfig.mapSize.height
       );
     }
+    const key = tileKey(Math.round(tileX), Math.round(tileY));
+    if (this.blockedTiles.has(key)) return true;
     return false;
   }
 }

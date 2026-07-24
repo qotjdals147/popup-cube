@@ -132,6 +132,18 @@ export const ko = {
     addToCart: '담기',
     added: '담았어요 ✅',
   },
+  display: {
+    title: '진열 상품',
+    loading: '진열 상품을 불러오는 중...',
+    errorLoad: '진열 상품을 불러오지 못했어요.',
+    empty: '이 진열 구역에 등록된 상품이 없어요.',
+    addToCart: '장바구니 담기',
+    openCart: '장바구니 열기',
+    interactHint: '가까이 가면 상호작용할 수 있어요',
+    interactNear: '진열 상품 보기',
+    tryOnTitle: '착용 미리보기',
+    tryOnPlaceholder: '2D 캐릭터 착용 미리보기 공간 — 정식 버전에서 구현 예정입니다.',
+  },
   cart: {
     title: '🛒 장바구니',
     empty: '장바구니가 비어있어요.',

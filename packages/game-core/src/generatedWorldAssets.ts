@@ -1,6 +1,6 @@
 /**
  * PDF 시안과 동일 파이프라인 — AI 생성 게임 에셋 (목업 PNG 통째 붙이기 아님).
- * GenerateImage로 room/avatar를 따로 생성 → Phaser에서 조립.
+ * 2:1 dimetric tile grid — room PNG(1024×1536)에 앵커 보정.
  */
 
 export const GENERATED_WORLD = {
@@ -9,19 +9,26 @@ export const GENERATED_WORLD = {
     '/worlds/generated/gucci-avatar-chibi-1.png',
     '/worlds/generated/gucci-avatar-chibi-2.png',
   ],
-  /** 1024×1536 room — marble floor walk grid (2:1 dimetric) */
+  /** Calibrated: table center tile (10,11) ≈ pixel (512, 885) in room PNG */
   tileWidth: 52,
   tileHeight: 26,
-  originX: 512,
-  originY: 600,
-  /** Trimmed avatar ~868px tall; 0.17 ≈ 40% smaller than prior 0.28 */
+  originX: 538,
+  originY: 612,
   avatarScale: 0.17,
   footLiftPx: 6,
   labelBelowFeetPx: 2,
-  /** Bubble anchor sits above scaled sprite height from feet */
   speechBubbleAboveFeetPx: 132,
-  /** Open floor spawn — right-front marble, away from NPC cluster */
-  defaultSpawn: { x: 13, y: 15, direction: 'left' as const },
+  /** Front marble floor — away from central table */
+  defaultSpawn: { x: 16, y: 17, direction: 'up' as const },
+};
+
+/** Central display table — interact when adjacent, never stand on top. */
+export const GUCCI_CENTER_TABLE = {
+  id: 'fixture_center_table',
+  label: '중앙 디스플레이 테이블',
+  center: { x: 10, y: 11 },
+  /** Chebyshev distance from center; player must be outside table footprint */
+  interactRadius: 3,
 };
 
 export interface GeneratedNpc {
@@ -34,12 +41,13 @@ export interface GeneratedNpc {
   lines: string[];
 }
 
+/** NPCs on open front/side marble — not on table footprint. */
 export const GENERATED_NPCS: GeneratedNpc[] = [
   {
     userId: 'npc:luxelover',
     username: 'luxelover',
-    x: 6,
-    y: 13,
+    x: 7,
+    y: 16,
     direction: 'right',
     avatarIndex: 1,
     lines: ['GG 패턴 진짜 고급스러워요!', '와! 이 가방 예쁘다!'],
@@ -48,7 +56,7 @@ export const GENERATED_NPCS: GeneratedNpc[] = [
     userId: 'npc:stylist_ming',
     username: 'stylist_ming',
     x: 14,
-    y: 13,
+    y: 16,
     direction: 'left',
     avatarIndex: 0,
     lines: ['여기 분위기 너무 좋아요', 'GG 패턴 멋져요!'],
@@ -56,13 +64,18 @@ export const GENERATED_NPCS: GeneratedNpc[] = [
   {
     userId: 'npc:seoul_vibes',
     username: 'seoul_vibes',
-    x: 10,
-    y: 14,
+    x: 11,
+    y: 18,
     direction: 'up',
     avatarIndex: 1,
     lines: ['바로 구매각!', '다음에 또 올게요'],
   },
 ];
+
+export interface GeneratedInteractZone {
+  id: string;
+  label: string;
+}
 
 export function tileToGeneratedScreen(tileX: number, tileY: number): { x: number; y: number } {
   const hw = GENERATED_WORLD.tileWidth / 2;
@@ -77,7 +90,14 @@ export function generatedDepth(tileX: number, tileY: number, layer = 0): number 
   return Math.floor((tileX + tileY) * 10 + layer);
 }
 
-/** Furniture / wall blocks only — marble floor tiles stay walkable. */
+/** Table footprint in tile space — matches visual round display in room PNG. */
+export function isGeneratedTableTile(tileX: number, tileY: number): boolean {
+  const x = Math.round(tileX);
+  const y = Math.round(tileY);
+  return x >= 8 && x <= 12 && y >= 9 && y <= 14;
+}
+
+/** Only furniture + walls — all other tiles are walkable marble floor. */
 export function isGeneratedBlockedTile(
   tileX: number,
   tileY: number,
@@ -88,44 +108,31 @@ export function isGeneratedBlockedTile(
   const y = Math.round(tileY);
   if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) return true;
 
-  // Single-tile outer walls
   if (x === 0 || y === 0 || x === mapWidth - 1 || y === mapHeight - 1) return true;
-  // Back wall
   if (x + y <= 5) return true;
 
-  // Central round display table only
-  if (x >= 9 && x <= 11 && y >= 10 && y <= 12) return true;
+  if (isGeneratedTableTile(x, y)) return true;
 
-  // Left armchair corner
-  if (x <= 3 && y >= 15 && y <= 17) return true;
-
-  // Bottom-right counter + clothing rack (tight — do not block open right floor)
-  if (x >= 17 && y >= 14) return true;
-  if (x === 16 && y >= 16) return true;
-
-  // Back wall shelf niches
-  if (x <= 2 && y >= 4 && y <= 10) return true;
-  if (x >= 18 && y >= 4 && y <= 11) return true;
-
-  // Door alcove
+  if (x >= 2 && x <= 4 && y >= 16 && y <= 18) return true;
+  if (x >= 17 && y >= 15) return true;
+  if (x === 16 && y >= 17) return true;
+  if (x <= 2 && y >= 4 && y <= 8) return true;
+  if (x >= 18 && y >= 4 && y <= 9) return true;
   if (x <= 4 && y <= 3) return true;
 
   return false;
 }
 
-export function generatedAvatarFootY(tileX: number, tileY: number): number {
-  return tileToGeneratedScreen(tileX, tileY).y;
+export function getGeneratedInteractZone(tileX: number, tileY: number): GeneratedInteractZone | null {
+  const x = tileX;
+  const y = tileY;
+  const { center, interactRadius } = GUCCI_CENTER_TABLE;
+  const dist = Math.max(Math.abs(x - center.x), Math.abs(y - center.y));
+  if (dist > interactRadius) return null;
+  if (isGeneratedTableTile(x, y)) return null;
+  return { id: GUCCI_CENTER_TABLE.id, label: GUCCI_CENTER_TABLE.label };
 }
 
-export function generatedLabelY(tileX: number, tileY: number): number {
-  return generatedAvatarFootY(tileX, tileY) + GENERATED_WORLD.labelBelowFeetPx;
-}
-
-export function generatedSpeechBubbleY(tileX: number, tileY: number): number {
-  return generatedAvatarFootY(tileX, tileY) - GENERATED_WORLD.speechBubbleAboveFeetPx;
-}
-
-/** Map arrow keys to isometric grid deltas (screen-aligned). */
 export function generatedMovementDelta(
   up: boolean,
   down: boolean,
@@ -159,6 +166,14 @@ export function directionFromGeneratedDelta(dx: number, dy: number): 'up' | 'dow
   if (dx === 0 && dy === 0) return 'down';
   if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? 'right' : 'left';
   return dy >= 0 ? 'down' : 'up';
+}
+
+export function generatedLabelY(tileX: number, tileY: number): number {
+  return tileToGeneratedScreen(tileX, tileY).y + GENERATED_WORLD.labelBelowFeetPx;
+}
+
+export function generatedSpeechBubbleY(tileX: number, tileY: number): number {
+  return tileToGeneratedScreen(tileX, tileY).y - GENERATED_WORLD.speechBubbleAboveFeetPx;
 }
 
 export function avatarIndexForUser(userId: string): number {

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import type { Socket } from 'socket.io-client';
-import { mountTopDownGame, type GameChatMessage, type TopDownGameController } from '@popup-cube/game-core';
+import { mountTopDownGame, type GameChatMessage, type GeneratedInteractZone, type TopDownGameController } from '@popup-cube/game-core';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { ShopPanel } from '../components/ShopPanel';
 import { CartDrawer } from '../components/CartDrawer';
+import { DisplayProductModal } from '../components/DisplayProductModal';
 import { OwnerProductPanel } from '../components/OwnerProductPanel';
 import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
 import { DemoToast } from '../components/DemoToast';
@@ -73,6 +74,8 @@ export function StorePage() {
   const [ownerOrdersOpen, setOwnerOrdersOpen] = useState(false);
   const [storeName, setStoreName] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [nearInteractZone, setNearInteractZone] = useState<GeneratedInteractZone | null>(null);
+  const [displayModalOpen, setDisplayModalOpen] = useState(false);
 
   function showComingSoon() {
     markActivity();
@@ -151,6 +154,9 @@ export function StorePage() {
       },
       onPlayerMove() {
         if (mounted) markActivity();
+      },
+      onNearInteractZone(zone) {
+        if (mounted) setNearInteractZone(zone);
       },
     })
       .then((controller) => {
@@ -315,8 +321,25 @@ export function StorePage() {
       </main>
 
       <footer style={styles.hud}>
-        <button style={styles.hudButton} onClick={showComingSoon} title="가까이 간 진열 조형물의 상품을 봅니다">
-          {t('store.hud.interact')}
+        <button
+          style={{
+            ...styles.hudButton,
+            ...(nearInteractZone ? styles.hudButtonActive : {}),
+            ...(!nearInteractZone ? styles.hudButtonDisabled : {}),
+          }}
+          disabled={!nearInteractZone}
+          onClick={() => {
+            if (!nearInteractZone) return;
+            markActivity();
+            setDisplayModalOpen(true);
+          }}
+          title={
+            nearInteractZone
+              ? t('display.interactNear', { label: nearInteractZone.label })
+              : t('display.interactHint')
+          }
+        >
+          {nearInteractZone ? t('display.interactNear') : t('store.hud.interact')}
         </button>
         <button
           style={styles.hudButton}
@@ -422,6 +445,18 @@ export function StorePage() {
 
       {cartOpen && storeId && (
         <CartDrawer storeId={storeId} userId={userId} onClose={() => setCartOpen(false)} />
+      )}
+
+      {displayModalOpen && storeId && nearInteractZone && (
+        <DisplayProductModal
+          storeId={storeId}
+          fixtureLabel={nearInteractZone.label}
+          onClose={() => setDisplayModalOpen(false)}
+          onOpenCart={() => {
+            setDisplayModalOpen(false);
+            setCartOpen(true);
+          }}
+        />
       )}
 
       {ownerProductsOpen && storeId && userId && (
@@ -566,6 +601,15 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#fff',
     fontSize: 13,
     cursor: 'pointer',
+  },
+  hudButtonActive: {
+    borderColor: '#c9a962',
+    background: '#1f2840',
+    boxShadow: '0 0 0 1px #c9a96244',
+  },
+  hudButtonDisabled: {
+    opacity: 0.55,
+    cursor: 'not-allowed',
   },
   shopButton: {
     marginLeft: 'auto',
