@@ -14,9 +14,14 @@ export const GENERATED_WORLD = {
   tileHeight: 26,
   originX: 512,
   originY: 600,
-  avatarScale: 0.28,
-  /** Open floor spawn — front-center, away from central table */
-  defaultSpawn: { x: 10, y: 16, direction: 'up' as const },
+  /** Trimmed avatar ~868px tall; 0.17 ≈ 40% smaller than prior 0.28 */
+  avatarScale: 0.17,
+  footLiftPx: 6,
+  labelBelowFeetPx: 2,
+  /** Bubble anchor sits above scaled sprite height from feet */
+  speechBubbleAboveFeetPx: 132,
+  /** Open floor spawn — right-front marble, away from NPC cluster */
+  defaultSpawn: { x: 13, y: 15, direction: 'left' as const },
 };
 
 export interface GeneratedNpc {
@@ -33,18 +38,18 @@ export const GENERATED_NPCS: GeneratedNpc[] = [
   {
     userId: 'npc:luxelover',
     username: 'luxelover',
-    x: 12,
-    y: 15,
-    direction: 'left',
+    x: 6,
+    y: 13,
+    direction: 'right',
     avatarIndex: 1,
     lines: ['GG 패턴 진짜 고급스러워요!', '와! 이 가방 예쁘다!'],
   },
   {
     userId: 'npc:stylist_ming',
     username: 'stylist_ming',
-    x: 8,
-    y: 15,
-    direction: 'right',
+    x: 14,
+    y: 13,
+    direction: 'left',
     avatarIndex: 0,
     lines: ['여기 분위기 너무 좋아요', 'GG 패턴 멋져요!'],
   },
@@ -52,7 +57,7 @@ export const GENERATED_NPCS: GeneratedNpc[] = [
     userId: 'npc:seoul_vibes',
     username: 'seoul_vibes',
     x: 10,
-    y: 17,
+    y: 14,
     direction: 'up',
     avatarIndex: 1,
     lines: ['바로 구매각!', '다음에 또 올게요'],
@@ -72,7 +77,7 @@ export function generatedDepth(tileX: number, tileY: number, layer = 0): number 
   return Math.floor((tileX + tileY) * 10 + layer);
 }
 
-/** Furniture / wall blocks only — open marble floor stays walkable. */
+/** Furniture / wall blocks only — marble floor tiles stay walkable. */
 export function isGeneratedBlockedTile(
   tileX: number,
   tileY: number,
@@ -83,28 +88,41 @@ export function isGeneratedBlockedTile(
   const y = Math.round(tileY);
   if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) return true;
 
-  // Outer walls
-  if (x <= 1 || y <= 1 || x >= mapWidth - 2 || y >= mapHeight - 2) return true;
-  // Back wall (top of room)
-  if (x + y <= 6) return true;
+  // Single-tile outer walls
+  if (x === 0 || y === 0 || x === mapWidth - 1 || y === mapHeight - 1) return true;
+  // Back wall
+  if (x + y <= 5) return true;
 
-  // Central round display table
+  // Central round display table only
   if (x >= 9 && x <= 11 && y >= 10 && y <= 12) return true;
 
-  // Left armchair + side table
-  if (x <= 4 && y >= 14 && y <= 17) return true;
+  // Left armchair corner
+  if (x <= 3 && y >= 15 && y <= 17) return true;
 
-  // Right checkout counter + clothing rack
-  if (x >= 15 && y >= 14) return true;
+  // Bottom-right counter + clothing rack (tight — do not block open right floor)
+  if (x >= 17 && y >= 14) return true;
+  if (x === 16 && y >= 16) return true;
 
-  // Wall-mounted shelf strips (not walkable)
-  if (x <= 3 && y >= 5 && y <= 11) return true;
-  if (x >= 16 && y >= 5 && y <= 12) return true;
+  // Back wall shelf niches
+  if (x <= 2 && y >= 4 && y <= 10) return true;
+  if (x >= 18 && y >= 4 && y <= 11) return true;
 
-  // Door alcove (top-left)
-  if (x <= 5 && y <= 4) return true;
+  // Door alcove
+  if (x <= 4 && y <= 3) return true;
 
   return false;
+}
+
+export function generatedAvatarFootY(tileX: number, tileY: number): number {
+  return tileToGeneratedScreen(tileX, tileY).y;
+}
+
+export function generatedLabelY(tileX: number, tileY: number): number {
+  return generatedAvatarFootY(tileX, tileY) + GENERATED_WORLD.labelBelowFeetPx;
+}
+
+export function generatedSpeechBubbleY(tileX: number, tileY: number): number {
+  return generatedAvatarFootY(tileX, tileY) - GENERATED_WORLD.speechBubbleAboveFeetPx;
 }
 
 /** Map arrow keys to isometric grid deltas (screen-aligned). */

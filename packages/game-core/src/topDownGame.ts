@@ -28,6 +28,8 @@ import {
   GENERATED_WORLD,
   generatedDepth,
   generatedMovementDelta,
+  generatedLabelY,
+  generatedSpeechBubbleY,
   isGeneratedBlockedTile,
   tileToGeneratedScreen,
   type GeneratedNpc,
@@ -487,8 +489,8 @@ class TopDownScene extends Phaser.Scene {
       }
     }
 
-    nextX = Phaser.Math.Clamp(nextX, 0, this.mapConfig.mapSize.width - 1);
-    nextY = Phaser.Math.Clamp(nextY, 0, this.mapConfig.mapSize.height - 1);
+    nextX = Phaser.Math.Clamp(nextX, 1, this.mapConfig.mapSize.width - 2);
+    nextY = Phaser.Math.Clamp(nextY, 1, this.mapConfig.mapSize.height - 2);
 
     if (this.isBlocked(nextX, nextY)) {
       const slideX = this.isBlocked(nextX, this.selfTile.y);
@@ -717,7 +719,7 @@ class TopDownScene extends Phaser.Scene {
     let body: Phaser.GameObjects.Container | Phaser.GameObjects.Rectangle | Phaser.GameObjects.Image;
     if (isGen) {
       const idx = avatarVariant ?? (isSelf ? 0 : avatarIndexForUser(userId));
-      body = this.add.image(px.x, px.y - 8, `gen-avatar-${idx}`);
+      body = this.add.image(px.x, px.y - GENERATED_WORLD.footLiftPx, `gen-avatar-${idx}`);
       body.setOrigin(0.5, 0.95);
       body.setScale(GENERATED_WORLD.avatarScale);
       body.setDepth(generatedDepth(tileX, tileY, 5));
@@ -728,7 +730,7 @@ class TopDownScene extends Phaser.Scene {
       body = this.add.rectangle(px.x, px.y, 32, 38, isSelf ? 0xe94560 : 0x3e7bfa);
     }
 
-    const labelY = isGen ? px.y + 4 : isIso ? px.y + 18 : px.y + 30;
+    const labelY = isGen ? generatedLabelY(tileX, tileY) : isIso ? px.y + 18 : px.y + 30;
     const label = this.add
       .text(px.x, labelY, nameplateText(username, isOwner), {
         fontSize: isGen ? '11px' : isIso ? '11px' : '14px',
@@ -743,7 +745,11 @@ class TopDownScene extends Phaser.Scene {
       label.setDepth(isoDepth(tileX, tileY, 6));
     }
 
-    const bubbleY = isGen ? px.y - 52 : isIso ? px.y - 46 : px.y - 38;
+    const bubbleY = isGen
+      ? generatedSpeechBubbleY(tileX, tileY)
+      : isIso
+        ? px.y - 46
+        : px.y - 38;
     const speechBubble = this.add
       .text(px.x, bubbleY, '', {
         fontSize: '12px',
@@ -780,11 +786,15 @@ class TopDownScene extends Phaser.Scene {
     const px = this.tileToScreen(tileX, tileY);
     const isGen = this.visualStyle === 'generated';
     const isIso = this.visualStyle === 'iso-fake';
-    const bodyY = isGen ? px.y - 8 : isIso ? px.y - 4 : px.y;
+    const bodyY = isGen ? px.y - GENERATED_WORLD.footLiftPx : isIso ? px.y - 4 : px.y;
     player.body.setPosition(px.x, bodyY);
-    const labelY = isGen ? px.y + 4 : isIso ? px.y + 18 : px.y + 30;
+    const labelY = isGen ? generatedLabelY(tileX, tileY) : isIso ? px.y + 18 : px.y + 30;
     player.label.setPosition(px.x, labelY);
-    const bubbleY = isGen ? px.y - 52 : isIso ? px.y - 46 : px.y - 38;
+    const bubbleY = isGen
+      ? generatedSpeechBubbleY(tileX, tileY)
+      : isIso
+        ? px.y - 46
+        : px.y - 38;
     player.speechBubble.setPosition(px.x, bubbleY);
     if (isGen) {
       player.body.setDepth(generatedDepth(tileX, tileY, 5));
