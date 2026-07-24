@@ -257,6 +257,7 @@
 | AD-040 | **(계획) 점주 전용 내장 AI 에이전트** — 매장 만들기/수정 시 **실사 사진 첨부** 또는 **자연어**로 레이아웃·진열 가구(슬롯 수·옷걸이 용량 등 **실제 동작하는 fixture**)까지 제안. LLM→**구조화 JSON**→2D 미리보기→**점주 승인** 후 저장. 이미지 생성 API는 **보조·quota·캐시**. 단순 SD 일괄 변환(AD-012)보다 **에이전트+템플릿 카탈로그**가 현실적. 상세 §40 | User 2026-07-24: 점주 편의·API 사용량 내 에이전트 가능 여부 | 2026-07-24 |
 | AD-041 | **실매장 유사도 = 제품 핵심** — 단순 게임 맵·제네릭 쇼룸 **아님**. 점주는 **본인 오프라인 팝업**과 최대한 비슷한 온라인 공간을 원함. **브랜드 색·사진·존 배치·실물 상품 픽셀**로 「우리 팝업」이 보여야 함. 기술=**레고(슬롯 fixture) + 점주 브랜딩(실사·팔레트·레이아웃)** — §41 | User 2026-07-24: 게임 아닌 실제 팝업 연계, 점주 실매장 닮기 | 2026-07-24 |
 | AD-042 | **점주 온보딩 = 「팝업 사진으로 시작」3단 wizard** — (1) 실사 1~3장 (2) vision+LLM으로 palette·배치 **초안** (3) 2D 미리보기 **손 수정**→승인. **매장 전체 image gen 금지(v1)**. 비용·편의·유사도 실행 **§42** | User 2026-07-24: 비용 아끼면서 현실적으로 어떻게? | 2026-07-24 |
+| AD-043 | **GUCCI 데모 등각 월드 = `generated` visualStyle** — PDF 시안과 **동일 AI 이미지 생성 파이프라인**으로 room/avatar PNG 생성 → Phaser 2:1 dimetric **타일 그리드**에 조립(목업 PNG 통째 붙이기·Graphics 사각형 placeholder **금지**). **지금:** CEO 데모용 하드코드 앵커·충돌·NPC (`generatedWorldAssets.ts`). **정식:** `display_fixtures` + walkability 마스크 + 점주 에디터 배치(AD-033). 상세 **§43** | User 2026-07-24: 시안 품질대로 월드 + 정식 경로 질문 | 2026-07-24 |
 
 ---
 
@@ -468,6 +469,29 @@ popup_store/                          # Turborepo root
 - **Author:** User + Cursor Agent
 - **Changed:** AD-041, §41 — 점주 「본인 팝업 닮기」= 성공 조건, 레고+스킨 모델, published 최소 기준
 - **Notes:** §40 카탈로그 ≠ 제네릭 쇼룸 — **점주 브랜딩 레이어**가 핵심
+
+### 2026-07-24 — §43 GUCCI 등각 월드(generated) + 테이블 상호작용 데모 (AD-043)
+- **Author:** User(CEO 데모 품질 요구) + Cursor Agent
+- **Why now (지금 하는 이유):**
+  - **투자자/대표 시연 마감** — `m05-world-mobile.png` 수준 등각 부티크가 live URL에서 보여야 함
+  - **겉면만 등각이 아님** — Phaser **2:1 dimetric 타일** + AI room/avatar **분리 생성·조립** (PDF 시안과 동일 파이프라인)
+  - **throwaway 아님** — `packages/game-core`·소켓·장바구니·상품 API는 정식과 **동일 monorepo** (§29). 데모만 GUCCI·하드코드 앵커로 단순화
+- **Implemented (코드):**
+  - `packages/game-core/src/generatedWorldAssets.ts` — room/avatar 경로, **그리드 앵커**(table center 보정), 충돌(바닥 우선·가구만 차단), NPC, `getGeneratedInteractZone()`
+  - `topDownGame.ts` — `visualStyle: 'generated'` (GUCCI), 등각 방향키 이동, `onNearInteractZone` → React
+  - `apps/web/public/worlds/generated/` — `gucci-iso-room-empty.png`, chibi avatar (누끼: `scripts/process-avatar-png.cjs`)
+  - `DisplayProductModal.tsx` — 테이블 근처 **상호작용** → 진열 상품 3종 · 장바구니 담기 · 착용 미리보기 **플레이스홀더**
+  - Live: Vercel `popup-cube-web` + Railway socket (commits `c81bc72`~`9d9c1af`대)
+- **Known demo gaps (다음 세션 보정):**
+  - 타일 그리드 ↔ room PNG **픽셀 정합** — NPC/충돌 미세 조정 필요할 수 있음
+  - `map_config` objects 충돌은 generated 모드에서 **무시** (이중 충돌 방지)
+- **Formal (정식 때):**
+  - **Phase 4 AD-033** — `display_fixtures` / `display_slots` DB + 점주 `OwnerDisplayPanel` 배치
+  - 매장마다 **walkability 마스크** 또는 fixture footprint 자동 생성 (하드코드 `isGeneratedBlockedTile` 대체)
+  - room/avatar: 점주 브랜딩 레이어(§41) — AI room **템플릿+팔레트** 또는 승인된 픽셀 에셋 카탈로그
+  - `TryOnPreview` 실구현 — 지금은 「정식 버전에서 구현 예정」 텍스트만
+  - GUCCI 데모 데이터·`VITE_DEMO_STORE_ID` — 정식 브랜드 전환 시 §30 초기화
+- **Notes:** §32 Phase 4 체크리스트 일부 **데모 선행** 완료 표시. §38.7 갭 표 갱신.
 
 ### 2026-07-24 — §40.12 수동 꾸미기 vs AI vs 기본 리소스 FAQ
 - **Author:** User 질문 + Cursor Agent
@@ -2544,11 +2568,11 @@ union all select 'profiles', count(*) from public.profiles;
 
 ### 구현 체크리스트 (Phase 4)
 - [ ] DB: `display_fixtures` / `display_slots` (또는 `map_config` 확장) + RLS
-- [ ] Phaser: 조형물 proximity + Interact / `E`
-- [ ] `DisplayProductModal` — 슬롯 상품 리스트 + 바로구매/담기/착용해보기
+- [x] Phaser: 조형물 proximity + Interact (GUCCI 데모 — `onNearInteractZone`, §43)
+- [x] `DisplayProductModal` — **데모:** 슬롯 상품 3종 + 담기 + 착용 **플레이스홀더** (바로구매·실착용 ⬜)
 - [ ] `TryOnPreview` — 우측 아바타 착용 전·후
 - [ ] 점주 `OwnerDisplayPanel` — 조형물 배치 + 슬롯 CRUD + 순서
-- [ ] GUCCI 데모 시드: 원형 테이블 3슬롯 + 기존 products 연결
+- [ ] GUCCI 데모 시드: 원형 테이블 3슬롯 + **display_slots** DB 연동 (지금은 products API 직접)
 - [ ] i18n·시안·PDF와 버튼명 동기화 유지
 
 ### 시각 자료
@@ -2742,7 +2766,7 @@ pptx 슬라이드 9: **메타버스 실패 원인 = UI 복잡** → 앱 월드 H
 | 시안 | 현재 `apps/web` (데모) |
 |---|---|
 | 모바일 전용 다크 UI | 반응형 웹, 손님+점주 혼재 |
-| 등각(isometric) 픽셀 월드 | **탑뷰** Phaser (AD-033·등각 전환 예정) |
+| 등각(isometric) 픽셀 월드 | **GUCCI 데모만** `generated` 등각 (§43). 일반 매장·정식 = Phase 4 fixture 에디터 + walkability |
 | 동네 필터 홈 (m03) | 단순 스토어 목록 |
 | 실사/픽셀 이중 이미지 | 단일 product image |
 | PC owner 전용 | 일반 회원 플로우도 웹에 존재 |
@@ -3340,3 +3364,59 @@ AI 실패 시 → **수동 palette + 드래그** fallback (막히지 않음).
 - [ ] `extract_palette` / `suggest_layout` API
 - [ ] 실사|미리보기 split view
 - [ ] quota UI
+
+---
+
+## 43. GUCCI 데모 등각 월드 — 지금 vs 정식 (AD-043)
+
+> **User 질문 (2026-07-24):** 「지금 왜 이렇게 하고 있고, 정식 땐 어떻게 할 건지」 다인수인계에 정리되고 있나?  
+> **한 줄 답:** **예.** `HANDOFF_POPUP_STORE.md`가 living document(AD-018). 아래가 그 요약.
+
+### 43.1 지금 하는 이유 (CEO/투자자 데모)
+
+| 목표 | 내용 |
+|---|---|
+| **보여줄 것** | `m05-world-mobile.png` 수준 **등각 2D 픽셀 부티크** + 멀티플레이 + 채팅 + 상품/장바구니 |
+| **기한** | 런칭·시연 (§1 Launch status) |
+| **브랜드** | GUCCI = **데모 전용** (AD-009), 정식 전 교체·§30 초기화 |
+| **기술 선택** | PDF 시안과 **같은 AI 이미지 생성** → room/avatar **분리 PNG** → Phaser **2:1 dimetric 그리드**에 조립 |
+
+**하지 않는 것 (데모에서 시도했다가 폐기):**
+- 목업 PNG를 Phaser 배경으로 **통째 붙이기**
+- `Graphics`로 사각형·chevron **placeholder** 바닥/가구 그리기
+- `map_config` 가구 충돌과 generated 충돌 **이중 적용**
+
+### 43.2 아키텍처 (겉면만 등각 아님)
+
+```
+[AI room PNG]  ── 배경 레이어 (고정)
+[AI avatar PNG] ── 캐릭터 스프라이트 (depth sort)
+[타일 그리드]  ── 이동·충돌·진열 proximity (논리 좌표)
+[Socket.io]    ── 멀티플레이 (정식과 동일)
+```
+
+- **파일:** `generatedWorldAssets.ts`, `topDownGame.ts` (`visualStyle: 'generated'`)
+- **에셋:** `apps/web/public/worlds/generated/`
+- **보정:** table center `(10,11)` ↔ room PNG 픽셀 앵커 — **데모는 수동 튜닝**, 정식은 자동화
+
+### 43.3 정식 때 (Phase 4+)
+
+| 데모 (지금) | 정식 |
+|---|---|
+| GUCCI 하드코드 room PNG | 점주 **템플릿 room + palette** 또는 승인된 픽셀 에셋 (§41·§42) |
+| `isGeneratedBlockedTile()` 수동 zones | **fixture footprint** + **walkability 마스크** (에디터/AI 배치) |
+| `GENERATED_NPCS` 고정 | 실제 접속 유저 only (또는 이벤트 NPC 설정) |
+| `DisplayProductModal` → products API 3종 | **`display_slots`** → fixture별 슬롯 상품 (AD-033) |
+| 착용 미리보기 placeholder | `TryOnPreview` 실구현 |
+| `apps/web` 반응형 데모 | **앱(Expo)** 쇼핑·월드 + **웹** 점주 관리 (AD-037) |
+
+**선행 조건:** AD-033 fixture DB + OwnerDisplayPanel → 그 위에 AI agent(AD-040) optional.
+
+### 43.4 다음 에이전트가 이어갈 때
+
+1. §43 Changelog + `generatedWorldAssets.ts` 읽기
+2. 그리드/NPC/충돌 이슈 → **앵커 수치** 조정 (코드 구조 바꾸지 말 것)
+3. Phase 4 착수 시 §32 체크리스트 — DB 슬롯 연동부터
+4. 큰 결정은 AD 테이블에 한 줄 추가 (AD-018)
+
+*Last updated: 2026-07-24 (§43 GUCCI generated world) by Cursor Agent*
