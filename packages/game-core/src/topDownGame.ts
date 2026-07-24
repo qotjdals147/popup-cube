@@ -22,13 +22,14 @@ import {
 } from './isoVisuals';
 import { DEMO_STORE_ID } from '@popup-cube/shared';
 import {
-  buildM05Boutique,
-  createM05Avatar,
-  isM05BlockedTile,
-  M05_NPCS,
-  type M05Npc,
-} from './m05BoutiqueWorld';
-import { avatarVariantForUser } from './pixelArt';
+  avatarIndexForUser,
+  GENERATED_NPCS,
+  GENERATED_WORLD,
+  generatedDepth,
+  isGeneratedBlockedTile,
+  tileToGeneratedScreen,
+  type GeneratedNpc,
+} from './generatedWorldAssets';
 
 // 타일/캐릭터/글자가 전체적으로 작아 보인다는 피드백 반영 — 타일 크기를 키우고,
 // 지도 전체를 억지로 화면에 눌러 담는 대신 "고정된 카메라 창"만 보여준 뒤 캐릭터를 따라다니게 함.
@@ -38,11 +39,11 @@ const VIEWPORT_HEIGHT_PX = 520;
 const GUCCI_VIEWPORT_WIDTH_PX = 960;
 const GUCCI_VIEWPORT_HEIGHT_PX = 560;
 
-export type WorldVisualStyle = 'top-down' | 'iso-fake';
+export type WorldVisualStyle = 'top-down' | 'iso-fake' | 'generated';
 
 function resolveVisualStyle(storeId: string, override?: WorldVisualStyle): WorldVisualStyle {
   if (override) return override;
-  return storeId === DEMO_STORE_ID ? 'iso-fake' : 'top-down';
+  return storeId === DEMO_STORE_ID ? 'generated' : 'top-down';
 }
 const DEFAULT_MAP_SIZE = { width: 20, height: 20 };
 const MOVE_SPEED_TILES_PER_SEC = 4;
@@ -168,9 +169,9 @@ export async function mountTopDownGame(
   options.onStatusChange?.('월드 로딩 중...');
 
   const visualStyle = resolveVisualStyle(options.storeId, options.visualStyle);
-  const isM05Demo = options.storeId === DEMO_STORE_ID && visualStyle === 'iso-fake';
-  const viewportWidth = isM05Demo ? GUCCI_VIEWPORT_WIDTH_PX : VIEWPORT_WIDTH_PX;
-  const viewportHeight = isM05Demo ? GUCCI_VIEWPORT_HEIGHT_PX : VIEWPORT_HEIGHT_PX;
+  const isGeneratedDemo = options.storeId === DEMO_STORE_ID && visualStyle === 'generated';
+  const viewportWidth = isGeneratedDemo ? GUCCI_VIEWPORT_WIDTH_PX : VIEWPORT_WIDTH_PX;
+  const viewportHeight = isGeneratedDemo ? GUCCI_VIEWPORT_HEIGHT_PX : VIEWPORT_HEIGHT_PX;
   const scene = new TopDownScene({
     mapConfig: normalizedMap,
     storeId: options.storeId,
@@ -320,7 +321,9 @@ function tileToPixels(tileX: number, tileY: number) {
 class TopDownScene extends Phaser.Scene {
   private readonly mapConfig: MapConfig;
   private readonly storeId: string;
-  private readonly isM05Demo: boolean;
+  private readonly isGeneratedDemo: boolean;
+  private generatedTextureWidth = 1024;
+  private generatedTextureHeight = 1536;
   private readonly selfUserId: string;
   private readonly selfUsername: string;
   private readonly selfIsOwner: boolean;
@@ -359,14 +362,14 @@ class TopDownScene extends Phaser.Scene {
     super({ key: 'TopDownScene' });
     this.mapConfig = config.mapConfig;
     this.storeId = config.storeId;
-    this.isM05Demo = config.storeId === DEMO_STORE_ID && config.visualStyle === 'iso-fake';
+    this.isGeneratedDemo = config.storeId === DEMO_STORE_ID && config.visualStyle === 'generated';
     this.selfUserId = config.selfUserId;
     this.selfUsername = config.selfUsername;
     this.selfIsOwner = config.selfIsOwner;
     this.initialPlayers = config.initialPlayers;
     this.selfSpawn = config.selfSpawn;
     this.visualStyle = config.visualStyle;
-    const vpW = this.isM05Demo ? GUCCI_VIEWPORT_WIDTH_PX : VIEWPORT_WIDTH_PX;
+    const vpW = this.isGeneratedDemo ? GUCCI_VIEWPORT_WIDTH_PX : VIEWPORT_WIDTH_PX;
     this.isoOrigin = getIsoMapOrigin(
       config.mapConfig.mapSize.width,
       config.mapConfig.mapSize.height,
@@ -375,28 +378,39 @@ class TopDownScene extends Phaser.Scene {
   }
 
   private tileToScreen(tileX: number, tileY: number): IsoPoint {
+    if (this.visualStyle === 'generated') {
+      return tileToGeneratedScreen(tileX, tileY);
+    }
     if (this.visualStyle === 'iso-fake') {
       return tileToIsoScreen(tileX, tileY, this.isoOrigin.x, this.isoOrigin.y);
     }
     return tileToPixels(tileX, tileY);
   }
 
+  preload() {
+    if (this.visualStyle === 'generated') {
+      this.load.image('gen-room', GENERATED_WORLD.room);
+      GENERATED_WORLD.avatars.forEach((path, i) => {
+        this.load.image(`gen-avatar-${i}`, path);
+      });
+    }
+  }
+
   create() {
     this.cameras.main.setBackgroundColor('#0b1020');
 
-    if (this.visualStyle === 'iso-fake') {
-      if (this.isM05Demo) {
-        buildM05Boutique(
-          this,
-          this.mapConfig.mapSize.width,
-          this.mapConfig.mapSize.height,
-          this.isoOrigin
-        );
-      } else {
-        drawGucciBackdrop(this, VIEWPORT_WIDTH_PX, VIEWPORT_HEIGHT_PX);
-        this.drawIsoFloor();
-        this.drawIsoObjects();
-      }
+    if (this.visualStyle === 'generated') {
+      const tex = this.textures.get('gen-room');
+      const source = tex.getSourceImage() as HTMLImageElement;
+      this.generatedTextureWidth = source.width || 1024;
+      this.generatedTextureHeight = source.height || 1536;
+      this.add
+        .image(this.generatedTextureWidth / 2, this.generatedTextureHeight / 2, 'gen-room')
+        .setDepth(-50);
+    } else if (this.visualStyle === 'iso-fake') {
+      drawGucciBackdrop(this, VIEWPORT_WIDTH_PX, VIEWPORT_HEIGHT_PX);
+      this.drawIsoFloor();
+      this.drawIsoObjects();
     } else {
       this.drawGrid();
       this.drawFloorTiles();
@@ -404,8 +418,8 @@ class TopDownScene extends Phaser.Scene {
     }
 
     this.createPlayers();
-    if (this.isM05Demo) {
-      this.spawnM05DemoNpcs();
+    if (this.isGeneratedDemo) {
+      this.spawnGeneratedNpcs();
     }
     this.setupCamera();
 
@@ -465,8 +479,12 @@ class TopDownScene extends Phaser.Scene {
     this.selfTile = { x: nextX, y: nextY, direction };
     this.applyPlayerPosition(player, nextX, nextY, direction);
 
-    if (this.visualStyle === 'iso-fake') {
-      player.body.setDepth(isoDepth(nextX, nextY, 5));
+    if (this.visualStyle === 'generated' || this.visualStyle === 'iso-fake') {
+      const depth =
+        this.visualStyle === 'generated'
+          ? generatedDepth(nextX, nextY, 5)
+          : isoDepth(nextX, nextY, 5);
+      player.body.setDepth(depth);
     }
 
     const now = this.time.now;
@@ -573,8 +591,8 @@ class TopDownScene extends Phaser.Scene {
     });
   }
 
-  private spawnM05DemoNpcs() {
-    M05_NPCS.forEach((npc) => {
+  private spawnGeneratedNpcs() {
+    GENERATED_NPCS.forEach((npc) => {
       if (this.players.has(npc.userId)) return;
       const visual = this.createPlayerVisual(
         npc.userId,
@@ -584,26 +602,29 @@ class TopDownScene extends Phaser.Scene {
         npc.y,
         npc.direction,
         false,
-        npc.variant
+        npc.avatarIndex
       );
       this.players.set(npc.userId, visual);
-      this.scheduleM05NpcChatter(npc);
+      this.scheduleGeneratedNpcChatter(npc);
     });
   }
 
-  private scheduleM05NpcChatter(npc: M05Npc) {
+  private scheduleGeneratedNpcChatter(npc: GeneratedNpc) {
     const delayMs = 6000 + Math.floor(Math.random() * 8000);
     const timer = this.time.delayedCall(delayMs, () => {
       const line = npc.lines[Math.floor(Math.random() * npc.lines.length)];
       this.showSpeechBubble(npc.userId, line);
-      this.scheduleM05NpcChatter(npc);
+      this.scheduleGeneratedNpcChatter(npc);
     });
     this.npcChatTimers.push(timer);
   }
 
   /** 카메라를 지도 전체 크기로 제한하고, 내 캐릭터를 부드럽게 따라다니게 한다. */
   private setupCamera() {
-    if (this.visualStyle === 'iso-fake') {
+    if (this.visualStyle === 'generated') {
+      this.cameras.main.setBounds(0, 0, this.generatedTextureWidth, this.generatedTextureHeight);
+      this.cameras.main.setZoom(0.72);
+    } else if (this.visualStyle === 'iso-fake') {
       const bounds = getIsoMapPixelBounds(
         this.mapConfig.mapSize.width,
         this.mapConfig.mapSize.height,
@@ -657,13 +678,16 @@ class TopDownScene extends Phaser.Scene {
     avatarVariant?: number
   ): PlayerVisual {
     const px = this.tileToScreen(tileX, tileY);
+    const isGen = this.visualStyle === 'generated';
     const isIso = this.visualStyle === 'iso-fake';
 
     let body: Phaser.GameObjects.Container | Phaser.GameObjects.Rectangle | Phaser.GameObjects.Image;
-    if (isIso && this.isM05Demo) {
-      const variant = avatarVariant ?? (isSelf ? 0 : avatarVariantForUser(userId));
-      body = createM05Avatar(this, tileX, tileY, isSelf, variant);
-      body.setPosition(px.x, px.y - 6);
+    if (isGen) {
+      const idx = avatarVariant ?? (isSelf ? 0 : avatarIndexForUser(userId));
+      body = this.add.image(px.x, px.y - 24, `gen-avatar-${idx}`);
+      body.setOrigin(0.5, 0.92);
+      body.setScale(GENERATED_WORLD.avatarScale);
+      body.setDepth(generatedDepth(tileX, tileY, 5));
     } else if (isIso) {
       body = createIsoPlayerVisual(this, tileX, tileY, isSelf, isOwner);
       body.setPosition(px.x, px.y - 4);
@@ -671,20 +695,22 @@ class TopDownScene extends Phaser.Scene {
       body = this.add.rectangle(px.x, px.y, 32, 38, isSelf ? 0xe94560 : 0x3e7bfa);
     }
 
-    const labelY = isIso ? px.y + 18 : px.y + 30;
+    const labelY = isGen ? px.y + 4 : isIso ? px.y + 18 : px.y + 30;
     const label = this.add
       .text(px.x, labelY, nameplateText(username, isOwner), {
-        fontSize: isIso ? '11px' : '14px',
+        fontSize: isGen ? '11px' : isIso ? '11px' : '14px',
         color: '#ffffff',
         backgroundColor: 'rgba(0,0,0,0.75)',
         padding: { left: 5, right: 5, top: 2, bottom: 2 },
       })
       .setOrigin(0.5, 0);
-    if (isIso) {
+    if (isGen) {
+      label.setDepth(generatedDepth(tileX, tileY, 6));
+    } else if (isIso) {
       label.setDepth(isoDepth(tileX, tileY, 6));
     }
 
-    const bubbleY = isIso ? px.y - 46 : px.y - 38;
+    const bubbleY = isGen ? px.y - 52 : isIso ? px.y - 46 : px.y - 38;
     const speechBubble = this.add
       .text(px.x, bubbleY, '', {
         fontSize: '12px',
@@ -697,7 +723,9 @@ class TopDownScene extends Phaser.Scene {
       .setOrigin(0.5, 1)
       .setVisible(false)
       .setAlpha(1);
-    if (isIso) {
+    if (isGen) {
+      speechBubble.setDepth(generatedDepth(tileX, tileY, 25));
+    } else if (isIso) {
       speechBubble.setDepth(isoDepth(tileX, tileY, 25));
     }
 
@@ -717,14 +745,19 @@ class TopDownScene extends Phaser.Scene {
 
   private applyPlayerPosition(player: PlayerVisual, tileX: number, tileY: number, direction: Direction) {
     const px = this.tileToScreen(tileX, tileY);
+    const isGen = this.visualStyle === 'generated';
     const isIso = this.visualStyle === 'iso-fake';
-    const bodyY = isIso && this.isM05Demo ? px.y - 6 : isIso ? px.y - 4 : px.y;
+    const bodyY = isGen ? px.y - 24 : isIso ? px.y - 4 : px.y;
     player.body.setPosition(px.x, bodyY);
-    const labelY = isIso ? px.y + 18 : px.y + 30;
+    const labelY = isGen ? px.y + 4 : isIso ? px.y + 18 : px.y + 30;
     player.label.setPosition(px.x, labelY);
-    const bubbleY = isIso ? px.y - 46 : px.y - 38;
+    const bubbleY = isGen ? px.y - 52 : isIso ? px.y - 46 : px.y - 38;
     player.speechBubble.setPosition(px.x, bubbleY);
-    if (isIso) {
+    if (isGen) {
+      player.body.setDepth(generatedDepth(tileX, tileY, 5));
+      player.label.setDepth(generatedDepth(tileX, tileY, 6));
+      player.speechBubble.setDepth(generatedDepth(tileX, tileY, 25));
+    } else if (isIso) {
       player.body.setDepth(isoDepth(tileX, tileY, 5));
       player.label.setDepth(isoDepth(tileX, tileY, 6));
       player.speechBubble.setDepth(isoDepth(tileX, tileY, 25));
@@ -830,8 +863,8 @@ class TopDownScene extends Phaser.Scene {
   private isBlocked(tileX: number, tileY: number): boolean {
     const key = tileKey(Math.round(tileX), Math.round(tileY));
     if (this.blockedTiles.has(key)) return true;
-    if (this.isM05Demo) {
-      return isM05BlockedTile(
+    if (this.isGeneratedDemo) {
+      return isGeneratedBlockedTile(
         tileX,
         tileY,
         this.mapConfig.mapSize.width,
