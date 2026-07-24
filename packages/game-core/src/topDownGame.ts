@@ -525,8 +525,13 @@ class TopDownScene extends Phaser.Scene {
       }
     }
 
-    nextX = Phaser.Math.Clamp(nextX, 1, this.mapConfig.mapSize.width - 2);
-    nextY = Phaser.Math.Clamp(nextY, 1, this.mapConfig.mapSize.height - 2);
+    if (this.isGeneratedDemo) {
+      nextX = Phaser.Math.Clamp(nextX, 0.5, this.mapConfig.mapSize.width - 0.5);
+      nextY = Phaser.Math.Clamp(nextY, 0.5, this.mapConfig.mapSize.height - 0.5);
+    } else {
+      nextX = Phaser.Math.Clamp(nextX, 1, this.mapConfig.mapSize.width - 2);
+      nextY = Phaser.Math.Clamp(nextY, 1, this.mapConfig.mapSize.height - 2);
+    }
 
     if (this.isBlocked(nextX, nextY)) {
       const slideX = this.isBlocked(nextX, this.selfTile.y);

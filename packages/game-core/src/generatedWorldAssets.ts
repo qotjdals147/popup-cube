@@ -32,22 +32,23 @@ export const GENERATED_WORLD = {
   defaultSpawn: { x: 6, y: 18, direction: 'up' as const },
 };
 
-/** Room PNG — central round display table (ellipse, ry tuned for walk space above/below). */
+/** Room PNG — central round display table (ellipse). */
 export const TABLE_PIXEL_ELLIPSE = {
   cx: 554,
   cy: 874,
-  rx: 188,
-  ry: 128,
+  rx: 182,
+  ry: 118,
 };
 
 /** Interact ring: just outside table, not on top. d = normalized ellipse distance² */
 export const TABLE_INTERACT_INNER = 0.82;
 export const TABLE_INTERACT_OUTER = 1.55;
 
-const ARMCHAIR_RECT = { x1: 120, y1: 990, x2: 320, y2: 1180 };
-const COUNTER_RECT = { x1: 690, y1: 1030, x2: 960, y2: 1240 };
-/** Walkable marble — expanded vertically around table north/south lanes */
-const FLOOR_BOUNDS = { xMin: 85, xMax: 935, yMin: 645, yMax: 1245 };
+/** Tight to sprite — leave marble lanes on sides/bottom */
+const ARMCHAIR_RECT = { x1: 140, y1: 1010, x2: 290, y2: 1160 };
+const COUNTER_RECT = { x1: 720, y1: 1055, x2: 940, y2: 1220 };
+/** Walkable marble — symmetric extra space north/south of table */
+const FLOOR_BOUNDS = { xMin: 75, xMax: 945, yMin: 620, yMax: 1280 };
 
 export const GUCCI_CENTER_TABLE = {
   id: 'fixture_center_table',
