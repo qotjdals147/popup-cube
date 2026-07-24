@@ -1,0 +1,18 @@
+{
+  "name": "@popup-cube/ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared React HUD components (chat, shop panel, visitor count, owner toolbar)",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "peerDependencies": {
+    "react": "^18.3.1"
+  },
+  "dependencies": {
+    "@popup-cube/shared": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "typescript": "^5.7.2"
+  }
+}

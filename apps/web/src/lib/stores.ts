@@ -1,0 +1,36 @@
+import type { StoreSummary } from '@popup-cube/shared';
+import { supabase } from './supabase';
+
+/**
+ * 홈 허브(§26)용 매장 목록 조회.
+ * RLS `stores_public_read` (is_active = true) 정책으로 비로그인도 조회 가능하지만,
+ * 홈은 로그인 후 화면이므로 항상 로그인 상태에서 호출됨.
+ */
+export async function listPublishedStores(search?: string): Promise<StoreSummary[]> {
+  let query = supabase
+    .from('stores')
+    .select('id, name, description, thumbnail_url, status')
+    .eq('is_active', true)
+    .eq('status', 'published')
+    .order('name', { ascending: true });
+
+  const trimmed = search?.trim();
+  if (trimmed) {
+    query = query.ilike('name', `%${trimmed}%`);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function getStoreSummary(storeId: string): Promise<StoreSummary | null> {
+  const { data, error } = await supabase
+    .from('stores')
+    .select('id, name, description, thumbnail_url, status')
+    .eq('id', storeId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}

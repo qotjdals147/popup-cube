@@ -1,0 +1,721 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>온라인 팝업스토어 플랫폼 시안 (등각뷰 V2)</title>
+  <style>
+    /* 멘트만 바꿔도 되게: .copy / .lead-box / table 셀 텍스트만 고치면 됨 */
+    @page { size: A4; margin: 12mm 10mm; }
+    :root {
+      --ink: #1a1a2e;
+      --navy: #0f3460;
+      --navy-deep: #16213e;
+      --rose: #e94560;
+      --gold: #c4a35a;
+      --gold-soft: #f3e6c4;
+      --paper: #f7f5f0;
+      --paper-2: #efeae0;
+      --line: #d4cfc4;
+      --muted: #5c6370;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: Gulim, "굴림", Dotum, "돋움", "Malgun Gothic", sans-serif;
+      color: var(--ink);
+      line-height: 1.78;
+      font-size: 10.8pt;
+      margin: 0;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      line-break: strict;
+      background:
+        radial-gradient(ellipse at 12% 0%, rgba(196,163,90,0.14), transparent 42%),
+        radial-gradient(ellipse at 100% 20%, rgba(15,52,96,0.08), transparent 45%),
+        linear-gradient(180deg, #fbfaf7 0%, var(--paper) 40%, #f4f1ea 100%);
+    }
+
+    /* —— 표지 —— */
+    .cover {
+      min-height: 262mm;
+      page-break-after: always;
+      margin: -12mm -10mm;
+      padding: 28mm 20mm;
+      position: relative;
+      overflow: hidden;
+      color: #fff;
+      background:
+        linear-gradient(145deg, #0c1220 0%, #16213e 42%, #0f3460 78%, #1a1020 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .cover::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 78% 22%, rgba(233,69,96,0.28), transparent 32%),
+        radial-gradient(circle at 18% 70%, rgba(196,163,90,0.22), transparent 38%),
+        repeating-linear-gradient(
+          -18deg,
+          transparent,
+          transparent 11px,
+          rgba(255,255,255,0.015) 11px,
+          rgba(255,255,255,0.015) 12px
+        );
+      pointer-events: none;
+    }
+    .cover::after {
+      content: "";
+      position: absolute;
+      left: 18mm; right: 18mm; top: 16mm; bottom: 16mm;
+      border: 1px solid rgba(196,163,90,0.45);
+      box-shadow: inset 0 0 0 8px rgba(255,255,255,0.03);
+      pointer-events: none;
+    }
+    .cover-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .cover .eyebrow {
+      display: inline-block;
+      font-size: 9.5pt;
+      letter-spacing: 0.22em;
+      color: var(--gold-soft);
+      border: 1px solid rgba(196,163,90,0.55);
+      padding: 6px 14px;
+      margin: 0 0 22px;
+      background: rgba(196,163,90,0.08);
+    }
+    .cover h1 {
+      font-size: 30pt;
+      line-height: 1.28;
+      margin: 0 0 18px;
+      color: #fff;
+      text-align: center;
+      text-shadow: 0 2px 24px rgba(0,0,0,0.35);
+    }
+    .cover h1 .accent {
+      color: var(--gold-soft);
+    }
+    .cover .lead {
+      font-size: 12.5pt;
+      line-height: 1.9;
+      color: rgba(255,255,255,0.88);
+      margin: 0 0 28px;
+      padding: 14px 12px 0;
+      border-left: none;
+      border-top: 3px solid var(--rose);
+      text-align: center;
+      max-width: 440px;
+      word-break: keep-all;
+      overflow-wrap: normal;
+      line-break: strict;
+    }
+    .cover .meta {
+      font-size: 10pt;
+      color: rgba(243,230,196,0.75);
+      line-height: 1.8;
+      text-align: center;
+      word-break: keep-all;
+      overflow-wrap: normal;
+      line-break: strict;
+      max-width: 420px;
+    }
+    .cover .brand-mark {
+      margin-top: 40px;
+      font-size: 11pt;
+      letter-spacing: 0.28em;
+      color: var(--gold);
+      text-align: center;
+    }
+
+    /* —— 본문 공통 —— */
+    .sheet { padding: 2mm 1mm 4mm; }
+    h2 {
+      font-size: 14.5pt;
+      margin: 22px 0 12px;
+      padding: 10px 14px 10px 16px;
+      color: #fff;
+      background: linear-gradient(90deg, var(--navy-deep) 0%, var(--navy) 70%, #395480 100%);
+      border-left: 5px solid var(--gold);
+      box-shadow: 0 6px 18px rgba(15,52,96,0.18);
+      position: relative;
+    }
+    h2::after {
+      content: "";
+      position: absolute;
+      right: 0; top: 0; bottom: 0; width: 48px;
+      background: linear-gradient(90deg, transparent, rgba(233,69,96,0.35));
+    }
+    h3 {
+      font-size: 12pt;
+      margin: 20px 0 8px;
+      color: var(--navy);
+      padding-bottom: 6px;
+      border-bottom: 2px solid transparent;
+      border-image: linear-gradient(90deg, var(--rose), var(--gold), transparent 70%) 1;
+    }
+    p { margin: 8px 0; }
+    p.copy strong, .lead-box strong, li strong {
+      color: var(--navy-deep);
+      font-weight: bold;
+    }
+
+    .lead-box {
+      margin: 12px 0 16px;
+      padding: 16px 18px 16px 20px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.95), rgba(243,230,196,0.35)),
+        var(--paper-2);
+      border: 1px solid var(--gold);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.8) inset,
+        0 10px 28px rgba(15,52,96,0.08);
+      position: relative;
+    }
+    .lead-box::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0; width: 6px;
+      background: linear-gradient(180deg, var(--rose), var(--gold));
+    }
+
+    .callout {
+      margin: 14px 0;
+      padding: 12px 16px;
+      background: linear-gradient(90deg, rgba(15,52,96,0.06), rgba(233,69,96,0.05));
+      border: 1px dashed rgba(15,52,96,0.28);
+      border-radius: 2px;
+      color: var(--navy-deep);
+    }
+
+    /* 표 — 가운데 정렬, 바둑판(체크) 느낌 없이 한 톤으로 */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 12px 0 18px;
+      font-size: 10pt;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(15,52,96,0.08);
+      border: 1px solid #c5d0e0;
+      border-radius: 2px;
+    }
+    th, td {
+      padding: 11px 12px;
+      vertical-align: middle;
+      text-align: center;
+      border-bottom: 1px solid #d7dee8;
+      border-right: 1px solid #d7dee8;
+      word-break: keep-all;
+      line-break: strict;
+    }
+    th:last-child, td:last-child { border-right: none; }
+    tr:last-child td { border-bottom: none; }
+    th {
+      background: #0f3460;
+      color: #fff;
+      font-weight: bold;
+    }
+    td {
+      background: #ffffff;
+      color: var(--ink);
+    }
+    /* 줄무늬는 아주 연한 한 색만 (금색·로즈 교차 금지) */
+    tr:nth-child(even) td {
+      background: #f3f6fa;
+    }
+    /* 비교표: 마지막 열(플랫폼)만 옅은 남색으로 통일 강조 */
+    table.cmp th:last-child {
+      background: #163a66;
+      box-shadow: inset 0 -3px 0 var(--gold);
+    }
+    table.cmp td:last-child,
+    table.cmp tr:nth-child(even) td:last-child {
+      background: #eaf0f7;
+      font-weight: bold;
+      color: var(--navy-deep);
+    }
+    /* 비교표 맨 왼쪽(구분) 열 */
+    table.cmp td:first-child,
+    table.cmp tr:nth-child(even) td:first-child {
+      background: #f7f8fb;
+      color: #3a4556;
+      font-weight: bold;
+    }
+    /* 2열 표: 오른쪽(플랫폼 방식) 열 톤 통일 */
+    table.pair th:last-child {
+      background: #163a66;
+      box-shadow: inset 0 -3px 0 var(--gold);
+    }
+    table.pair td:last-child,
+    table.pair tr:nth-child(even) td:last-child {
+      background: #eaf0f7;
+    }
+
+    /* 리스트 */
+    ul.feature-list {
+      list-style: none;
+      margin: 10px 0 14px;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+    }
+    ul.feature-list li {
+      margin: 0;
+      padding: 10px 12px 10px 14px;
+      background: rgba(255,255,255,0.85);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--rose);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+    }
+    ol.steps {
+      margin: 10px 0 14px;
+      padding: 14px 14px 14px 36px;
+      background: linear-gradient(135deg, #fff, rgba(15,52,96,0.05));
+      border: 1px solid var(--line);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
+    }
+    ol.steps li { margin: 8px 0; padding-left: 4px; }
+
+    /* 그림 — 크게 보이되, 한 장에 제목+그림+캡션이 같이 들어가게 */
+    figure {
+      margin: 10px 0 14px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      padding: 8px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: 0 8px 20px rgba(15,52,96,0.1);
+    }
+    figure img {
+      width: 100%;
+      max-width: 100%;
+      max-height: 128mm;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      border: 1px solid rgba(15,52,96,0.12);
+      background: #111827;
+      object-fit: contain;
+    }
+    .two-col figure img {
+      max-height: 88mm;
+    }
+    /* 큰 그림 여러 장일 때: 다음 그림부터 새 페이지 (혼자 밀려난 잔여 방지) */
+    .break-before {
+      page-break-before: always;
+      break-before: page;
+    }
+    /* 짧은 텍스트 블록이 그림과 같이 붙도록 */
+    .keep {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    h2, h3 {
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+    @media print {
+      figure img { max-height: 130mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .two-col figure img { max-height: 92mm; }
+      body, h2, .lead-box, table, th, .badge, .cover {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+    figcaption {
+      font-size: 9.2pt;
+      color: var(--muted);
+      margin-top: 8px;
+      padding: 6px 4px 2px;
+      line-height: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .badge {
+      flex: 0 0 auto;
+      font-size: 8pt;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+      padding: 3px 8px;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .badge.live {
+      background: linear-gradient(90deg, #1f6b4a, #2c8a5e);
+    }
+    .badge.mock {
+      background: linear-gradient(90deg, var(--navy), #3d5f8f);
+    }
+    .cap-text { flex: 1; }
+
+    .page-break { page-break-before: always; }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .footer-line {
+      margin-top: 28px;
+      font-size: 9pt;
+      color: var(--muted);
+      text-align: center;
+      padding: 14px 10px 4px;
+      border-top: 1px solid transparent;
+      border-image: linear-gradient(90deg, transparent, var(--gold), var(--rose), var(--gold), transparent) 1;
+      background: linear-gradient(180deg, transparent, rgba(196,163,90,0.08));
+    }
+  </style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="cover-inner">
+    <div class="eyebrow">BUSINESS DESIGN · SCREEN DECK</div>
+    <h1>온라인 팝업스토어<br><span class="accent">플랫폼 시안</span></h1>
+    <p class="lead copy">
+      오프라인 팝업처럼 「들어가서 구경하는」 느낌을<br>
+      온라인에 만들고,<br>
+      그 안에서 실물 상품을 주문·배송까지<br>
+      이어 주는 플랫폼입니다.
+    </p>
+    <p class="meta copy">
+      2026년 7월 · 등각뷰 비교본 V2<br>
+      ※ 월드 시안만 탑뷰→등각뷰(옆방 표현)로 교체.<br>
+      본문·원본 PDF는 그대로입니다.
+    </p>
+    <div class="brand-mark">POP-UP CUBE</div>
+  </div>
+</section>
+
+<section class="sheet">
+  <h2>이 문서에서 말하려는 것</h2>
+  <div class="lead-box copy">
+    이 플랫폼은 <strong>게임이 아니라</strong>, <strong>온라인으로 팝업스토어를 열고 실물을 파는 쇼핑몰</strong>입니다.<br>
+    손님은 캐릭터로 매장에 들어가 돌아다니고, 테이블·옷걸이 앞에서 상품을 보고 삽니다.<br>
+    점주는 팝업을 열고, 상품을 올리고, 주문을 처리합니다.
+  </div>
+  <p class="copy">
+    픽셀로 그린 매장, 채팅, 구매 후 작은 이벤트 같은 요소는
+    「쇼핑을 재미있게 만들려는 장치」이고, 중심은 언제나
+    <strong>실물 구매 · 배송지 · 주문 · 점주 관리</strong>입니다.
+  </p>
+</section>
+
+<section class="sheet">
+  <h2>1. 손님·점주는 어떻게 들어오나</h2>
+  <p class="copy">
+    처음 화면에서 <strong>손님(쇼핑)</strong>과 <strong>점주(매장 관리)</strong>를 나눕니다.
+    손님은 팝업에 들어가 사고, 점주는 매장·상품·주문을 관리합니다.
+  </p>
+  <figure>
+    <img src="pdf-assets-v2/01-landing.png" alt="시작 화면" />
+    <figcaption>
+      <span class="badge live">실제 화면</span>
+      <span class="cap-text">시작 화면 — 손님 / 점주 선택</span>
+    </figcaption>
+  </figure>
+</section>
+
+<section class="sheet page-break">
+  <h2>2. 왜 이런 플랫폼이 필요한가</h2>
+  <p class="copy">오프라인 팝업은 분위기가 좋지만, 기간과 장소가 짧고, 멀리 사는 사람은 오기 어렵습니다. 반대로 일반 쇼핑몰은 편하지만 「팝업에 와 본」 느낌이 약합니다.</p>
+  <table class="pair">
+    <tr>
+      <th>오프라인 팝업만으로 아쉬운 점</th>
+      <th>플랫폼 방식</th>
+    </tr>
+    <tr>
+      <td class="copy">기간·장소가 한정됨</td>
+      <td class="copy">링크로 언제든, 어디서든 입장</td>
+    </tr>
+    <tr>
+      <td class="copy">줄 서기, 이동 부담</td>
+      <td class="copy">집에서도 매장을 「들어가」 구경</td>
+    </tr>
+    <tr>
+      <td class="copy">한 번 가본 사람 중심</td>
+      <td class="copy">다시 들어오고, 다른 사람과 같이 볼 수 있음</td>
+    </tr>
+    <tr>
+      <td class="copy">자사몰은 상품 목록 위주</td>
+      <td class="copy">공간·진열·이벤트까지 있는 「팝업」 느낌</td>
+    </tr>
+    <tr>
+      <td class="copy">가상세계만 있으면 실물 판매와 멀어짐</td>
+      <td class="copy">구경한 뒤 <strong>실물 주문·배송</strong>까지 한곳에서</td>
+    </tr>
+  </table>
+
+  <h2>3. 일반 쇼핑몰·게임형 서비스와 무엇이 다른가</h2>
+  <table class="cmp">
+    <tr>
+      <th></th>
+      <th>일반 쇼핑몰</th>
+      <th>게임형 가상세계</th>
+      <th>플랫폼</th>
+    </tr>
+    <tr>
+      <td class="copy">핵심</td>
+      <td class="copy">빨리 구매</td>
+      <td class="copy">공간에서 놀기</td>
+      <td class="copy">들어가 보고, 실물도 삼</td>
+    </tr>
+    <tr>
+      <td class="copy">매장</td>
+      <td class="copy">상품 목록</td>
+      <td class="copy">맵 제작이 무거움</td>
+      <td class="copy">점주가 팝업 공간을 꾸밈</td>
+    </tr>
+    <tr>
+      <td class="copy">이벤트</td>
+      <td class="copy">쿠폰</td>
+      <td class="copy">게임 패스</td>
+      <td class="copy">구매 후 할인 또는 사은품(선택)</td>
+    </tr>
+  </table>
+  <div class="callout copy">
+    한 줄로 말하면, <strong>「팝업에 온 기분」으로 실물을 사고, 산 뒤에도 공간·아바타에서 그 경험이 이어지는</strong> 플랫폼입니다.
+  </div>
+</section>
+
+<section class="sheet page-break">
+  <h2>4. 손님은 이렇게 이용합니다</h2>
+
+  <h3>4-1. 열려 있는 팝업 중에서 고른다</h3>
+  <p class="copy">
+    로그인하면 <strong>지금 열려 있는 여러 팝업</strong>이 보입니다.
+    한 개짜리 가게 앱이 아니라, 여러 브랜드 팝업이 같은 플랫폼에 올라와 있는 형태입니다.
+    카드를 누르면 매장 정보를 보고, 「입장하기」로 그 팝업 안으로 들어갑니다.
+  </p>
+  <div class="two-col">
+    <figure>
+      <img src="pdf-assets-v2/02-login.png" alt="로그인" />
+      <figcaption>
+        <span class="badge live">실제 화면</span>
+        <span class="cap-text">손님 로그인</span>
+      </figcaption>
+    </figure>
+    <figure>
+      <img src="pdf-assets-v2/03-home-hub-sian.png" alt="열려 있는 팝업 목록" />
+      <figcaption>
+        <span class="badge mock">완성 시안</span>
+        <span class="cap-text">열려 있는 팝업 목록 — 원하는 매장을 눌러 입장</span>
+      </figcaption>
+    </figure>
+  </div>
+  <figure>
+    <img src="pdf-assets-v2/04-enter-modal-sian.png" alt="입장 확인" />
+    <figcaption>
+      <span class="badge mock">완성 시안</span>
+      <span class="cap-text">매장 정보 확인 후 입장 — 「이 팝업으로 들어간다」는 단계가 분명하게</span>
+    </figcaption>
+  </figure>
+
+  <h3>4-2. 매장 안을 걸어 다니며 본다</h3>
+  <p class="copy">
+    들어가면 <strong>2D로 그린 매장</strong>이 나옵니다. 캐릭터로 이동하고, 다른 손님과 채팅할 수 있습니다.
+    화면 아래에는 자주 쓰는 버튼만 둡니다.
+  </p>
+  <ul class="feature-list">
+    <li class="copy"><strong>상호작용</strong> — 앞에 선 테이블·옷걸이에 올려둔 상품 보기</li>
+    <li class="copy"><strong>채팅</strong> — 같은 매장 사람들과 대화</li>
+    <li class="copy"><strong>장바구니</strong> — 담아 둔 상품·결제</li>
+    <li class="copy"><strong>전체 상품</strong> — 이 매장 상품을 한눈에 보기</li>
+  </ul>
+  <figure>
+    <img src="pdf-assets-v2/world-mockup-complete.png" alt="팝업 매장 안" />
+    <figcaption>
+      <span class="badge mock">완성 시안</span>
+      <span class="cap-text">팝업 매장 안 — 2D 공간에서 이동·채팅·쇼핑</span>
+    </figcaption>
+  </figure>
+
+  <h3>4-3. 진열된 상품을 고른다</h3>
+  <p class="copy">
+    오프라인처럼 <strong>테이블이나 옷걸이 앞</strong>에 서서 상호작용하면,
+    그 위에 올려둔 상품만 뜹니다.
+    상품을 고른 뒤 <strong>장바구니 담기 → 바로 구매 → 착용해보기</strong> 순으로 누를 수 있습니다.
+    (착용해보기는 아바타에 끼워 미리 보는 기능입니다.)
+  </p>
+  <figure>
+    <img src="pdf-assets-v2/display-interact-popup.png" alt="진열 상품 선택" />
+    <figcaption>
+      <span class="badge mock">완성 시안</span>
+      <span class="cap-text">테이블 앞 → 진열 상품 → 담기 · 구매 · 착용해보기</span>
+    </figcaption>
+  </figure>
+  <figure class="break-before">
+    <img src="pdf-assets-v2/tryon-preview-mockup.png" alt="착용해보기" />
+    <figcaption>
+      <span class="badge mock">완성 시안</span>
+      <span class="cap-text">착용해보기 — 아바타에 입혀 본 모습</span>
+    </figcaption>
+  </figure>
+</section>
+
+<section class="sheet page-break">
+  <h2>5. 사는 흐름 — 장바구니 · 배송 · 혜택</h2>
+  <p class="copy">
+    여기서 강조하고 싶은 것은 「게임이 아니라 <strong>쇼핑몰처럼</strong> 산다」는 점입니다.
+    상품을 담고, 배송지를 넣고, 주문이 남습니다.
+  </p>
+
+  <h3>5-1. 상품 · 장바구니 · 결제</h3>
+  <figure>
+    <img src="pdf-assets-v2/shop-panel-mockup.png" alt="상품 목록" />
+    <figcaption>
+      <span class="badge mock">완성 시안</span>
+      <span class="cap-text">매장 상품 목록</span>
+    </figcaption>
+  </figure>
+  <figure class="break-before">
+    <img src="pdf-assets-v2/checkout-flow-mockup.png" alt="결제 흐름" />
+    <figcaption>
+      <span class="badge mock">완성 시안</span>
+      <span class="cap-text">장바구니 → 배송지 → 혜택 선택</span>
+    </figcaption>
+  </figure>
+
+  <div class="keep break-before">
+    <h3>5-2. 배송지</h3>
+    <figure>
+      <img src="pdf-assets-v2/05-mypage.png" alt="배송지 관리" />
+      <figcaption>
+        <span class="badge live">실제 화면</span>
+        <span class="cap-text">마이페이지에서 배송지 등록·관리</span>
+      </figcaption>
+    </figure>
+
+    <h3>5-3. 구매 후 혜택</h3>
+    <p class="copy">실물 결제가 끝난 뒤, 손님은 혜택 형태만 고릅니다.</p>
+    <ol class="steps">
+      <li class="copy">실물 상품 구매·결제</li>
+      <li class="copy">그다음 — <strong>할인</strong>(확정) 또는 <strong>사은품 뽑기</strong>(추가 결제 없음) 중 선택</li>
+    </ol>
+    <div class="callout copy">
+      돈을 넣고 「뽑기만」 하는 구조가 아닙니다.
+      이미 산 뒤의 사은품·할인 선택에 가깝습니다. (편의점 사은품·백화점 증정과 비슷한 성격)
+    </div>
+  </div>
+</section>
+
+<section class="sheet page-break">
+  <h2>6. 점주(매장)는 무엇을 하나</h2>
+  <p class="copy">
+    점주는 팝업을 열고, 상품을 올리고,
+    매장 안 <strong>2D 진열</strong>(테이블·옷걸이 등)에 상품을 배치하며,
+    들어온 주문을 확인합니다. (3D로 만드는 계획은 없습니다.)
+  </p>
+  <ul class="feature-list">
+    <li class="copy">매장 만들기 — 이름, 대표 이미지, 설명</li>
+    <li class="copy">상품 등록 — 가격, 사진, 판매 여부</li>
+    <li class="copy">진열 배치 — 테이블·옷걸이에 상품을 올리고 순서 바꾸기</li>
+    <li class="copy">주문 관리 — 누가, 어디로, 무엇을 샀는지 확인</li>
+  </ul>
+  <figure>
+    <img src="pdf-assets-v2/owner-display-slots-mockup.png" alt="점주 진열" />
+    <figcaption>
+      <span class="badge mock">완성 시안</span>
+      <span class="cap-text">점주 — 매장에 진열용 가구를 두고 상품을 끼워 넣기 (2D)</span>
+    </figcaption>
+  </figure>
+  <figure class="break-before">
+    <img src="pdf-assets-v2/owner-orders-mockup.png" alt="점주 주문" />
+    <figcaption>
+      <span class="badge mock">완성 시안</span>
+      <span class="cap-text">점주 — 주문·배송지 확인</span>
+    </figcaption>
+  </figure>
+</section>
+
+<section class="sheet page-break">
+  <div class="keep">
+    <h2>7. 지금 어디까지 되어 있나</h2>
+    <p class="copy">이미 웹으로 손님·점주 흐름의 뼈대는 동작합니다. 아래는 보기 쉽게만 정리한 것입니다.</p>
+    <table>
+      <tr>
+        <th>구분</th>
+        <th>지금</th>
+        <th>앞으로</th>
+      </tr>
+      <tr>
+        <td class="copy">손님·점주 로그인, 홈</td>
+        <td class="copy">동작</td>
+        <td class="copy">소셜 로그인 등 보강</td>
+      </tr>
+      <tr>
+        <td class="copy">매장 안 이동·채팅</td>
+        <td class="copy">일부 동작 / 시안 병행</td>
+        <td class="copy">동시 접속·안정화</td>
+      </tr>
+      <tr>
+        <td class="copy">상품·장바구니·배송지·주문</td>
+        <td class="copy">동작</td>
+        <td class="copy">실제 결제사·물류 연결</td>
+      </tr>
+      <tr>
+        <td class="copy">구매 후 할인/사은품 선택</td>
+        <td class="copy">동작</td>
+        <td class="copy">점주가 직접 이벤트 설정하는 화면</td>
+      </tr>
+      <tr>
+        <td class="copy">테이블 앞 진열·착용해보기</td>
+        <td class="copy">시안으로 방향 확정</td>
+        <td class="copy">매장과 바로 연결해 완성</td>
+      </tr>
+      <tr>
+        <td class="copy">점주 진열 꾸미기</td>
+        <td class="copy">시안</td>
+        <td class="copy">점주 도구로 구현</td>
+      </tr>
+    </table>
+    <div class="callout copy">
+      지금 보이는 화면은 「그냥 그림만」이 아니라, <strong>같은 웹 화면을 발전시켜 정식으로 쓰는</strong> 방향입니다.
+    </div>
+
+    <h2>8. 수익은 어디서 나는가 (초기 생각)</h2>
+    <table>
+      <tr>
+        <th>항목</th>
+        <th>설명</th>
+      </tr>
+      <tr>
+        <td class="copy">입점·이용료</td>
+        <td class="copy">매장을 열고 운영하는 비용 (월 이용 등)</td>
+      </tr>
+      <tr>
+        <td class="copy">거래 수수료</td>
+        <td class="copy">실물 판매액의 일부 (결제 연동 후)</td>
+      </tr>
+      <tr>
+        <td class="copy">브랜드 팝업 패키지</td>
+        <td class="copy">기간 한정 팝업을 기획·제작·운영해 주는 형태</td>
+      </tr>
+      <tr>
+        <td class="copy">프로모션</td>
+        <td class="copy">브랜드가 사은품·할인 이벤트를 돌릴 때</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="footer-line">
+    POP-UP CUBE · 시안 등각뷰 비교본 V2 · 2026-07-14<br>
+    탑뷰→등각뷰 이미지 전용 (옆방/옆공간 표현) · 본문·코드·원본 시안 미변경 · assets: docs/pdf-assets-v2/
+  </div>
+</section>
+
+</body>
+</html>

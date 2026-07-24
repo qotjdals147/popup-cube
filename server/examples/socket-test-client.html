@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>POP-UP CUBE - Socket Test Client</title>
+  <style>
+    body { font-family: monospace; background: #1a1a2e; color: #eee; padding: 20px; }
+    input, button { padding: 8px; margin: 4px; }
+    #log { background: #16213e; padding: 12px; height: 300px; overflow-y: auto; margin-top: 12px; border-radius: 4px; }
+    .event { margin: 2px 0; }
+    .event.join  { color: #4ecca3; }
+    .event.move  { color: #ffd369; }
+    .event.chat  { color: #e94560; }
+    .event.error { color: #ff6b6b; }
+  </style>
+</head>
+<body>
+  <h2>POP-UP CUBE — Channel Test Client</h2>
+  <div>
+    <input id="storeId"  value="popup_gucci_01" placeholder="Store ID" />
+    <input id="userId"   value="user_001" placeholder="User ID" />
+    <input id="username" value="Player1"  placeholder="Username" />
+    <button onclick="joinStore()">Join Store</button>
+  </div>
+  <div>
+    <button onclick="moveRandom()">Move Random</button>
+    <input id="chatMsg" placeholder="Chat message" />
+    <button onclick="sendChat()">Send Chat</button>
+  </div>
+  <div id="log"></div>
+
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script>
+    const socket = io('http://localhost:3000');
+    let joined = false;
+
+    function log(cls, msg) {
+      const el = document.createElement('div');
+      el.className = 'event ' + cls;
+      el.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      document.getElementById('log').prepend(el);
+    }
+
+    socket.on('connect', () => log('join', 'Connected: ' + socket.id));
+
+    socket.on('player:joined', (d) =>
+      log('join', `${d.username} joined at (${d.x}, ${d.y})`));
+    socket.on('player:left', (d) =>
+      log('join', `User ${d.userId} left`));
+    socket.on('player:moved', (d) =>
+      log('move', `${d.userId} -> (${d.x}, ${d.y}) ${d.direction}`));
+    socket.on('chat:message', (d) =>
+      log('chat', `${d.username}: ${d.message}`));
+
+    function joinStore() {
+      const payload = {
+        storeId:  document.getElementById('storeId').value,
+        userId:   document.getElementById('userId').value,
+        username: document.getElementById('username').value,
+        x: 10, y: 10, direction: 'down',
+      };
+      socket.emit('store:join', payload, (res) => {
+        if (res.ok) {
+          joined = true;
+          log('join', `Joined channel ${res.channel.number} (${res.channel.visitorCount}/${res.channel.maxCapacity} online)`);
+          log('join', `Store: ${res.store.name} | Players: ${res.players.length}`);
+        } else {
+          log('error', res.error);
+        }
+      });
+    }
+
+    function moveRandom() {
+      if (!joined) return log('error', 'Join a store first');
+      socket.emit('player:move', {
+        x: Math.floor(Math.random() * 20),
+        y: Math.floor(Math.random() * 20),
+        direction: ['up','down','left','right'][Math.floor(Math.random()*4)],
+      });
+    }
+
+    function sendChat() {
+      if (!joined) return;
+      const msg = document.getElementById('chatMsg').value;
+      socket.emit('chat:message', { message: msg });
+      document.getElementById('chatMsg').value = '';
+    }
+  </script>
+</body>
+</html>
