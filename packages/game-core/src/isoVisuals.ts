@@ -187,15 +187,17 @@ export function createIsoPlayerVisual(
   const depth = isoDepth(tileX, tileY, 5);
   container.setDepth(depth);
 
-  const shadow = scene.add.ellipse(0, 6, 34, 12, GUCCI_COLORS.shadow, 0.4);
-  const body = scene.add.rectangle(0, -6, 20, 26, isSelf ? GUCCI_COLORS.playerSelf : GUCCI_COLORS.playerOther);
-  body.setAngle(-6);
-  const head = scene.add.circle(0, -22, 9, 0xffdcc8);
-  const highlight = scene.add.rectangle(0, -8, 16, 6, 0xffffff, 0.15);
-  container.add([shadow, body, highlight, head]);
+  const shadow = scene.add.ellipse(0, 8, 28, 10, GUCCI_COLORS.shadow, 0.35);
+  // m05 시안 — 큰 머리 chibi
+  const body = scene.add.rectangle(0, 2, 16, 18, isSelf ? 0xc9a962 : isOwner ? 0x0d5c45 : 0x3a4a6a);
+  const head = scene.add.circle(0, -12, 11, 0xffdcc8);
+  const hair = scene.add.rectangle(0, -18, 18, 8, isSelf ? 0x2a1a10 : 0x1a1a2e);
+  const eyeL = scene.add.circle(-4, -13, 2, 0x1a1a2e);
+  const eyeR = scene.add.circle(4, -13, 2, 0x1a1a2e);
+  container.add([shadow, body, head, hair, eyeL, eyeR]);
 
   if (isOwner) {
-    const crown = scene.add.text(-14, -30, '👑', { fontSize: '14px' }).setOrigin(0.5);
+    const crown = scene.add.text(0, -28, '👑', { fontSize: '12px' }).setOrigin(0.5);
     container.add(crown);
   }
 
