@@ -23,9 +23,11 @@ import {
 import { DEMO_STORE_ID } from '@popup-cube/shared';
 import {
   avatarIndexForUser,
+  directionFromGeneratedDelta,
   GENERATED_NPCS,
   GENERATED_WORLD,
   generatedDepth,
+  generatedMovementDelta,
   isGeneratedBlockedTile,
   tileToGeneratedScreen,
   type GeneratedNpc,
@@ -455,26 +457,50 @@ class TopDownScene extends Phaser.Scene {
     const leftPressed = this.cursors.left.isDown;
     const rightPressed = this.cursors.right.isDown;
 
-    if (upPressed) {
-      nextY -= deltaTile;
-      direction = 'up';
-    } else if (downPressed) {
-      nextY += deltaTile;
-      direction = 'down';
-    }
+    if (this.visualStyle === 'generated') {
+      const { dx, dy } = generatedMovementDelta(
+        upPressed,
+        downPressed,
+        leftPressed,
+        rightPressed
+      );
+      if (dx !== 0 || dy !== 0) {
+        nextX += dx * deltaTile;
+        nextY += dy * deltaTile;
+        direction = directionFromGeneratedDelta(dx, dy);
+      }
+    } else {
+      if (upPressed) {
+        nextY -= deltaTile;
+        direction = 'up';
+      } else if (downPressed) {
+        nextY += deltaTile;
+        direction = 'down';
+      }
 
-    if (leftPressed) {
-      nextX -= deltaTile;
-      direction = 'left';
-    } else if (rightPressed) {
-      nextX += deltaTile;
-      direction = 'right';
+      if (leftPressed) {
+        nextX -= deltaTile;
+        direction = 'left';
+      } else if (rightPressed) {
+        nextX += deltaTile;
+        direction = 'right';
+      }
     }
 
     nextX = Phaser.Math.Clamp(nextX, 0, this.mapConfig.mapSize.width - 1);
     nextY = Phaser.Math.Clamp(nextY, 0, this.mapConfig.mapSize.height - 1);
 
-    if (this.isBlocked(nextX, nextY)) return;
+    if (this.isBlocked(nextX, nextY)) {
+      const slideX = this.isBlocked(nextX, this.selfTile.y);
+      const slideY = this.isBlocked(this.selfTile.x, nextY);
+      if (!slideX) {
+        nextY = this.selfTile.y;
+      } else if (!slideY) {
+        nextX = this.selfTile.x;
+      } else {
+        return;
+      }
+    }
 
     this.selfTile = { x: nextX, y: nextY, direction };
     this.applyPlayerPosition(player, nextX, nextY, direction);
@@ -645,10 +671,17 @@ class TopDownScene extends Phaser.Scene {
   }
 
   private createPlayers() {
+    const spawn = this.isGeneratedDemo
+      ? GENERATED_WORLD.defaultSpawn
+      : {
+          x: safeNumber(this.selfSpawn.x, 10),
+          y: safeNumber(this.selfSpawn.y, 10),
+          direction: this.selfSpawn.direction ?? 'down',
+        };
     this.selfTile = {
-      x: safeNumber(this.selfSpawn.x, 10),
-      y: safeNumber(this.selfSpawn.y, 10),
-      direction: this.selfSpawn.direction ?? 'down',
+      x: safeNumber(spawn.x, 10),
+      y: safeNumber(spawn.y, 10),
+      direction: spawn.direction ?? 'down',
     };
     const self = this.createPlayerVisual(
       this.selfUserId,
@@ -684,8 +717,8 @@ class TopDownScene extends Phaser.Scene {
     let body: Phaser.GameObjects.Container | Phaser.GameObjects.Rectangle | Phaser.GameObjects.Image;
     if (isGen) {
       const idx = avatarVariant ?? (isSelf ? 0 : avatarIndexForUser(userId));
-      body = this.add.image(px.x, px.y - 24, `gen-avatar-${idx}`);
-      body.setOrigin(0.5, 0.92);
+      body = this.add.image(px.x, px.y - 8, `gen-avatar-${idx}`);
+      body.setOrigin(0.5, 0.95);
       body.setScale(GENERATED_WORLD.avatarScale);
       body.setDepth(generatedDepth(tileX, tileY, 5));
     } else if (isIso) {
@@ -747,7 +780,7 @@ class TopDownScene extends Phaser.Scene {
     const px = this.tileToScreen(tileX, tileY);
     const isGen = this.visualStyle === 'generated';
     const isIso = this.visualStyle === 'iso-fake';
-    const bodyY = isGen ? px.y - 24 : isIso ? px.y - 4 : px.y;
+    const bodyY = isGen ? px.y - 8 : isIso ? px.y - 4 : px.y;
     player.body.setPosition(px.x, bodyY);
     const labelY = isGen ? px.y + 4 : isIso ? px.y + 18 : px.y + 30;
     player.label.setPosition(px.x, labelY);
