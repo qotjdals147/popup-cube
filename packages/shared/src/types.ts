@@ -206,3 +206,48 @@ export interface StoreJoinResponse {
   players?: PlayerState[];
   self?: { x: number; y: number; direction: PlayerState['direction']; isOwner?: boolean };
 }
+
+/** §42.3 / §44 — 플랫폼 진열 조형물 카탈로그 (fixture_templates). */
+export interface FixtureTemplate {
+  id: string;
+  display_name: string;
+  slot_count: number;
+  size_w: number;
+  size_d: number;
+  sort_order: number;
+  sprite_key: string | null;
+  interaction_kind: string;
+  is_active: boolean;
+}
+
+/** 매장에 배치된 조형물 1개 (display_fixtures). */
+export interface DisplayFixture {
+  id: string;
+  store_id: string;
+  template_id: string;
+  origin_x: number;
+  origin_y: number;
+  rotation: 0 | 90 | 180 | 270;
+  label: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** 조형물 슬롯 — 상품 연결 (display_slots). */
+export interface DisplaySlot {
+  id: string;
+  fixture_id: string;
+  slot_index: number;
+  product_id: string | null;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface DisplayFixtureWithTemplate extends DisplayFixture {
+  template: FixtureTemplate;
+}
+
+export interface DisplaySlotWithProduct extends DisplaySlot {
+  product?: Product | null;
+}

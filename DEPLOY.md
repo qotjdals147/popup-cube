@@ -1,8 +1,10 @@
 # POP-UP CUBE — Vercel + Railway 배포
 
+> **전체 인프라 설계:** `HANDOFF_POPUP_STORE.md` **§46** · env 상세 **§9**
+
 ## CEO 데모 URL
 
-- **웹:** Vercel Production URL
+- **웹:** https://popup-cube-web.vercel.app
 - **소비자:** `demo@shopper.com` / `demo`
 - **점주:** `demo@owner.com` / `demo`
 

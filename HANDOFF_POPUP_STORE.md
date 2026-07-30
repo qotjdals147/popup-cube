@@ -106,6 +106,55 @@
 
 **예외 (브리핑 생략 가능):** HANDOFF만 업데이트, 순수 질문 답변, 사용자가 "브리핑 없이 바로 해"라고 명시한 경우
 
+### Expo Go 실기 테스트 안내 규칙 (필수 — 2026-07-30)
+
+**User는 개발자가 아님.** 앱·모바일 관련 작업이 끝나면 (또는 User가 「테스트 어떻게 해?」라고 물으면) **매번** 아래를 **쉬운 말 + 복붙 가능한 명령**으로 설명해 준다.  
+상세 기술 메모는 `apps/mobile/README.md` · 이 절이 **에이전트 행동 규칙**.
+
+#### 에이전트가 반드시 지킬 것
+1. **SDK 버전을 항상 명시** — 이 프로젝트는 **Expo SDK 52**. 「Expo Go만 설치하세요」만 쓰지 말고 **SDK 52 APK**라고 쓴다. (SDK 57 = 실기기 크래시, ISS-025)
+2. **명령은 PowerShell 기준** · 워크스페이스 절대 경로부터 (`cd C:\Users\qotjd\Downloads\Cursor\popup_store\...`)
+3. **Tunnel 기본** — 폰과 PC가 다른 네트워크일 수 있음 → `npx expo start --tunnel --port 8082 --clear`
+4. **데모 계정**을 함께 적는다: `demo@shopper.com` / `demo` (손님) · `demo@owner.com` / `demo` (점주·월드 입장만, 관리는 PC)
+5. **Sprint 4-1+ 월드 테스트**면 추가로 안내:
+   - 웹 `/play` 가 **Vercel에 배포됐는지** (앱 WebView가 `EXPO_PUBLIC_WEB_ORIGIN` = `https://popup-cube-web.vercel.app` 를 염)
+   - Vercel `VITE_SOCKET_SERVER_URL` = **Railway** URL (localhost면 월드 오프라인 안내만 보임)
+6. 테스트 플로우를 **클릭 순서**로: 랜딩 → 일반 회원 로그인 → 홈 → 매장 카드 → 입장 → 월드(WebView)
+7. 깨지면 **짧은 체크리스트**만: SDK 52인지 / `--clear` 재시작했는지 / `npm install --legacy-peer-deps` / Vercel·소켓
+
+#### User에게 붙여 줄 표준 안내문 (복사용)
+
+```
+【Expo Go 테스트 — POP-UP CUBE】
+
+1) 폰에 Expo Go **SDK 52** 설치
+   - Play 스토어 일반 Expo Go가 57이면 삭제 후 SDK 52 APK:
+     https://github.com/expo/expo-go-releases/releases/download/Expo-Go-2.32.20/Expo-Go-2.32.20.apk
+   - 또는 PC에서: cd apps\mobile → npx expo-go url android 52
+
+2) PC (PowerShell)
+   cd C:\Users\qotjd\Downloads\Cursor\popup_store
+   npm install --legacy-peer-deps
+   cd apps\mobile
+   npx expo start --tunnel --port 8082 --clear
+
+3) 폰 Expo Go로 QR 스캔
+
+4) 로그인
+   - 손님: demo@shopper.com / demo
+   - 점주(월드만): demo@owner.com / demo
+
+5) 홈 → 매장 카드 → 입장하기 → 픽셀 월드(WebView)
+   - 월드가 안 열리면: Vercel에 최신 웹 배포·Railway 소켓 URL 확인
+
+※ SDK 57 Expo Go + 이 프로젝트 = 거의 항상 팅김
+※ 빨간 화면(모듈 없음) → 루트에서 npm install --legacy-peer-deps 후 --clear 재시작
+```
+
+#### HANDOFF / 대화에서의 위치
+- 앱 기능 **완료·배포 직후** Changelog에 「실기 테스트: §0 Expo Go 안내」한 줄
+- User가 테스트 중이면 §7 「사용자가 지금 해야 할 것」을 위 표준 안내와 맞게 유지
+
 ---
 
 ## 1. Project Overview
@@ -116,9 +165,13 @@
 | **Purpose** | 오프라인 팝업 스토어 한계를 넘는 2D 픽셀 아트 메타버스 커머스 플랫폼 |
 | **Workspace** | `C:\Users\qotjd\Downloads\Cursor\popup_store` |
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
-| **Current Phase** | Phase 1 완료 → **Phase 2 (Phaser 월드)** 진입 준비 |
+| **Current Phase** | **Phase 4 정식 런칭** — Sprint 4-1 완료 (앱 WebView + `/play` Phaser + display_fixtures 로드). 다음: Sprint 4-2 진열 상품 팝업·장바구니 |
 | **Version** | `0.2.0` |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
+| **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
+| **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
+| **GitHub Repo** | `qotjdals147/popup-cube` — push → Vercel 자동 배포 |
+| **인프라 설계도** | **§46** (전체 호스팅 맵) · 배포 절차 `DEPLOY.md` · 요금 요약 **§28** |
 | **Investor Demo Target** | ~~2~3주~~ → **2026-07-13(일) 저녁 긴급 미팅** (일정 앞당김, AD-032). 그 전까지 **「시각 프로토타입」** 우선, 이후 2~3주 안에 **전 기능 live** 보강 |
 | **Demo Theme** | 패션/브랜드 팝업 (Gucci 스타일 레퍼런스) |
 
@@ -183,7 +236,23 @@
 | Server ↔ Supabase | `@supabase/supabase-js` + **service_role key** `(DB 비밀번호 대신 안전한 키)` | `server/` |
 | Web ↔ Supabase | `@supabase/supabase-js` + **anon/publishable key** | `apps/web/` |
 | Frontend / Game | React + Vite (Phaser는 Phase 2에서 추가) | `apps/web/` |
+| Mobile app | **Expo (React Native)** SDK 52 | `apps/mobile/` |
 | Config | `dotenv` | 각 앱별 `.env` |
+
+### 개발 환경 (User / 대표님·투자자에게 말할 때)
+| 구분 | 도구 | 역할 |
+|---|---|---|
+| **코드 작성·AI 보조** | **Cursor** `(VS Code 기반 IDE + AI)` | 솔로 개발자가 설계·구현·디버그 (외주 팀 대신 1인 + AI) |
+| **DB·로그인** | **Supabase** | PostgreSQL + Auth + Storage (클라우드) |
+| **웹 배포** | **Vercel** | `popup-cube-web.vercel.app` |
+| **실시간 서버** | **Node.js + Express + Socket.io** | 멀티플레이·채팅 (로컬/Railway 예정) |
+| **캐시** | **Upstash Redis** | 채널 인원·플레이어 위치 |
+| **모바일** | **Expo / Expo Go** | Android·iOS 한 코드베이스 (앱 스토어 출시는 EAS Build 예정) |
+| **버전 관리** | **Git + GitHub** | `qotjdals147/popup-cube` |
+| **Monorepo** | **Turborepo + npm workspaces** | web · mobile · server · packages 한 repo |
+
+> **「개발툴 뭐 써?」** — **Cursor + Supabase + Vercel + Expo** 한 줄로 말해도 됨.  
+> 「AI가 코드 짜주냐?」→ **Cursor AI로 1인 개발 속도를 올리고, 실제 서비스는 Supabase·Vercel 같은 업계 표준 SaaS에 올린다**고 설명하면 됨.
 
 > **왜 `pg`(직접 DB 비밀번호 연결) 대신 `supabase-js`?** `(AD-015)`  
 > DB 비밀번호를 직접 다루지 않아도 되고, Supabase가 제공하는 **service_role 키**만 있으면 서버가 모든 테이블에 접근 가능. 더 안전하고 관리가 쉬움.
@@ -260,6 +329,7 @@
 | AD-043 | **GUCCI 데모 등각 월드 = `generated` visualStyle** — PDF 시안과 **동일 AI 이미지 생성 파이프라인**으로 room/avatar PNG 생성 → Phaser 2:1 dimetric **타일 그리드**에 조립(목업 PNG 통째 붙이기·Graphics 사각형 placeholder **금지**). **지금:** CEO 데모용 하드코드 앵커·충돌·NPC (`generatedWorldAssets.ts`). **정식:** §44 Grid Occupancy + `display_fixtures`(AD-033). 상세 **§43·§44** | User 2026-07-24: 시안 품질대로 월드 + 정식 경로 질문 | 2026-07-24 |
 | AD-044 | **Grid Occupancy 표준 (등각 타일 맵)** — 타일 그리드 `grid[x][y]` + fixture **다중 타일 점유**(`origin` + `width`×`depth`) + **Y-sort** `(tx+ty)` + 충돌=occupied·벽 + 문=transition(AD-025). **데모(GUCCI):** 이동·depth만 타일, 충돌은 PNG 픽셀 보정(§43). **정식:** occupied가 단일 진실 소스 — §44 | User 2026-07-24: Gemini 등각 도면 스펙 ↔ 우리 정식 방향 정리 요청 | 2026-07-24 |
 | AD-045 | **점주 AI = 매장 전체 생성 ❌ → 리소스 추출 + 도면 에디터** — 실사 업로드 시 **타일·가구·소품·재고 픽셀**만 API로 분리 추출 → **점주 계정 귀속 라이브러리**. 꾸미기 전 **픽셀 도면(벽·문·구조)** 편집 → 바닥 **칠하기**·fixture **점유 배치**(§44). 전체 room gen 금지(GUCCI 충돌 이슈 회피). **§45** | User 2026-07-24: API 절약 + 좌표/충돌 문제 근본 해결 | 2026-07-24 |
+| AD-046 | **인프라·호스팅 맵** — GitHub/Vercel/Railway/Supabase/Upstash 등 **역할·URL·env·비용·단계별 필요 서비스** 단일 설계도. §28 요약 보완. 상세 **§46** | User 2026-07-24: 호스팅 여러 개 정리·앞으로 필요한 것 미리 설계 | 2026-07-24 |
 
 ---
 
@@ -301,15 +371,23 @@
 - [x] **상품 등록/목록 + 장바구니 MVP (§10, AD-027 연속선)** — `products` 테이블+RLS, 점주 상품 등록/수정/숨기기 패널(`OwnerProductPanel`), 소비자 상품 보기 패널(`ShopPanel`, 수량 +/-), 장바구니(`CartContext` — client-only, `localStorage`)+장바구니 Drawer(`CartDrawer`, mock 결제)
 - [x] **구매 완료 시 "할인 vs 가챠" 선택 (AD-028, §10)** — `store_promotions`(매장별 할인%), `gacha_pools`/`gacha_pool_entries`(실제 상품+가챠 전용 아이템 혼합, 매장 공용 풀)/`gacha_rolls` 테이블+RLS, `roll_gacha()` SECURITY DEFINER 함수(서버 측 가중치 랜덤, 클라이언트 조작 불가), GUCCI 데모 매장에 10% 할인 + 가챠 아이템 4종 시드, `CartDrawer`에 결제 완료 후 혜택 선택 단계 추가
 - [x] **주문 저장 + 소비자 배송지 관리 (AD-030, §10)** — `user_addresses`(여러 배송지+별명+기본 지정) + `orders`/`order_items`(실제 주문 저장) 테이블+RLS, `place_order()`(서버가 가격·할인 재검증 후 원자적 저장) + `get_store_orders()`(점주가 본인 매장 주문+구매자 닉네임+배송지 조회) SECURITY DEFINER/INVOKER 함수, 마이페이지(`/mypage`) 배송지 관리 UI, `CartDrawer`에 배송지 선택 단계 추가, 점주 툴바 "📊 주문 관리" 연동(`OwnerOrdersPanel`)
+- [x] **Phase 4 Sprint 0 — fixture DB + occupancy (2026-07-27)** — `fixture_templates`(§42.3 8종 시드) + `display_fixtures` + `display_slots` + RLS/GRANT; `packages/game-core/src/occupancyGrid.ts` (`buildOccupancyGrid`, `canWalk`, `canPlaceFixture`); `apps/web/src/lib/displayFixtures.ts` CRUD; `packages/shared` 타입; SQL `supabase/migrations/20260727_phase4_display_fixtures.sql`
+- [x] **Phase 4 Sprint 1 — `apps/mobile` Expo shell (2026-07-27, AD-037/038)** — expo-router: m01 랜딩(이중 로그인) · 로그인/회원가입 · 홈(매장 목록·검색·입장 모달) · `/store/[storeId]` placeholder; Supabase Auth+AsyncStorage; EAS projectId `49c42cb0-...`; `eas.json` · `apps/mobile/README.md`
 
-### ⬜ Not Done / Next
+- [x] **Phase 4 Sprint 2 — 웹 AD-037 + 에디터 MVP (2026-07-27)** — `LandingPage`/`LoginPage` 점주 전용 · `HomePage`→점주 대시보드 · `/store/:storeId/edit` (`StoreEditPage`: 개요·상품·주문·꾸미기 탭) · `/app-only` · `/store/:storeId` 월드→에디터/앱 리다이렉트 · `OwnerProductPanel`/`OwnerOrdersPanel` embedded 모드 · `getMyStore()`
+
+### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
+- [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
+- [x] **Sprint 4-1 — 앱 Phaser 월드 뼈대** — WebView → `/play/:storeId` · `display_fixtures` 로드 · GUCCI 시드 1건 (2026-07-30)
+- [ ] **Sprint 4-2 — 손님 진열 상호작용** — 슬롯 상품 팝업 · 장바구니 · TryOn (앱 HUD)
 - [ ] **[Phase 4, 정식 출시 필수] "임시저장(draft)/출시(published)" 재도입 (AD-021, §26)** — 데모는 생성 즉시 `published`로 단순화했지만, 정식 개발 때는 반드시 draft 기본값 + 계속 편집 + draft도 점주에게 잘 보이게(배지) + 출시 버튼으로 복원. 에디터(Phase 4) 작업과 **함께** 진행할 것(에디터 없이 draft만 먼저 넣으면 이번 ISS-015처럼 막다른 흐름 재발). 자세한 요구사항은 §26 "정식 출시 시 임시저장/출시 UX" 참고.
 - [x] **Phase 2 후속 (일부)** — 카메라가 캐릭터를 따라다니는 고정 뷰포트 방식으로 전환 + 타일/캐릭터/글자 크기 확대(2026-07-13, AD-026)
 - [ ] **Phase 2 후속 (남음)** — 충돌 정확도 개선(현재는 collidable 타일 단순 차단), 간단 애니메이션(방향별 스프라이트) 추가
 - [ ] **점주 전용 픽셀 자산 파이프라인 (AD-020, §27)** — 표준 스프라이트·상품 연결·구매 소유권 기반 장착
 - [ ] **점주 AI 매장 에이전트 (AD-040, §40)** — 자연어/실사→진열 가구·슬롯 레이아웃 제안 (Phase 4+ / AD-033 이후)
-- [ ] Railway / Vercel 배포
-- [ ] Git remote / 커밋 (사용자 요청 시에만)
+- [x] **Vercel 배포** — `apps/web` → https://popup-cube-web.vercel.app (GitHub `main` 연동)
+- [x] **Railway 배포** — `server/` Socket.io (URL은 Railway 대시보드 · `VITE_SOCKET_SERVER_URL`과 `WEB_ORIGIN` 쌍 맞출 것 — §46)
+- [ ] Git remote / 커밋 (사용자 요청 시에만) — *repo는 GitHub 연결됨*
 
 ### File Tree (as of 2026-07-13)
 ```
@@ -402,14 +480,31 @@ popup_store/                          # Turborepo root
 | ISS-022 | ~~채팅 입력창에서 스페이스바(띄어쓰기)가 안 됨~~ | Resolved | Phaser `createCursorKeys()`가 방향키뿐 아니라 **SPACE(32)까지 전역 `addCapture` + `preventDefault`** 해서, 채팅 `<input>`에 포커스가 있어도 스페이스바가 브라우저까지 전달되지 않음. **수정**: 방향키만 `addKey(..., capture=true)`로 따로 등록(SPACE 미포함). 채팅 열림 시 `removeCapture(방향키)`로 가로채기 해제, 닫으면 `addCapture` 복원(2026-07-13). |
 | ISS-023 | ~~SQL로 한글 시드 데이터를 여러 개 한 번에 넣을 때 일부 글자가 다른 글자로 깨져서 입력됨~~ | Resolved (주의 필요) | GUCCI 가챠 아이템 이름 시드(2026-07-13) 중 "디지털"→"대지털", "마이룸"→"마이릲" 등으로 일부 글자가 잘못 생성됨(원인: 한 SQL 문 안에 여러 개의 흔치 않은 한글 복합어를 동시에 생성할 때 에이전트가 글자를 잘못 만들어내는 것으로 추정 — 도구/인코딩 문제가 아니라 텍스트 생성 자체의 오류). **조치**: 항목을 하나씩 나눠서 `UPDATE ... RETURNING`으로 즉시 재확인하며 재입력해 해결. **후속 세션 주의사항**: 한글이 많이 들어가는 SQL/데이터를 한 번에 여러 건 입력할 때는, 입력 직후 반드시 `SELECT`로 실제 저장된 문자열을 재확인할 것(특히 흔치 않은 복합어). 이상하면 하나씩 나눠서 다시 입력. |
 | ISS-024 | ~~Upstash Redis 무료 50만 Commands 한도가 개발 중 거의 소진~~ | Resolved | 원인: `player:move`마다 `hset`+`expire`를 Redis에 쓰고, 클라이언트가 50ms마다 이동 이벤트 전송 → Writes 48만+ / Reads 1천 수준. **조치(2026-07-14)**: `expire`는 입장 시 1회만, 서버 Redis 영속화 500ms 스로틀, 클라이언트 emit 250ms. `REDIS_MOVE_PERSIST_MS` env. 개발 시 `npm run dev` 장시간 + 매장 페이지 이동 테스트 주의. |
+| ISS-025 | ~~Expo Go SDK 57 APK에서 번들 후 앱 force-close~~ | Resolved | Galaxy Fold 5 등 실기기에서 SDK 57 Expo Go로 번들 완료 직후 크래시. **조치(2026-07-27)**: `apps/mobile` **Expo SDK 52** + React 18.3.1로 다운그레이드, `@popup-cube/shared` 제거(로컬 types), metro 0.81.5 override. **Expo Go는 SDK 52 APK** 설치 필수 (`apps/mobile/README.md`). |
+| ISS-026 | ~~모바일 로그인 `Invalid API Key`~~ | Resolved | `apps/mobile/.env` anon key JWT 오타 + 번들 캐시에 옛 키/`placeholder` 잔존. **조치**: `.env` 웹과 동일 키로 수정, `app.config.ts`에서 `.env` 직접 read + `extra`에 주입, `supabase.ts` fallback 정리. |
+| ISS-027 | ~~모바일 **디버그 배너**(`연결 준비됨 · 빌드 cfg-4`)~~ | Resolved | User 2026-07-27 모바일 테스트 완료 → §7 체크리스트대로 `index.tsx`/`login.tsx`/`app.config.ts`/`supabase.ts` 정리 완료. |
 
 ---
 
 ## 7. Next Steps (Priority Order)
 
 ### 사용자가 지금 해야 할 것
-- **2026-07-13(일) 저녁 대표님 미팅** — `docs/INVESTOR_PITCH.md` 미리 읽기, 시연 순서 **§31** 참고
-- 미팅 전 로컬 또는 Vercel URL에서 **§31 시연 경로** 한 번 클릭해 보기 (깨지는 화면 있으면 Cursor에 알려주기)
+- **Sprint 4-1 실기 확인** — 절차는 **§0 「Expo Go 실기 테스트 안내 규칙」표준 안내문** 그대로.
+- 흐름: Expo Go **SDK 52** → `demo@shopper.com` / `demo` → 홈 → GUCCI 입장 → WebView 월드.
+- **배포:** `git push` → Vercel에 `/play/:storeId` 반영된 뒤 테스트.
+- **소켓:** Vercel `VITE_SOCKET_SERVER_URL` = Railway URL (localhost면 월드 「오프라인」안내만).
+
+### 모바일 테스트 후 정리 (ISS-027 — User 요청 2026-07-27, **테스트 완료 시 필수**)
+Expo Go 실기 테스트가 끝나면 아래를 **전부** 제거·원복 (남기면 손님/점주 화면에 개발 문구 노출):
+
+| 파일 | 제거·원복 대상 |
+|---|---|
+| `apps/mobile/app/index.tsx` | `cfgBanner` / 「연결 준비됨 · 빌드 cfg-4」 블록 + 관련 import·style |
+| `apps/mobile/app/login.tsx` | 동일 `cfgBanner` 블록 + `readSupabaseConfig` import(배너용만) |
+| `apps/mobile/app.config.ts` | `extra.configBuild: 'cfg-4'` |
+| `apps/mobile/src/lib/supabase.ts` | `FALLBACK_*` 하드코드·`configBuild`·`readSupabaseConfig().build` (운영은 `.env` + `extra`만) |
+
+완료 후 Changelog에 「ISS-027 Resolved — 디버그 배너 제거」 기록.
 
 ### 🔴 긴급 — 2026-07-13 저녁 투자자 미팅 (AD-032, §31)
 **목표:** 「이런 플랫폼 할 거예요」를 **눈으로** 이해시키기. 전 기능 완벽 동작은 **필수 아님**.
@@ -439,6 +534,19 @@ popup_store/                          # Turborepo root
 - **구매 완료 시 "할인 vs 가챠" 선택 (AD-028)** — `store_promotions`/`gacha_pools`/`gacha_pool_entries`/`gacha_rolls` 테이블+RLS, `roll_gacha()` SECURITY DEFINER 함수, GUCCI 데모 시드(할인 10% + 가챠 아이템 4종), `CartDrawer`에 혜택 선택 단계. 아래 Changelog 참고.
 - **주문 저장 + 소비자 배송지 관리 (AD-030)** — `user_addresses`/`orders`/`order_items` 테이블+RLS, `place_order()`/`get_store_orders()` 함수, 마이페이지 배송지 관리, `CartDrawer` 배송지 선택 단계, 점주 주문 관리 패널. 아래 Changelog 참고.
 
+### Cursor가 다음에 할 것 (Phase 4 정식 런칭 — AD-037, 2026-07-27~)
+
+**채널 원칙:** PC 웹 = 점주 관리만 · 손님 쇼핑·월드 = **앱(Expo)**. 데모 `apps/web` 손님 플로우는 시연용 유지 → 정식 전 분리.
+
+| Sprint | 상태 | 내용 |
+|---|---|---|
+| **0** | ✅ 2026-07-27 | fixture DB + `occupancyGrid` + `displayFixtures.ts` |
+| **1** | ✅ 2026-07-27 | `apps/mobile` Expo — m01/m02/m03 + 입장 placeholder |
+| **2** | ✅ 2026-07-27 | 웹 AD-037 (점주 로그인만) + `/store/:id/edit` |
+| **3** | ✅ 2026-07-27 | `OwnerDisplayPanel` + draft/출시 (AD-021, 에디터와 동시) |
+| **4-1** | ✅ 2026-07-30 | 앱 WebView + 웹 `/play/:storeId` Phaser · `displayFixtures` 로드 · GUCCI fixture 시드 |
+| **4-2** | ⬜ **다음** | 진열 슬롯 상품 팝업 · 장바구니 · TryOn |
+
 ### Cursor가 다음에 할 것 (긴급 미팅 **이후**, 순서대로)
 0. **Phase 4 핵심 — 진열 조형물 + 슬롯 쇼핑 (AD-033, §32)** — 소비자는 테이블/옷걸이 앞 상호작용 → 상품 팝업(구매·담기·착용해보기+아바타 프리뷰). 점주는 조형물 배치 + 슬롯에 상품 넣고/빼고/순서 변경. 시안 목업·PDF는 2026-07-14 완료, **코드 구현**이 다음 본작업.
 0-a. **자동 로그인 (AD-034, §33)** — LoginPage 체크박스 + 세션 유지 정책. 시안만 2026-07-14.
@@ -462,6 +570,73 @@ popup_store/                          # Turborepo root
 
 ## 8. Changelog
 
+### 2026-07-30 — Phase 4 Sprint 4-1: 앱 WebView 월드 + display_fixtures 로드
+- **Author:** Cursor Agent (User 승인 · Composer)
+- **Changed:**
+  - `apps/web/src/pages/PlayWorldPage.tsx` — `/play/:storeId` (앱 WebView 전용) · 해시 세션 복구 · layout 로드 · VirtualDpad
+  - `apps/web/src/App.tsx` · `i18n/ko.ts` `play.*`
+  - `packages/game-core/src/topDownGame.ts` — `displayFixtures` / `occupancy` 옵션 · top-down 조형물 표시·근접 존
+  - `apps/mobile` — `react-native-webview` · `store/[storeId].tsx` WebView · `EXPO_PUBLIC_WEB_ORIGIN`
+  - Supabase: GUCCI `display_fixtures` 시드 1건 (`table_round_3`) · migration `20260730_sprint4_gucci_display_fixture_seed.sql`
+  - **§0 Expo Go 실기 테스트 안내 규칙** 추가 (SDK 52 · tunnel · 데모계정 · 월드 배포 체크 · 복사용 안내문)
+- **Notes:** GUCCI 시각/충돌은 기존 generated PNG 유지. 헤더에 「진열 N개」표시로 DB 연동 확인. **다음 4-2** = 슬롯 상품 팝업·장바구니. 실기 테스트: §0 Expo Go 안내.
+
+### 2026-07-27 — Phase 4 Sprint 3: OwnerDisplayPanel + draft/출시 (AD-021, AD-033)
+- **Author:** Cursor Agent (User 승인)
+- **Changed:**
+  - `OwnerDisplayPanel.tsx` — 8종 조형물 팔레트·격자 배치·겹침 검사·슬롯 상품 연결
+  - `StoreEditPage.tsx` — layout 탭 연결, 개요 「출시하기」버튼, draft/published 배지
+  - `HomePage.tsx` — 점주 대시보드 임시저장/출시 배지
+  - `stores.ts` — `publishStore()`
+  - Supabase migration `sprint3_draft_publish` — `create_owner_store` → `status: draft`
+  - `i18n/ko.ts` — `ownerDisplay`, `ownerEdit` 출시 문구
+  - **ISS-027 Resolved** — 모바일 cfg-4 디버그 배너·fallback 하드코드 제거
+- **Notes:** 새 매장은 draft로 생성. GUCCI 등 기존 published 매장 유지. Sprint 4 = 앱 월드·손님 진열 상호작용.
+
+### 2026-07-27 — 모바일 Expo SDK 52 + Supabase 로그인 수정 + 디버그 배너 (ISS-025~027)
+- **Author:** Cursor Agent + User (실기 테스트)
+- **Changed:**
+  - `apps/mobile` — Expo **SDK 52** (React 18.3.1, RN 0.76.9), SDK 57 크래시 회피
+  - `apps/mobile/.env` — anon key 웹과 동기화
+  - `apps/mobile/app.config.ts` — `.env` 직접 read → `extra.supabaseUrl/AnonKey`
+  - `apps/mobile/src/lib/supabase.ts` — manifest `extra` 우선, fallback, auth 에러 한글화
+  - `apps/mobile/app/index.tsx`, `login.tsx` — **임시** `연결 준비됨 · 빌드 cfg-4` 배너 (테스트용)
+  - root `package.json` — metro 0.81.5 overrides
+- **Notes:** Expo Go **SDK 52 APK** 필수. **ISS-027**: 모바일 테스트 완료 후 §7 체크리스트대로 cfg 배너·fallback 하드코드 **전부 제거** (User 2026-07-27 인수인계 확인). Sprint 3 착수 대기(User 승인).
+
+### 2026-07-27 — Phase 4 Sprint 2: 웹 AD-037 + 점주 에디터 MVP
+- **Author:** Cursor Agent (User 승인)
+- **Changed:**
+  - `apps/web` — **AD-037 채널 분리**: 랜딩/로그인 점주 전용, 일반 회원 → `/app-only` 안내
+  - `HomePage.tsx` → 점주 대시보드 (매장 없으면 만들기, 있으면 에디터 진입)
+  - `StoreEditPage.tsx` — `/store/:storeId/edit` (개요 · 상품 · 주문 · 매장 꾸미기 placeholder)
+  - `AppOnlyPage.tsx`, `App.tsx` 라우트 정리 (MobileShell 제거, `/mypage`→앱 안내)
+  - `StorePage.tsx` — 웹 월드 플레이 비활성 (점주→edit, 그 외→app-only)
+  - `OwnerProductPanel` / `OwnerOrdersPanel` — `embedded` 모드 (에디터 탭)
+  - `stores.ts` — `getMyStore()`, `CreateStorePage` 성공 시 `/edit` 이동
+  - `i18n/ko.ts` — `ownerDashboard`, `ownerEdit`, `appOnly` 키
+- **Notes:** 매장 꾸미기(fixture)·draft/출시 = **Sprint 3**. 손님 쇼핑·월드 = **앱(Sprint 4)**.
+
+### 2026-07-27 — Phase 4 Sprint 1: Expo mobile shell (AD-037/038)
+- **Author:** Cursor Agent (User 승인)
+- **Changed:**
+  - `apps/mobile/` — Expo **SDK 52** + expo-router, `@popup-cube/mobile` *(CHANGELOG 2026-07-27: SDK 57→52, ISS-025)*
+  - Screens: `app/index.tsx` (m01), `login.tsx`, `home.tsx`, `store/[storeId].tsx` (placeholder)
+  - `src/context/AuthContext.tsx`, `lib/supabase.ts` (AsyncStorage), `lib/stores.ts`, `components/StoreEnterModal.tsx`
+  - `app.config.ts` — slug `popup-cube`, EAS projectId `49c42cb0-df70-47a8-b34d-22878a8e3529`, bundle `com.popupcube.app`
+  - `eas.json`, `metro.config.js` (monorepo), `README.md`, `.env.example`
+- **Notes:** Phaser·장바구니·동네필터 = Sprint 4+/AD-035. 로컬: `cd apps/mobile && npm run start` → Expo Go. 점주 관리 UI는 앱에 **없음** (PC 웹).
+
+### 2026-07-27 — Phase 4 Sprint 0: fixture DB + Grid Occupancy 엔진
+- **Author:** Cursor Agent (User 승인)
+- **Changed:**
+  - Supabase migration `phase4_display_fixtures` — `fixture_templates`(8종), `display_fixtures`, `display_slots`, RLS, slot seed trigger
+  - `supabase/migrations/20260727_phase4_display_fixtures.sql`
+  - `packages/shared/src/types.ts` — `FixtureTemplate`, `DisplayFixture`, `DisplaySlot`
+  - `packages/game-core/src/occupancyGrid.ts` — `buildOccupancyGrid`, `canWalk`, `canPlaceFixture`, `fixtureInteractRing`
+  - `apps/web/src/lib/displayFixtures.ts` — CRUD + `loadStoreDisplayLayout`
+- **Notes:** UI(에디터·앱) 없음 — **웹·앱 공통 데이터·충돌 뼈대**. GUCCI §43 픽셀 충돌은 데모 유지. 다음 Sprint 1 = Expo. AD-037 채널 분리 병행.
+
 ### 2026-07-24 — §42 실행안: 팝업 사진 wizard + 비용 통제 (AD-042)
 - **Author:** User + Cursor Agent
 - **Changed:** AD-042, §42 — 3단 wizard, vision+LLM만·image gen v1 금지, fixture 8종, quota표
@@ -471,6 +646,23 @@ popup_store/                          # Turborepo root
 - **Author:** User + Cursor Agent
 - **Changed:** AD-041, §41 — 점주 「본인 팝업 닮기」= 성공 조건, 레고+스킨 모델, published 최소 기준
 - **Notes:** §40 카탈로그 ≠ 제네릭 쇼룸 — **점주 브랜딩 레이어**가 핵심
+
+### 2026-07-29 (b) — Vercel 정본 · Pages OFF · Trial FAQ
+
+- **Changed:** §46.11 — FC Zero Pages **Unpublish** (None 없음) · URL 정본 표 · Trial→Hobby FAQ
+- **Cross-ref:** `HANDOFF_FC_ZERO.md` §39.2~§39.3 · `VERCEL_MIGRATION.md` 백업 절차
+
+### 2026-07-29 — FC Vercel 이관 · 팀 통합 · §46.11
+
+- **Added:** FC Zero/Platform Production on Vercel (`fc-team-dashboard` · `fc-team-platform`) — Git 연동 ✅ · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`**
+- **Changed:** §46.3 Live URL · §46.2 Vercel 행 · Quick Facts Vercel 팀 · diagram
+- **Added:** §46.11 — Vercel/Railway/Supabase 3프로젝트 · Pro Trial · 결제 미등록 · Agent 워크플로 메모
+- **Notes:** Platform Supabase Auth Vercel URL ✅ · Railway Trial $5 ~$0.04/월
+
+### 2026-07-24 — §46 인프라·호스팅 맵 (AD-046)
+- **Author:** User + Cursor Agent
+- **Changed:** AD-046, §46 — GitHub/Vercel/Railway/Supabase/Upstash/Expo/PG/AI 등 역할·단계·env·비용·Live URL 통합. §28·§9·`DEPLOY.md` cross-ref
+- **Notes:** §28 = Vercel/Railway 입문·요금 요약. **전체 설계도 = §46**
 
 ### 2026-07-24 — §45 리소스 추출 + 픽셀 도면 에디터 (AD-045)
 - **Author:** User + Cursor Agent
@@ -989,6 +1181,8 @@ popup_store/                          # Turborepo root
 
 ## 9. Environment Variables
 
+> **인프라 전체 맵:** **§46** · 배포: **`DEPLOY.md`**
+
 ### `server/.env`
 | Variable | Required | Default | Description |
 |---|---|---|---|
@@ -1237,12 +1431,59 @@ gacha_rolls            (누가 언제 뭘 뽑았는지 기록)
 ```sql
 -- display_fixtures: 매장에 놓인 조형물 1개
 -- id, store_id, kind ('table_3'|'hanger'|'shelf'|...), x, y, slot_count, label
--- Phase 4: size_w, size_d (또는 kind→템플릿 카탈로그 lookup) — §44 multi-tile occupancy
+-- Phase 4: size_w, size_d → fixture_templates lookup (§44 multi-tile occupancy)
 
 -- display_slots: 조형물 칸별 상품
 -- fixture_id, slot_index (0..n-1), product_id NULLABLE, sort_order
 ```
-`map_config.layers.objects`에 `fixture_id` / `kind` / `slot_count`를 심는 방식도 가능 — Phase 4 착수 시 하나로 확정.
+
+> **✅ 적용 완료 (2026-07-27, Sprint 0)** — `template_id` + `origin_x/y` + `rotation` 방식으로 확정. `size_w/size_d`는 `fixture_templates`에 있음. 마이그레이션: `phase4_display_fixtures` · SQL 파일 `supabase/migrations/20260727_phase4_display_fixtures.sql`
+
+### `fixture_templates` `(플랫폼 카탈로그 — §42.3 8종)`
+| Column | Type | Notes |
+|---|---|---|
+| id | TEXT PK | e.g. `table_round_3` |
+| display_name | TEXT | UI 표시명 |
+| slot_count | INT | 슬롯 수 |
+| size_w / size_d | INT | 타일 footprint (§44) |
+| sort_order | INT | 카탈로그 정렬 |
+| sprite_key | TEXT | Phaser 스프라이트 (Phase 4b) |
+| interaction_kind | TEXT | default `proximity` |
+| is_active | BOOLEAN | |
+
+**RLS:** `fixture_templates_public_read` — 활성 템플릿 누구나 SELECT. **Grant:** `anon`/`authenticated` SELECT.
+
+### `display_fixtures` `(매장별 배치 인스턴스)`
+| Column | Type | Notes |
+|---|---|---|
+| id | UUID PK | |
+| store_id | VARCHAR FK → stores | cascade |
+| template_id | TEXT FK → fixture_templates | |
+| origin_x / origin_y | INT | 타일 origin |
+| rotation | INT | 0 \| 90 \| 180 \| 270 |
+| label | TEXT | Nullable |
+| sort_order | INT | |
+| created_at / updated_at | TIMESTAMPTZ | |
+
+**Trigger:** insert 시 `seed_display_slots_for_fixture()` — `slot_count`만큼 빈 `display_slots` 자동 생성.
+
+**RLS:** `display_fixtures_public_read`(published+active 매장) / `display_fixtures_owner_*`(본인 매장 CRUD). **Grant:** `anon`/`authenticated` SELECT; `authenticated` INSERT/UPDATE/DELETE.
+
+### `display_slots` `(슬롯 ↔ 상품)`
+| Column | Type | Notes |
+|---|---|---|
+| id | UUID PK | |
+| fixture_id | UUID FK → display_fixtures | cascade |
+| slot_index | INT | 0..n-1, UNIQUE(fixture_id, slot_index) |
+| product_id | UUID FK → products | Nullable, SET NULL on delete |
+| sort_order | INT | 손님 팝업 나열 순 |
+| created_at | TIMESTAMPTZ | |
+
+**RLS:** public read via published store / owner update on own fixtures. **Grant:** `anon`/`authenticated` SELECT; `authenticated` UPDATE only.
+
+**코드:** `apps/web/src/lib/displayFixtures.ts` · `packages/game-core/src/occupancyGrid.ts` · `packages/shared/src/types.ts`
+
+~~`map_config.layers.objects`에 `fixture_id` 심기~~ — **별도 테이블 방식으로 확정 (2026-07-27)**
 
 시안: `docs/pdf-assets/display-interact-popup.png`, `tryon-preview-mockup.png`, `owner-display-slots-mockup.png` · 상세 §32
 
@@ -1406,6 +1647,7 @@ npm run dev
 | `store_assets` | 점주가 자기 매장 인테리어에 반복 사용하는 픽셀 자산 |
 | `asset_conversion_jobs` | 점주 전용 이미지→픽셀 변환 작업, 상태·비용·감사 기록 |
 | ~~`gacha_pools` / `gacha_pool_entries` / `gacha_rolls`~~ | ✅ 2026-07-13 구현됨 — §10 참고 (할인 vs 가챠 선택 MVP, AD-028) |
+| ~~`fixture_templates` / `display_fixtures` / `display_slots`~~ | ✅ 2026-07-27 Sprint 0 — §10 참고 (AD-033, §44) |
 | `assets` | Uploaded pixel art / sprites (S3/Supabase Storage URL) |
 
 ---
@@ -1631,6 +1873,8 @@ where email = 'demo@owner.com';
 
 ## 21. Testing Environments
 
+> **Live URL · 호스팅 역할:** **§46**
+
 ### Web (Primary)
 | Environment | Tool | Use |
 |---|---|---|
@@ -1689,7 +1933,10 @@ where email = 'demo@owner.com';
 | **Supabase** `(수파베이스)` | **DB + 로그인 + 파일 저장** 을 웹에서 관리해 주는 서비스. PostgreSQL 기반. |
 | **RLS** `(행 수준 보안)` | DB에서 **"이 유저는 자기 데이터만 본다"** 고 막는 규칙. |
 | **Vercel** `(버셀)` | **웹사이트(React)** 를 인터넷에 올려 주는 호스팅. URL 하나로 데모 공유. **Hobby 플랜 = 무료**(개인·비상업용, 월 사용량 한도 있음). 상세는 §28. |
-| **Railway** `(레일웨이)` | **Socket.io 서버** 처럼 24시간 켜져 있어야 하는 프로그램을 클라우드에 올리는 곳. **신규 Trial $5(30일 1회)** → 이후 **Free $1/월** 또는 **Hobby $5/월**. 상세는 §28. |
+| **Railway** `(레일웨이)` | **Socket.io 서버** 처럼 24시간 켜져 있어야 하는 프로그램을 클라우드에 올리는 곳. **신규 Trial $5(30일 1회)** → 이후 **Free $1/월** 또는 **Hobby $5/월**. 상세는 §28·**§46**. |
+| **Upstash** `(업스태시)` | **Redis를 클라우드로** 쓰게 해 주는 서비스. 로컬 Redis 설치 없이 URL 하나로 연결. 채널 인원·플레이어 좌표 캐시. **§46** |
+| **GitHub** `(깃허브)` | **소스 코드 저장 + 버전 관리**. push하면 Vercel이 자동으로 웹을 다시 빌드. repo: `qotjdals147/popup-cube`. **§46** |
+| **Expo / EAS** `(엑스포)` | **React Native 앱**을 Android·iOS로 빌드·배포하는 도구 (post-demo, §39). **§46** |
 | **Mock** `(목)` | **가짜·연습용** — 예: 진짜 결제 없이 "결제됐다"고만 처리. |
 | **Scaffold** `(스캐폴드)` | **뼈대만** 먼저 깔아 두는 것. 디테일은 나중. |
 | **Deploy** `(배포)` | 만든 걸 **인터넷에서 쓸 수 있게** 올리는 것. |
@@ -1886,7 +2133,7 @@ where email = 'demo@owner.com';
 | `/home` | **월드 허브** — 카드 그리드·검색·입장 모달 | ✅ P0 구현 (`HomePage.tsx`) |
 | `/store/create` | 점주 매장 만들기 폼 | ✅ P1 구현 (`CreateStorePage.tsx`) — 성공 시 `/store/:storeId`로 바로 이동 |
 | `/store/:storeId` | 픽셀 월드 플레이 | ✅ 기존 StorePage + 홈으로 돌아가기 버튼 추가 |
-| `/store/:storeId/edit` | 점주 에디터 | ⬜ post-demo Phase 4 |
+| `/store/:storeId/edit` | 점주 에디터 | ✅ Sprint 2 MVP (`StoreEditPage.tsx`) |
 
 ### DB / API (구현 완료 — P0)
 
@@ -2129,7 +2376,8 @@ stores ──< asset_conversion_jobs
 ## 28. Deployment — Vercel / Railway 역할 (쉬운 설명)
 
 > **언제 읽나:** "배포가 뭐지?", "Vercel/Railway가 왜 필요하지?" 질문 시.  
-> **상태:** 아직 미배포(§5 Not Done). 기능을 더 만든 뒤 투자자 데모 직전에 올리는 것을 권장.
+> **상태 (2026-07-24):** **Vercel Live** ✅ — https://popup-cube-web.vercel.app · Railway `server/` ✅ (소켓 URL은 §46·`DEPLOY.md`).  
+> **전체 호스팅 맵(모든 서비스·앞으로 필요한 것):** **§46** ← 여기서 시작해도 됨.
 
 ### 지금 상태 vs 배포 후
 
@@ -2552,6 +2800,7 @@ union all select 'profiles', count(*) from public.profiles;
 - **§43** — GUCCI 데모 등각 월드 — 지금 vs 정식 (AD-043)
 - **§44** — Grid Occupancy 표준 (AD-044)
 - **§45** — 리소스 추출 + 픽셀 도면 에디터 (AD-045)
+- **§46** — 인프라·호스팅 맵 (AD-046) · `DEPLOY.md`
 
 ---
 
@@ -2583,13 +2832,15 @@ union all select 'profiles', count(*) from public.profiles;
 시안·에디터·월드 목업은 **2D 픽셀/탑뷰**. 3D는 로드맵에 없음 (AD-022·AD-033).
 
 ### 구현 체크리스트 (Phase 4)
-- [ ] DB: `display_fixtures` / `display_slots` (또는 `map_config` 확장) + RLS
-- [ ] **§44 Grid Occupancy** — `buildOccupancyGrid()`, fixture w×d 점유, walkable mask
+- [x] DB: `display_fixtures` / `display_slots` + `fixture_templates` + RLS (2026-07-27 Sprint 0)
+- [x] **§44 Grid Occupancy** — `buildOccupancyGrid()`, fixture w×d 점유 (`occupancyGrid.ts`, 2026-07-27)
+- [ ] walkable mask / blueprint 연동 (§45)
 - [x] Phaser: 조형물 proximity + Interact (GUCCI 데모 — `onNearInteractZone`, §43)
 - [x] `DisplayProductModal` — **데모:** 슬롯 상품 3종 + 담기 + 착용 **플레이스홀더** (바로구매·실착용 ⬜)
 - [ ] `TryOnPreview` — 우측 아바타 착용 전·후
-- [ ] 점주 `OwnerDisplayPanel` — 조형물 배치 + 슬롯 CRUD + 순서
-- [ ] GUCCI 데모 시드: 원형 테이블 3슬롯 + **display_slots** DB 연동 (지금은 products API 직접)
+- [x] 점주 `OwnerDisplayPanel` — 조형물 배치 + 슬롯 CRUD + 순서 (Sprint 3)
+- [x] GUCCI `display_fixtures` 시드 1건 (Sprint 4-1) — 슬롯 상품 연결·팝업은 **4-2**
+- [x] 앱 WebView `/play/:storeId` (Sprint 4-1)
 - [ ] i18n·시안·PDF와 버튼명 동기화 유지
 
 ### 시각 자료
@@ -2878,13 +3129,22 @@ apps/mobile (Expo/RN)       ← 일반 회원 쇼핑·월드 — Android + iOS �
 
 ### 39.7 EAS / Expo — 에이전트·개발자 메모
 
-**초기 파일 (아직 없음 — `apps/mobile` 생성 시):**
+**초기 파일 (2026-07-27 Sprint 1 — ✅ 생성됨):**
 ```
 apps/mobile/
-├── app.json or app.config.ts   # bundleId, version, icons
-├── eas.json                    # build profiles
-├── package.json                # expo, react-native, @popup-cube/shared
-└── src/                        # §38.4 화면
+├── app.config.ts               # slug popup-cube, EAS projectId, bundle com.popupcube.app
+├── eas.json                    # development / preview / production
+├── metro.config.js             # monorepo watchFolders
+├── app/                        # expo-router (m01~m04 shell)
+│   ├── index.tsx               # m01 이중 로그인
+│   ├── login.tsx               # m02
+│   ├── home.tsx                # m03
+│   └── store/[storeId].tsx     # placeholder → Sprint 4 Phaser
+├── src/
+│   ├── context/AuthContext.tsx
+│   ├── lib/supabase.ts         # AsyncStorage session
+│   └── components/StoreEnterModal.tsx
+└── README.md
 ```
 
 **`eas.json` 프로필 예시 (개념):**
@@ -3376,6 +3636,7 @@ AI 실패 시 → **수동 palette + 드래그** fallback (막히지 않음).
 
 ### 42.7 체크리스트
 
+- [x] fixture 8종 DB 카탈로그 (`fixture_templates` 시드, 2026-07-27)
 - [ ] fixture 8종 등각 픽셀 아트
 - [ ] 타일 12종
 - [ ] `StoreSetupWizard`
@@ -3621,8 +3882,8 @@ Gemini 「3방 + 벽 + 문」= POP-UP CUBE **`map_config v2`**:
 
 ### 44.10 Phase 4 구현 체크리스트
 
-- [ ] `buildOccupancyGrid(map_config | fixtures[])` — room 로드 시 1회 빌드
-- [ ] fixture 카탈로그 — kind별 `size.w`, `size.d`, `slot_count`, 스프라이트 anchor
+- [x] `buildOccupancyGrid(map_config | fixtures[])` — `packages/game-core/src/occupancyGrid.ts` (2026-07-27)
+- [x] fixture 카탈로그 — `fixture_templates` DB 8종 + `size_w`, `size_d`, `slot_count` (2026-07-27)
 - [ ] `OwnerDisplayPanel` — 배치 시 overlap·벽 검사 = occupied 충돌
 - [ ] Phaser — `canWalk(tx,ty)` = walkable && !occupied; generated 픽셀 충돌 **제거**
 - [ ] Interact — fixture bbox + adjacent tile ring
@@ -3634,6 +3895,8 @@ Gemini 「3방 + 벽 + 문」= POP-UP CUBE **`map_config v2`**:
 | 항목 | 위치 |
 |---|---|
 | 데모 투영·픽셀 충돌 | `packages/game-core/src/generatedWorldAssets.ts` |
+| **§44 occupancy 엔진** | `packages/game-core/src/occupancyGrid.ts` |
+| **fixture CRUD (웹·앱 공용)** | `apps/web/src/lib/displayFixtures.ts` |
 | depth sort | `isoVisuals.ts`, `generatedWorldAssets.ts`, `topDownGame.ts` |
 | fixture·슬롯 UX | §32, AD-033 |
 | 다방 | §7 `map_config v2`, AD-025 |
@@ -3814,7 +4077,7 @@ wall_slots[x][y][face]  — face ∈ N|E|S|W
 - [ ] `extract_resource` API (segment/crop → sprite + w×d + slot 추정)
 - [ ] `BlueprintEditor` — 벽·문·walkable 페인트
 - [ ] `DecorateEditor` — floor drag-paint, fixture snap, overlap 검사
-- [ ] `buildOccupancyGrid(blueprint, fixtures)` — §44
+- [x] `buildOccupancyGrid(blueprint, fixtures)` — §44 (`occupancyGrid.ts`, 2026-07-27)
 - [ ] Phaser: generated 픽셀 충돌 경로 **제거**, tile-only
 - [ ] Agent tools: `extract_from_photo`, `suggest_blueprint`, `suggest_placement`
 - [ ] (v1.1) `wall_slots` 벽걸이
@@ -3827,3 +4090,269 @@ wall_slots[x][y][face]  — face ∈ N|E|S|W
 - [ ] 라이브러리 — **매장별** vs **점주 계정 전역** 공유
 
 *Last updated: 2026-07-24 (§45 resource extract + blueprint editor) by Cursor Agent*
+
+---
+
+## 46. 인프라·호스팅 맵 — 전체 설계 (AD-046)
+
+> **User (2026-07-24):** Railway, Supabase, Vercel 등 호스팅이 많은데 HANDOFF에 정리돼 있나? **어떤 용도로 어떤 사이트** 쓰이고 **앞으로 뭐가 더 필요**한지 미리 설계해 두자.  
+> **한 줄:** **§28** = Vercel/Railway **입문·요금**. **§46** = **전체 인프라 지도** (현재 + 정식 + 앱 + PG + AI).
+
+### 46.1 아키텍처 — 누가 뭘 담당하나
+
+```
+                    [사용자]
+        ┌──────────────┼──────────────┐
+        │              │              │
+   PC 브라우저    폰 브라우저      (정식) Expo 앱
+        │              │              │
+        └──────┬───────┴──────┬───────┘
+               │              │
+         [Vercel]         [Vercel 또는
+          apps/web         앱스토어 APK/IPA]
+               │              │
+    VITE_SUPABASE_*     @popup-cube/shared
+    (anon key)                │
+               │              │
+               └──────┬───────┘
+                      │  REST / Auth / Storage
+               ┌──────▼──────┐
+               │  Supabase   │  popup-platform (Seoul)
+               │  Postgres   │  stores, products, orders, profiles…
+               │  Auth       │  demo@shopper.com / demo@owner.com
+               │  Storage    │  store-assets 버킷
+               └──────▲──────┘
+                      │  service_role (server만)
+               ┌──────┴──────┐
+               │  Railway    │  server/ — Express + Socket.io
+               │  (24h ON)   │  멀티플레이·채팅·채널 배정
+               └──────┬──────┘
+                      │
+               ┌──────▼──────┐
+               │  Upstash    │  Redis — 채널 인원(Set), 플레이어 Hash
+               │  Redis      │  (이동 좌표는 스로틀 — ISS-024)
+               └─────────────┘
+
+[GitHub] qotjdals147/popup-cube — push → Vercel auto-build
+[GitHub] qotjdals147/fc-team-dashboard · fc-team-platform — 같은 Vercel 팀 popup-cube (FC, 2026-07-29)
+[Cursor] 로컬 개발 · Agent · Supabase MCP
+```
+
+**왜 Supabase만으로 안 되나 (AD-006):** Realtime DB ≠ 게임 틱(50~250ms) 이동 동기화. **Socket.io 전용 서버**가 Railway에 있어야 멀티플레이가 안정적.
+
+### 46.2 서비스 카탈로그 — 전체
+
+| 서비스 | 대시보드 | 이 프로젝트에서 하는 일 | 코드/설정 위치 | 지금 | 정식 때 |
+|---|---|---|---|---|---|
+| **GitHub** | github.com | 소스·PR·이력. `main` push → Vercel 배포 | repo `popup-cube` | ✅ | ✅ |
+| **Vercel** | vercel.com | **손님·데모 웹 UI** (`apps/web` React+Vite+Phaser) · **FC Zero/Platform 정적** (별도 프로젝트, 동일 팀) | `apps/web/`, `vercel.json` · FC: **`setup/VERCEL_MIGRATION.md`** | ✅ Live | ✅ (+ 점주 PC 웹 분리 검토 AD-037) |
+| **Railway** | railway.com | **Socket.io 실시간 서버** (`server/`) | `server/`, `railway.toml`(있으면) | ✅ | ✅ Hobby $5/월~ |
+| **Supabase** | supabase.com | **DB + Auth + Storage + (선택) Edge** | `popup-platform`, MCP, migrations | ✅ Free | Free→Pro |
+| **Upstash** | upstash.com | **Redis** — 채널·좌표 임시 저장 | `server/.env` `REDIS_URL` | ✅ Free | 사용량 과금 |
+| **Cursor** | cursor.com | IDE + Agent + Supabase MCP | 로컬 | ✅ | ✅ |
+| **Expo / EAS** | expo.dev | **Android+iOS 앱** 빌드·OTA (§39) | `apps/mobile/` (미생성) | ⬜ | ✅ Phase 3 |
+| **Apple Developer** | developer.apple.com | iOS TestFlight·App Store | — | ⬜ | $99/년 |
+| **Google Play Console** | play.google.com/console | Android APK/AAB | — | ⬜ | $25 1회 |
+| **결제 PG** | 토스·카카오 등 | 실결제 (지금 mock) | `server/` 또는 Edge | ⬜ mock | ✅ 정식 |
+| **AI API** | OpenAI·Gemini 등 | 점주 리소스 추출·레이아웃 (§40·§45) | **server만** 프록시 | ⬜ | ✅ quota |
+| **도메인/DNS** | 가비아·Cloudflare | `popupcube.co.kr` 등 | Vercel Custom Domain | ⬜ | 선택 |
+| **모니터링** | Sentry 등 | 에러·성능 | — | ⬜ | 선택 |
+| **주소 API** | 카카오·다음 | 점주 매장 지역 (AD-035) | server proxy | ⬜ | ✅ |
+
+### 46.3 Live URL · 프로젝트 ID (2026-07-29)
+
+| 항목 | 값 |
+|---|---|
+| **Popup 웹 (Production)** | https://popup-cube-web.vercel.app |
+| **FC Zero (Production)** | https://fc-team-dashboard.vercel.app · Vercel `fc-team-dashboard` · Git `qotjdals147/fc-team-dashboard` |
+| **FC Platform (Production)** | https://fc-team-platform.vercel.app · Vercel `fc-team-platform` · Git `qotjdals147/fc-team-platform` · Supabase Auth Site URL ✅ |
+| **Vercel 팀** | `popup-cube` (3 프로젝트). 팀 slug rename → preview URL만 영향 · Production `*.vercel.app`는 **프로젝트명** 기준 |
+| **GitHub** | https://github.com/qotjdals147/popup-cube |
+| **Supabase (Popup)** | `popup-platform` · ref `cvrtobxkvpcpcxrcspdp` · region Seoul |
+| **Supabase URL** | `https://cvrtobxkvpcpcxrcspdp.supabase.co` |
+| **Railway 소켓** | `popup-cube-server` · Trial **$5 크레딧** (2026-07-29: ~$0.2 사용 · est. ~$0.04/월) |
+| **데모 계정** | `demo@shopper.com` / `demo` · `demo@owner.com` / `demo` |
+| **데모 매장** | `popup_gucci_01` |
+
+FC 배포 상세: **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** · **`docs/HANDOFF_FC_ZERO.md` §39** · **`docs/HANDOFF_PLATFORM.md` §10g**
+
+배포 절차 상세: **`popup_store/DEPLOY.md`**
+
+### 46.4 환경변수 — 서비스 간 연결 (필수 쌍)
+
+| 변수 | 설정 위치 | 가리키는 곳 | 비고 |
+|---|---|---|---|
+| `VITE_SUPABASE_URL` | Vercel · `apps/web/.env` | Supabase | 공개 OK |
+| `VITE_SUPABASE_ANON_KEY` | Vercel · `apps/web/.env` | Supabase anon | 공개 OK, RLS가 보호 |
+| `VITE_SOCKET_SERVER_URL` | Vercel · `apps/web/.env` | **Railway URL** | ❌ `localhost` on live |
+| `VITE_DEMO_STORE_ID` | Vercel | `popup_gucci_01` | 데모 전용 |
+| `WEB_ORIGIN` | Railway · `server/.env` | Vercel URL 또는 `*` | CORS |
+| `SUPABASE_URL` | Railway · `server/.env` | Supabase | |
+| `SUPABASE_SERVICE_ROLE_KEY` | Railway · `server/.env` | Supabase | ⚠️ **서버만**, 절대 Vercel |
+| `REDIS_URL` | Railway · `server/.env` | Upstash | |
+| `REDIS_MOVE_PERSIST_MS` | Railway | `500` 권장 | ISS-024 |
+
+**비밀키 저장 위치 (에이전트):**
+
+| 파일 | 용도 | 커밋 |
+|---|---|---|
+| workspace `.env.local` → `POPUP_*` | Cursor Agent · MCP · REST 검증 | ❌ never |
+| `popup_store/server/.env` | 로컬·Railway 동기화 원본 | ❌ never |
+| `popup_store/apps/web/.env` | 로컬 Vite | ❌ never (anon만 example 가능) |
+| Vercel / Railway **Dashboard Variables** | Production | — |
+
+규칙: `.cursor/rules/supabase-env.mdc` — FC Zero / FC Platform / POPUP **키 혼용 금지**.
+
+### 46.5 단계별 — 앞으로 필요한 것
+
+#### Phase A — 지금 (CEO/투자자 데모) ✅ 대부분 완료
+
+| 필요 | 서비스 | 상태 |
+|---|---|---|
+| 웹 URL | Vercel | ✅ |
+| 멀티플레이 | Railway + Upstash | ✅ (URL 쌍만 항상 확인) |
+| DB·로그인·상품 | Supabase | ✅ |
+| 소스·자동 배포 | GitHub → Vercel | ✅ |
+| 모바일 시연 | 폰 브라우저 → Vercel URL | ✅ (§35 mobile mode) |
+
+#### Phase B — 정식 웹 출시 (Phase 4, AD-033·§45)
+
+| 추가 필요 | 서비스 | 이유 |
+|---|---|---|
+| **Vercel Pro** 검토 | Vercel | Hobby = 비상업 조건 — 실제 판매 시 Pro ($20/월) |
+| **Railway Hobby** | Railway | $1/월 Free로 24h 소켓 부족 (§28) |
+| **Supabase Pro** 검토 | Supabase | 매장·주문·이미지 증가, 백업 |
+| **커스텀 도메인** | DNS + Vercel | 브랜드 URL |
+| **PG 연동** | 토스페이먼츠 등 | mock → 실결제 |
+| **AI API + quota** | OpenAI/Gemini | §45 리소스 추출·§40 agent (**server 프록시**) |
+| **주소 검색 API** | 카카오 로컬 등 | AD-035 동네·배송지 |
+
+#### Phase C — 모바일 앱 (§39, AD-038)
+
+| 추가 필요 | 서비스 | 이유 |
+|---|---|---|
+| **Expo EAS** | expo.dev | Android/iOS 빌드 |
+| **Apple Developer** | Apple | TestFlight·App Store |
+| **Google Play** | Google | APK/AAB 배포 |
+| **(동일 백엔드)** | Supabase + Railway + Upstash | 앱도 **같은** API·소켓 — repo만 `apps/mobile` 추가 |
+
+#### Phase D — 규모 확대 (트래픽·매출 발생 후)
+
+| 검토 | 서비스 |
+|---|---|
+| Supabase read replica / connection pool | Supabase |
+| Redis 플랜 업 | Upstash |
+| Railway Pro / 수평 확장 | Railway |
+| CDN·이미지 최적화 | Vercel / Cloudflare |
+| 에러 모니터링 | Sentry |
+| 로그·분석 | Datadog / Logtail (선택) |
+
+### 46.6 월 비용 감 — 단계별 (§28 보강)
+
+| 단계 | 구성 | 월 예상 |
+|---|---|---|
+| **데모 (지금)** | Vercel $0 + Railway Trial/Hobby $0~5 + Supabase/Upstash Free | **$0 ~ $5** |
+| **정식 초기** | + Railway Hobby + (PG 수수료만 %) + (AI API 소량) | **$5 ~ $40** + PG% |
+| **앱 출시** | + Apple $99/년 + Google $25 1회 + EAS | 분摊 **~$10/월** |
+| **성장기** | Vercel Pro + Supabase Pro + Railway Pro | **$50 ~ $150+** |
+
+PG·앱스토어 수수료·AI 호출량은 **매출/사용량 비례** — §28 표와 동일.
+
+### 46.7 안 쓰는 것 / 대안 보류
+
+| 서비스 | 안 쓰는 이유 |
+|---|---|
+| **Supabase Realtime** alone | 게임 이동 동기화 부적합 (AD-006) — Socket.io 유지 |
+| **Netlify / Cloudflare Pages** | Vercel 이미 연동·동작 중 |
+| **Render / Fly.io** | Railway로 통일 (§28·DEPLOY.md) |
+| **Firebase** | Supabase(Postgres) + Auth 이미 전환 완료 (AD-015) |
+| **자체 VPS + Docker** | MVP에 DevOps 부담 — managed PaaS 우선 |
+| **Heroku** | Railway와 역할 중복 |
+
+### 46.8 새 서비스 추가 시 체크리스트 (AD-018)
+
+1. **§46 표**에 한 줄 추가 (역할·env·비용)
+2. **§9** env 표 업데이트
+3. **AD 테이블**에 결정 한 줄 (AD-0xx)
+4. **Changelog** 기록
+5. `service_role` / API 키 → **server 또는 Edge만** — 브라우저 금지
+6. `DEPLOY.md`에 배포 단계 추가 (해당 시)
+
+### 46.9 관련 § · 파일
+
+| 문서 | 내용 |
+|---|---|
+| **§28** | Vercel/Railway 쉬운 설명·무료 플랜·4개 서비스 비용 |
+| **§9** | env 변수 표 |
+| **§11** | Redis 키 패턴 |
+| **§21** | 테스트 환경 (로컬 vs Staging vs Live) |
+| **§29** | 데모→정식→앱 — 코드 재사용 |
+| **`DEPLOY.md`** | Railway/Vercel 배포 클릭 순서 |
+| **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** | FC Vercel 이관 · Git · Auth · 요금 메모 |
+| **`.cursor/rules/supabase-env.mdc`** | POPUP vs FC Zero vs FC Platform 키 분리 |
+
+### 46.11 워크스pace 인프라 메모 (2026-07-29)
+
+기획·에이전트 세션에서 정리 — **3프로젝트 공통**.
+
+#### Vercel (팀 `popup-cube`)
+
+| 프로젝트 | URL | Git |
+|---|---|---|
+| `popup-cube-web` | popup-cube-web.vercel.app | `popup-cube` monorepo |
+| `fc-team-dashboard` | fc-team-dashboard.vercel.app | `fc-team-dashboard` ✅ |
+| `fc-team-platform` | fc-team-platform.vercel.app | `fc-team-platform` ✅ |
+
+- **플랜**: 팀 단위 **Pro Trial** (~9일 남을 때 배너). **카드 없음** → Hobby(무료) · **카드 있음** → Pro ~$20/월. **사이트 보통 유지**.
+- **결제 수단**: User **미등록** (2026-07-29).
+- **GitHub Pages**:
+  - **FC Zero** — **OFF** (`Unpublish site` · Source에 `None` 없음) · 백업 복구 → **`HANDOFF_FC_ZERO.md` §39.2**
+  - **FC Platform** — **ON 가능** (백업) · 동일 절차
+  - Pages OFF = `github.io`만 404 · **Git push · Vercel 배포 유지**
+
+#### URL 정본 (2026-07-29)
+
+| Product | 들어갈 주소 |
+|---|---|
+| FC Zero | **https://fc-team-dashboard.vercel.app** |
+| FC Platform | **https://fc-team-platform.vercel.app** |
+| Popup web | **https://popup-cube-web.vercel.app** |
+
+#### Railway (Popup only)
+
+- `popup-cube-server` · Trial $5 크레딧 · **카드 없음** → 크레딧 소진 시 업그레이드 또는 중지.
+- FC Zero/Platform **Railway 없음**.
+
+#### Supabase (프로젝트 3개 분리 · 키 혼용 금지)
+
+| Product | Supabase ref | Auth URL |
+|---|---|---|
+| FC Zero | `ajcidqsjpkzupxeizbyp` | 없음 (`meta` PW) |
+| FC Platform | `rdscgnvseplwlftjixom` | Vercel Site URL ✅ |
+| Popup | `cvrtobxkvpcpcxrcspdp` | Vercel + local |
+
+에이전트: workspace `.env.local` `FC_ZERO_*` / `FC_PLATFORM_*` / `POPUP_*` · 규칙 `.cursor/rules/supabase-env.mdc`
+
+#### Cursor / Agent 워크플로
+
+- **배포**: Git push → Vercel (FC·Popup). Supabase MCP = DB. Vercel MCP = 선택(조회·로그).
+- **VS Code 확장**(GitLens 등)보다 **MCP + HANDOFF + Rules**가 Agent 효율에 핵심.
+- **MSW MCP** = MapleStory World용 — **이 3프로젝트 무관**.
+
+#### 미완 · 선택
+
+- [ ] GitHub repo에 FC `vercel.json` / `.vercelignore` push
+- [x] **FC Zero GitHub Pages OFF** (Unpublish site · 2026-07-29) — 복구 §39.2
+- [ ] FC Platform Pages OFF (선택 · 백업 유지 가능)
+- [ ] Vercel 팀 slug `popup-cube` → 중립명 rename
+- [ ] 법인 Pro · 커스텀 도메인
+
+### 46.10 Pending User Input
+
+- [ ] **Railway Production URL** — HANDOFF에 User가 확정 URL 기록 (민감 아님, 공개 URL)
+- [ ] **정식 도메인** 후보 (`popupcube.com` 등)
+- [ ] **PG** 1순위 (토스페이먼츠 / 카카오 / …)
+- [ ] **AI API** 1순위 (Gemini / OpenAI — §40)
+- [ ] 데모·정식 **Supabase 프로젝트 분리** 여부 (지금은 하나로 demo+dev 공존 — §30 초기화 정책)
+
+*Last updated: 2026-07-29 (§46.11 Pages OFF · Trial FAQ) by Cursor Agent*

@@ -56,10 +56,14 @@ export function CreateStorePage() {
         thumbnailFile,
       });
       await refreshProfile();
-      navigate(`/store/${storeId}`);
+      navigate(`/store/${storeId}/edit`);
     } catch (err) {
       if (err instanceof CreateStoreError && err.code === 'THUMBNAIL_TOO_LARGE') {
         setError(t('createStore.errorThumbnailTooLarge'));
+      } else if (err instanceof CreateStoreError && err.code === 'UPLOAD_FAILED') {
+        setError(t('createStore.errorUploadFailed'));
+      } else if (err instanceof CreateStoreError && err.message && err.message !== 'CREATE_FAILED') {
+        setError(err.message);
       } else {
         setError(t('createStore.errorGeneric'));
       }

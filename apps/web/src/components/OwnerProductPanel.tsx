@@ -12,7 +12,9 @@ import { t } from '../i18n';
 interface OwnerProductPanelProps {
   storeId: string;
   userId: string;
-  onClose: () => void;
+  onClose?: () => void;
+  /** 에디터 탭에 임베드 — 모달 오버레이 없음 (Sprint 2) */
+  embedded?: boolean;
 }
 
 /**
@@ -20,7 +22,7 @@ interface OwnerProductPanelProps {
  * "숨기기"를 누르면 손님 화면에서만 안 보이고(soft delete), 완전히 지워지진 않음
  * (나중에 주문 이력과 연결될 걸 대비).
  */
-export function OwnerProductPanel({ storeId, userId, onClose }: OwnerProductPanelProps) {
+export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }: OwnerProductPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -150,15 +152,18 @@ export function OwnerProductPanel({ storeId, userId, onClose }: OwnerProductPane
     }
   }
 
-  return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
-        <div style={styles.header}>
-          <h3 style={styles.title}>{t('ownerProducts.title')}</h3>
-          <button style={styles.closeButton} onClick={onClose}>
-            ✕
-          </button>
-        </div>
+  const panelBody = (
+    <>
+        {!embedded && (
+          <div style={styles.header}>
+            <h3 style={styles.title}>{t('ownerProducts.title')}</h3>
+            {onClose && (
+              <button style={styles.closeButton} onClick={onClose}>
+                ✕
+              </button>
+            )}
+          </div>
+        )}
 
         <form style={styles.form} onSubmit={handleSubmit}>
           <div style={styles.formRow}>
@@ -286,6 +291,22 @@ export function OwnerProductPanel({ storeId, userId, onClose }: OwnerProductPane
             ))
           )}
         </div>
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <section style={styles.embeddedPanel}>
+        <h2 style={styles.embeddedTitle}>{t('ownerProducts.title')}</h2>
+        {panelBody}
+      </section>
+    );
+  }
+
+  return (
+    <div style={styles.overlay} onClick={onClose}>
+      <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
+        {panelBody}
       </div>
     </div>
   );
@@ -296,6 +317,13 @@ function formatPrice(price: number): string {
 }
 
 const styles: Record<string, React.CSSProperties> = {
+  embeddedPanel: {
+    background: '#16213e',
+    borderRadius: 12,
+    padding: 24,
+    border: '1px solid #2c4270',
+  },
+  embeddedTitle: { margin: '0 0 16px', fontSize: 18, color: '#fff' },
   overlay: {
     position: 'fixed',
     inset: 0,

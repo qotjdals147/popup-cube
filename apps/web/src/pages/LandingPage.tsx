@@ -1,28 +1,22 @@
 import { useNavigate } from 'react-router-dom';
-import { ViewModeToggle } from '../components/ViewModeToggle';
-import { useViewMode } from '../context/ViewModeContext';
 import { t } from '../i18n';
 
+/** AD-037 — PC 웹: 스토어 관리자 로그인만 */
 export function LandingPage() {
   const navigate = useNavigate();
-  const { isMobile } = useViewMode();
 
   return (
-    <div style={styles.page} className={isMobile ? 'page-mobile' : undefined}>
-      <div style={styles.card} className="landing-card">
+    <div style={styles.page}>
+      <div style={styles.card}>
         <h1 style={styles.title}>{t('landing.title')}</h1>
         <p style={styles.subtitle}>{t('landing.subtitle')}</p>
         <p style={styles.tagline}>{t('landing.tagline')}</p>
 
-        <button style={styles.primaryButton} onClick={() => navigate('/login?role=shopper')}>
-          {t('landing.shopButton')} <span style={styles.hint}>{t('landing.shopHint')}</span>
+        <button style={styles.primaryButton} onClick={() => navigate('/login')}>
+          {t('landing.ownerButton')}
         </button>
 
-        <button style={styles.secondaryButton} onClick={() => navigate('/login?role=owner')}>
-          {t('landing.ownerButton')} <span style={styles.hint}>{t('landing.ownerHint')}</span>
-        </button>
-
-        <ViewModeToggle />
+        <p style={styles.appNote}>{t('landing.appNote')}</p>
       </div>
     </div>
   );
@@ -36,13 +30,15 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
     fontFamily: "'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif",
+    padding: 24,
   },
   card: {
     background: '#0f3460',
     padding: '40px 32px',
     borderRadius: 16,
     textAlign: 'center',
-    width: 320,
+    width: '100%',
+    maxWidth: 380,
     boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
   },
   title: {
@@ -61,14 +57,13 @@ const styles: Record<string, React.CSSProperties> = {
   tagline: {
     color: '#a0a0c0',
     marginTop: 0,
-    marginBottom: 32,
+    marginBottom: 28,
     fontSize: 13,
     lineHeight: 1.5,
   },
   primaryButton: {
     width: '100%',
     padding: '14px',
-    marginBottom: 12,
     borderRadius: 10,
     border: 'none',
     background: '#e94560',
@@ -77,20 +72,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     cursor: 'pointer',
   },
-  secondaryButton: {
-    width: '100%',
-    padding: '14px',
-    borderRadius: 10,
-    border: '1px solid #e94560',
-    background: 'transparent',
-    color: '#e94560',
-    fontSize: 16,
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-  hint: {
+  appNote: {
+    color: '#8ea6dd',
     fontSize: 12,
-    opacity: 0.8,
-    fontWeight: 400,
+    lineHeight: 1.5,
+    marginTop: 20,
+    marginBottom: 0,
   },
 };

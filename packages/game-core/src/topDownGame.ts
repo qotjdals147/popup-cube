@@ -37,8 +37,16 @@ import {
   type GeneratedInteractZone,
   type GeneratedNpc,
 } from './generatedWorldAssets';
+import {
+  canWalk,
+  effectiveFixtureSize,
+  fixtureInteractRing,
+  type FixturePlacement,
+  type OccupancyGridResult,
+} from './occupancyGrid';
 
 export type { GeneratedInteractZone } from './generatedWorldAssets';
+export type { FixturePlacement } from './occupancyGrid';
 
 // 타일/캐릭터/글자가 전체적으로 작아 보인다는 피드백 반영 — 타일 크기를 키우고,
 // 지도 전체를 억지로 화면에 눌러 담는 대신 "고정된 카메라 창"만 보여준 뒤 캐릭터를 따라다니게 함.
@@ -122,6 +130,14 @@ export interface TopDownGameMountOptions {
   onNearInteractZone?: (zone: GeneratedInteractZone | null) => void;
   /** 모바일 레이아웃 — 캔버스 ENVELOP·줌 조정 (세로 화면 꽉 채움) */
   mobileLayout?: boolean;
+  /**
+   * Sprint 4 — DB `display_fixtures` 배치.
+   * GUCCI generated 월드에서는 시각/충돌은 PNG 데모 유지, 상호작용은 기존 테이블 존 우선.
+   * top-down / iso-fake 에서는 조형물 표시·점유 충돌·근접 상호작용에 사용.
+   */
+  displayFixtures?: FixturePlacement[];
+  /** `buildOccupancyGrid` 결과 — 있으면 top-down walk에 occupied 반영 */
+  occupancy?: OccupancyGridResult;
 }
 
 export interface VirtualDirections {
@@ -225,6 +241,8 @@ export async function mountTopDownGame(
     visualStyle,
     mobileLayout,
     onNearInteractZone: options.onNearInteractZone,
+    displayFixtures: options.displayFixtures ?? [],
+    occupancy: options.occupancy,
   });
 
   const game = new Phaser.Game({
@@ -390,6 +408,8 @@ class TopDownScene extends Phaser.Scene {
   private readonly selfSpawn: { x: number; y: number; direction: Direction };
   private readonly visualStyle: WorldVisualStyle;
   private readonly mobileLayout: boolean;
+  private readonly displayFixtures: FixturePlacement[];
+  private readonly occupancy?: OccupancyGridResult;
   private readonly isoOrigin: IsoPoint;
   private readonly npcChatTimers: Phaser.Time.TimerEvent[] = [];
   private readonly players = new Map<string, PlayerVisual>();
@@ -429,6 +449,8 @@ class TopDownScene extends Phaser.Scene {
     visualStyle: WorldVisualStyle;
     mobileLayout?: boolean;
     onNearInteractZone?: (zone: GeneratedInteractZone | null) => void;
+    displayFixtures?: FixturePlacement[];
+    occupancy?: OccupancyGridResult;
   }) {
     super({ key: 'TopDownScene' });
     this.mapConfig = config.mapConfig;
@@ -442,6 +464,8 @@ class TopDownScene extends Phaser.Scene {
     this.visualStyle = config.visualStyle;
     this.mobileLayout = config.mobileLayout ?? false;
     this.onNearInteractZone = config.onNearInteractZone;
+    this.displayFixtures = config.displayFixtures ?? [];
+    this.occupancy = config.occupancy;
     const vpW = this.isGeneratedDemo ? GUCCI_VIEWPORT_WIDTH_PX : VIEWPORT_WIDTH_PX;
     this.isoOrigin = getIsoMapOrigin(
       config.mapConfig.mapSize.width,
@@ -484,10 +508,12 @@ class TopDownScene extends Phaser.Scene {
       drawGucciBackdrop(this, VIEWPORT_WIDTH_PX, VIEWPORT_HEIGHT_PX);
       this.drawIsoFloor();
       this.drawIsoObjects();
+      this.drawDisplayFixtures();
     } else {
       this.drawGrid();
       this.drawFloorTiles();
       this.drawObjects();
+      this.drawDisplayFixtures();
     }
 
     this.createPlayers();
@@ -609,15 +635,85 @@ class TopDownScene extends Phaser.Scene {
   }
 
   private emitInteractZoneIfNeeded(force: boolean) {
-    if (!this.isGeneratedDemo || !this.onNearInteractZone) return;
+    if (!this.onNearInteractZone) return;
     const now = this.time?.now ?? 0;
     if (!force && now - this.lastInteractEmitMs < 150) return;
     this.lastInteractEmitMs = now;
-    const zone = getGeneratedInteractZone(this.selfTile.x, this.selfTile.y);
+
+    let zone: GeneratedInteractZone | null = null;
+    if (this.isGeneratedDemo) {
+      zone = getGeneratedInteractZone(this.selfTile.x, this.selfTile.y);
+    } else {
+      zone = this.findNearbyDisplayFixtureZone();
+    }
+
     const id = zone?.id ?? null;
     if (force || id !== this.lastInteractZoneId) {
       this.lastInteractZoneId = id;
       this.onNearInteractZone(zone);
+    }
+  }
+
+  /** top-down/iso — DB fixture 점유 링 근처면 상호작용 존 (Sprint 4) */
+  private findNearbyDisplayFixtureZone(): GeneratedInteractZone | null {
+    if (this.displayFixtures.length === 0) return null;
+    const { width, height } = this.mapConfig.mapSize;
+    const tx = Math.round(this.selfTile.x);
+    const ty = Math.round(this.selfTile.y);
+    for (const fixture of this.displayFixtures) {
+      const ring = fixtureInteractRing(fixture, width, height);
+      if (ring.some((t) => t.x === tx && t.y === ty)) {
+        return {
+          id: fixture.id,
+          label: fixture.label?.trim() || fixture.templateId,
+        };
+      }
+    }
+    return null;
+  }
+
+  /** map_config objects 위에 display_fixtures 조형물 표시 (generated PNG 월드는 스킵) */
+  private drawDisplayFixtures() {
+    if (this.displayFixtures.length === 0) return;
+    for (const fixture of this.displayFixtures) {
+      const rot = fixture.rotation ?? 0;
+      const { w, d } = effectiveFixtureSize(fixture.size, rot);
+      const cx = fixture.origin.x + (w - 1) / 2;
+      const cy = fixture.origin.y + (d - 1) / 2;
+      const screen = this.tileToScreen(cx, cy);
+      const label = fixture.label?.trim() || fixture.templateId;
+      const depth =
+        this.visualStyle === 'iso-fake' ? isoDepth(cx, cy, 4) : Math.floor((cx + cy) * 10 + 4);
+
+      if (this.visualStyle === 'iso-fake') {
+        drawIsoProp(this, cx, cy, fixture.templateId, screen.x, screen.y - 10);
+      } else {
+        this.add
+          .rectangle(
+            screen.x,
+            screen.y,
+            Math.max(28, w * (DEFAULT_TILE_SIZE - 8)),
+            Math.max(28, d * (DEFAULT_TILE_SIZE - 8)),
+            0xc9a962,
+            0.85
+          )
+          .setDepth(depth);
+      }
+      this.add
+        .text(screen.x, screen.y - 28, shortAssetLabel(label), {
+          fontSize: '11px',
+          color: '#ffffff',
+          backgroundColor: '#00000099',
+          padding: { left: 4, right: 4, top: 2, bottom: 2 },
+        })
+        .setOrigin(0.5)
+        .setDepth(depth + 1);
+
+      for (let dx = 0; dx < w; dx++) {
+        for (let dy = 0; dy < d; dy++) {
+          this.blockedTiles.add(tileKey(fixture.origin.x + dx, fixture.origin.y + dy));
+        }
+      }
     }
   }
 
@@ -1063,7 +1159,12 @@ class TopDownScene extends Phaser.Scene {
         this.mapConfig.mapSize.height
       );
     }
-    const key = tileKey(Math.round(tileX), Math.round(tileY));
+    const tx = Math.round(tileX);
+    const ty = Math.round(tileY);
+    if (this.occupancy) {
+      return !canWalk(this.occupancy.grid, tx, ty);
+    }
+    const key = tileKey(tx, ty);
     if (this.blockedTiles.has(key)) return true;
     return false;
   }

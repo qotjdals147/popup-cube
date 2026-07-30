@@ -34,3 +34,28 @@ export async function getStoreSummary(storeId: string): Promise<StoreSummary | n
   if (error) throw error;
   return data;
 }
+
+/** 점주 본인 매장 — draft 포함 (RLS owner read) */
+export async function getMyStore(storeId: string): Promise<StoreSummary | null> {
+  const { data, error } = await supabase
+    .from('stores')
+    .select('id, name, description, thumbnail_url, status')
+    .eq('id', storeId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+/** 점주 매장 출시 — draft → published (AD-021, Sprint 3) */
+export async function publishStore(storeId: string): Promise<StoreSummary> {
+  const { data, error } = await supabase
+    .from('stores')
+    .update({ status: 'published' })
+    .eq('id', storeId)
+    .select('id, name, description, thumbnail_url, status')
+    .single();
+
+  if (error) throw error;
+  return data;
+}

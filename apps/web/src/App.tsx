@@ -1,27 +1,30 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { ViewModeProvider } from './context/ViewModeContext';
-import { MobileShell } from './components/MobileShell';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { HomePage } from './pages/HomePage';
 import { CreateStorePage } from './pages/CreateStorePage';
+import { StoreEditPage } from './pages/StoreEditPage';
 import { StorePage } from './pages/StorePage';
-import { MyPage } from './pages/MyPage';
+import { PlayWorldPage } from './pages/PlayWorldPage';
+import { AppOnlyPage } from './pages/AppOnlyPage';
 
 function AppRoutes() {
   return (
-    <MobileShell>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/store/create" element={<CreateStorePage />} />
-        <Route path="/mypage" element={<MyPage />} />
-        <Route path="/store/:storeId" element={<StorePage />} />
-      </Routes>
-    </MobileShell>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/home" element={<HomePage />} />
+      <Route path="/app-only" element={<AppOnlyPage />} />
+      <Route path="/store/create" element={<CreateStorePage />} />
+      <Route path="/store/:storeId/edit" element={<StoreEditPage />} />
+      {/* 모바일 앱 WebView 전용 플레이 월드 (Sprint 4-1) — AD-037 손님 채널 */}
+      <Route path="/play/:storeId" element={<PlayWorldPage />} />
+      <Route path="/mypage" element={<Navigate to="/app-only" replace />} />
+      <Route path="/store/:storeId" element={<StorePage />} />
+    </Routes>
   );
 }
 

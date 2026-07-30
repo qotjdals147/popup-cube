@@ -1,161 +1,135 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import type { StoreSummary } from '@popup-cube/shared';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { listPublishedStores } from '../lib/stores';
-import { StoreEnterModal } from '../components/StoreEnterModal';
-import { ViewModeToggle } from '../components/ViewModeToggle';
-import { useViewMode } from '../context/ViewModeContext';
+import { getMyStore } from '../lib/stores';
 import { t } from '../i18n';
+import type { StoreSummary } from '@popup-cube/shared';
 
+/** AD-037 — PC 웹 점주 대시보드 (매장 목록·쇼핑 허브 아님) */
 export function HomePage() {
-  const { userId, role, loading: authLoading, signOut } = useAuth();
-  const { isMobile } = useViewMode();
+  const { userId, role, storeId, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const [search, setSearch] = useState('');
-  const [stores, setStores] = useState<StoreSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [selectedStore, setSelectedStore] = useState<StoreSummary | null>(null);
-  const [idleNotice, setIdleNotice] = useState(
-    Boolean((location.state as { idleKicked?: boolean } | null)?.idleKicked)
-  );
+  const [store, setStore] = useState<StoreSummary | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!idleNotice) return;
-    // 뒤로가기 등으로 state가 남아 반복 노출되지 않도록 한 번 보여주고 히스토리에서 지움.
-    navigate('.', { replace: true, state: null });
-    const timer = setTimeout(() => setIdleNotice(false), 5000);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (!authLoading && !userId) {
-      navigate('/');
+    if (authLoading) return;
+    if (!userId) {
+      navigate('/', { replace: true });
     }
   }, [authLoading, userId, navigate]);
 
   useEffect(() => {
+    if (!storeId || role !== 'owner') {
+      setStore(null);
+      return;
+    }
+
     let active = true;
     setLoading(true);
-    setError(false);
-
-    const timer = setTimeout(() => {
-      listPublishedStores(search)
-        .then((data) => {
-          if (active) setStores(data);
-        })
-        .catch(() => {
-          if (active) setError(true);
-        })
-        .finally(() => {
-          if (active) setLoading(false);
-        });
-    }, 250);
+    getMyStore(storeId)
+      .then((data) => {
+        if (active) setStore(data);
+      })
+      .catch(() => {
+        if (active) setStore(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
     return () => {
       active = false;
-      clearTimeout(timer);
     };
-  }, [search]);
+  }, [storeId, role]);
 
   async function handleSignOut() {
     await signOut();
     navigate('/');
   }
 
+  if (authLoading || !userId) {
+    return <div style={styles.page}>{t('ownerDashboard.loading')}</div>;
+  }
+
   return (
-    <div
-      style={styles.page}
-      className={isMobile ? 'page-mobile home-page-mobile' : undefined}
-    >
-      <header style={styles.header} className={isMobile ? 'home-header-mobile' : undefined}>
-        <div style={styles.headerTitles}>
-          <h1 style={styles.title}>{t('home.title')}</h1>
-          <p style={styles.tagline}>{t('home.tagline')}</p>
+    <div style={styles.page}>
+      <header style={styles.header}>
+        <div>
+          <h1 style={styles.title}>{t('ownerDashboard.title')}</h1>
+          <p style={styles.tagline}>{t('ownerDashboard.tagline')}</p>
         </div>
-        <input
-          style={styles.search}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={t('home.searchPlaceholder')}
-        />
-        <button style={styles.myPageButton} onClick={() => navigate('/mypage')}>
-          {t('common.myPage')}
-        </button>
-        <button style={styles.logoutButton} onClick={handleSignOut}>
+        <button style={styles.logoutButton} type="button" onClick={handleSignOut}>
           {t('common.logout')}
         </button>
       </header>
 
-      {idleNotice && <div style={styles.idleNotice}>{t('home.idleKickedNotice')}</div>}
-
-      {role === 'owner' && (
-        <div style={styles.ownerBar}>
-          <button style={styles.createButton} onClick={() => navigate('/store/create')}>
-            {t('home.createStore')}
-          </button>
-        </div>
-      )}
-
       <main style={styles.main}>
-        {loading && <p style={styles.status}>{t('home.loading')}</p>}
-        {!loading && error && <p style={styles.statusError}>{t('home.errorLoad')}</p>}
-
-        {!loading && !error && stores.length === 0 && (
-          <div style={styles.empty}>
-            <p style={styles.emptyTitle}>{t('home.emptyTitle')}</p>
-            <p style={styles.emptySubtitle}>
-              {search ? t('home.emptySubtitleSearch') : t('home.emptySubtitle')}
-            </p>
-          </div>
+        {role === 'shopper' && (
+          <section style={styles.panel}>
+            <h2 style={styles.panelTitle}>{t('ownerDashboard.noStoreTitle')}</h2>
+            <p style={styles.body}>{t('ownerDashboard.noStoreBody')}</p>
+            <button style={styles.primaryButton} type="button" onClick={() => navigate('/store/create')}>
+              {t('ownerDashboard.createStore')}
+            </button>
+            <button style={styles.secondaryButton} type="button" onClick={() => navigate('/app-only')}>
+              {t('ownerDashboard.shopperAppLink')}
+            </button>
+          </section>
         )}
 
-        {!loading && !error && stores.length > 0 && (
-          <div style={styles.grid} className={isMobile ? 'home-grid-mobile' : undefined}>
-            {stores.map((store) => (
-              <button
-                key={store.id}
-                style={styles.card}
-                onClick={() => setSelectedStore(store)}
-              >
-                <div style={styles.thumbnailWrap}>
-                  {store.thumbnail_url ? (
-                    <img
-                      src={store.thumbnail_url}
-                      alt={store.name}
-                      style={styles.thumbnail}
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div style={styles.thumbnailFallback}>{store.name.charAt(0)}</div>
-                  )}
+        {role === 'owner' && (
+          <section style={styles.panel}>
+            {loading && <p style={styles.hint}>{t('ownerDashboard.loading')}</p>}
+            {!loading && store && (
+              <>
+                <div style={styles.storeRow}>
+                  <div style={styles.thumbWrap}>
+                    {store.thumbnail_url ? (
+                      <img src={store.thumbnail_url} alt="" style={styles.thumb} />
+                    ) : (
+                      <div style={styles.thumbFallback}>{store.name.charAt(0)}</div>
+                    )}
+                  </div>
+                  <div>
+                    <div style={styles.nameRow}>
+                      <h2 style={styles.storeName}>{store.name}</h2>
+                      <span
+                        style={
+                          store.status === 'draft' ? styles.badgeDraft : styles.badgePublished
+                        }
+                      >
+                        {store.status === 'draft'
+                          ? t('ownerDashboard.statusDraft')
+                          : t('ownerDashboard.statusPublished')}
+                      </span>
+                    </div>
+                    <p style={styles.storeDesc}>
+                      {store.description?.trim() || t('ownerEdit.noDescription')}
+                    </p>
+                  </div>
                 </div>
-                <div style={styles.cardName}>{store.name}</div>
-              </button>
-            ))}
-          </div>
+                <button
+                  style={styles.primaryButton}
+                  type="button"
+                  onClick={() => navigate(`/store/${storeId}/edit`)}
+                >
+                  {t('ownerDashboard.manageStore')}
+                </button>
+              </>
+            )}
+            {!loading && !store && (
+              <>
+                <p style={styles.body}>{t('ownerDashboard.storeMissing')}</p>
+                <button style={styles.primaryButton} type="button" onClick={() => navigate('/store/create')}>
+                  {t('ownerDashboard.createStore')}
+                </button>
+              </>
+            )}
+          </section>
         )}
       </main>
-
-      {isMobile && (
-        <footer style={{ padding: '0 16px 20px' }}>
-          <ViewModeToggle />
-        </footer>
-      )}
-
-      {selectedStore && (
-        <StoreEnterModal
-          store={selectedStore}
-          onClose={() => setSelectedStore(null)}
-          onEnter={() => navigate(`/store/${selectedStore.id}`)}
-        />
-      )}
     </div>
   );
 }
@@ -169,35 +143,15 @@ const styles: Record<string, React.CSSProperties> = {
   },
   header: {
     display: 'flex',
+    justifyContent: 'space-between',
     alignItems: 'center',
     gap: 16,
-    padding: '16px 24px',
+    padding: '20px 28px',
     background: '#0f3460',
     flexWrap: 'wrap',
   },
-  headerTitles: { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 140 },
-  title: { fontSize: 20, margin: 0, letterSpacing: 0.5, whiteSpace: 'nowrap' },
-  tagline: { margin: 0, fontSize: 12, color: '#a0a0c0' },
-  search: {
-    flex: 1,
-    minWidth: 160,
-    padding: '10px 14px',
-    borderRadius: 20,
-    border: '1px solid #2c4270',
-    background: '#16213e',
-    color: '#fff',
-    fontSize: 13,
-  },
-  myPageButton: {
-    background: 'transparent',
-    border: '1px solid #2c4270',
-    color: '#fff',
-    borderRadius: 6,
-    padding: '8px 14px',
-    cursor: 'pointer',
-    fontSize: 12,
-    whiteSpace: 'nowrap',
-  },
+  title: { fontSize: 22, margin: 0 },
+  tagline: { margin: '4px 0 0', fontSize: 13, color: '#a0a0c0' },
   logoutButton: {
     background: 'transparent',
     border: '1px solid #a0a0c0',
@@ -206,70 +160,75 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '8px 14px',
     cursor: 'pointer',
     fontSize: 12,
-    whiteSpace: 'nowrap',
   },
-  idleNotice: {
-    padding: '10px 24px',
-    background: '#3a2f10',
-    color: '#ffd580',
-    fontSize: 13,
-    borderBottom: '1px solid #6b5320',
-  },
-  ownerBar: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    padding: '10px 24px',
-    background: '#533483',
-  },
-  createButton: {
-    padding: '8px 16px',
-    borderRadius: 8,
-    border: '1px solid rgba(255,255,255,0.4)',
-    background: 'rgba(255,255,255,0.12)',
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-  main: { padding: '24px', maxWidth: 1080, margin: '0 auto' },
-  status: { color: '#a0a0c0', fontSize: 14, textAlign: 'center', marginTop: 40 },
-  statusError: { color: '#ff6b6b', fontSize: 14, textAlign: 'center', marginTop: 40 },
-  empty: { textAlign: 'center', marginTop: 60 },
-  emptyTitle: { fontSize: 16, color: '#fff', marginBottom: 6 },
-  emptySubtitle: { fontSize: 13, color: '#a0a0c0' },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-    gap: 20,
-  },
-  card: {
-    display: 'flex',
-    flexDirection: 'column',
-    background: '#0f3460',
-    border: 'none',
+  main: { padding: '28px', maxWidth: 720, margin: '0 auto' },
+  panel: {
+    background: '#16213e',
     borderRadius: 12,
+    padding: 28,
+    border: '1px solid #2c4270',
+  },
+  panelTitle: { margin: '0 0 12px', fontSize: 18 },
+  body: { color: '#d8e4ff', fontSize: 14, lineHeight: 1.6, margin: '0 0 20px' },
+  hint: { color: '#a0a0c0', fontSize: 14 },
+  storeRow: { display: 'flex', gap: 16, marginBottom: 20, flexWrap: 'wrap' },
+  thumbWrap: {
+    width: 120,
+    height: 90,
+    borderRadius: 10,
     overflow: 'hidden',
-    cursor: 'pointer',
-    padding: 0,
-    textAlign: 'left',
+    background: '#0f3460',
+    flexShrink: 0,
   },
-  thumbnailWrap: {
-    width: '100%',
-    height: 140,
-    background: 'linear-gradient(135deg, #533483, #16213e)',
-  },
-  thumbnail: { width: '100%', height: '100%', objectFit: 'cover' },
-  thumbnailFallback: {
+  thumb: { width: '100%', height: '100%', objectFit: 'cover' },
+  thumbFallback: {
     width: '100%',
     height: '100%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#fff',
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: 700,
     opacity: 0.6,
   },
-  cardName: { padding: '12px 14px', fontSize: 14, fontWeight: 600, color: '#fff' },
+  storeName: { margin: 0, fontSize: 18 },
+  nameRow: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 4 },
+  badgePublished: {
+    fontSize: 11,
+    padding: '3px 8px',
+    borderRadius: 999,
+    background: '#173a2c',
+    color: '#8ce0b0',
+    border: '1px solid #2c6b4a',
+  },
+  badgeDraft: {
+    fontSize: 11,
+    padding: '3px 8px',
+    borderRadius: 999,
+    background: '#3a2f17',
+    color: '#ffd580',
+    border: '1px solid #6b5a2c',
+  },
+  storeDesc: { margin: '8px 0 0', fontSize: 13, color: '#a0a0c0', lineHeight: 1.5 },
+  primaryButton: {
+    padding: '12px 20px',
+    borderRadius: 8,
+    border: 'none',
+    background: '#e94560',
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  secondaryButton: {
+    marginTop: 12,
+    padding: '10px 16px',
+    borderRadius: 8,
+    border: '1px solid #2c4270',
+    background: 'transparent',
+    color: '#8ea6dd',
+    fontSize: 13,
+    cursor: 'pointer',
+  },
 };
+

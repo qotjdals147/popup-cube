@@ -113,12 +113,19 @@ export function StorePage() {
     setIdleSecondsLeft(null);
   }
 
+  /** AD-037 — 웹 플레이 월드 비활성: 점주→에디터, 그 외→앱 안내 */
   useEffect(() => {
-    if (authLoading) return;
+    if (authLoading || !storeId) return;
     if (!userId) {
-      navigate('/login?role=shopper');
+      navigate('/login', { replace: true });
+      return;
     }
-  }, [authLoading, userId, navigate]);
+    if (isOwnerOfThisStore) {
+      navigate(`/store/${storeId}/edit`, { replace: true });
+      return;
+    }
+    navigate('/app-only', { replace: true });
+  }, [authLoading, userId, storeId, isOwnerOfThisStore, navigate]);
 
   useEffect(() => {
     if (!storeId || !userId || !worldRef.current) return;

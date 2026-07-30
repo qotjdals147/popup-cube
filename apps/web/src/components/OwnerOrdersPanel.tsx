@@ -5,14 +5,15 @@ import { t } from '../i18n';
 
 interface OwnerOrdersPanelProps {
   storeId: string;
-  onClose: () => void;
+  onClose?: () => void;
+  embedded?: boolean;
 }
 
 /**
  * 점주용 주문 관리 화면 — 실제 저장된 주문(mock 결제지만 DB엔 진짜 기록, §10) 목록.
  * 구매자 닉네임·배송지는 `get_store_orders` 서버 함수가 본인 매장 소유 여부를 검증한 뒤 반환.
  */
-export function OwnerOrdersPanel({ storeId, onClose }: OwnerOrdersPanelProps) {
+export function OwnerOrdersPanel({ storeId, onClose, embedded = false }: OwnerOrdersPanelProps) {
   const [orders, setOrders] = useState<OwnerOrderView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -34,15 +35,18 @@ export function OwnerOrdersPanel({ storeId, onClose }: OwnerOrdersPanelProps) {
     };
   }, [storeId]);
 
-  return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
-        <div style={styles.header}>
-          <h3 style={styles.title}>{t('ownerOrders.title')}</h3>
-          <button style={styles.closeButton} onClick={onClose}>
-            ✕
-          </button>
-        </div>
+  const panelBody = (
+    <>
+        {!embedded && (
+          <div style={styles.header}>
+            <h3 style={styles.title}>{t('ownerOrders.title')}</h3>
+            {onClose && (
+              <button style={styles.closeButton} onClick={onClose}>
+                ✕
+              </button>
+            )}
+          </div>
+        )}
 
         {loading && <p style={styles.hint}>{t('ownerOrders.loading')}</p>}
         {!loading && error && <p style={styles.error}>{t('ownerOrders.errorLoad')}</p>}
@@ -90,6 +94,22 @@ export function OwnerOrdersPanel({ storeId, onClose }: OwnerOrdersPanelProps) {
             ))}
           </div>
         )}
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <section style={styles.embeddedPanel}>
+        <h2 style={styles.embeddedTitle}>{t('ownerOrders.title')}</h2>
+        {panelBody}
+      </section>
+    );
+  }
+
+  return (
+    <div style={styles.overlay} onClick={onClose}>
+      <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
+        {panelBody}
       </div>
     </div>
   );
@@ -105,6 +125,13 @@ function formatDate(iso: string): string {
 }
 
 const styles: Record<string, React.CSSProperties> = {
+  embeddedPanel: {
+    background: '#16213e',
+    borderRadius: 12,
+    padding: 24,
+    border: '1px solid #2c4270',
+  },
+  embeddedTitle: { margin: '0 0 16px', fontSize: 18, color: '#fff' },
   overlay: {
     position: 'fixed',
     inset: 0,

@@ -19,5 +19,10 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "packageManager": "npm@11.16.0"
+  "packageManager": "npm@11.16.0",
+  "overrides": {
+    "metro": "0.81.5",
+    "metro-config": "0.81.5",
+    "metro-resolver": "0.81.5"
+  }
 }

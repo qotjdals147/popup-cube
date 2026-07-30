@@ -1,7 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ViewModeToggle } from '../components/ViewModeToggle';
-import { useViewMode } from '../context/ViewModeContext';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { t, getAuthErrorMessage } from '../i18n';
 import { checkNicknameAvailable, isNicknameLengthValid } from '../lib/nickname';
@@ -9,12 +7,10 @@ import { checkNicknameAvailable, isNicknameLengthValid } from '../lib/nickname';
 type Mode = 'login' | 'signup';
 type NicknameStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
 
+/** AD-037 — PC 웹 로그인: 스토어 관리자 전용 */
 export function LoginPage() {
-  const [searchParams] = useSearchParams();
-  const role = searchParams.get('role') === 'owner' ? 'owner' : 'shopper';
   const navigate = useNavigate();
-  const { isMobile } = useViewMode();
-  const { signInWithPassword, signUp } = useAuth();
+  const { signInWithPassword, signUp, userId, role, storeId, loading: authLoading } = useAuth();
 
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
@@ -24,6 +20,19 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (authLoading || !userId) return;
+    if (role === 'shopper') {
+      navigate('/home', { replace: true });
+      return;
+    }
+    if (role === 'owner' && storeId) {
+      navigate(`/store/${storeId}/edit`, { replace: true });
+    } else {
+      navigate('/home', { replace: true });
+    }
+  }, [authLoading, userId, role, storeId, navigate]);
 
   function toggleMode() {
     setMode((m) => (m === 'login' ? 'signup' : 'login'));
@@ -36,7 +45,6 @@ export function LoginPage() {
 
   function handleNicknameChange(value: string) {
     setNickname(value);
-    // 닉네임을 수정하면 이전 중복확인 결과는 무효 — 반드시 다시 확인해야 함.
     setNicknameStatus('idle');
   }
 
@@ -67,16 +75,13 @@ export function LoginPage() {
 
     if (signInError) {
       setError(getAuthErrorMessage(signInError));
-      return;
     }
-    navigate('/home');
   }
 
   async function handleSignupSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
-    // 중복확인을 안 눌렀거나(idle/checking/error), 눌렀는데 중복(taken)인 상태면 가입 자체를 막는다.
     if (nicknameStatus !== 'available') {
       setError(nicknameStatus === 'taken' ? t('signup.taken') : t('signup.needCheck'));
       return;
@@ -97,8 +102,6 @@ export function LoginPage() {
       setPassword('');
       return;
     }
-
-    navigate('/home');
   }
 
   const nicknameHint =
@@ -111,18 +114,14 @@ export function LoginPage() {
           : null;
 
   return (
-    <div style={styles.page} className={isMobile ? 'page-mobile' : undefined}>
+    <div style={styles.page}>
       <form
         style={styles.card}
-        className="login-card"
         onSubmit={mode === 'login' ? handleLoginSubmit : handleSignupSubmit}
       >
-        <h2 style={styles.title}>
-          {role === 'owner' ? t('login.ownerTitle') : t('login.shopperTitle')}
-        </h2>
-        <p style={styles.subtitle}>
-          {role === 'owner' ? t('login.ownerSubtitle') : t('login.shopperSubtitle')}
-        </p>
+        <h2 style={styles.title}>{t('login.ownerTitle')}</h2>
+        <p style={styles.subtitle}>{t('login.ownerSubtitle')}</p>
+        <p style={styles.pcHint}>{t('login.ownerPcHint')}</p>
 
         {info && <p style={styles.info}>{info}</p>}
 
@@ -171,7 +170,7 @@ export function LoginPage() {
 
         {error && <p style={styles.error}>{error}</p>}
 
-        <button style={styles.button} type="submit" disabled={loading}>
+        <button style={styles.button} type="submit" disabled={loading || authLoading}>
           {mode === 'login'
             ? loading
               ? t('common.loggingIn')
@@ -188,8 +187,6 @@ export function LoginPage() {
         <button style={styles.backButton} type="button" onClick={() => navigate('/')}>
           {t('common.back')}
         </button>
-
-        <ViewModeToggle />
       </form>
     </div>
   );
@@ -203,25 +200,24 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
     fontFamily: "'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif",
+    padding: 24,
   },
   card: {
     background: '#0f3460',
     padding: '36px 32px',
     borderRadius: 16,
-    width: 320,
+    width: '100%',
+    maxWidth: 380,
     boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
   },
   title: { color: '#fff', fontSize: 20, margin: 0 },
-  subtitle: { color: '#a0a0c0', fontSize: 13, marginTop: 8, marginBottom: 8 },
-  demoHint: {
-    color: '#7dffb2',
+  subtitle: { color: '#a0a0c0', fontSize: 13, marginTop: 8, marginBottom: 4 },
+  pcHint: {
+    color: '#8ea6dd',
     fontSize: 12,
     marginTop: 0,
     marginBottom: 16,
-    background: '#173a2c',
-    border: '1px solid #2c6b4a',
-    borderRadius: 8,
-    padding: '8px 10px',
+    lineHeight: 1.5,
   },
   input: {
     width: '100%',

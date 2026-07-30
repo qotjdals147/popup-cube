@@ -9,3 +9,4 @@ export * from './topDownGame';
 export type { WorldVisualStyle, GeneratedInteractZone, VirtualDirections } from './topDownGame';
 export { GUCCI_CENTER_TABLE } from './generatedWorldAssets';
 export * from './isoVisuals';
+export * from './occupancyGrid';
