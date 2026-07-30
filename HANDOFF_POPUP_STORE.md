@@ -112,7 +112,10 @@
 상세 기술 메모는 `apps/mobile/README.md` · 이 절이 **에이전트 행동 규칙**.
 
 #### 에이전트가 반드시 지킬 것
-1. **SDK 버전을 항상 명시** — 이 프로젝트는 **Expo SDK 52**. 「Expo Go만 설치하세요」만 쓰지 말고 **SDK 52 APK**라고 쓴다. (SDK 57 = 실기기 크래시, ISS-025)
+1. **SDK 버전을 항상 명시** — 이 프로젝트는 **Expo SDK 52**. 「Expo Go만 설치하세요」만 쓰지 말고 **SDK 52 APK**라고 쓴다.  
+   - Play 스토어 Expo Go = 보통 **최신**(현재 **54** 등) → QR 찍으면 *Project is incompatible* (우리 52 vs Go 54).  
+   - **SDK 57** = 실기기 크래시 이력 (ISS-025) — 쓰지 말 것.  
+   - 해결: Play 스토어 Expo Go **삭제** → **SDK 52 APK** 설치 → QR 다시.
 2. **명령은 PowerShell 기준** · 워크스페이스 절대 경로부터 (`cd C:\Users\qotjd\Downloads\Cursor\popup_store\...`)
 3. **Tunnel 기본** — 폰과 PC가 다른 네트워크일 수 있음 → `npx expo start --tunnel --port 8082 --clear`
 4. **데모 계정**을 함께 적는다: `demo@shopper.com` / `demo` (손님) · `demo@owner.com` / `demo` (점주·월드 입장만, 관리는 PC)
@@ -127,10 +130,14 @@
 ```
 【Expo Go 테스트 — POP-UP CUBE】
 
-1) 폰에 Expo Go **SDK 52** 설치
-   - Play 스토어 일반 Expo Go가 57이면 삭제 후 SDK 52 APK:
+1) 폰에 Expo Go **SDK 52** 설치 (Play 스토어 버전은 보통 54+라 **안 맞음**)
+   - Play 스토어 Expo Go **삭제**
+   - SDK 52 APK 설치:
+     https://expo.dev/go?sdkVersion=52
+     (Android device → Manual / APK)
+   - 직접 APK 예:
      https://github.com/expo/expo-go-releases/releases/download/Expo-Go-2.32.20/Expo-Go-2.32.20.apk
-   - 또는 PC에서: cd apps\mobile → npx expo-go url android 52
+   - 또는 PC: cd apps\mobile → npx expo-go url android 52
 
 2) PC (PowerShell)
    cd C:\Users\qotjd\Downloads\Cursor\popup_store
@@ -138,7 +145,7 @@
    cd apps\mobile
    npx expo start --tunnel --port 8082 --clear
 
-3) 폰 Expo Go로 QR 스캔
+3) 폰 **SDK 52** Expo Go로 QR 스캔
 
 4) 로그인
    - 손님: demo@shopper.com / demo
@@ -147,6 +154,8 @@
 5) 홈 → 매장 카드 → 입장하기 → 픽셀 월드(WebView)
    - 월드가 안 열리면: Vercel에 최신 웹 배포·Railway 소켓 URL 확인
 
+※ "Project is incompatible … Expo Go SDK 54 / project SDK 52"
+   → Play 스토어 Go 삭제 후 SDK 52 APK 설치 (위 1번)
 ※ SDK 57 Expo Go + 이 프로젝트 = 거의 항상 팅김
 ※ 빨간 화면(모듈 없음) → 루트에서 npm install --legacy-peer-deps 후 --clear 재시작
 ```
@@ -165,7 +174,7 @@
 | **Purpose** | 오프라인 팝업 스토어 한계를 넘는 2D 픽셀 아트 메타버스 커머스 플랫폼 |
 | **Workspace** | `C:\Users\qotjd\Downloads\Cursor\popup_store` |
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
-| **Current Phase** | **Phase 4 정식 런칭** — Sprint 4-1 완료 (앱 WebView + `/play` Phaser + display_fixtures 로드). 다음: Sprint 4-2 진열 상품 팝업·장바구니 |
+| **Current Phase** | **Phase 4 정식 런칭** — Sprint 4-2 진행 (진열 팝업·장바구니·착용 미리보기). 다음: 폴리시 / PG / 캐릭터 고도화 |
 | **Version** | `0.2.0` |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
@@ -379,7 +388,7 @@
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
 - [x] **Sprint 4-1 — 앱 Phaser 월드 뼈대** — WebView → `/play/:storeId` · `display_fixtures` 로드 · GUCCI 시드 1건 (2026-07-30)
-- [ ] **Sprint 4-2 — 손님 진열 상호작용** — 슬롯 상품 팝업 · 장바구니 · TryOn (앱 HUD)
+- [x] **Sprint 4-2 — 손님 진열 상호작용** — 슬롯 상품 팝업 · 장바구니 · 착용 미리보기 (2026-07-30) · 바로구매·풀 TryOn ⬜
 - [ ] **[Phase 4, 정식 출시 필수] "임시저장(draft)/출시(published)" 재도입 (AD-021, §26)** — 데모는 생성 즉시 `published`로 단순화했지만, 정식 개발 때는 반드시 draft 기본값 + 계속 편집 + draft도 점주에게 잘 보이게(배지) + 출시 버튼으로 복원. 에디터(Phase 4) 작업과 **함께** 진행할 것(에디터 없이 draft만 먼저 넣으면 이번 ISS-015처럼 막다른 흐름 재발). 자세한 요구사항은 §26 "정식 출시 시 임시저장/출시 UX" 참고.
 - [x] **Phase 2 후속 (일부)** — 카메라가 캐릭터를 따라다니는 고정 뷰포트 방식으로 전환 + 타일/캐릭터/글자 크기 확대(2026-07-13, AD-026)
 - [ ] **Phase 2 후속 (남음)** — 충돌 정확도 개선(현재는 collidable 타일 단순 차단), 간단 애니메이션(방향별 스프라이트) 추가
@@ -489,10 +498,9 @@ popup_store/                          # Turborepo root
 ## 7. Next Steps (Priority Order)
 
 ### 사용자가 지금 해야 할 것
-- **Sprint 4-1 실기 확인** — 절차는 **§0 「Expo Go 실기 테스트 안내 규칙」표준 안내문** 그대로.
-- 흐름: Expo Go **SDK 52** → `demo@shopper.com` / `demo` → 홈 → GUCCI 입장 → WebView 월드.
-- **배포:** `git push` → Vercel에 `/play/:storeId` 반영된 뒤 테스트.
-- **소켓:** Vercel `VITE_SOCKET_SERVER_URL` = Railway URL (localhost면 월드 「오프라인」안내만).
+- **Sprint 4-2 실기 확인** — §0 Expo Go 안내문 · SDK 52.
+- 흐름: 로그인 → GUCCI 입장 → 테이블 근처 → **「진열 상품 보기」** 탭 → 담기 / 착용해보기 / 장바구니.
+- Vercel에 `/play` 최신 배포 후 테스트 (push 후 1~2분).
 
 ### 모바일 테스트 후 정리 (ISS-027 — User 요청 2026-07-27, **테스트 완료 시 필수**)
 Expo Go 실기 테스트가 끝나면 아래를 **전부** 제거·원복 (남기면 손님/점주 화면에 개발 문구 노출):
@@ -545,7 +553,7 @@ Expo Go 실기 테스트가 끝나면 아래를 **전부** 제거·원복 (남�
 | **2** | ✅ 2026-07-27 | 웹 AD-037 (점주 로그인만) + `/store/:id/edit` |
 | **3** | ✅ 2026-07-27 | `OwnerDisplayPanel` + draft/출시 (AD-021, 에디터와 동시) |
 | **4-1** | ✅ 2026-07-30 | 앱 WebView + 웹 `/play/:storeId` Phaser · `displayFixtures` 로드 · GUCCI fixture 시드 |
-| **4-2** | ⬜ **다음** | 진열 슬롯 상품 팝업 · 장바구니 · TryOn |
+| **4-2** | ✅ 2026-07-30 | 진열 슬롯 상품 팝업 · 장바구니 · 착용 미리보기 (풀 스프라이트 TryOn은 후속) |
 
 ### Cursor가 다음에 할 것 (긴급 미팅 **이후**, 순서대로)
 0. **Phase 4 핵심 — 진열 조형물 + 슬롯 쇼핑 (AD-033, §32)** — 소비자는 테이블/옷걸이 앞 상호작용 → 상품 팝업(구매·담기·착용해보기+아바타 프리뷰). 점주는 조형물 배치 + 슬롯에 상품 넣고/빼고/순서 변경. 시안 목업·PDF는 2026-07-14 완료, **코드 구현**이 다음 본작업.
@@ -569,6 +577,15 @@ Expo Go 실기 테스트가 끝나면 아래를 **전부** 제거·원복 (남�
 ---
 
 ## 8. Changelog
+
+### 2026-07-30 — Phase 4 Sprint 4-2: 진열 상품 팝업 · 장바구니 · 착용 미리보기
+- **Author:** Cursor Agent (User 승인)
+- **Changed:**
+  - `PlayWorldPage.tsx` — HUD(상호작용·장바구니·전체상품) · `DisplayProductModal` · `CartDrawer` · `ShopPanel`
+  - `DisplayProductModal.tsx` — `fixtureId` 슬롯 상품 로드 · 착용 미리보기(상품 이미지) · 바로구매 준비중
+  - GUCCI `display_slots` ← 스카프·티·백 상품 연결 · migration `20260730_sprint4_gucci_slot_products.sql`
+  - `i18n/ko.ts` — `display.buySoon` · `tryOnHint` · `tryOnApplied` · `play.interactTap`
+- **Notes:** 풀 캐릭터 스프라이트 장착(AD-020)은 후속. 실기: 테이블 근처 → 진열 상품 보기 → 담기. §0 Expo Go 안내.
 
 ### 2026-07-30 — Phase 4 Sprint 4-1: 앱 WebView 월드 + display_fixtures 로드
 - **Author:** Cursor Agent (User 승인 · Composer)
@@ -2836,11 +2853,11 @@ union all select 'profiles', count(*) from public.profiles;
 - [x] **§44 Grid Occupancy** — `buildOccupancyGrid()`, fixture w×d 점유 (`occupancyGrid.ts`, 2026-07-27)
 - [ ] walkable mask / blueprint 연동 (§45)
 - [x] Phaser: 조형물 proximity + Interact (GUCCI 데모 — `onNearInteractZone`, §43)
-- [x] `DisplayProductModal` — **데모:** 슬롯 상품 3종 + 담기 + 착용 **플레이스홀더** (바로구매·실착용 ⬜)
-- [ ] `TryOnPreview` — 우측 아바타 착용 전·후
+- [x] `DisplayProductModal` — 슬롯 상품 + 담기 + 착용 **미리보기**(Sprint 4-2) · 바로구매·풀 스프라이트 ⬜
+- [ ] `TryOnPreview` — 우측 아바타 착용 전·후 (파츠 레이어 · AD-020)
 - [x] 점주 `OwnerDisplayPanel` — 조형물 배치 + 슬롯 CRUD + 순서 (Sprint 3)
-- [x] GUCCI `display_fixtures` 시드 1건 (Sprint 4-1) — 슬롯 상품 연결·팝업은 **4-2**
-- [x] 앱 WebView `/play/:storeId` (Sprint 4-1)
+- [x] GUCCI `display_fixtures` 시드 + 슬롯 상품 3종 (Sprint 4-1/4-2)
+- [x] 앱 WebView `/play/:storeId` + 진열 상호작용 HUD (Sprint 4-1/4-2)
 - [ ] i18n·시안·PDF와 버튼명 동기화 유지
 
 ### 시각 자료

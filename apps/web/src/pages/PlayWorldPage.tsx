@@ -16,7 +16,11 @@ import {
   type VirtualDirections,
 } from '@popup-cube/game-core';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { VirtualDpad } from '../components/VirtualDpad';
+import { DisplayProductModal } from '../components/DisplayProductModal';
+import { CartDrawer } from '../components/CartDrawer';
+import { ShopPanel } from '../components/ShopPanel';
 import { toFixturePlacement, loadStoreDisplayLayout } from '../lib/displayFixtures';
 import { getStoreSummary } from '../lib/stores';
 import { supabase } from '../lib/supabase';
@@ -42,7 +46,7 @@ function isBrowserOnLocalDev(): boolean {
   return host === 'localhost' || host === '127.0.0.1';
 }
 
-/** 앱 WebView가 넘긴 Supabase 세션을 해시에서 읽어 복구 (Sprint 4-1) */
+/** 앱 WebView가 넘긴 Supabase 세션을 해시에서 읽어 복구 */
 async function bootstrapSessionFromHash(): Promise<void> {
   const raw = window.location.hash.replace(/^#/, '');
   if (!raw) return;
@@ -63,14 +67,28 @@ function postToApp(type: string, payload?: Record<string, unknown>) {
   window.ReactNativeWebView?.postMessage(JSON.stringify({ type, ...payload }));
 }
 
+/** GUCCI generated 존 id → DB fixture UUID 매핑 (Sprint 4-2) */
+function resolveFixtureId(
+  zone: GeneratedInteractZone | null,
+  placements: FixturePlacement[]
+): string | null {
+  if (!zone || placements.length === 0) return null;
+  if (placements.some((p) => p.id === zone.id)) return zone.id;
+  if (zone.id === 'fixture_center_table' || zone.id.startsWith('fixture_')) {
+    return placements[0]?.id ?? null;
+  }
+  return placements[0]?.id ?? null;
+}
+
 /**
- * 모바일 앱 WebView 전용 플레이 월드 (AD-037 / Sprint 4-1).
- * PC 점주 웹 `/store/:id` 와 분리 — 손님 쇼핑·월드는 여기 + 앱.
+ * 모바일 앱 WebView 전용 플레이 월드 (AD-037 · Sprint 4-2).
+ * 진열 상호작용 → 상품 팝업 · 장바구니 · 착용 미리보기.
  */
 export function PlayWorldPage() {
   const { storeId } = useParams();
   const navigate = useNavigate();
   const { userId, email, nickname, loading: authLoading } = useAuth();
+  const { totalQuantity } = useCart();
   const worldRef = useRef<HTMLDivElement | null>(null);
   const gameRef = useRef<TopDownGameController | null>(null);
   const socketRef = useRef<Socket | null>(null);
@@ -94,6 +112,14 @@ export function PlayWorldPage() {
     Awaited<ReturnType<typeof loadStoreDisplayLayout>>['occupancy'] | undefined
   >(undefined);
   const [layoutReady, setLayoutReady] = useState(false);
+  const [displayOpen, setDisplayOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
+
+  const activeFixtureId = useMemo(
+    () => resolveFixtureId(nearZone, placements),
+    [nearZone, placements]
+  );
 
   useEffect(() => {
     let active = true;
@@ -111,7 +137,6 @@ export function PlayWorldPage() {
       setWorldError(null);
       return;
     }
-    // WebView 해시 세션 복구가 AuthContext보다 늦게 끝날 수 있음 — 잠깐 대기
     const timer = window.setTimeout(() => {
       setWorldError(t('play.needLogin'));
     }, 900);
@@ -198,7 +223,10 @@ export function PlayWorldPage() {
         );
       },
       onNearInteractZone(zone) {
-        if (mounted) setNearZone(zone);
+        if (mounted) {
+          setNearZone(zone);
+          if (!zone) setDisplayOpen(false);
+        }
       },
     })
       .then((controller) => {
@@ -240,10 +268,14 @@ export function PlayWorldPage() {
 
   function goHome() {
     postToApp('navigate_home');
-    // 브라우저에서 직접 열었을 때 fallback
     if (!window.ReactNativeWebView) {
       navigate('/app-only');
     }
+  }
+
+  function openDisplay() {
+    if (!nearZone) return;
+    setDisplayOpen(true);
   }
 
   if (bootstrapping || authLoading) {
@@ -273,10 +305,33 @@ export function PlayWorldPage() {
 
       <div ref={worldRef} style={styles.world} />
 
-      {nearZone && (
-        <div style={styles.interactBanner}>
+      {nearZone && !displayOpen && (
+        <button type="button" style={styles.interactBanner} onClick={openDisplay}>
           <span>{nearZone.label}</span>
-          <span style={styles.interactHint}>{t('play.interactSoon')}</span>
+          <span style={styles.interactHint}>{t('play.interactTap')}</span>
+        </button>
+      )}
+
+      {gameReady && (
+        <div style={styles.hud}>
+          <button
+            type="button"
+            style={{
+              ...styles.hudBtn,
+              ...(nearZone ? styles.hudBtnActive : styles.hudBtnDisabled),
+            }}
+            disabled={!nearZone}
+            onClick={openDisplay}
+          >
+            {nearZone ? t('display.interactNear') : t('store.hud.interact')}
+          </button>
+          <button type="button" style={styles.hudBtn} onClick={() => setCartOpen(true)}>
+            🛒 {t('store.hud.cart')}
+            {totalQuantity > 0 ? ` (${totalQuantity})` : ''}
+          </button>
+          <button type="button" style={styles.hudBtn} onClick={() => setShopOpen(true)}>
+            {t('store.hud.allProducts')}
+          </button>
         </div>
       )}
 
@@ -284,6 +339,38 @@ export function PlayWorldPage() {
         <div style={styles.dpadWrap}>
           <VirtualDpad onDirectionChange={onDpad} />
         </div>
+      )}
+
+      {displayOpen && storeId && nearZone && (
+        <DisplayProductModal
+          storeId={storeId}
+          fixtureLabel={nearZone.label}
+          fixtureId={activeFixtureId}
+          onClose={() => setDisplayOpen(false)}
+          onOpenCart={() => {
+            setDisplayOpen(false);
+            setCartOpen(true);
+          }}
+        />
+      )}
+
+      {cartOpen && storeId && (
+        <CartDrawer
+          storeId={storeId}
+          userId={userId}
+          onClose={() => setCartOpen(false)}
+        />
+      )}
+
+      {shopOpen && storeId && (
+        <ShopPanel
+          storeId={storeId}
+          onClose={() => setShopOpen(false)}
+          onOpenCart={() => {
+            setShopOpen(false);
+            setCartOpen(true);
+          }}
+        />
       )}
     </div>
   );
@@ -345,21 +432,50 @@ const styles: Record<string, CSSProperties> = {
   interactBanner: {
     position: 'absolute',
     left: 12,
-    right: 12,
+    right: 100,
     bottom: 148,
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 8,
     padding: '12px 14px',
-    background: 'rgba(15,23,42,0.92)',
+    background: 'rgba(15,23,42,0.94)',
     border: '1px solid #c9a962',
     borderRadius: 12,
     zIndex: 3,
     fontSize: 14,
     fontWeight: 600,
+    color: '#fff',
+    cursor: 'pointer',
   },
-  interactHint: { fontSize: 12, color: '#94a3b8', fontWeight: 500 },
+  interactHint: { fontSize: 12, color: '#c9a962', fontWeight: 600 },
+  hud: {
+    position: 'absolute',
+    left: 8,
+    bottom: 16,
+    zIndex: 3,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    maxWidth: '46%',
+  },
+  hudBtn: {
+    border: '1px solid #334155',
+    background: 'rgba(15,23,42,0.92)',
+    color: '#f1f5f9',
+    borderRadius: 10,
+    padding: '10px 12px',
+    fontSize: 13,
+    fontWeight: 600,
+    textAlign: 'left',
+  },
+  hudBtnActive: {
+    borderColor: '#c9a962',
+    color: '#c9a962',
+  },
+  hudBtnDisabled: {
+    opacity: 0.45,
+  },
   dpadWrap: {
     position: 'absolute',
     right: 8,

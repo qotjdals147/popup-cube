@@ -1,20 +1,24 @@
 import { useEffect, useState } from 'react';
 import type { Product } from '@popup-cube/shared';
 import { listActiveProducts } from '../lib/products';
+import { listFixtureDisplayProducts } from '../lib/displayFixtures';
 import { useCart } from '../context/CartContext';
 import { t } from '../i18n';
 
 interface DisplayProductModalProps {
   storeId: string;
   fixtureLabel: string;
+  /** DB display_fixtures.id — 있으면 슬롯 상품 우선 (Sprint 4-2) */
+  fixtureId?: string | null;
   onClose: () => void;
   onOpenCart: () => void;
 }
 
-/** 중앙 디스플레이 테이블 등 — 진열 구역 상호작용 팝업 (데모). */
+/** 진열 조형물 상호작용 팝업 — 슬롯 상품 · 담기 · 착용 미리보기 (AD-033) */
 export function DisplayProductModal({
   storeId,
   fixtureLabel,
+  fixtureId,
   onClose,
   onOpenCart,
 }: DisplayProductModalProps) {
@@ -24,33 +28,49 @@ export function DisplayProductModal({
   const [error, setError] = useState<string | null>(null);
   const [addedId, setAddedId] = useState<string | null>(null);
   const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
+  const [tryOnProduct, setTryOnProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
     setError(null);
-    listActiveProducts(storeId)
-      .then((data) => {
+    setTryOnProduct(null);
+
+    async function load() {
+      try {
+        let items: Product[] = [];
+        if (fixtureId) {
+          items = await listFixtureDisplayProducts(fixtureId);
+        }
+        // 슬롯 비어 있으면 매장 활성 상품 일부로 fallback (데모·빈 진열 대비)
+        if (items.length === 0) {
+          const all = await listActiveProducts(storeId);
+          items = all.slice(0, 3);
+        }
         if (!mounted) return;
-        const displayItems = data.slice(0, 3);
-        setProducts(displayItems);
-        setPreviewProduct(displayItems[0] ?? null);
-      })
-      .catch(() => {
+        setProducts(items);
+        setPreviewProduct(items[0] ?? null);
+      } catch {
         if (mounted) setError(t('display.errorLoad'));
-      })
-      .finally(() => {
+      } finally {
         if (mounted) setLoading(false);
-      });
+      }
+    }
+
+    void load();
     return () => {
       mounted = false;
     };
-  }, [storeId]);
+  }, [storeId, fixtureId]);
 
   function handleAdd(product: Product) {
     addToCart(storeId, product, 1);
     setAddedId(product.id);
     window.setTimeout(() => setAddedId((prev) => (prev === product.id ? null : prev)), 1200);
+  }
+
+  function handleTryOn(product: Product) {
+    setTryOnProduct(product);
   }
 
   return (
@@ -61,7 +81,7 @@ export function DisplayProductModal({
             <p style={styles.kicker}>{fixtureLabel}</p>
             <h3 style={styles.title}>{t('display.title')}</h3>
           </div>
-          <button style={styles.closeButton} onClick={onClose}>
+          <button type="button" style={styles.closeButton} onClick={onClose}>
             ✕
           </button>
         </div>
@@ -78,6 +98,7 @@ export function DisplayProductModal({
               {products.map((product) => (
                 <button
                   key={product.id}
+                  type="button"
                   style={{
                     ...styles.productChip,
                     ...(previewProduct?.id === product.id ? styles.productChipActive : {}),
@@ -104,10 +125,17 @@ export function DisplayProductModal({
                   {previewProduct.description && (
                     <p style={styles.desc}>{previewProduct.description}</p>
                   )}
-                  <button style={styles.addButton} onClick={() => handleAdd(previewProduct)}>
+                  <button
+                    type="button"
+                    style={styles.addButton}
+                    onClick={() => handleAdd(previewProduct)}
+                  >
                     {addedId === previewProduct.id ? t('shop.added') : t('display.addToCart')}
                   </button>
-                  <button style={styles.cartLink} onClick={onOpenCart}>
+                  <button type="button" style={styles.buySoon} disabled>
+                    {t('display.buySoon')}
+                  </button>
+                  <button type="button" style={styles.cartLink} onClick={onOpenCart}>
                     {t('display.openCart')}
                   </button>
                 </div>
@@ -116,9 +144,30 @@ export function DisplayProductModal({
                   <div style={styles.tryOnTitle}>{t('display.tryOnTitle')}</div>
                   <div style={styles.tryOnStage}>
                     <div style={styles.tryOnAvatar}>🧍</div>
-                    <p style={styles.tryOnPlaceholder}>{t('display.tryOnPlaceholder')}</p>
+                    {tryOnProduct ? (
+                      <>
+                        {tryOnProduct.image_url ? (
+                          <img
+                            src={tryOnProduct.image_url}
+                            alt=""
+                            style={styles.tryOnItemImg}
+                          />
+                        ) : (
+                          <span style={styles.tryOnItemEmoji}>✨</span>
+                        )}
+                        <p style={styles.tryOnApplied}>
+                          {t('display.tryOnApplied', { name: tryOnProduct.name })}
+                        </p>
+                      </>
+                    ) : (
+                      <p style={styles.tryOnPlaceholder}>{t('display.tryOnHint')}</p>
+                    )}
                   </div>
-                  <button style={styles.tryOnButton} disabled title={t('display.tryOnPlaceholder')}>
+                  <button
+                    type="button"
+                    style={styles.tryOnButton}
+                    onClick={() => handleTryOn(previewProduct)}
+                  >
                     {t('store.hud.tryOn')}
                   </button>
                 </div>
@@ -191,8 +240,8 @@ const styles: Record<string, React.CSSProperties> = {
   chipEmoji: { fontSize: 22, width: 36, textAlign: 'center' },
   chipName: { maxWidth: 120, textAlign: 'left' },
   detail: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
+    display: 'flex',
+    flexDirection: 'column',
     gap: 16,
   },
   detailInfo: {
@@ -212,6 +261,17 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#1a1520',
     fontWeight: 700,
     cursor: 'pointer',
+    marginBottom: 8,
+  },
+  buySoon: {
+    width: '100%',
+    padding: '8px 14px',
+    borderRadius: 10,
+    border: '1px solid #3a4560',
+    background: '#1a2236',
+    color: '#6a7490',
+    cursor: 'not-allowed',
+    fontSize: 12,
     marginBottom: 8,
   },
   cartLink: {
@@ -246,6 +306,15 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 12,
   },
   tryOnAvatar: { fontSize: 48, marginBottom: 8 },
+  tryOnItemImg: {
+    width: 56,
+    height: 56,
+    borderRadius: 8,
+    objectFit: 'cover',
+    border: '1px solid #c9a96288',
+    marginBottom: 8,
+  },
+  tryOnItemEmoji: { fontSize: 28, marginBottom: 6 },
   tryOnPlaceholder: {
     margin: 0,
     color: '#8a94ad',
@@ -253,13 +322,28 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'center',
     lineHeight: 1.5,
   },
+  tryOnHint: {
+    margin: 0,
+    color: '#8a94ad',
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 1.5,
+  },
+  tryOnApplied: {
+    margin: 0,
+    color: '#d0d8f0',
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 1.4,
+  },
   tryOnButton: {
     padding: '8px 12px',
     borderRadius: 8,
-    border: '1px solid #3a4560',
+    border: '1px solid #c9a96288',
     background: '#1a2236',
-    color: '#6a7490',
-    cursor: 'not-allowed',
+    color: '#c9a962',
+    cursor: 'pointer',
     fontSize: 12,
+    fontWeight: 600,
   },
 };

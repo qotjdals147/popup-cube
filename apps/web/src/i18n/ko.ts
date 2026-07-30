@@ -109,12 +109,13 @@ export const ko = {
     hint: 'POP-UP CUBE 앱(Expo)을 설치한 뒤 「일반 회원 로그인」으로 입장해 주세요.',
     backLanding: '← 처음으로',
   },
-  /** 앱 WebView 플레이 월드 (Sprint 4-1 · /play/:storeId) */
+  /** 앱 WebView 플레이 월드 (Sprint 4 · /play/:storeId) */
   play: {
     backHome: '← 홈',
     needLogin: '로그인이 필요해요. 앱에서 다시 입장해 주세요.',
     fixtureCount: '진열 {count}개',
     interactSoon: '진열 상품 보기 · 곧 연결',
+    interactTap: '탭해서 진열 상품 보기',
   },
   createStore: {
     title: '매장 만들기',
@@ -196,11 +197,14 @@ export const ko = {
     errorLoad: '진열 상품을 불러오지 못했어요.',
     empty: '이 진열 구역에 등록된 상품이 없어요.',
     addToCart: '장바구니 담기',
+    buySoon: '바로 구매 (준비 중)',
     openCart: '장바구니 열기',
     interactHint: '가까이 가면 상호작용할 수 있어요',
     interactNear: '진열 상품 보기',
     tryOnTitle: '착용 미리보기',
     tryOnPlaceholder: '2D 캐릭터 착용 미리보기 공간 — 정식 버전에서 구현 예정입니다.',
+    tryOnHint: '상품을 고른 뒤 「착용해보기」를 눌러 보세요.',
+    tryOnApplied: '{name} 착용 중 (미리보기)',
   },
   cart: {
     title: '🛒 장바구니',

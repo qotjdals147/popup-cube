@@ -474,6 +474,11 @@ export function StorePage() {
         <DisplayProductModal
           storeId={storeId}
           fixtureLabel={nearInteractZone.label}
+          fixtureId={
+            nearInteractZone.id === 'fixture_center_table'
+              ? undefined
+              : nearInteractZone.id
+          }
           onClose={() => setDisplayModalOpen(false)}
           onOpenCart={() => {
             setDisplayModalOpen(false);
