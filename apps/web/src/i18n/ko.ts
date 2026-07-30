@@ -116,6 +116,7 @@ export const ko = {
     fixtureCount: '진열 {count}개',
     interactSoon: '진열 상품 보기 · 곧 연결',
     interactTap: '탭해서 진열 상품 보기',
+    moveWhenReady: '월드 입장 후 이동 가능',
   },
   createStore: {
     title: '매장 만들기',

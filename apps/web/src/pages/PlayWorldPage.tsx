@@ -312,6 +312,14 @@ export function PlayWorldPage() {
         </button>
       )}
 
+      {/* 이동 D-pad — 왼쪽 아래 (항상 보이게 · embedded 인라인) */}
+      <div style={styles.dpadWrap}>
+        <VirtualDpad embedded onDirectionChange={onDpad} disabled={!gameReady} />
+        {!gameReady && (
+          <div style={styles.dpadHint}>{t('play.moveWhenReady')}</div>
+        )}
+      </div>
+
       {gameReady && (
         <div style={styles.hud}>
           <button
@@ -332,12 +340,6 @@ export function PlayWorldPage() {
           <button type="button" style={styles.hudBtn} onClick={() => setShopOpen(true)}>
             {t('store.hud.allProducts')}
           </button>
-        </div>
-      )}
-
-      {gameReady && (
-        <div style={styles.dpadWrap}>
-          <VirtualDpad onDirectionChange={onDpad} />
         </div>
       )}
 
@@ -432,8 +434,8 @@ const styles: Record<string, CSSProperties> = {
   interactBanner: {
     position: 'absolute',
     left: 12,
-    right: 100,
-    bottom: 148,
+    right: 12,
+    bottom: 210,
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -442,7 +444,7 @@ const styles: Record<string, CSSProperties> = {
     background: 'rgba(15,23,42,0.94)',
     border: '1px solid #c9a962',
     borderRadius: 12,
-    zIndex: 3,
+    zIndex: 4,
     fontSize: 14,
     fontWeight: 600,
     color: '#fff',
@@ -451,13 +453,13 @@ const styles: Record<string, CSSProperties> = {
   interactHint: { fontSize: 12, color: '#c9a962', fontWeight: 600 },
   hud: {
     position: 'absolute',
-    left: 8,
+    right: 8,
     bottom: 16,
-    zIndex: 3,
+    zIndex: 5,
     display: 'flex',
     flexDirection: 'column',
     gap: 8,
-    maxWidth: '46%',
+    maxWidth: '42%',
   },
   hudBtn: {
     border: '1px solid #334155',
@@ -478,8 +480,19 @@ const styles: Record<string, CSSProperties> = {
   },
   dpadWrap: {
     position: 'absolute',
-    right: 8,
-    bottom: 16,
-    zIndex: 3,
+    left: 10,
+    bottom: 20,
+    zIndex: 5,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dpadHint: {
+    fontSize: 11,
+    color: '#94a3b8',
+    background: 'rgba(15,23,42,0.85)',
+    padding: '4px 8px',
+    borderRadius: 6,
   },
 };
