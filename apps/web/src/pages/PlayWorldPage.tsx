@@ -11,6 +11,7 @@ import type { Socket } from 'socket.io-client';
 import {
   mountTopDownGame,
   type FixturePlacement,
+  type GameChatMessage,
   type GeneratedInteractZone,
   type TopDownGameController,
   type VirtualDirections,
@@ -18,6 +19,8 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { VirtualDpad } from '../components/VirtualDpad';
+import { PlayHudBar } from '../components/PlayHudBar';
+import { PlayWorldChatPanel } from '../components/PlayWorldChatPanel';
 import { DisplayProductModal } from '../components/DisplayProductModal';
 import { CartDrawer } from '../components/CartDrawer';
 import { ShopPanel } from '../components/ShopPanel';
@@ -25,6 +28,7 @@ import { toFixturePlacement, loadStoreDisplayLayout } from '../lib/displayFixtur
 import { getStoreSummary } from '../lib/stores';
 import { supabase } from '../lib/supabase';
 import { t } from '../i18n';
+import '../styles/play-world.css';
 
 declare global {
   interface Window {
@@ -92,6 +96,7 @@ export function PlayWorldPage() {
   const worldRef = useRef<HTMLDivElement | null>(null);
   const gameRef = useRef<TopDownGameController | null>(null);
   const socketRef = useRef<Socket | null>(null);
+  const chatOpenRef = useRef(false);
 
   const username = useMemo(
     () => nickname ?? email?.split('@')[0] ?? t('common.guest'),
@@ -115,6 +120,9 @@ export function PlayWorldPage() {
   const [displayOpen, setDisplayOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [messages, setMessages] = useState<GameChatMessage[]>([]);
 
   const activeFixtureId = useMemo(
     () => resolveFixtureId(nearZone, placements),
@@ -189,6 +197,7 @@ export function PlayWorldPage() {
     let mounted = true;
     setWorldError(null);
     setGameReady(false);
+    setMessages([]);
 
     if (!serverUrl || (isLocalhostServerUrl(serverUrl) && !isBrowserOnLocalDev())) {
       setWorldStatus('');
@@ -228,6 +237,10 @@ export function PlayWorldPage() {
           if (!zone) setDisplayOpen(false);
         }
       },
+      onChatMessage(message) {
+        if (!mounted) return;
+        setMessages((prev) => [...prev.slice(-24), message]);
+      },
     })
       .then((controller) => {
         if (!mounted) {
@@ -236,6 +249,7 @@ export function PlayWorldPage() {
         }
         gameRef.current = controller;
         setGameReady(true);
+        controller.setMovementEnabled(!chatOpenRef.current);
         postToApp('world_ready', { storeId, fixtureCount: placements.length });
       })
       .catch((err) => {
@@ -262,6 +276,11 @@ export function PlayWorldPage() {
     return () => ro.disconnect();
   }, [gameReady]);
 
+  useEffect(() => {
+    chatOpenRef.current = chatOpen;
+    gameRef.current?.setMovementEnabled(!chatOpen);
+  }, [chatOpen]);
+
   const onDpad = useCallback((dirs: VirtualDirections) => {
     gameRef.current?.setVirtualDirections(dirs);
   }, []);
@@ -278,6 +297,18 @@ export function PlayWorldPage() {
     setDisplayOpen(true);
   }
 
+  function handleSendChat() {
+    const text = chatInput.trim();
+    if (!text) {
+      setChatOpen(false);
+      setChatInput('');
+      return;
+    }
+    gameRef.current?.sendChat(text);
+    setChatInput('');
+    setChatOpen(false);
+  }
+
   if (bootstrapping || authLoading) {
     return (
       <div style={styles.root}>
@@ -287,7 +318,7 @@ export function PlayWorldPage() {
   }
 
   return (
-    <div style={styles.root}>
+    <div className="play-world-page" style={styles.root}>
       <header style={styles.header}>
         <button type="button" style={styles.backBtn} onClick={goHome}>
           {t('play.backHome')}
@@ -306,42 +337,50 @@ export function PlayWorldPage() {
       <div ref={worldRef} style={styles.world} />
 
       {nearZone && !displayOpen && (
-        <button type="button" style={styles.interactBanner} onClick={openDisplay}>
+        <button
+          type="button"
+          className="play-interact-banner"
+          style={styles.interactBanner}
+          onClick={openDisplay}
+        >
           <span>{nearZone.label}</span>
           <span style={styles.interactHint}>{t('play.interactTap')}</span>
         </button>
       )}
 
       {/* 이동 D-pad — 왼쪽 아래 (항상 보이게 · embedded 인라인) */}
-      <div style={styles.dpadWrap}>
-        <VirtualDpad embedded onDirectionChange={onDpad} disabled={!gameReady} />
+      <div className="play-dpad-wrap">
+        <VirtualDpad
+          embedded
+          onDirectionChange={onDpad}
+          disabled={!gameReady || chatOpen}
+        />
         {!gameReady && (
           <div style={styles.dpadHint}>{t('play.moveWhenReady')}</div>
         )}
       </div>
 
       {gameReady && (
-        <div style={styles.hud}>
-          <button
-            type="button"
-            style={{
-              ...styles.hudBtn,
-              ...(nearZone ? styles.hudBtnActive : styles.hudBtnDisabled),
-            }}
-            disabled={!nearZone}
-            onClick={openDisplay}
-          >
-            {nearZone ? t('display.interactNear') : t('store.hud.interact')}
-          </button>
-          <button type="button" style={styles.hudBtn} onClick={() => setCartOpen(true)}>
-            🛒 {t('store.hud.cart')}
-            {totalQuantity > 0 ? ` (${totalQuantity})` : ''}
-          </button>
-          <button type="button" style={styles.hudBtn} onClick={() => setShopOpen(true)}>
-            {t('store.hud.allProducts')}
-          </button>
+        <div className="play-hud-anchor">
+          <PlayHudBar
+            interactDisabled={!nearZone}
+            interactActive={!!nearZone}
+            cartCount={totalQuantity}
+            onInteract={openDisplay}
+            onChat={() => setChatOpen(true)}
+            onCart={() => setCartOpen(true)}
+            onShop={() => setShopOpen(true)}
+          />
         </div>
       )}
+
+      <PlayWorldChatPanel
+        open={chatOpen}
+        messages={messages}
+        input={chatInput}
+        onInputChange={setChatInput}
+        onSend={handleSendChat}
+      />
 
       {displayOpen && storeId && nearZone && (
         <DisplayProductModal
@@ -435,7 +474,6 @@ const styles: Record<string, CSSProperties> = {
     position: 'absolute',
     left: 12,
     right: 12,
-    bottom: 210,
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -451,43 +489,6 @@ const styles: Record<string, CSSProperties> = {
     cursor: 'pointer',
   },
   interactHint: { fontSize: 12, color: '#c9a962', fontWeight: 600 },
-  hud: {
-    position: 'absolute',
-    right: 8,
-    bottom: 16,
-    zIndex: 5,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 8,
-    maxWidth: '42%',
-  },
-  hudBtn: {
-    border: '1px solid #334155',
-    background: 'rgba(15,23,42,0.92)',
-    color: '#f1f5f9',
-    borderRadius: 10,
-    padding: '10px 12px',
-    fontSize: 13,
-    fontWeight: 600,
-    textAlign: 'left',
-  },
-  hudBtnActive: {
-    borderColor: '#c9a962',
-    color: '#c9a962',
-  },
-  hudBtnDisabled: {
-    opacity: 0.45,
-  },
-  dpadWrap: {
-    position: 'absolute',
-    left: 10,
-    bottom: 20,
-    zIndex: 5,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 6,
-  },
   dpadHint: {
     fontSize: 11,
     color: '#94a3b8',

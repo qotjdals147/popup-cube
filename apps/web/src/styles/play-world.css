@@ -1,0 +1,155 @@
+/* PlayWorld (/play) — Sprint 4-3 HUD (AD-047) */
+
+.play-world-page {
+  --play-hud-height: 64px;
+}
+
+.play-world-page .play-dpad-wrap {
+  position: absolute;
+  left: max(10px, env(safe-area-inset-left, 0));
+  bottom: calc(14px + env(safe-area-inset-bottom, 0));
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.play-hud-anchor {
+  position: absolute;
+  z-index: 5;
+  left: 112px;
+  right: max(8px, env(safe-area-inset-right, 0));
+  bottom: calc(12px + env(safe-area-inset-bottom, 0));
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.play-hud-anchor .play-hud-bar {
+  pointer-events: auto;
+}
+
+.play-hud-bar {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  padding: 5px 6px;
+  border-radius: 999px;
+  background: rgba(10, 14, 26, 0.94);
+  border: 1px solid rgba(201, 169, 98, 0.5);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  max-width: 100%;
+}
+
+.play-hud-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 48px;
+  max-width: 72px;
+  flex: 1 1 0;
+  padding: 4px 2px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #e2e8f0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.play-hud-slot:active:not(:disabled) {
+  background: rgba(201, 169, 98, 0.15);
+}
+
+.play-hud-slot-active {
+  background: rgba(201, 169, 98, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(201, 169, 98, 0.55);
+}
+
+.play-hud-slot-disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.play-hud-slot-shop .play-hud-label {
+  color: #7ee8a8;
+}
+
+.play-hud-slot-cart .play-hud-label {
+  color: #ffb3c0;
+}
+
+.play-hud-icon {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  flex-shrink: 0;
+}
+
+.play-hud-label {
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.play-world-page .play-interact-banner {
+  bottom: calc(var(--play-hud-height) + 24px + env(safe-area-inset-bottom, 0));
+}
+
+.play-world-chat.chat-open-mobile {
+  bottom: calc(var(--play-hud-height) + 8px + env(safe-area-inset-bottom, 0));
+  max-height: 34vh;
+}
+
+.play-world-chat-log {
+  max-height: 12vh;
+  overflow-y: auto;
+  font-size: 11px;
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
+.play-world-chat-line {
+  margin-bottom: 4px;
+}
+
+.play-world-chat-time {
+  color: #64748b;
+  font-size: 10px;
+}
+
+@media (orientation: landscape) {
+  .play-hud-anchor {
+    left: 118px;
+    justify-content: flex-end;
+  }
+
+  .play-hud-bar {
+    flex: 0 1 auto;
+    width: auto;
+    max-width: min(300px, calc(100vw - 140px));
+  }
+
+  .play-hud-slot {
+    min-width: 44px;
+    flex: 0 0 auto;
+  }
+
+  .play-world-page .play-dpad-wrap {
+    bottom: calc(10px + env(safe-area-inset-bottom, 0));
+  }
+
+  .play-world-chat.chat-open-mobile {
+    max-height: 42vh;
+    left: max(118px, env(safe-area-inset-left, 0));
+  }
+}

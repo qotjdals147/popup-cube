@@ -174,8 +174,8 @@
 | **Purpose** | 오프라인 팝업 스토어 한계를 넘는 2D 픽셀 아트 메타버스 커머스 플랫폼 |
 | **Workspace** | `C:\Users\qotjd\Downloads\Cursor\popup_store` |
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
-| **Current Phase** | **Phase 4 정식 런칭** — Sprint 4-2 진행 (진열 팝업·장바구니·착용 미리보기). 다음: 폴리시 / PG / 캐릭터 고도화 |
-| **Version** | `0.2.0` |
+| **Current Phase** | **Phase 4** — Sprint **4-3 HUD 바 완료** · **다음 = 실기 확인 후 바로구매 mock 또는 4-x 폴리시** (2026-07-31) |
+| **Version** | `0.2.2` (Sprint 4-3 play HUD) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -339,6 +339,7 @@
 | AD-044 | **Grid Occupancy 표준 (등각 타일 맵)** — 타일 그리드 `grid[x][y]` + fixture **다중 타일 점유**(`origin` + `width`×`depth`) + **Y-sort** `(tx+ty)` + 충돌=occupied·벽 + 문=transition(AD-025). **데모(GUCCI):** 이동·depth만 타일, 충돌은 PNG 픽셀 보정(§43). **정식:** occupied가 단일 진실 소스 — §44 | User 2026-07-24: Gemini 등각 도면 스펙 ↔ 우리 정식 방향 정리 요청 | 2026-07-24 |
 | AD-045 | **점주 AI = 매장 전체 생성 ❌ → 리소스 추출 + 도면 에디터** — 실사 업로드 시 **타일·가구·소품·재고 픽셀**만 API로 분리 추출 → **점주 계정 귀속 라이브러리**. 꾸미기 전 **픽셀 도면(벽·문·구조)** 편집 → 바닥 **칠하기**·fixture **점유 배치**(§44). 전체 room gen 금지(GUCCI 충돌 이슈 회피). **§45** | User 2026-07-24: API 절약 + 좌표/충돌 문제 근본 해결 | 2026-07-24 |
 | AD-046 | **인프라·호스팅 맵** — GitHub/Vercel/Railway/Supabase/Upstash 등 **역할·URL·env·비용·단계별 필요 서비스** 단일 설계도. §28 요약 보완. 상세 **§46** | User 2026-07-24: 호스팅 여러 개 정리·앞으로 필요한 것 미리 설계 | 2026-07-24 |
+| AD-047 | **월드 모바일 HUD = 시안 하단 가로 바** — 픽셀 아이콘 4칸: `상호작용 · 채팅 · 장바구니 · 전체상품` (`Online_Popup.docx` · AD-033). **세로:** 하단 중앙(또는 풀폭 근처) 알약 바 + D-pad 왼쪽 아래. **가로:** 같은 바를 **늘리지 않음**(`max-width` 알약 유지) · D-pad 왼쪽 · 바는 하단 중앙/오른쪽. 지금 PlayWorld는 **임시 텍스트 버튼**(기능용) — **Sprint 4-3**에서 시안 바로 교체. 상세 **§32.1** | User 2026-07-30: 시안 HUD 확인·가로 늘림 금지 | 2026-07-30 |
 
 ---
 
@@ -389,14 +390,15 @@
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
 - [x] **Sprint 4-1 — 앱 Phaser 월드 뼈대** — WebView → `/play/:storeId` · `display_fixtures` 로드 · GUCCI 시드 1건 (2026-07-30)
 - [x] **Sprint 4-2 — 손님 진열 상호작용** — 슬롯 상품 팝업 · 장바구니 · 착용 미리보기 (2026-07-30) · 바로구매·풀 TryOn ⬜
-- [ ] **[Phase 4, 정식 출시 필수] "임시저장(draft)/출시(published)" 재도입 (AD-021, §26)** — 데모는 생성 즉시 `published`로 단순화했지만, 정식 개발 때는 반드시 draft 기본값 + 계속 편집 + draft도 점주에게 잘 보이게(배지) + 출시 버튼으로 복원. 에디터(Phase 4) 작업과 **함께** 진행할 것(에디터 없이 draft만 먼저 넣으면 이번 ISS-015처럼 막다른 흐름 재발). 자세한 요구사항은 §26 "정식 출시 시 임시저장/출시 UX" 참고.
+- [x] **Sprint 4-3 — 시안형 하단 HUD 바 (AD-047, §32.1)** — 픽셀 4칸 · 세로/가로 알약 · 채팅 · D-pad 겹침 방지 (2026-07-31)
+- [x] **draft/출시 (AD-021)** — Sprint 3에서 `create_owner_store` → draft + 출시 버튼 (완료)
 - [x] **Phase 2 후속 (일부)** — 카메라가 캐릭터를 따라다니는 고정 뷰포트 방식으로 전환 + 타일/캐릭터/글자 크기 확대(2026-07-13, AD-026)
-- [ ] **Phase 2 후속 (남음)** — 충돌 정확도 개선(현재는 collidable 타일 단순 차단), 간단 애니메이션(방향별 스프라이트) 추가
-- [ ] **점주 전용 픽셀 자산 파이프라인 (AD-020, §27)** — 표준 스프라이트·상품 연결·구매 소유권 기반 장착
+- [ ] **Phase 2 후속 (남음)** — 충돌 정확도 개선, **방향별 스프라이트 애니메이션** (캐릭터 뼈대/파츠는 AD-020 — **쇼핑 루프·HUD 안정 후**)
+- [ ] **점주 전용 픽셀 자산 파이프라인 (AD-020, §27)** — 표준 스프라이트·상품 연결·구매 소유권 기반 장착 (**의도적 후순위** — User 2026-07-30 확인: Sprint 순서 유지)
 - [ ] **점주 AI 매장 에이전트 (AD-040, §40)** — 자연어/실사→진열 가구·슬롯 레이아웃 제안 (Phase 4+ / AD-033 이후)
 - [x] **Vercel 배포** — `apps/web` → https://popup-cube-web.vercel.app (GitHub `main` 연동)
 - [x] **Railway 배포** — `server/` Socket.io (URL은 Railway 대시보드 · `VITE_SOCKET_SERVER_URL`과 `WEB_ORIGIN` 쌍 맞출 것 — §46)
-- [ ] Git remote / 커밋 (사용자 요청 시에만) — *repo는 GitHub 연결됨*
+- [x] **Git push** — Sprint 4-1~4-2 · D-pad fix (`main` · 2026-07-30)
 
 ### File Tree (as of 2026-07-13)
 ```
@@ -491,101 +493,87 @@ popup_store/                          # Turborepo root
 | ISS-024 | ~~Upstash Redis 무료 50만 Commands 한도가 개발 중 거의 소진~~ | Resolved | 원인: `player:move`마다 `hset`+`expire`를 Redis에 쓰고, 클라이언트가 50ms마다 이동 이벤트 전송 → Writes 48만+ / Reads 1천 수준. **조치(2026-07-14)**: `expire`는 입장 시 1회만, 서버 Redis 영속화 500ms 스로틀, 클라이언트 emit 250ms. `REDIS_MOVE_PERSIST_MS` env. 개발 시 `npm run dev` 장시간 + 매장 페이지 이동 테스트 주의. |
 | ISS-025 | ~~Expo Go SDK 57 APK에서 번들 후 앱 force-close~~ | Resolved | Galaxy Fold 5 등 실기기에서 SDK 57 Expo Go로 번들 완료 직후 크래시. **조치(2026-07-27)**: `apps/mobile` **Expo SDK 52** + React 18.3.1로 다운그레이드, `@popup-cube/shared` 제거(로컬 types), metro 0.81.5 override. **Expo Go는 SDK 52 APK** 설치 필수 (`apps/mobile/README.md`). |
 | ISS-026 | ~~모바일 로그인 `Invalid API Key`~~ | Resolved | `apps/mobile/.env` anon key JWT 오타 + 번들 캐시에 옛 키/`placeholder` 잔존. **조치**: `.env` 웹과 동일 키로 수정, `app.config.ts`에서 `.env` 직접 read + `extra`에 주입, `supabase.ts` fallback 정리. |
-| ISS-027 | ~~모바일 **디버그 배너**(`연결 준비됨 · 빌드 cfg-4`)~~ | Resolved | User 2026-07-27 모바일 테스트 완료 → §7 체크리스트대로 `index.tsx`/`login.tsx`/`app.config.ts`/`supabase.ts` 정리 완료. |
+| ISS-027 | ~~모바일 **디버그 배너**(`연결 준비됨 · 빌드 cfg-4`)~~ | Resolved | User 2026-07-27 모바일 테스트 완료 → §7 체크리스트대로 정리 완료. |
+| ISS-028 | ~~PlayWorld **이동 D-pad가 안 보임**~~ | Resolved | CSS `.virtual-dpad` absolute left + wrap을 오른쪽에 둬 화면 밖. **조치:** `VirtualDpad` `embedded` · 왼쪽 아래 · commit `9208754`. |
+| ISS-029 | Play 스토어 Expo Go **SDK 54+** vs 프로젝트 **SDK 52** → incompatible | Low | §0: Play Go 삭제 → SDK 52 APK. 프로젝트 54 업은 별도 승인. |
 
 ---
 
 ## 7. Next Steps (Priority Order)
 
-### 사용자가 지금 해야 할 것
-- **Sprint 4-2 실기 확인** — §0 Expo Go 안내문 · SDK 52.
-- 흐름: 로그인 → GUCCI 입장 → 테이블 근처 → **「진열 상품 보기」** 탭 → 담기 / 착용해보기 / 장바구니.
-- Vercel에 `/play` 최신 배포 후 테스트 (push 후 1~2분).
+### ⏭ 세션 재개 — Sprint 4-3 **코드 완료** (2026-07-31)
 
-### 모바일 테스트 후 정리 (ISS-027 — User 요청 2026-07-27, **테스트 완료 시 필수**)
-Expo Go 실기 테스트가 끝나면 아래를 **전부** 제거·원복 (남기면 손님/점주 화면에 개발 문구 노출):
-
-| 파일 | 제거·원복 대상 |
+| 항목 | 값 |
 |---|---|
-| `apps/mobile/app/index.tsx` | `cfgBanner` / 「연결 준비됨 · 빌드 cfg-4」 블록 + 관련 import·style |
-| `apps/mobile/app/login.tsx` | 동일 `cfgBanner` 블록 + `readSupabaseConfig` import(배너용만) |
-| `apps/mobile/app.config.ts` | `extra.configBuild: 'cfg-4'` |
-| `apps/mobile/src/lib/supabase.ts` | `FALLBACK_*` 하드코드·`configBuild`·`readSupabaseConfig().build` (운영은 `.env` + `extra`만) |
+| **방금 완료** | Sprint 4-3 — `PlayHudBar` · `PlayWorldChatPanel` · `play-world.css` |
+| **User 확인** | Vercel 배포 후 Expo Go SDK 52 · GUCCI · 하단 알약 4버튼 · 채팅 |
+| **다음 후보** | ① 바로 구매 mock ② HUD 아이콘 시안 PNG 교체 ③ StorePage HUD 재사용 |
+| **Git `main`** | 4-3 **로컬 커밋 전** — push 후 Vercel `/play` 반영 |
 
-완료 후 Changelog에 「ISS-027 Resolved — 디버그 배너 제거」 기록.
+### Cursor 다음 1개 (우선)
 
-### 🔴 긴급 — 2026-07-13 저녁 투자자 미팅 (AD-032, §31)
-**목표:** 「이런 플랫폼 할 거예요」를 **눈으로** 이해시키기. 전 기능 완벽 동작은 **필수 아님**.
+| # | 작업 | 상태 |
+|---|---|---|
+| **1** | **실기 확인** — 4-3 HUD · 채팅 · 세로/가로 | ⬜ User |
+| 2 | 바로 구매 mock | ⬜ 팝업 「준비 중」 |
+| 3 | 풀 TryOn / 캐릭터 스프라이트 AD-020 | ⬜ **후순위** |
+| 4 | AD-034/035 자동로그인·동네필터 | ⬜ 시안만 |
+| 5 | PG 실결제 | ⬜ User 후보 미정 |
 
-**용어 (User가 찾던 표현):**
-- **「코드 기반 시각 프로토타입」** — 보여주기용이지만 **버리지 않는** 시안. PPT/Figma만이 아니라 **실제 웹 화면(React)** 으로 만듦 → 정식 개발 **같은 코드**로 이어감 (AD-027)
-- 영어: **High-fidelity UI prototype** / **UI shell** — 화면·레이아웃은 진짜, 데이터·일부 동작은 mock·정적이어도 OK
-- **아닌 것:** ① PPT만(정식에 안 이어짐) ② 전부 실제 동작 완성품(시간 없음)
-
-**미팅 시연 우선 화면:** 랜딩 → 홈(매장 카드·입장 모달) → 팝업 월드 → 쇼핑·장바구니·배송지·할인/가챠 → 점주(상품·주문 관리). 멀티·채팅은 **되면** 보여주고, 안 되면 「동시 접속 예정」으로 넘어가도 됨.
-
-**미팅 전 Cursor 우선 (승인 후):** ① §31 경로 안 깨지게 ② 커merce 느낌 비주얼 폴리시 ③ 미구현 버튼 「준비 중」 처리 ④ Vercel URL
-
-### 2026-07-13 사용자 요청 분류 — "당장 가능" vs "나중에 같이"
-사용자가 한 번에 여러 요청을 줬을 때, 다른 미구현 기능에 의존하는지 여부로 분류함.
-
-**✅ 당장 처리 (이 세션에서 완료, 아래 Changelog 참고)**
-- 캐릭터 닉네임 위치: 머리 위 → 발밑
-- 채팅 말풍선: 채팅 시 5초간 머리 위에 표시, 5초 전에 새 채팅 치면 그 내용으로 교체 후 다시 5초(최신 메시지만 표시 — 메이플스토리 방식)
-- 점주 캐릭터 이름표에 왕관 표시(닉네임 왼쪽) — **본인이 점주인 매장에서만** 표시
-- 점주는 **본인 매장**에서 잠수(자리비움) 자동퇴장 면제 (다른 사람 매장 방문 시엔 일반 유저와 동일하게 적용)
-- 닉네임 표시 스타일 통일 (검정 반투명 배경 + 흰 글자, 본인/상대 동일)
-- 로그인 화면에 회원가입 모드 추가: 이메일/비밀번호/닉네임 + "중복확인" 버튼 → 확인 안 했거나 중복이면 가입 버튼 눌러도 막고 안내 문구 표시
-
-**✅ 완료 (2026-07-13, 이번 세션)**
-- **상품 등록/목록 + 장바구니 MVP** — `products` 테이블+RLS, 점주 등록/수정/숨기기, 소비자 상품 보기+장바구니 담기(+/− 수량, 기본값 1), 장바구니 Drawer(mock 결제). 아래 Changelog 참고.
-- **구매 완료 시 "할인 vs 가챠" 선택 (AD-028)** — `store_promotions`/`gacha_pools`/`gacha_pool_entries`/`gacha_rolls` 테이블+RLS, `roll_gacha()` SECURITY DEFINER 함수, GUCCI 데모 시드(할인 10% + 가챠 아이템 4종), `CartDrawer`에 혜택 선택 단계. 아래 Changelog 참고.
-- **주문 저장 + 소비자 배송지 관리 (AD-030)** — `user_addresses`/`orders`/`order_items` 테이블+RLS, `place_order()`/`get_store_orders()` 함수, 마이페이지 배송지 관리, `CartDrawer` 배송지 선택 단계, 점주 주문 관리 패널. 아래 Changelog 참고.
-
-### Cursor가 다음에 할 것 (Phase 4 정식 런칭 — AD-037, 2026-07-27~)
-
-**채널 원칙:** PC 웹 = 점주 관리만 · 손님 쇼핑·월드 = **앱(Expo)**. 데모 `apps/web` 손님 플로우는 시연용 유지 → 정식 전 분리.
+### Sprint 표
 
 | Sprint | 상태 | 내용 |
 |---|---|---|
-| **0** | ✅ 2026-07-27 | fixture DB + `occupancyGrid` + `displayFixtures.ts` |
-| **1** | ✅ 2026-07-27 | `apps/mobile` Expo — m01/m02/m03 + 입장 placeholder |
-| **2** | ✅ 2026-07-27 | 웹 AD-037 (점주 로그인만) + `/store/:id/edit` |
-| **3** | ✅ 2026-07-27 | `OwnerDisplayPanel` + draft/출시 (AD-021, 에디터와 동시) |
-| **4-1** | ✅ 2026-07-30 | 앱 WebView + 웹 `/play/:storeId` Phaser · `displayFixtures` 로드 · GUCCI fixture 시드 |
-| **4-2** | ✅ 2026-07-30 | 진열 슬롯 상품 팝업 · 장바구니 · 착용 미리보기 (풀 스프라이트 TryOn은 후속) |
+| 0~3 | ✅ | fixture · Expo · 점주 에디터 · OwnerDisplay · draft |
+| **4-1** | ✅ 2026-07-30 | WebView `/play` · fixtures · GUCCI 시드 |
+| **4-2** | ✅ 2026-07-30 | 슬롯 팝업 · 장바구니 · 착용 미리보기 · D-pad fix |
+| **4-3** | ✅ 2026-07-31 | 시안 하단 HUD + 채팅 + 가로 알약 (AD-047) |
 
-### Cursor가 다음에 할 것 (긴급 미팅 **이후**, 순서대로)
-0. **Phase 4 핵심 — 진열 조형물 + 슬롯 쇼핑 (AD-033, §32)** — 소비자는 테이블/옷걸이 앞 상호작용 → 상품 팝업(구매·담기·착용해보기+아바타 프리뷰). 점주는 조형물 배치 + 슬롯에 상품 넣고/빼고/순서 변경. 시안 목업·PDF는 2026-07-14 완료, **코드 구현**이 다음 본작업.
-0-a. **자동 로그인 (AD-034, §33)** — LoginPage 체크박스 + 세션 유지 정책. 시안만 2026-07-14.
-0-b. **동네별 팝업 · 홈 필터 (AD-035, §34)** — `stores` 지역 필드 + 주소 API + HomePage 구역 묶음. 시안만 2026-07-14.
-0-c. **모바일 앱 UI (AD-036, §35)** — 일반 회원·스토어 관리자 앱 시안 `m01`~`m10`. 정식 회원 채널은 앱(AD-037). **관리 UI는 앱에 없음.**
-0-d. **정식 채널 정리 (AD-037)** — `apps/web` → 스토어 관리 전용(일반 회원 로그인/월드 제거 또는 별도 admin host). `apps/mobile`에 일반 회원·스토어 관리자 이중 로그인 + 쇼핑/월드.
-0-e. **모바일 앱 스캐폴딩 + 스토어 출시 준비 (AD-038, §39)** — `apps/mobile`(Expo) 생성, EAS Build, Play Store·App Store 등록 체크리스트.
-1. **(선택) 점주용 가챠/할인 관리 화면** — 지금은 RLS·DB만 있고 점주가 직접 확률·할인율을 바꾸는 UI는 없음(SQL로만 조정 가능). 필요해지면 `OwnerProductPanel`과 비슷한 패널로 추가.
-2. **(선택, PG 확정 후) 실제 PG 연동** — mock 결제를 실결제로 교체. PG 후보 정해지면 진행. (주문 저장 자체는 AD-030으로 이미 완료됨 — PG는 "결제 승인" 단계만 교체하면 됨)
-3. (Phase 4 에디터와 함께) **매장 여러 방(room) + 문/엘리베이터 이동** (AD-025, §10 "map_config v2") — 지금은 계획만 기록, 실제 구현은 에디터 작업 시작할 때
-4. (선택, 급하지 않음) **닉네임 변경 UI** — 지금은 회원가입 때만 입력 가능. 기존 계정 2개(`demo@shopper.com`/`demo@owner.com`)는 2026-07-13에 SQL로 수동 지정(`데모소비자`/`데모점주`)해 둠 — 필요하면 마이페이지 같은 화면에서 직접 바꾸게 만들 수 있음.
-5. **Phase 2 후속 폴리시** — 탑뷰 월드 UX 개선: 충돌/카메라/애니메이션(방향별 스프라이트) 순서로 보강
-6. `StorePage` 접근 정책 정리 — 비로그인 시 `/login`으로 보내는 것은 구현 완료, 로그인 후 원래 매장으로 복귀(`next` 파라미터)는 아직 미구현
-7. (선택) 사용자가 테스트로 만든 중복 매장(`store_237c7feca7` / `store_21c81b95ea`, "Mr. Sim & Bee") 정리 여부 확인 — 삭제 UI 없어 필요하면 SQL로 직접 처리
-8. (선택) **매장 대표 이미지도 `contain`(적응형)으로 통일할지 결정** — 상품 사진은 이미 적응형으로 바꿨는데(2026-07-13), 홈 카드·입장모달·매장만들기 미리보기는 아직 `cover`(꽉 채우기)라 사진 비율에 따라 잘릴 수 있음. 통일이 필요하면 다음에 같이 처리.
+### 키 파일
+- `apps/web/src/pages/PlayWorldPage.tsx` — WebView 월드
+- `apps/web/src/components/DisplayProductModal.tsx` · `VirtualDpad.tsx` (`embedded`)
+- `apps/mobile/app/store/[storeId].tsx`
+- 시안: `Online_Popup.docx` · §32 · **§32.1**
 
 ### Pending User Input
-- [ ] 결제 PG 후보 (데모는 mock order; post-demo 연동)
+- [ ] 결제 PG 후보
+- [ ] (선택) Expo SDK 54 업그레이드 여부 — 현재 **52 APK 고정**
+
+### 캐릭터 타이밍 (User 2026-07-30)
+지금 = PNG 아바타 · 4-2 = 착용 미리보기만 · 본격 스프라이트/장착 = HUD·쇼핑 안정 **후** (AD-020). **순서 앞당기지 않음.**
+
+### (참고·과거) 투자자 미팅 AD-032
+2026-07-13 긴급 미팅용 — 현 런칭 Sprint와 별개. 시연 용어는 §31.
 
 ---
 
 ## 8. Changelog
 
+### 2026-07-31 — Phase 4 Sprint 4-3: 시안형 하단 HUD 바 + 채팅 (AD-047)
+- **Author:** Cursor Agent (User 승인)
+- **Changed:**
+  - `PlayHudBar.tsx` — 픽셀 SVG 4칸 (상호작용·채팅·장바구니·전체상품)
+  - `PlayWorldChatPanel.tsx` — `/play` 실시간 채팅 오버레이
+  - `play-world.css` — 알약 바 · D-pad 왼쪽 · 가로 `max-width` (늘리지 않음)
+  - `PlayWorldPage.tsx` — 임시 텍스트 HUD 제거 · `onChatMessage` · 채팅 시 이동 정지
+  - `i18n/ko.ts` — `play.hudBarLabel`
+- **Notes:** 실기 테스트 §0 Expo Go · Vercel push 후 WebView 확인.
+
+### 2026-07-30 (c) — 세션 인수인계 · AD-047 · ISS-028/029
+- **Author:** Cursor Agent + User
+- **Changed:** AD-047 · §32.1 · §7 재개=**Sprint 4-3** · ISS-028 Resolved · ISS-029 문서화
+- **Notes:** User 바쁨 중단. 다음 채팅에서 4-3 브리핑.
+
+### 2026-07-30 — PlayWorld D-pad 가시성 (ISS-028)
+- **Changed:** `VirtualDpad` `embedded` · PlayWorld 왼쪽 · HUD 오른쪽 · push `9208754`
+
 ### 2026-07-30 — Phase 4 Sprint 4-2: 진열 상품 팝업 · 장바구니 · 착용 미리보기
 - **Author:** Cursor Agent (User 승인)
 - **Changed:**
   - `PlayWorldPage.tsx` — HUD(상호작용·장바구니·전체상품) · `DisplayProductModal` · `CartDrawer` · `ShopPanel`
-  - `DisplayProductModal.tsx` — `fixtureId` 슬롯 상품 로드 · 착용 미리보기(상품 이미지) · 바로구매 준비중
-  - GUCCI `display_slots` ← 스카프·티·백 상품 연결 · migration `20260730_sprint4_gucci_slot_products.sql`
-  - `i18n/ko.ts` — `display.buySoon` · `tryOnHint` · `tryOnApplied` · `play.interactTap`
-- **Notes:** 풀 캐릭터 스프라이트 장착(AD-020)은 후속. 실기: 테이블 근처 → 진열 상품 보기 → 담기. §0 Expo Go 안내.
+  - `DisplayProductModal.tsx` — `fixtureId` 슬롯 상품 로드 · 착용 미리보기 · 바로구매 준비중
+  - GUCCI `display_slots` 상품 3종 · migration `20260730_sprint4_gucci_slot_products.sql`
+- **Notes:** push `2350997`. 풀 스프라이트 TryOn은 후속.
 
 ### 2026-07-30 — Phase 4 Sprint 4-1: 앱 WebView 월드 + display_fixtures 로드
 - **Author:** Cursor Agent (User 승인 · Composer)
@@ -596,7 +584,7 @@ Expo Go 실기 테스트가 끝나면 아래를 **전부** 제거·원복 (남�
   - `apps/mobile` — `react-native-webview` · `store/[storeId].tsx` WebView · `EXPO_PUBLIC_WEB_ORIGIN`
   - Supabase: GUCCI `display_fixtures` 시드 1건 (`table_round_3`) · migration `20260730_sprint4_gucci_display_fixture_seed.sql`
   - **§0 Expo Go 실기 테스트 안내 규칙** 추가 (SDK 52 · tunnel · 데모계정 · 월드 배포 체크 · 복사용 안내문)
-- **Notes:** GUCCI 시각/충돌은 기존 generated PNG 유지. 헤더에 「진열 N개」표시로 DB 연동 확인. **다음 4-2** = 슬롯 상품 팝업·장바구니. 실기 테스트: §0 Expo Go 안내.
+- **Notes:** GUCCI 시각/충돌은 기존 generated PNG 유지. 헤더에 「진열 N개」표시로 DB 연동 확인. push `e271ec8`.
 
 ### 2026-07-27 — Phase 4 Sprint 3: OwnerDisplayPanel + draft/출시 (AD-021, AD-033)
 - **Author:** Cursor Agent (User 승인)
@@ -1969,6 +1957,7 @@ where email = 'demo@owner.com';
 | **진열 슬롯** `(Display Slot)` | 조형물 위 **칸** (예: 테이블 3칸). 점주가 칸마다 상품을 넣고 순서를 바꿈. |
 | **전체 상품** | 매장 **카탈로그 전체** 목록 버튼. **장바구니와 다름** (예전 이름: 「지금 쇼핑하기」). |
 | **장바구니** | 담아 둔 상품·수량·결제 화면. HUD·헤더에 별도 버튼. |
+| **HUD 바** `(하단 조작 바)` | 월드 화면 **아래 알약 모양 버튼 줄**. 시안: 상호작용·채팅·장바구니·전체상품 4칸 (AD-047 · Sprint 4-3). 지금 PlayWorld는 **임시 글자 버튼**. |
 
 ---
 
@@ -2857,8 +2846,9 @@ union all select 'profiles', count(*) from public.profiles;
 - [ ] `TryOnPreview` — 우측 아바타 착용 전·후 (파츠 레이어 · AD-020)
 - [x] 점주 `OwnerDisplayPanel` — 조형물 배치 + 슬롯 CRUD + 순서 (Sprint 3)
 - [x] GUCCI `display_fixtures` 시드 + 슬롯 상품 3종 (Sprint 4-1/4-2)
-- [x] 앱 WebView `/play/:storeId` + 진열 상호작용 HUD (Sprint 4-1/4-2)
-- [ ] i18n·시안·PDF와 버튼명 동기화 유지
+- [x] 앱 WebView `/play/:storeId` + 진열 상호작용 HUD (Sprint 4-1/4-2) — **지금 HUD는 임시 텍스트 버튼**
+- [x] **Sprint 4-3 — 시안형 하단 HUD 바 (AD-047, §32.1)** — 픽셀 4아이콘 · 세로/가로 · 채팅 포함
+- [ ] i18n·시안·PDF와 버튼명 동기화 유지 · **시안 PNG 아이콘으로 교체**(선택)
 
 ### 시각 자료
 | 파일 | 내용 |
@@ -2874,7 +2864,49 @@ union all select 'profiles', count(*) from public.profiles;
 | `docs/pdf-assets/owner-store-region-sian.png` | 점주 매장 지역(주소 API) |
 | `docs/pdf-assets/m01-..m10-*.png` | 모바일 시안 (쇼핑·입장·월드) — 관리 UI는 PC 웹 (`owner-*`) |
 
-*Last updated: 2026-07-14 (시안 v4 · 자동로그인 · 동네필터 · 모바일) by Cursor Agent*
+*Last updated: 2026-07-30 (AD-047 · §32.1 · Sprint 4-3 next) by Cursor Agent*
+
+---
+
+## 32.1 월드 모바일 HUD 바 (AD-047) — Sprint 4-3
+
+> **한 줄:** 시안처럼 **하단 알약(가로) 바에 픽셀 아이콘 4칸** — 상호작용 · 채팅 · 장바구니 · 전체상품. 지금 PlayWorld의 **임시 텍스트 버튼**을 이걸로 교체.
+
+### 왜 지금인가
+Sprint 4-2로 **기능**(진열·담기·장바구니·전체상품)은 됨. UX만 시안과 다름. User 확인(2026-07-30): **다음 작업 = 이 HUD**.
+
+### 레이아웃 (확정)
+
+| 방향 | D-pad | HUD 바 |
+|---|---|---|
+| **세로(portrait)** | 왼쪽 아래 (`VirtualDpad` `embedded`) | 하단 **중앙~풀폭 근처** 알약 바 (시안) |
+| **가로(landscape)** | 왼쪽 아래 유지 | **같은 알약을 가로로 늘리지 않음** (`max-width` 유지) · 하단 **중앙 또는 오른쪽** |
+
+**금지:** 가로모드에서 바를 화면 가로 전체로 stretch · D-pad와 HUD 겹침 · 시안에 없는 5번째 HUD 버튼.
+
+### 버튼 4칸 (시안 `Online_Popup.docx` · §32 HUD 규칙과 동일)
+
+| 칸 | 동작 (이미 있는 기능 연결) |
+|---|---|
+| 상호작용 | 근처 fixture → `DisplayProductModal` (4-2) |
+| 채팅 | PlayWorld에 **채팅 UI 연결** (StorePage 채팅과 동일 소켓 — 4-3에서 HUD에 포함) |
+| 장바구니 | `CartDrawer` |
+| 전체상품 | `ShopPanel` |
+
+### 구현 메모 (다음 에이전트)
+1. §0 브리핑·User 승인 후 착수
+2. 주 파일: `PlayWorldPage.tsx` + 새 컴포넌트 예: `PlayHudBar.tsx` (또는 동등)
+3. 픽셀 아이콘: 시안/docx 참고 · 없으면 단순 픽셀 스타일 SVG/PNG placeholder 후 교체 가능
+4. `VirtualDpad` `embedded` 유지(ISS-028) — 위치만 HUD와 충돌 없게
+5. StorePage 데모 월드 HUD도 **가능하면** 같은 바 재사용 (필수는 앱 `/play` 먼저)
+
+### 완료 기준
+- [x] 세로·가로 모두 알약 바 + D-pad 동시 사용 가능
+- [x] 4버튼 모두 동작 (채팅 포함)
+- [x] 임시 텍스트 HUD 제거
+- [ ] User 실기 확인 · HANDOFF push · Changelog 배포
+
+*Last updated: 2026-07-31 by Cursor Agent*
 
 ---
 
