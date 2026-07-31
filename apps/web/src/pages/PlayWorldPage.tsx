@@ -293,6 +293,43 @@ export function PlayWorldPage() {
     gameRef.current?.setMovementEnabled(!chatOpen);
   }, [chatOpen]);
 
+  /** WebView/모바일: 헤더 잡고 위아래 끌 때 페이지가 살짝 스크롤되는 현상 방지 (ISS-032) */
+  const headerRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prev = {
+      htmlOverflow: html.style.overflow,
+      bodyOverflow: body.style.overflow,
+      htmlOverscroll: html.style.overscrollBehavior,
+      bodyOverscroll: body.style.overscrollBehavior,
+      htmlHeight: html.style.height,
+      bodyHeight: body.style.height,
+    };
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    html.style.overscrollBehavior = 'none';
+    body.style.overscrollBehavior = 'none';
+    html.style.height = '100%';
+    body.style.height = '100%';
+
+    const header = headerRef.current;
+    const blockTouchMove = (e: TouchEvent) => {
+      if (e.cancelable) e.preventDefault();
+    };
+    header?.addEventListener('touchmove', blockTouchMove, { passive: false });
+
+    return () => {
+      html.style.overflow = prev.htmlOverflow;
+      body.style.overflow = prev.bodyOverflow;
+      html.style.overscrollBehavior = prev.htmlOverscroll;
+      body.style.overscrollBehavior = prev.bodyOverscroll;
+      html.style.height = prev.htmlHeight;
+      body.style.height = prev.bodyHeight;
+      header?.removeEventListener('touchmove', blockTouchMove);
+    };
+  }, []);
+
   const onDpad = useCallback((dirs: VirtualDirections) => {
     gameRef.current?.setVirtualDirections(dirs);
   }, []);
@@ -331,8 +368,8 @@ export function PlayWorldPage() {
 
   return (
     <div className="play-world-page" style={styles.root}>
-      <header style={styles.header}>
-        <button type="button" style={styles.backBtn} onClick={goHome}>
+      <header ref={headerRef} className="play-world-header" style={styles.header}>
+        <button type="button" className="play-world-back" style={styles.backBtn} onClick={goHome}>
           {t('play.backHome')}
         </button>
         <div style={styles.headerText}>
@@ -430,6 +467,8 @@ const styles: Record<string, CSSProperties> = {
     background: '#0a0e1a',
     color: '#f5f5f5',
     fontFamily: 'system-ui, sans-serif',
+    overflow: 'hidden',
+    overscrollBehavior: 'none',
   },
   header: {
     display: 'flex',

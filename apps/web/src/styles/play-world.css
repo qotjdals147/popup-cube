@@ -6,6 +6,23 @@
   /* embedded D-pad: 54 + 4 + 54 + 4 + 54 ≈ 170 */
   --play-dpad-stack-height: 172px;
   --play-dpad-bottom-inset: 14px;
+  overflow: hidden;
+  overscroll-behavior: none;
+  height: 100%;
+  max-height: 100dvh;
+  touch-action: none;
+}
+
+/* 헤더·버튼만 터치 — 나머지 영역은 Phaser/D-pad가 pan */
+.play-world-page .play-world-header {
+  touch-action: manipulation;
+  flex-shrink: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.play-world-page .play-world-header .play-world-back {
+  touch-action: manipulation;
 }
 
 .play-world-page .play-dpad-wrap {
@@ -17,6 +34,7 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  touch-action: manipulation;
 }
 
 .play-hud-anchor {
@@ -28,6 +46,7 @@
   display: flex;
   justify-content: center;
   pointer-events: none;
+  touch-action: manipulation;
 }
 
 .play-hud-anchor .play-hud-bar {

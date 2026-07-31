@@ -154,6 +154,9 @@ export default function StoreScreen() {
       <WebView
         source={{ uri: playUrl }}
         style={styles.webview}
+        scrollEnabled={false}
+        bounces={false}
+        overScrollMode="never"
         onMessage={onMessage}
         allowsInlineMediaPlayback
         mediaPlaybackRequiresUserAction={false}
