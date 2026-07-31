@@ -19,7 +19,7 @@ import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
 import { DemoToast } from '../components/DemoToast';
 import { VirtualDpad } from '../components/VirtualDpad';
 import { ViewModeToggle } from '../components/ViewModeToggle';
-import { getStoreSummary } from '../lib/stores';
+import { getStoreSummary, userOwnsStore } from '../lib/stores';
 import { t, getRoleLabel } from '../i18n';
 import { DEMO_STORE_ID } from '@popup-cube/shared';
 
@@ -50,7 +50,6 @@ export function StorePage() {
     email,
     nickname,
     loading: authLoading,
-    storeId: myStoreId,
     signOut,
   } = useAuth();
   const navigate = useNavigate();
@@ -63,7 +62,7 @@ export function StorePage() {
   const lastActivityRef = useRef<number>(Date.now());
   const chatOpenRef = useRef(false);
 
-  const isOwnerOfThisStore = role === 'owner' && myStoreId === storeId;
+  const [isOwnerOfThisStore, setIsOwnerOfThisStore] = useState(false);
   // 닉네임이 있으면 우선 사용 (구버전 계정은 nickname이 없어서 email 앞부분으로 대체).
   const username = useMemo(
     () => nickname ?? email?.split('@')[0] ?? t('common.guest'),
@@ -107,6 +106,20 @@ export function StorePage() {
       active = false;
     };
   }, [storeId]);
+
+  useEffect(() => {
+    if (!userId || !storeId || role !== 'owner') {
+      setIsOwnerOfThisStore(false);
+      return;
+    }
+    let active = true;
+    void userOwnsStore(userId, storeId).then((owns) => {
+      if (active) setIsOwnerOfThisStore(owns);
+    });
+    return () => {
+      active = false;
+    };
+  }, [userId, storeId, role]);
 
   function markActivity() {
     lastActivityRef.current = Date.now();

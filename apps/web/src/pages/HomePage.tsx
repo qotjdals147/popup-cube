@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getMyStore } from '../lib/stores';
+import { listOwnedStores } from '../lib/stores';
+import { DEMO_STORE_ID } from '@popup-cube/shared';
 import { t } from '../i18n';
 import type { StoreSummary } from '@popup-cube/shared';
 
 /** AD-037 — PC 웹 점주 대시보드 (매장 목록·쇼핑 허브 아님) */
 export function HomePage() {
-  const { userId, role, storeId, loading: authLoading, signOut } = useAuth();
+  const { userId, role, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
 
-  const [store, setStore] = useState<StoreSummary | null>(null);
+  const [stores, setStores] = useState<StoreSummary[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -21,19 +22,25 @@ export function HomePage() {
   }, [authLoading, userId, navigate]);
 
   useEffect(() => {
-    if (!storeId || role !== 'owner') {
-      setStore(null);
+    if (!userId || role !== 'owner') {
+      setStores([]);
       return;
     }
 
     let active = true;
     setLoading(true);
-    getMyStore(storeId)
+    listOwnedStores(userId)
       .then((data) => {
-        if (active) setStore(data);
+        if (!active) return;
+        const sorted = [...data].sort((a, b) => {
+          if (a.id === DEMO_STORE_ID) return -1;
+          if (b.id === DEMO_STORE_ID) return 1;
+          return a.name.localeCompare(b.name, 'ko');
+        });
+        setStores(sorted);
       })
       .catch(() => {
-        if (active) setStore(null);
+        if (active) setStores([]);
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -42,7 +49,7 @@ export function HomePage() {
     return () => {
       active = false;
     };
-  }, [storeId, role]);
+  }, [userId, role]);
 
   async function handleSignOut() {
     await signOut();
@@ -82,9 +89,9 @@ export function HomePage() {
         {role === 'owner' && (
           <section style={styles.panel}>
             {loading && <p style={styles.hint}>{t('ownerDashboard.loading')}</p>}
-            {!loading && store && (
-              <>
-                <div style={styles.storeRow}>
+            {!loading &&
+              stores.map((store) => (
+                <div key={store.id} style={{ ...styles.storeRow, marginBottom: 24 }}>
                   <div style={styles.thumbWrap}>
                     {store.thumbnail_url ? (
                       <img src={store.thumbnail_url} alt="" style={styles.thumb} />
@@ -92,7 +99,7 @@ export function HomePage() {
                       <div style={styles.thumbFallback}>{store.name.charAt(0)}</div>
                     )}
                   </div>
-                  <div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={styles.nameRow}>
                       <h2 style={styles.storeName}>{store.name}</h2>
                       <span
@@ -108,18 +115,17 @@ export function HomePage() {
                     <p style={styles.storeDesc}>
                       {store.description?.trim() || t('ownerEdit.noDescription')}
                     </p>
+                    <button
+                      style={styles.primaryButton}
+                      type="button"
+                      onClick={() => navigate(`/store/${store.id}/edit`)}
+                    >
+                      {t('ownerDashboard.manageStore')}
+                    </button>
                   </div>
                 </div>
-                <button
-                  style={styles.primaryButton}
-                  type="button"
-                  onClick={() => navigate(`/store/${storeId}/edit`)}
-                >
-                  {t('ownerDashboard.manageStore')}
-                </button>
-              </>
-            )}
-            {!loading && !store && (
+              ))}
+            {!loading && stores.length === 0 && (
               <>
                 <p style={styles.body}>{t('ownerDashboard.storeMissing')}</p>
                 <button style={styles.primaryButton} type="button" onClick={() => navigate('/store/create')}>

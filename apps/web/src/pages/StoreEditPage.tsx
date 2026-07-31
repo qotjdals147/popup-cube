@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getMyStore, publishStore } from '../lib/stores';
+import { getMyStore, publishStore, userOwnsStore } from '../lib/stores';
 import { OwnerProductPanel } from '../components/OwnerProductPanel';
 import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
 import { OwnerDisplayPanel } from '../components/OwnerDisplayPanel';
@@ -13,7 +13,7 @@ type EditTab = 'overview' | 'products' | 'orders' | 'layout';
 export function StoreEditPage() {
   const { storeId } = useParams();
   const navigate = useNavigate();
-  const { userId, role, storeId: myStoreId, loading: authLoading, signOut } = useAuth();
+  const { userId, role, loading: authLoading, signOut } = useAuth();
 
   const [tab, setTab] = useState<EditTab>('overview');
   const [store, setStore] = useState<StoreSummary | null>(null);
@@ -22,6 +22,8 @@ export function StoreEditPage() {
   const [publishing, setPublishing] = useState(false);
   const [publishMsg, setPublishMsg] = useState<string | null>(null);
   const [publishErr, setPublishErr] = useState(false);
+  const [ownershipChecked, setOwnershipChecked] = useState(false);
+  const [ownsStore, setOwnsStore] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -33,11 +35,24 @@ export function StoreEditPage() {
       navigate('/app-only', { replace: true });
       return;
     }
-    if (!storeId || role !== 'owner' || myStoreId !== storeId) {
+    if (!storeId || role !== 'owner') {
       navigate('/home', { replace: true });
       return;
     }
-  }, [authLoading, userId, role, myStoreId, storeId, navigate]);
+
+    let active = true;
+    setOwnershipChecked(false);
+    void userOwnsStore(userId, storeId).then((ok) => {
+      if (!active) return;
+      setOwnsStore(ok);
+      setOwnershipChecked(true);
+      if (!ok) navigate('/home', { replace: true });
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [authLoading, userId, role, storeId, navigate]);
 
   async function loadStore() {
     if (!storeId) return;
@@ -54,10 +69,10 @@ export function StoreEditPage() {
   }
 
   useEffect(() => {
-    if (!storeId || role !== 'owner' || myStoreId !== storeId) return;
+    if (!storeId || !ownershipChecked || !ownsStore) return;
     loadStore();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storeId, role, myStoreId]);
+  }, [storeId, ownershipChecked, ownsStore]);
 
   async function handleSignOut() {
     await signOut();
@@ -80,7 +95,7 @@ export function StoreEditPage() {
     }
   }
 
-  if (authLoading || !userId || !storeId) {
+  if (authLoading || !userId || !storeId || !ownershipChecked || !ownsStore) {
     return <div style={styles.page}>{t('ownerEdit.loading')}</div>;
   }
 

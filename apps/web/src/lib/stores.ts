@@ -47,6 +47,31 @@ export async function getMyStore(storeId: string): Promise<StoreSummary | null> 
   return data;
 }
 
+/** 점주가 해당 매장의 소유자인지 — `stores.owner_id` 기준 (profiles.store_id와 다를 수 있음) */
+export async function userOwnsStore(userId: string, storeId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('stores')
+    .select('id')
+    .eq('id', storeId)
+    .eq('owner_id', userId)
+    .maybeSingle();
+
+  if (error) return false;
+  return !!data;
+}
+
+/** 점주 대시보드 — 본인 소유 매장 전체 (GUCCI + 테스트로 만든 매장 등) */
+export async function listOwnedStores(userId: string): Promise<StoreSummary[]> {
+  const { data, error } = await supabase
+    .from('stores')
+    .select('id, name, description, thumbnail_url, status')
+    .eq('owner_id', userId)
+    .order('name', { ascending: true });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
 /** 점주 매장 출시 — draft → published (AD-021, Sprint 3) */
 export async function publishStore(storeId: string): Promise<StoreSummary> {
   const { data, error } = await supabase

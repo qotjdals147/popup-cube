@@ -527,6 +527,7 @@ popup_store/                          # Turborepo root
 | ISS-030 | ~~폰 가로 회전해도 앱·월드 화면이 세로 고정~~ | Resolved (2단계) | ① `app.config` `orientation: 'default'` ② **Expo Go는 config만으론 부족** → 매장 `store/[storeId].tsx`에서 `expo-screen-orientation` **`OrientationLock.ALL`** (2026-07-31). 홈 나가면 `PORTRAIT_UP`. 폰 **시스템 자동 회전** 켜짐 필수. |
 | ISS-031 | ~~몰입 — Expo Go에서 상·하단 OS UI 계속 표시~~ | Resolved | **오전:** 2차(`164b5f7`) 후에도 ❌ → **오후 User:** **`--clear` + ISS-032(WebView scroll lock) 반영 번들** 후 **✅ 몰입 동작 확인**. 스택: `worldImmersive.ts` · `_layout` · `app.config` sticky-immersive · WebView `scrollEnabled={false}`. |
 | ISS-032 | ~~월드 상단(홈·채널/진열) 잡고 위아래 끌면 화면이 살짝 스크롤~~ | Resolved | `PlayWorldPage` body/overscroll lock · 헤더 `touchmove` 차단 · WebView `overScrollMode="never"`. **User 2026-07-31 실기 OK.** |
+| ISS-033 | ~~demo@owner가 GUCCI 점주인데 주문/에디터 안 됨~~ | Resolved | **DB:** GUCCI `owner_id` = demo owner ✅ · `profiles.store_id` = draft `하이` ❌. **앱:** `profiles.store_id`만 보던 점주 판별 → **`stores.owner_id`** (`userOwnsStore`). **DB:** profile → `popup_gucci_01` migration. |
 
 ---
 
@@ -611,6 +612,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-07-31 — ISS-033 demo owner ↔ GUCCI ownership
+- **User:** GUCCI가 demo owner에 귀속 안 된 것 같음
+- **Changed:** `userOwnsStore` · `StoreEditPage`/`StorePage`/`HomePage`/`LoginPage` · migration `20260731_fix_demo_owner_profile_gucci.sql`
+- **Notes:** 소유 = `stores.owner_id`. `profiles.store_id` = 마지막 생성 매장 포인터.
 
 ### 2026-07-31 — Sprint 4-4: 진열 바로 구매 mock
 - **Changed:** `DisplayProductModal.tsx` · `ko.ts` · `PlayWorldPage` / `StorePage` `userId`

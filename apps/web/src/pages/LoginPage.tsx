@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { t, getAuthErrorMessage } from '../i18n';
 import { checkNicknameAvailable, isNicknameLengthValid } from '../lib/nickname';
+import { userOwnsStore } from '../lib/stores';
+import { DEMO_STORE_ID } from '@popup-cube/shared';
 
 type Mode = 'login' | 'signup';
 type NicknameStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
@@ -27,11 +29,19 @@ export function LoginPage() {
       navigate('/home', { replace: true });
       return;
     }
-    if (role === 'owner' && storeId) {
-      navigate(`/store/${storeId}/edit`, { replace: true });
-    } else {
-      navigate('/home', { replace: true });
+    if (role === 'owner') {
+      void (async () => {
+        if (userId && (await userOwnsStore(userId, DEMO_STORE_ID))) {
+          navigate(`/store/${DEMO_STORE_ID}/edit`, { replace: true });
+        } else if (storeId) {
+          navigate(`/store/${storeId}/edit`, { replace: true });
+        } else {
+          navigate('/home', { replace: true });
+        }
+      })();
+      return;
     }
+    navigate('/home', { replace: true });
   }, [authLoading, userId, role, storeId, navigate]);
 
   function toggleMode() {
