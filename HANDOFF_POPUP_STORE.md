@@ -504,7 +504,7 @@ popup_store/                          # Turborepo root
 | ISS-028 | ~~PlayWorld **이동 D-pad가 안 보임**~~ | Resolved | CSS `.virtual-dpad` absolute left + wrap을 오른쪽에 둬 화면 밖. **조치:** `VirtualDpad` `embedded` · 왼쪽 아래 · commit `9208754`. |
 | ISS-029 | Play 스토어 Expo Go **SDK 54+** vs 프로젝트 **SDK 52** → incompatible | Low | §0: Play Go 삭제 → SDK 52 APK. 프로젝트 54 업은 별도 승인. |
 | ISS-030 | ~~폰 가로 회전해도 앱·월드 화면이 세로 고정~~ | Resolved (2단계) | ① `app.config` `orientation: 'default'` ② **Expo Go는 config만으론 부족** → 매장 `store/[storeId].tsx`에서 `expo-screen-orientation` **`OrientationLock.ALL`** (2026-07-31). 홈 나가면 `PORTRAIT_UP`. 폰 **시스템 자동 회전** 켜짐 필수. |
-| ISS-031 | ~~몰입 — Expo Go에서 상·하단 OS UI 계속 표시~~ | **Deferred** (AD-051) | User 2026-07-31: **2차 수정 후에도 동일** → **Expo Go 한계로 수용**, 최종 확인은 **EAS development APK**. 코드: `worldImmersive.ts` · `_layout` StatusBar 제거 · `app.config` sticky-immersive · **로컬 커밋 대기**( `main` 최신 push = `6901d70` 이후 변경분). |
+| ISS-031 | ~~몰입 — Expo Go에서 상·하단 OS UI 계속 표시~~ | **Deferred** (AD-051) | User 2026-07-31: **2차 수정 후에도 동일** → **Expo Go 한계로 수용**, 최종 확인은 **EAS development APK**. 코드: commit **`164b5f7`** (`worldImmersive.ts`, `_layout`, `app.config` sticky-immersive 등). |
 
 ---
 
@@ -517,7 +517,7 @@ popup_store/                          # Turborepo root
 | **User 확인 완료** | 알약 위치(AD-049) OK · 몰입은 Expo Go ❌ → **dev APK**(AD-051) |
 | **4-4 목표** | 진열 팝업 `바로 구매 (준비 중)` → **mock 결제 완료 UX** (토스트/모달 · 주문번호 가짜 · PG 없음) · `DisplayProductModal.tsx` · §32 시안 버튼 순서 유지 |
 | **범위 밖(당분간)** | PG 실결제 · 풀 TryOn(AD-020) · 동네 필터(AD-035) |
-| **Git** | `6901d70` push됨 · **미커밋:** immersive 2차(`_layout`, `worldImmersive.ts`, `home/login/index` restore 등) — 다음 착수 전 **commit+push** 권장 |
+| **Git** | **`164b5f7`** 몰입 2차+HANDOFF **push 완료** (`6901d70` → immersive 1차만 원격에 있었음) |
 
 ### Cursor 다음 1개 (우선)
 
