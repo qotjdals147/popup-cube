@@ -25,7 +25,8 @@ const config: ExpoConfig = {
   name: 'POP-UP CUBE',
   slug: 'popup-cube',
   version: '0.1.0',
-  orientation: 'portrait',
+  /** AD-047: 월드(/play WebView) 가로 HUD 확인 — 세로만 고정하면 폰을 돌려도 화면 안 돌아감 */
+  orientation: 'default',
   icon: './assets/icon.png',
   scheme: 'popupcube',
   userInterfaceStyle: 'dark',

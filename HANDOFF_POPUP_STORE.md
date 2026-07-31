@@ -340,6 +340,7 @@
 | AD-045 | **점주 AI = 매장 전체 생성 ❌ → 리소스 추출 + 도면 에디터** — 실사 업로드 시 **타일·가구·소품·재고 픽셀**만 API로 분리 추출 → **점주 계정 귀속 라이브러리**. 꾸미기 전 **픽셀 도면(벽·문·구조)** 편집 → 바닥 **칠하기**·fixture **점유 배치**(§44). 전체 room gen 금지(GUCCI 충돌 이슈 회피). **§45** | User 2026-07-24: API 절약 + 좌표/충돌 문제 근본 해결 | 2026-07-24 |
 | AD-046 | **인프라·호스팅 맵** — GitHub/Vercel/Railway/Supabase/Upstash 등 **역할·URL·env·비용·단계별 필요 서비스** 단일 설계도. §28 요약 보완. 상세 **§46** | User 2026-07-24: 호스팅 여러 개 정리·앞으로 필요한 것 미리 설계 | 2026-07-24 |
 | AD-047 | **월드 모바일 HUD = 시안 하단 가로 바** — 픽셀 아이콘 4칸: `상호작용 · 채팅 · 장바구니 · 전체상품` (`Online_Popup.docx` · AD-033). **세로:** 하단 중앙(또는 풀폭 근처) 알약 바 + D-pad 왼쪽 아래. **가로:** 같은 바를 **늘리지 않음**(`max-width` 알약 유지) · D-pad 왼쪽 · 바는 하단 중앙/오른쪽. 지금 PlayWorld는 **임시 텍스트 버튼**(기능용) — **Sprint 4-3**에서 시안 바로 교체. 상세 **§32.1** | User 2026-07-30: 시안 HUD 확인·가로 늘림 금지 | 2026-07-30 |
+| AD-048 | **앱 화면 회전 = `default`** — 월드 WebView에서 가로 HUD(AD-047) 확인하려면 네이티브 **세로 고정 금지**. `app.config.ts` `orientation: 'default'`. 로그인·홈도 가로 가능(MVP); **월드만 가로 허용**은 `expo-screen-orientation` 후순위 | User 2026-07-31: 가로 돌려도 화면 안 돌아감 | 2026-07-31 |
 
 ---
 
@@ -496,6 +497,7 @@ popup_store/                          # Turborepo root
 | ISS-027 | ~~모바일 **디버그 배너**(`연결 준비됨 · 빌드 cfg-4`)~~ | Resolved | User 2026-07-27 모바일 테스트 완료 → §7 체크리스트대로 정리 완료. |
 | ISS-028 | ~~PlayWorld **이동 D-pad가 안 보임**~~ | Resolved | CSS `.virtual-dpad` absolute left + wrap을 오른쪽에 둬 화면 밖. **조치:** `VirtualDpad` `embedded` · 왼쪽 아래 · commit `9208754`. |
 | ISS-029 | Play 스토어 Expo Go **SDK 54+** vs 프로젝트 **SDK 52** → incompatible | Low | §0: Play Go 삭제 → SDK 52 APK. 프로젝트 54 업은 별도 승인. |
+| ISS-030 | ~~폰 가로 회전해도 앱·월드 화면이 세로 고정~~ | Resolved | `apps/mobile/app.config.ts` `orientation: 'portrait'` → **`default`** (2026-07-31). Expo Go **재시작(`--clear`)** 후 매장 WebView에서 회전 확인. `PlayWorldPage` `orientationchange` 리사이즈 추가. |
 
 ---
 
@@ -508,7 +510,42 @@ popup_store/                          # Turborepo root
 | **방금 완료** | Sprint 4-3 — `PlayHudBar` · `PlayWorldChatPanel` · `play-world.css` |
 | **User 확인** | Vercel 배포 후 Expo Go SDK 52 · GUCCI · 하단 알약 4버튼 · 채팅 |
 | **다음 후보** | ① 바로 구매 mock ② HUD 아이콘 시안 PNG 교체 ③ StorePage HUD 재사용 |
-| **Git `main`** | 4-3 **로컬 커밋 전** — push 후 Vercel `/play` 반영 |
+| **Git `main`** | `2ef3a65` Sprint 4-3 push 완료 → Vercel `/play` 자동 배포 (1~2분) |
+
+### 사용자가 지금 해야 할 것 (Sprint 4-3 실기 — §0 Expo)
+
+**목표:** 앱 WebView 월드에서 **하단 알약 HUD 4칸** + **채팅** + **D-pad(왼쪽)** 이 시안대로 동작하는지 확인.
+
+**확인 체크리스트 (순서대로)**
+
+| # | 확인 항목 | 기대 결과 |
+|---|---|---|
+| 1 | 배포 반영 | push `2ef3a65` 후 1~2분 · 웹 `https://popup-cube-web.vercel.app` |
+| 2 | Expo Go | **SDK 52 APK** (Play 스토어 54+ ❌) · **app.config 바꾼 뒤엔 Expo `--clear` 재시작** |
+| 3 | 입장 | `demo@shopper.com` / `demo` → 홈 → **GUCCI** → 입장 → 월드 |
+| 4 | HUD 바 | 하단 **알약** · 아이콘 4칸: 상호작용·채팅·장바구니·전체상품 (옛 **세로 글자 버튼** 아님) |
+| 5 | D-pad | **왼쪽 아래** 이동 패드 보임 · HUD와 겹치지 않음 |
+| 6 | 상호작용 | 테이블 근처 → 상호작용 탭 → 진열 상품 팝업 · 담기 |
+| 7 | 채팅 | 채팅 탭 → 입력 → 전송 · (채팅 중 캐릭터 이동 멈춤) |
+| 8 | 장바구니·전체상품 | 각각 Drawer / ShopPanel 열림 |
+| 9 | 가로 모드 | 폰 가로 → HUD **가로로 늘지 않음** · D-pad 왼쪽 유지 |
+
+**PC에서 Expo 띄우기 (PowerShell, 복붙)**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+폰 **SDK 52** Expo Go로 QR 스캔.
+
+**표준 안내문 전체** — HANDOFF **§0 「User에게 붙여 줄 표준 안내문」** 블록과 동일 (SDK 52 APK 링크·데모 계정·incompatible 해결 포함).
+
+**안 될 때 (짧게)** SDK 52 APK인지 · `--clear` 재시작 · `npm install --legacy-peer-deps` · Vercel 최신 배포 · Railway 소켓(`VITE_SOCKET_SERVER_URL`) — 월드만 「오프라인」이면 쇼핑 HUD는 되고 실시간·채팅만 안 될 수 있음.
+
+**테스트 후 User에게 알려줄 것:** OK / 어디서 막혔는지(스크린·한 줄) → 다음 작업(바로구매 mock 등) 진행.
 
 ### Cursor 다음 1개 (우선)
 
@@ -549,6 +586,11 @@ popup_store/                          # Turborepo root
 
 ## 8. Changelog
 
+### 2026-07-31 — 앱 가로 회전 허용 (ISS-030 · AD-048)
+- **Author:** Cursor Agent (User 피드백)
+- **Changed:** `apps/mobile/app.config.ts` `orientation: 'default'` · `PlayWorldPage.tsx` orientation 리사이즈
+- **Notes:** **Expo `--clear` 재시작 필수**(app.config 변경). §7 체크 #9 가로 HUD 재확인.
+
 ### 2026-07-31 — Phase 4 Sprint 4-3: 시안형 하단 HUD 바 + 채팅 (AD-047)
 - **Author:** Cursor Agent (User 승인)
 - **Changed:**
@@ -557,7 +599,7 @@ popup_store/                          # Turborepo root
   - `play-world.css` — 알약 바 · D-pad 왼쪽 · 가로 `max-width` (늘리지 않음)
   - `PlayWorldPage.tsx` — 임시 텍스트 HUD 제거 · `onChatMessage` · 채팅 시 이동 정지
   - `i18n/ko.ts` — `play.hudBarLabel`
-- **Notes:** 실기 테스트 §0 Expo Go · Vercel push 후 WebView 확인.
+- **Notes:** push `2ef3a65`. **실기 테스트: §0 Expo Go 안내** · §7 「사용자가 지금 해야 할 것」9항목 체크리스트.
 
 ### 2026-07-30 (c) — 세션 인수인계 · AD-047 · ISS-028/029
 - **Author:** Cursor Agent + User

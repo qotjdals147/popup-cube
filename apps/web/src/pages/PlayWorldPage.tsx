@@ -277,6 +277,17 @@ export function PlayWorldPage() {
   }, [gameReady]);
 
   useEffect(() => {
+    if (!gameReady) return;
+    const refresh = () => window.setTimeout(() => gameRef.current?.resize(), 150);
+    window.addEventListener('orientationchange', refresh);
+    window.visualViewport?.addEventListener('resize', refresh);
+    return () => {
+      window.removeEventListener('orientationchange', refresh);
+      window.visualViewport?.removeEventListener('resize', refresh);
+    };
+  }, [gameReady]);
+
+  useEffect(() => {
     chatOpenRef.current = chatOpen;
     gameRef.current?.setMovementEnabled(!chatOpen);
   }, [chatOpen]);
