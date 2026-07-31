@@ -10,7 +10,9 @@ import {
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import Constants from 'expo-constants';
 import * as ScreenOrientation from 'expo-screen-orientation';
+import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../../src/context/AuthContext';
+import { useWorldImmersiveChrome } from '../../src/hooks/useWorldImmersiveChrome';
 import { t } from '../../src/i18n/ko';
 import { getStoreSummary } from '../../src/lib/stores';
 import { getSupabase } from '../../src/lib/supabase';
@@ -115,6 +117,9 @@ export default function StoreScreen() {
     [store?.name, storeId]
   );
 
+  const worldChromeActive = Boolean(playUrl && !webError);
+  useWorldImmersiveChrome(worldChromeActive);
+
   if (authLoading || loadingMeta || !sessionReady) {
     return (
       <View style={styles.centered}>
@@ -138,6 +143,7 @@ export default function StoreScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar hidden style="light" />
       {role === 'owner' && (
         <View style={styles.ownerBar}>
           <Text style={styles.ownerBarText}>{t.store.ownerHint}</Text>

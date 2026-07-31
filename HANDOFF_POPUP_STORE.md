@@ -343,6 +343,7 @@
 | AD-047 | **월드 모바일 HUD = 시안 하단 가로 바** — 픽셀 아이콘 4칸: `상호작용 · 채팅 · 장바구니 · 전체상품` (`Online_Popup.docx` · AD-033). **세로:** 하단 중앙(또는 풀폭 근처) 알약 바 + D-pad 왼쪽 아래. **가로:** 같은 바를 **늘리지 않음**(`max-width` 알약 유지) · D-pad 왼쪽 · 바는 하단 중앙/오른쪽. 지금 PlayWorld는 **임시 텍스트 버튼**(기능용) — **Sprint 4-3**에서 시안 바로 교체. 상세 **§32.1** | User 2026-07-30: 시안 HUD 확인·가로 늘림 금지 | 2026-07-30 |
 | AD-048 | **앱 화면 회전 = config + 런타임 API** — 월드 WebView 가로 HUD(AD-047): `app.config` `orientation: 'default'` + 매장 화면 `expo-screen-orientation` **`ALL`**. **Expo Go는 app.config만으로 회전 안 되는 경우 많음.** 로그인·홈은 매장 퇴장 시 `PORTRAIT_UP` | User 2026-07-31: 가로 돌려도 화면 안 돌아감 | 2026-07-31 |
 | AD-049 | **근접 상호작용 UI = 짧은 가운데 알약 (옵션 C)** — 진열: **긴 「탭해서 진열…」 바 제거** · `PlayProximityPill`(이름 + 「탭·상호작용」) · **탭 = HUD 상호작용과 동일** · D-pad 왼쪽 여백(`--play-dpad-clear`) · 가운데 정렬 · max-width. **엘리베이터 등 후속**도 같은 알약 패턴(행동 문구만 변경) | User 2026-07-31: 배너 겹침·HUD 중복 | 2026-07-31 |
+| AD-050 | **월드 몰입 = 시스템 UI 숨김 + 엣지 스와이프 (Android)** — 매장 WebView에서 `StatusBar` hidden · Android `expo-navigation-bar` **hidden + `overlay-swipe`** (위·아래 스와이프 시 잠깐 표시 후 자동 숨김). iOS: 상태바 숨김 · 홈 인디케이터는 OS 유지. `useWorldImmersiveChrome` · 홈 퇴장 시 복원 | User 2026-07-31: 인게임 느낌·게임식 UI | 2026-07-31 |
 
 ---
 
@@ -511,7 +512,7 @@ popup_store/                          # Turborepo root
 |---|---|
 | **방금 완료** | Sprint 4-3 — `PlayHudBar` · `PlayWorldChatPanel` · `play-world.css` |
 | **User 확인** | Vercel 배포 후 Expo Go SDK 52 · GUCCI · 하단 알약 4버튼 · 채팅 |
-| **다음 후보** | ① **월드 몰입(상태바 숨김)** User 1번 ② 바로 구매 mock ③ HUD 아이콘 시안 PNG |
+| **다음 후보** | ① 바로 구매 mock ② HUD 아이콘 시안 PNG ③ iOS 하단 홈 인디케이터 추가 폴리시(선택) |
 | **Git `main`** | `2ef3a65` Sprint 4-3 push 완료 → Vercel `/play` 자동 배포 (1~2분) |
 
 ### 사용자가 지금 해야 할 것 (Sprint 4-3 실기 — §0 Expo)
@@ -587,6 +588,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-07-31 — 월드 몰입 UI + 근접 알약 정렬 (AD-050 · AD-049)
+- **Author:** Cursor Agent (User 승인)
+- **Changed:** `useWorldImmersiveChrome.ts` · `store/[storeId].tsx` · `expo-navigation-bar` · `play-world.css` 알약 세로/가로 정중앙 · `PlayWorldPage` safe-area top
+- **Notes:** Android **overlay-swipe** = 게임식 엣지 스와이프. Expo **`--clear` 재시작** · Vercel `/play` 배포.
 
 ### 2026-07-31 — PlayWorld 근접 알약 UI (AD-049 · 옵션 C)
 - **Author:** Cursor Agent (User 승인)
@@ -2946,7 +2952,7 @@ Sprint 4-2로 **기능**(진열·담기·장바구니·전체상품)은 됨. UX�
 ### 근접 안내 알약 (AD-049 · 옵션 C — 2026-07-31)
 - **긴 가로 배너**(「탭해서 진열 상품 보기」) **사용 안 함** — D-pad·HUD와 겹침.
 - **`PlayProximityPill`**: 조형물 **이름**(가운데) + 「탭 · 상호작용」 · **탭 = HUD 상호작용**과 동일.
-- 위치: D-pad 오른쪽 영역 **가운데 정렬** · `play-world.css` `--play-dpad-clear`.
+- 위치: **세로** = D-pad **윗줄** · **화면 가로 정중앙** · **가로** = HUD 위 라인 유지 · **화면 가로 정중앙** (`play-world.css` 2026-07-31).
 - **엘리베이터/문 (후속):** 같은 알약 · 라벨만 「2층으로」 등 · 실행은 여전히 HUD 상호작용.
 
 ### 구현 메모 (다음 에이전트)

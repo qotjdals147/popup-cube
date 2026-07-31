@@ -3,6 +3,9 @@
 .play-world-page {
   --play-hud-height: 64px;
   --play-dpad-clear: 112px;
+  /* embedded D-pad: 54 + 4 + 54 + 4 + 54 ≈ 170 */
+  --play-dpad-stack-height: 172px;
+  --play-dpad-bottom-inset: 14px;
 }
 
 .play-world-page .play-dpad-wrap {
@@ -102,15 +105,22 @@
   max-width: 100%;
 }
 
+/* 세로: D-pad 윗줄 · 화면 가로 정중앙 (AD-049) */
 .play-world-page .play-proximity-anchor {
   position: absolute;
   z-index: 4;
-  left: var(--play-dpad-clear);
-  right: max(8px, env(safe-area-inset-right, 0));
-  bottom: calc(var(--play-hud-height) + 20px + env(safe-area-inset-bottom, 0));
+  left: 0;
+  right: 0;
+  bottom: calc(
+    var(--play-dpad-bottom-inset) + var(--play-dpad-stack-height) + 16px +
+      env(safe-area-inset-bottom, 0)
+  );
   display: flex;
   justify-content: center;
+  align-items: center;
   pointer-events: none;
+  padding-left: max(8px, env(safe-area-inset-left, 0));
+  padding-right: max(8px, env(safe-area-inset-right, 0));
 }
 
 .play-proximity-pill {
@@ -204,10 +214,14 @@
   }
 
   .play-world-page .play-proximity-anchor {
+    /* 가로: 높이는 HUD 위 라인 유지 · 가로만 화면 정중앙 */
+    left: 0;
+    right: 0;
     bottom: calc(var(--play-hud-height) + 14px + env(safe-area-inset-bottom, 0));
+    justify-content: center;
   }
 
   .play-proximity-pill {
-    max-width: min(240px, calc(100vw - 150px));
+    max-width: min(240px, calc(100vw - 32px));
   }
 }

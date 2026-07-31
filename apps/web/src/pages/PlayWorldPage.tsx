@@ -436,6 +436,7 @@ const styles: Record<string, CSSProperties> = {
     alignItems: 'center',
     gap: 10,
     padding: '10px 12px',
+    paddingTop: 'max(10px, env(safe-area-inset-top, 0px))',
     background: 'rgba(10,14,26,0.92)',
     borderBottom: '1px solid #1e293b',
     zIndex: 2,
