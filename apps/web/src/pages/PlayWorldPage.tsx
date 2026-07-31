@@ -428,6 +428,7 @@ export function PlayWorldPage() {
           storeId={storeId}
           fixtureLabel={nearZone.label}
           fixtureId={activeFixtureId}
+          userId={userId}
           onClose={() => setDisplayOpen(false)}
           onOpenCart={() => {
             setDisplayOpen(false);

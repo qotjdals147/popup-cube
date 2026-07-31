@@ -479,6 +479,7 @@ export function StorePage() {
               ? undefined
               : nearInteractZone.id
           }
+          userId={userId}
           onClose={() => setDisplayModalOpen(false)}
           onOpenCart={() => {
             setDisplayModalOpen(false);

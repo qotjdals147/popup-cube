@@ -413,7 +413,8 @@ npx expo start --tunnel --port 8082 --clear
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
 - [x] **Sprint 4-1 — 앱 Phaser 월드 뼈대** — WebView → `/play/:storeId` · `display_fixtures` 로드 · GUCCI 시드 1건 (2026-07-30)
-- [x] **Sprint 4-2 — 손님 진열 상호작용** — 슬롯 상품 팝업 · 장바구니 · 착용 미리보기 (2026-07-30) · 바로구매·풀 TryOn ⬜
+- [x] **Sprint 4-2 — 손님 진열 상호작용** — 슬롯 팝업 · 장바구니 · 착용 미리보기 (2026-07-30)
+- [x] **Sprint 4-4 — 진열 바로 구매 mock** — `DisplayProductModal` · `place_order` (2026-07-31)
 - [x] **Sprint 4-3 — 시안형 하단 HUD 바 (AD-047, §32.1)** — 픽셀 4칸 · 세로/가로 알약 · 채팅 · D-pad 겹침 방지 (2026-07-31)
 - [x] **AD-049 근접 알약 · AD-048 회전** — User 실기 OK (2026-07-31)
 - [x] **AD-050 몰입** — User **Expo Go SDK 52 실기 OK** (2026-07-31)
@@ -535,16 +536,15 @@ popup_store/                          # Turborepo root
 
 | 항목 | 값 |
 |---|---|
-| **User 확인 완료** | 알약(AD-049) · **몰입(AD-050)** · **헤더 스크롤(ISS-032)** — Expo Go SDK 52 (2026-07-31) |
-| **4-4 목표** | 진열 팝업 `바로 구매 (준비 중)` → **mock 결제 완료 UX** (토스트/모달 · 주문번호 가짜 · PG 없음) · `DisplayProductModal.tsx` · §32 시안 버튼 순서 유지 |
-| **범위 밖(당분간)** | PG 실결제 · 풀 TryOn(AD-020) · 동네 필터(AD-035) |
-| **Git** | **`a6c5992`** ISS-032 + HANDOFF (몰입 실기 OK) · Vercel 자동 배포 1~2분 |
+| **코드** | ✅ `DisplayProductModal` — 바로 구매 → 배송지 → mock 결제 → `place_order` → 완료 화면 |
+| **User 확인** | ⬜ Vercel 배포 후 §0 Expo · GUCCI 진열 → 바로 구매 |
+| **다음 후 4-4 OK 시** | HUD PNG 폴리시 · PG 연동(후보 확정 후) |
 
 ### Cursor 다음 1개 (우선)
 
 | # | 작업 | 상태 |
 |---|---|---|
-| **1** | **Sprint 4-4 — 바로 구매 mock** (`DisplayProductModal` · PlayWorld/Store 동일 패턴) | ⬜ **다음 착수** |
+| **1** | **Sprint 4-4 — 바로 구매 mock** | ✅ 코드 · ⬜ User 실기 |
 | 2 | EAS **development** 빌드 — 몰입 회귀 (AD-051, **선택**) | ⬜ 스토어 APK 전 |
 | 3 | HUD 아이콘 시안 PNG (SVG → 에셋) | ⬜ 폴리시 |
 | 4 | AD-034/035 자동로그인·동네필터 | ⬜ 시안만 |
@@ -561,12 +561,13 @@ popup_store/                          # Turborepo root
 
 ### 사용자가 4-4 후 테스트할 것 (§0 Expo · 웹)
 
-- Vercel `/play` 배포 반영 후 · 진열 → **바로 구매** → mock 완료 화면
-- Expo Go는 **월드 WebView**로 동일 플로우
+**목표:** 진열 팝업 → **바로 구매** → 배송지 → 완료(주문번호) · (선택) PC 점주 **주문 관리**에 주문 표시
 
-**PC (PowerShell) — §0 표준 4줄 (생략 금지)**
+**0)** GitHub push 후 Vercel **1~2분** 대기 (`https://popup-cube-web.vercel.app`)
 
-**아래 한 줄씩 복붙:**
+**1)** 폰 Expo Go **SDK 52** (Play 54+ ❌) — §0 표준 APK 링크
+
+**2) PC — Expo 이미 켜져 있으면 `Ctrl+C` 후, 아래 한 줄씩 복붙:**
 
 ```
 cd C:\Users\qotjd\Downloads\Cursor\popup_store
@@ -575,7 +576,11 @@ cd apps\mobile
 npx expo start --tunnel --port 8082 --clear
 ```
 
-폰 **SDK 52** Expo Go QR → `demo@shopper.com` / `demo` → GUCCI 입장
+**3)** 폰 **SDK 52** Expo Go QR
+
+**4)** `demo@shopper.com` / `demo` → GUCCI 입장 → 테이블 근처 **상호작용** → 상품 선택 → **바로 구매** → 배송지(없으면 추가) → 완료 화면
+
+**5)** (선택) `demo@owner.com` / `demo` — PC 웹 점주 툴바 **주문 관리**에 방금 주문 보이는지
 
 ### Sprint 표
 
@@ -585,7 +590,7 @@ npx expo start --tunnel --port 8082 --clear
 | **4-1** | ✅ 2026-07-30 | WebView `/play` · fixtures · GUCCI 시드 |
 | **4-2** | ✅ 2026-07-30 | 슬롯 팝업 · 장바구니 · 착용 미리보기 · **바로구매 ⬜** |
 | **4-3** | ✅ 2026-07-31 | 시안 HUD · 채팅 · 알약 · 회전 · **몰입 · 헤더 스크롤 fix** |
-| **4-4** | ⬜ **다음** | **바로 구매 mock** |
+| **4-4** | ✅ 코드 2026-07-31 | **바로 구매 mock** (`DisplayProductModal`) · ⬜ User 실기 |
 
 ### 키 파일
 - `apps/web/src/pages/PlayWorldPage.tsx` — WebView 월드
@@ -606,6 +611,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-07-31 — Sprint 4-4: 진열 바로 구매 mock
+- **Changed:** `DisplayProductModal.tsx` · `ko.ts` · `PlayWorldPage` / `StorePage` `userId`
+- **Flow:** 바로 구매 → 배송지(AD-030) → mock 결제 → `place_order`(할인 프로모션) → 주문번호·금액 완료
+- **Notes:** PG 없음 · 장바구니와 동일 DB 저장. **실기 테스트: §0 Expo Go 안내**
 
 ### 2026-07-31 — ISS-031·032 Resolved · AD-050 실기 OK (User)
 - **User:** Expo Go SDK 52 — **몰입 모드 동작** + **상단 헤더 스크롤/바운스 해결** 확인
