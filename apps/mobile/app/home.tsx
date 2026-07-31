@@ -17,11 +17,13 @@ import { useAuth } from '../src/context/AuthContext';
 import { t } from '../src/i18n/ko';
 import { listPublishedStores } from '../src/lib/stores';
 import { colors } from '../src/theme/colors';
+import { useRestoreSystemChromeOnFocus } from '../src/hooks/useWorldImmersiveChrome';
 
 /** m03 — 동네 필터는 Sprint 이후; 지금은 매장 목록 + 검색 */
 export default function HomeScreen() {
   const router = useRouter();
   const { userId, loading: authLoading, initError, signOut } = useAuth();
+  useRestoreSystemChromeOnFocus();
 
   const [search, setSearch] = useState('');
   const [stores, setStores] = useState<StoreSummary[]>([]);

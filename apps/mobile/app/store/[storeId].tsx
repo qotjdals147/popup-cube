@@ -13,6 +13,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../../src/context/AuthContext';
 import { useWorldImmersiveChrome } from '../../src/hooks/useWorldImmersiveChrome';
+import { applyWorldImmersiveChrome } from '../../src/lib/worldImmersive';
 import { t } from '../../src/i18n/ko';
 import { getStoreSummary } from '../../src/lib/stores';
 import { getSupabase } from '../../src/lib/supabase';
@@ -117,7 +118,8 @@ export default function StoreScreen() {
     [store?.name, storeId]
   );
 
-  const worldChromeActive = Boolean(playUrl && !webError);
+  /** 로딩 중에도 매장 화면이면 몰입 시도 (WebView 뜨기 전 상단바 잔류 방지) */
+  const worldChromeActive = !webError && Boolean(storeId && userId && !authLoading);
   useWorldImmersiveChrome(worldChromeActive);
 
   if (authLoading || loadingMeta || !sessionReady) {
@@ -168,6 +170,9 @@ export default function StoreScreen() {
         )}
         onError={() => setWebError(t.store.worldError)}
         onHttpError={() => setWebError(t.store.worldError)}
+        onLoadEnd={() => {
+          void applyWorldImmersiveChrome();
+        }}
       />
     </View>
   );

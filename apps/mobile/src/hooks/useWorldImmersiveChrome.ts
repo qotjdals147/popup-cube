@@ -1,44 +1,46 @@
-import { useEffect } from 'react';
-import { Platform } from 'react-native';
-import { setStatusBarHidden } from 'expo-status-bar';
-import * as NavigationBar from 'expo-navigation-bar';
+import { useCallback } from 'react';
+import { AppState, type AppStateStatus } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import {
+  applyWorldImmersiveChrome,
+  restoreSystemChrome,
+} from '../lib/worldImmersive';
 
-/**
- * 매장 WebView(월드) — 몰입 UI (AD-050).
- * Android: 하단·상단 가장자리 스와이프 시 시스템 UI 잠깐 표시 → 손 떼면 다시 숨김 (overlay-swipe).
- */
+/** 매장 WebView(월드) — 몰입 UI (AD-050). 포커스·WebView 로드 시 재적용. */
 export function useWorldImmersiveChrome(active: boolean) {
-  useEffect(() => {
-    if (!active) return;
+  useFocusEffect(
+    useCallback(() => {
+      if (!active) return undefined;
 
-    setStatusBarHidden(true, 'fade');
+      void applyWorldImmersiveChrome();
+      const retries = [200, 400, 1200, 2500, 5000].map((ms) =>
+        setTimeout(() => void applyWorldImmersiveChrome(), ms)
+      );
 
-    if (Platform.OS === 'android') {
-      void (async () => {
-        try {
-          await NavigationBar.setPositionAsync('absolute');
-          await NavigationBar.setBackgroundColorAsync('#00000000');
-          await NavigationBar.setVisibilityAsync('hidden');
-          await NavigationBar.setBehaviorAsync('overlay-swipe');
-        } catch (err) {
-          console.warn('[immersive] Android system UI:', err);
-        }
-      })();
-    }
+      const poll = setInterval(() => {
+        void applyWorldImmersiveChrome();
+      }, 3000);
 
-    return () => {
-      setStatusBarHidden(false, 'fade');
-      if (Platform.OS === 'android') {
-        void (async () => {
-          try {
-            await NavigationBar.setVisibilityAsync('visible');
-            await NavigationBar.setBehaviorAsync('inset-touch');
-            await NavigationBar.setPositionAsync('relative');
-          } catch {
-            // ignore restore errors
-          }
-        })();
-      }
-    };
-  }, [active]);
+      const onAppState = (state: AppStateStatus) => {
+        if (state === 'active') void applyWorldImmersiveChrome();
+      };
+      const appSub = AppState.addEventListener('change', onAppState);
+
+      return () => {
+        retries.forEach(clearTimeout);
+        clearInterval(poll);
+        appSub.remove();
+        void restoreSystemChrome();
+      };
+    }, [active])
+  );
+}
+
+/** 홈·로그인 — 시스템 UI 복원 (Expo Go immersive 잔여 방지) */
+export function useRestoreSystemChromeOnFocus() {
+  useFocusEffect(
+    useCallback(() => {
+      void restoreSystemChrome();
+    }, [])
+  );
 }

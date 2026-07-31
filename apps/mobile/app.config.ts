@@ -46,6 +46,15 @@ const config: ExpoConfig = {
     },
     package: 'com.popupcube.app',
   },
+  /** Expo Go: 프로젝트 로드 시 immersive 힌트 (매장 런타임 API와 병행 · ISS-031) */
+  androidNavigationBar: {
+    visible: 'sticky-immersive',
+    backgroundColor: '#00000000',
+  },
+  androidStatusBar: {
+    translucent: true,
+    backgroundColor: '#00000000',
+  },
   web: {
     favicon: './assets/favicon.png',
   },
@@ -55,6 +64,13 @@ const config: ExpoConfig = {
       'expo-screen-orientation',
       {
         initialOrientation: 'DEFAULT',
+      },
+    ],
+    [
+      'expo-navigation-bar',
+      {
+        backgroundColor: '#00000000',
+        legacyVisible: 'sticky-immersive',
       },
     ],
   ],

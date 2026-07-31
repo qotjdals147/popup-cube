@@ -18,6 +18,7 @@ import {
   isNicknameLengthValid,
 } from '../src/lib/nickname';
 import { colors } from '../src/theme/colors';
+import { useRestoreSystemChromeOnFocus } from '../src/hooks/useWorldImmersiveChrome';
 
 type Mode = 'login' | 'signup';
 type NicknameStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
@@ -25,6 +26,7 @@ type NicknameStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
 export default function LoginScreen() {
   const router = useRouter();
   const { role: roleParam } = useLocalSearchParams<{ role?: string }>();
+  useRestoreSystemChromeOnFocus();
   const isOwner = roleParam === 'owner';
   const { signInWithPassword, signUp, loading: authLoading } = useAuth();
 

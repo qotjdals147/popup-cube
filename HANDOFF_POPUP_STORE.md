@@ -175,8 +175,8 @@
 | **Purpose** | 오프라인 팝업 스토어 한계를 넘는 2D 픽셀 아트 메타버스 커머스 플랫폼 |
 | **Workspace** | `C:\Users\qotjd\Downloads\Cursor\popup_store` |
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
-| **Current Phase** | **Phase 4** — Sprint **4-3 HUD 바 완료** · **다음 = 실기 확인 후 바로구매 mock 또는 4-x 폴리시** (2026-07-31) |
-| **Version** | `0.2.2` (Sprint 4-3 play HUD) |
+| **Current Phase** | **Phase 4** — Sprint **4-3 실기 OK**(알약·HUD) · **몰입(AD-050)= dev APK에서 최종 확인** · **다음 = Sprint 4-4 바로 구매 mock** (2026-07-31) |
+| **Version** | `0.2.3` (4-3+ 몰입 코드 · 4-4 예정) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -343,7 +343,8 @@
 | AD-047 | **월드 모바일 HUD = 시안 하단 가로 바** — 픽셀 아이콘 4칸: `상호작용 · 채팅 · 장바구니 · 전체상품` (`Online_Popup.docx` · AD-033). **세로:** 하단 중앙(또는 풀폭 근처) 알약 바 + D-pad 왼쪽 아래. **가로:** 같은 바를 **늘리지 않음**(`max-width` 알약 유지) · D-pad 왼쪽 · 바는 하단 중앙/오른쪽. 지금 PlayWorld는 **임시 텍스트 버튼**(기능용) — **Sprint 4-3**에서 시안 바로 교체. 상세 **§32.1** | User 2026-07-30: 시안 HUD 확인·가로 늘림 금지 | 2026-07-30 |
 | AD-048 | **앱 화면 회전 = config + 런타임 API** — 월드 WebView 가로 HUD(AD-047): `app.config` `orientation: 'default'` + 매장 화면 `expo-screen-orientation` **`ALL`**. **Expo Go는 app.config만으로 회전 안 되는 경우 많음.** 로그인·홈은 매장 퇴장 시 `PORTRAIT_UP` | User 2026-07-31: 가로 돌려도 화면 안 돌아감 | 2026-07-31 |
 | AD-049 | **근접 상호작용 UI = 짧은 가운데 알약 (옵션 C)** — 진열: **긴 「탭해서 진열…」 바 제거** · `PlayProximityPill`(이름 + 「탭·상호작용」) · **탭 = HUD 상호작용과 동일** · D-pad 왼쪽 여백(`--play-dpad-clear`) · 가운데 정렬 · max-width. **엘리베이터 등 후속**도 같은 알약 패턴(행동 문구만 변경) | User 2026-07-31: 배너 겹침·HUD 중복 | 2026-07-31 |
-| AD-050 | **월드 몰입 = 시스템 UI 숨김 + 엣지 스와이프 (Android)** — 매장 WebView에서 `StatusBar` hidden · Android `expo-navigation-bar` **hidden + `overlay-swipe`** (위·아래 스와이프 시 잠깐 표시 후 자동 숨김). iOS: 상태바 숨김 · 홈 인디케이터는 OS 유지. `useWorldImmersiveChrome` · 홈 퇴장 시 복원 | User 2026-07-31: 인게임 느낌·게임식 UI | 2026-07-31 |
+| AD-050 | **월드 몰입 = 시스템 UI 숨김 + 엣지 스와이프 (Android)** — 매장 WebView에서 `StatusBar` hidden · Android `expo-navigation-bar` **hidden + `overlay-swipe`**. **루트 `_layout`에 전역 StatusBar 두지 않음**(매장 hidden과 충돌 · ISS-031). Stack `statusBarHidden` · `useWorldImmersiveChrome` · 홈 퇴장 시 복원. **인게임 HUD(알약·D-pad)는 유지** — 몰입 대상은 OS 바만 | User 2026-07-31: 인게임 느낌·게임식 UI | 2026-07-31 |
+| AD-051 | **몰입 최종 검증 = EAS development APK** — Expo Go에서는 OS 바 숨김이 **기대하지 않음**(ISS-031 User 확인). 코드·manifest(`sticky-immersive`)는 유지 · **`eas build --profile development`** 로 dev client 설치 후 매장 WebView에서 재확인. Preview/Production 빌드 전 게이트 | User 2026-07-31: Expo Go 그대로 보임 → dev APK에서 확인 합의 | 2026-07-31 |
 
 ---
 
@@ -395,6 +396,8 @@
 - [x] **Sprint 4-1 — 앱 Phaser 월드 뼈대** — WebView → `/play/:storeId` · `display_fixtures` 로드 · GUCCI 시드 1건 (2026-07-30)
 - [x] **Sprint 4-2 — 손님 진열 상호작용** — 슬롯 상품 팝업 · 장바구니 · 착용 미리보기 (2026-07-30) · 바로구매·풀 TryOn ⬜
 - [x] **Sprint 4-3 — 시안형 하단 HUD 바 (AD-047, §32.1)** — 픽셀 4칸 · 세로/가로 알약 · 채팅 · D-pad 겹침 방지 (2026-07-31)
+- [x] **AD-049 근접 알약 · AD-048 회전** — User 실기 OK (2026-07-31)
+- [x] **AD-050 몰입 코드** — Expo Go 검증 ❌ → **AD-051 dev APK 게이트** (2026-07-31)
 - [x] **draft/출시 (AD-021)** — Sprint 3에서 `create_owner_store` → draft + 출시 버튼 (완료)
 - [x] **Phase 2 후속 (일부)** — 카메라가 캐릭터를 따라다니는 고정 뷰포트 방식으로 전환 + 타일/캐릭터/글자 크기 확대(2026-07-13, AD-026)
 - [ ] **Phase 2 후속 (남음)** — 충돌 정확도 개선, **방향별 스프라이트 애니메이션** (캐릭터 뼈대/파츠는 AD-020 — **쇼핑 루프·HUD 안정 후**)
@@ -501,64 +504,50 @@ popup_store/                          # Turborepo root
 | ISS-028 | ~~PlayWorld **이동 D-pad가 안 보임**~~ | Resolved | CSS `.virtual-dpad` absolute left + wrap을 오른쪽에 둬 화면 밖. **조치:** `VirtualDpad` `embedded` · 왼쪽 아래 · commit `9208754`. |
 | ISS-029 | Play 스토어 Expo Go **SDK 54+** vs 프로젝트 **SDK 52** → incompatible | Low | §0: Play Go 삭제 → SDK 52 APK. 프로젝트 54 업은 별도 승인. |
 | ISS-030 | ~~폰 가로 회전해도 앱·월드 화면이 세로 고정~~ | Resolved (2단계) | ① `app.config` `orientation: 'default'` ② **Expo Go는 config만으론 부족** → 매장 `store/[storeId].tsx`에서 `expo-screen-orientation` **`OrientationLock.ALL`** (2026-07-31). 홈 나가면 `PORTRAIT_UP`. 폰 **시스템 자동 회전** 켜짐 필수. |
+| ISS-031 | ~~몰입 — Expo Go에서 상·하단 OS UI 계속 표시~~ | **Deferred** (AD-051) | User 2026-07-31: **2차 수정 후에도 동일** → **Expo Go 한계로 수용**, 최종 확인은 **EAS development APK**. 코드: `worldImmersive.ts` · `_layout` StatusBar 제거 · `app.config` sticky-immersive · **로컬 커밋 대기**( `main` 최신 push = `6901d70` 이후 변경분). |
 
 ---
 
 ## 7. Next Steps (Priority Order)
 
-### ⏭ 세션 재개 — Sprint 4-3 **코드 완료** (2026-07-31)
+### ⏭ 다음 세션 1순위 — **Sprint 4-4: 바로 구매 mock** (2026-07-31)
 
 | 항목 | 값 |
 |---|---|
-| **방금 완료** | Sprint 4-3 — `PlayHudBar` · `PlayWorldChatPanel` · `play-world.css` |
-| **User 확인** | Vercel 배포 후 Expo Go SDK 52 · GUCCI · 하단 알약 4버튼 · 채팅 |
-| **다음 후보** | ① 바로 구매 mock ② HUD 아이콘 시안 PNG ③ iOS 하단 홈 인디케이터 추가 폴리시(선택) |
-| **Git `main`** | `2ef3a65` Sprint 4-3 push 완료 → Vercel `/play` 자동 배포 (1~2분) |
-
-### 사용자가 지금 해야 할 것 (Sprint 4-3 실기 — §0 Expo)
-
-**목표:** 앱 WebView 월드에서 **하단 알약 HUD 4칸** + **채팅** + **D-pad(왼쪽)** 이 시안대로 동작하는지 확인.
-
-**확인 체크리스트 (순서대로)**
-
-| # | 확인 항목 | 기대 결과 |
-|---|---|---|
-| 1 | 배포 반영 | push `2ef3a65` 후 1~2분 · 웹 `https://popup-cube-web.vercel.app` |
-| 2 | Expo Go | **SDK 52 APK** (Play 스토어 54+ ❌) · **app.config 바꾼 뒤엔 Expo `--clear` 재시작** |
-| 3 | 입장 | `demo@shopper.com` / `demo` → 홈 → **GUCCI** → 입장 → 월드 |
-| 4 | HUD 바 | 하단 **알약** · 아이콘 4칸: 상호작용·채팅·장바구니·전체상품 (옛 **세로 글자 버튼** 아님) |
-| 5 | D-pad | **왼쪽 아래** 이동 패드 보임 · HUD와 겹치지 않음 |
-| 6 | 상호작용 | 테이블 근처 → **짧은 가운데 알약**(이름 + 탭·상호작용) **또는** HUD 상호작용 → 진열 팝업 |
-| 7 | 채팅 | 채팅 탭 → 입력 → 전송 · (채팅 중 캐릭터 이동 멈춤) |
-| 8 | 장바구니·전체상품 | 각각 Drawer / ShopPanel 열림 |
-| 9 | 가로 모드 | 폰 가로 → HUD **가로로 늘지 않음** · D-pad 왼쪽 유지 |
-
-**PC에서 Expo 띄우기 (PowerShell, 복붙)**
-
-```
-cd C:\Users\qotjd\Downloads\Cursor\popup_store
-npm install --legacy-peer-deps
-cd apps\mobile
-npx expo start --tunnel --port 8082 --clear
-```
-
-폰 **SDK 52** Expo Go로 QR 스캔.
-
-**표준 안내문 전체** — HANDOFF **§0 「User에게 붙여 줄 표준 안내문」** 블록과 동일 (SDK 52 APK 링크·데모 계정·incompatible 해결 포함).
-
-**안 될 때 (짧게)** SDK 52 APK인지 · `--clear` 재시작 · `npm install --legacy-peer-deps` · Vercel 최신 배포 · Railway 소켓(`VITE_SOCKET_SERVER_URL`) — 월드만 「오프라인」이면 쇼핑 HUD는 되고 실시간·채팅만 안 될 수 있음.
-
-**테스트 후 User에게 알려줄 것:** OK / 어디서 막혔는지(스크린·한 줄) → 다음 작업(바로구매 mock 등) 진행.
+| **User 확인 완료** | 알약 위치(AD-049) OK · 몰입은 Expo Go ❌ → **dev APK**(AD-051) |
+| **4-4 목표** | 진열 팝업 `바로 구매 (준비 중)` → **mock 결제 완료 UX** (토스트/모달 · 주문번호 가짜 · PG 없음) · `DisplayProductModal.tsx` · §32 시안 버튼 순서 유지 |
+| **범위 밖(당분간)** | PG 실결제 · 풀 TryOn(AD-020) · 동네 필터(AD-035) |
+| **Git** | `6901d70` push됨 · **미커밋:** immersive 2차(`_layout`, `worldImmersive.ts`, `home/login/index` restore 등) — 다음 착수 전 **commit+push** 권장 |
 
 ### Cursor 다음 1개 (우선)
 
 | # | 작업 | 상태 |
 |---|---|---|
-| **1** | **실기 확인** — 4-3 HUD · 채팅 · 세로/가로 | ⬜ User |
-| 2 | 바로 구매 mock | ⬜ 팝업 「준비 중」 |
-| 3 | 풀 TryOn / 캐릭터 스프라이트 AD-020 | ⬜ **후순위** |
+| **1** | **Sprint 4-4 — 바로 구매 mock** (`DisplayProductModal` · PlayWorld/Store 동일 패턴) | ⬜ **다음 착수** |
+| 2 | EAS **development** 빌드 + 몰입 재확인 (AD-051) | ⬜ User/인프라 타이밍 |
+| 3 | HUD 아이콘 시안 PNG (SVG → 에셋) | ⬜ 폴리시 |
 | 4 | AD-034/035 자동로그인·동네필터 | ⬜ 시안만 |
 | 5 | PG 실결제 | ⬜ User 후보 미정 |
+
+### (완료) Sprint 4-3 실기 — User 2026-07-31
+
+| # | 확인 항목 | 결과 |
+|---|---|---|
+| 1~8 | HUD · D-pad · 채팅 · 장바구니 등 | User 진행 중/부분 OK (알약 위치 **OK**) |
+| 9 | 가로 모드 | (별도 이슈 없으면 OK) |
+| — | **몰입 OS 바** | Expo Go **변화 없음** → AD-051 |
+
+### 사용자가 4-4 후 테스트할 것 (§0 Expo · 웹)
+
+- Vercel `/play` 배포 반영 후 · 진열 → **바로 구매** → mock 완료 화면
+- Expo Go는 **월드 WebView**로 동일 플로우 (몰입은 dev APK 때)
+
+**PC Expo (변경 없음)**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store\apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
 
 ### Sprint 표
 
@@ -566,8 +555,9 @@ npx expo start --tunnel --port 8082 --clear
 |---|---|---|
 | 0~3 | ✅ | fixture · Expo · 점주 에디터 · OwnerDisplay · draft |
 | **4-1** | ✅ 2026-07-30 | WebView `/play` · fixtures · GUCCI 시드 |
-| **4-2** | ✅ 2026-07-30 | 슬롯 팝업 · 장바구니 · 착용 미리보기 · D-pad fix |
-| **4-3** | ✅ 2026-07-31 | 시안 하단 HUD + 채팅 + 가로 알약 (AD-047) |
+| **4-2** | ✅ 2026-07-30 | 슬롯 팝업 · 장바구니 · 착용 미리보기 · **바로구매 ⬜** |
+| **4-3** | ✅ 2026-07-31 | 시안 HUD · 채팅 · 근접 알약 · 회전 · 몰입 코드 |
+| **4-4** | ⬜ **다음** | **바로 구매 mock** |
 
 ### 키 파일
 - `apps/web/src/pages/PlayWorldPage.tsx` — WebView 월드
@@ -588,6 +578,15 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-07-31 — ISS-031 Deferred · AD-051 (User Expo Go 몰입 확인)
+- **User:** 알약 위치 OK · **몰입(OS 바) Expo Go에서 변화 없음** → dev APK에서 최종 확인 합의
+- **Changed:** HANDOFF §7 → **Sprint 4-4 바로 구매 mock** 1순위 · ISS-031 Deferred · AD-051 추가
+- **Notes:** 로컬 immersive 2차 코드 **아직 main 미푸시** — 다음 세션 commit 권장
+
+### 2026-07-31 — 몰입 UI 2차 (ISS-031 · Expo Go 대응)
+- **Changed:** `worldImmersive.ts` · 재시도·WebView `onLoadEnd` · `androidNavigationBar.sticky-immersive` · 홈/로그인 restore · **`_layout` StatusBar 충돌 제거** · Stack `statusBarHidden`
+- **Notes:** Expo Go에서도 안 되면 **EAS development APK**로 확인. `app.config` 바꿨으면 **`--clear` 필수**.
 
 ### 2026-07-31 — 월드 몰입 UI + 근접 알약 정렬 (AD-050 · AD-049)
 - **Author:** Cursor Agent (User 승인)

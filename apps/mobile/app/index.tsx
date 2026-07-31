@@ -4,11 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../src/context/AuthContext';
 import { t } from '../src/i18n/ko';
 import { colors } from '../src/theme/colors';
+import { useRestoreSystemChromeOnFocus } from '../src/hooks/useWorldImmersiveChrome';
 
 /** m01 — 일반 회원 / 스토어 관리자 로그인 분기 (AD-037) */
 export default function LandingScreen() {
   const router = useRouter();
   const { initError } = useAuth();
+  useRestoreSystemChromeOnFocus();
 
   return (
     <SafeAreaView style={styles.safe}>
