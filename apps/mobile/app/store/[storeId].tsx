@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import Constants from 'expo-constants';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { useAuth } from '../../src/context/AuthContext';
 import { t } from '../../src/i18n/ko';
 import { getStoreSummary } from '../../src/lib/stores';
@@ -44,6 +45,20 @@ export default function StoreScreen() {
       router.replace('/');
     }
   }, [authLoading, userId, router]);
+
+  /** Expo Go: app.config orientation만으론 회전 안 될 수 있음 → 매장(WebView)에서 런타임 허용 (ISS-030) */
+  useEffect(() => {
+    void (async () => {
+      try {
+        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.ALL);
+      } catch (err) {
+        console.warn('[store] orientation ALL failed:', err);
+      }
+    })();
+    return () => {
+      void ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+    };
+  }, []);
 
   useEffect(() => {
     if (!storeId) return;

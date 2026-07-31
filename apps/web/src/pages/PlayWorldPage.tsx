@@ -20,6 +20,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { VirtualDpad } from '../components/VirtualDpad';
 import { PlayHudBar } from '../components/PlayHudBar';
+import { PlayProximityPill } from '../components/PlayProximityPill';
 import { PlayWorldChatPanel } from '../components/PlayWorldChatPanel';
 import { DisplayProductModal } from '../components/DisplayProductModal';
 import { CartDrawer } from '../components/CartDrawer';
@@ -348,15 +349,7 @@ export function PlayWorldPage() {
       <div ref={worldRef} style={styles.world} />
 
       {nearZone && !displayOpen && (
-        <button
-          type="button"
-          className="play-interact-banner"
-          style={styles.interactBanner}
-          onClick={openDisplay}
-        >
-          <span>{nearZone.label}</span>
-          <span style={styles.interactHint}>{t('play.interactTap')}</span>
-        </button>
+        <PlayProximityPill label={nearZone.label} onActivate={openDisplay} />
       )}
 
       {/* 이동 D-pad — 왼쪽 아래 (항상 보이게 · embedded 인라인) */}
@@ -481,25 +474,6 @@ const styles: Record<string, CSSProperties> = {
     position: 'relative',
     overflow: 'hidden',
   },
-  interactBanner: {
-    position: 'absolute',
-    left: 12,
-    right: 12,
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 8,
-    padding: '12px 14px',
-    background: 'rgba(15,23,42,0.94)',
-    border: '1px solid #c9a962',
-    borderRadius: 12,
-    zIndex: 4,
-    fontSize: 14,
-    fontWeight: 600,
-    color: '#fff',
-    cursor: 'pointer',
-  },
-  interactHint: { fontSize: 12, color: '#c9a962', fontWeight: 600 },
   dpadHint: {
     fontSize: 11,
     color: '#94a3b8',

@@ -122,6 +122,7 @@
 5. **Sprint 4-1+ 월드 테스트**면 추가로 안내:
    - 웹 `/play` 가 **Vercel에 배포됐는지** (앱 WebView가 `EXPO_PUBLIC_WEB_ORIGIN` = `https://popup-cube-web.vercel.app` 를 염)
    - Vercel `VITE_SOCKET_SERVER_URL` = **Railway** URL (localhost면 월드 오프라인 안내만 보임)
+   - **가로 회전:** 매장(WebView) 화면에서만 `expo-screen-orientation` 적용 — **홈·로그인은 세로**일 수 있음. 폰 **설정 → 디스플레이 → 자동 회전** 켜기. Expo Go에서 config만 바꿔도 안 돌아가면 **`--clear` 재시작** 후 **GUCCI 입장한 뒤** 가로 테스트.
 6. 테스트 플로우를 **클릭 순서**로: 랜딩 → 일반 회원 로그인 → 홈 → 매장 카드 → 입장 → 월드(WebView)
 7. 깨지면 **짧은 체크리스트**만: SDK 52인지 / `--clear` 재시작했는지 / `npm install --legacy-peer-deps` / Vercel·소켓
 
@@ -340,7 +341,8 @@
 | AD-045 | **점주 AI = 매장 전체 생성 ❌ → 리소스 추출 + 도면 에디터** — 실사 업로드 시 **타일·가구·소품·재고 픽셀**만 API로 분리 추출 → **점주 계정 귀속 라이브러리**. 꾸미기 전 **픽셀 도면(벽·문·구조)** 편집 → 바닥 **칠하기**·fixture **점유 배치**(§44). 전체 room gen 금지(GUCCI 충돌 이슈 회피). **§45** | User 2026-07-24: API 절약 + 좌표/충돌 문제 근본 해결 | 2026-07-24 |
 | AD-046 | **인프라·호스팅 맵** — GitHub/Vercel/Railway/Supabase/Upstash 등 **역할·URL·env·비용·단계별 필요 서비스** 단일 설계도. §28 요약 보완. 상세 **§46** | User 2026-07-24: 호스팅 여러 개 정리·앞으로 필요한 것 미리 설계 | 2026-07-24 |
 | AD-047 | **월드 모바일 HUD = 시안 하단 가로 바** — 픽셀 아이콘 4칸: `상호작용 · 채팅 · 장바구니 · 전체상품` (`Online_Popup.docx` · AD-033). **세로:** 하단 중앙(또는 풀폭 근처) 알약 바 + D-pad 왼쪽 아래. **가로:** 같은 바를 **늘리지 않음**(`max-width` 알약 유지) · D-pad 왼쪽 · 바는 하단 중앙/오른쪽. 지금 PlayWorld는 **임시 텍스트 버튼**(기능용) — **Sprint 4-3**에서 시안 바로 교체. 상세 **§32.1** | User 2026-07-30: 시안 HUD 확인·가로 늘림 금지 | 2026-07-30 |
-| AD-048 | **앱 화면 회전 = `default`** — 월드 WebView에서 가로 HUD(AD-047) 확인하려면 네이티브 **세로 고정 금지**. `app.config.ts` `orientation: 'default'`. 로그인·홈도 가로 가능(MVP); **월드만 가로 허용**은 `expo-screen-orientation` 후순위 | User 2026-07-31: 가로 돌려도 화면 안 돌아감 | 2026-07-31 |
+| AD-048 | **앱 화면 회전 = config + 런타임 API** — 월드 WebView 가로 HUD(AD-047): `app.config` `orientation: 'default'` + 매장 화면 `expo-screen-orientation` **`ALL`**. **Expo Go는 app.config만으로 회전 안 되는 경우 많음.** 로그인·홈은 매장 퇴장 시 `PORTRAIT_UP` | User 2026-07-31: 가로 돌려도 화면 안 돌아감 | 2026-07-31 |
+| AD-049 | **근접 상호작용 UI = 짧은 가운데 알약 (옵션 C)** — 진열: **긴 「탭해서 진열…」 바 제거** · `PlayProximityPill`(이름 + 「탭·상호작용」) · **탭 = HUD 상호작용과 동일** · D-pad 왼쪽 여백(`--play-dpad-clear`) · 가운데 정렬 · max-width. **엘리베이터 등 후속**도 같은 알약 패턴(행동 문구만 변경) | User 2026-07-31: 배너 겹침·HUD 중복 | 2026-07-31 |
 
 ---
 
@@ -497,7 +499,7 @@ popup_store/                          # Turborepo root
 | ISS-027 | ~~모바일 **디버그 배너**(`연결 준비됨 · 빌드 cfg-4`)~~ | Resolved | User 2026-07-27 모바일 테스트 완료 → §7 체크리스트대로 정리 완료. |
 | ISS-028 | ~~PlayWorld **이동 D-pad가 안 보임**~~ | Resolved | CSS `.virtual-dpad` absolute left + wrap을 오른쪽에 둬 화면 밖. **조치:** `VirtualDpad` `embedded` · 왼쪽 아래 · commit `9208754`. |
 | ISS-029 | Play 스토어 Expo Go **SDK 54+** vs 프로젝트 **SDK 52** → incompatible | Low | §0: Play Go 삭제 → SDK 52 APK. 프로젝트 54 업은 별도 승인. |
-| ISS-030 | ~~폰 가로 회전해도 앱·월드 화면이 세로 고정~~ | Resolved | `apps/mobile/app.config.ts` `orientation: 'portrait'` → **`default`** (2026-07-31). Expo Go **재시작(`--clear`)** 후 매장 WebView에서 회전 확인. `PlayWorldPage` `orientationchange` 리사이즈 추가. |
+| ISS-030 | ~~폰 가로 회전해도 앱·월드 화면이 세로 고정~~ | Resolved (2단계) | ① `app.config` `orientation: 'default'` ② **Expo Go는 config만으론 부족** → 매장 `store/[storeId].tsx`에서 `expo-screen-orientation` **`OrientationLock.ALL`** (2026-07-31). 홈 나가면 `PORTRAIT_UP`. 폰 **시스템 자동 회전** 켜짐 필수. |
 
 ---
 
@@ -509,7 +511,7 @@ popup_store/                          # Turborepo root
 |---|---|
 | **방금 완료** | Sprint 4-3 — `PlayHudBar` · `PlayWorldChatPanel` · `play-world.css` |
 | **User 확인** | Vercel 배포 후 Expo Go SDK 52 · GUCCI · 하단 알약 4버튼 · 채팅 |
-| **다음 후보** | ① 바로 구매 mock ② HUD 아이콘 시안 PNG 교체 ③ StorePage HUD 재사용 |
+| **다음 후보** | ① **월드 몰입(상태바 숨김)** User 1번 ② 바로 구매 mock ③ HUD 아이콘 시안 PNG |
 | **Git `main`** | `2ef3a65` Sprint 4-3 push 완료 → Vercel `/play` 자동 배포 (1~2분) |
 
 ### 사용자가 지금 해야 할 것 (Sprint 4-3 실기 — §0 Expo)
@@ -525,7 +527,7 @@ popup_store/                          # Turborepo root
 | 3 | 입장 | `demo@shopper.com` / `demo` → 홈 → **GUCCI** → 입장 → 월드 |
 | 4 | HUD 바 | 하단 **알약** · 아이콘 4칸: 상호작용·채팅·장바구니·전체상품 (옛 **세로 글자 버튼** 아님) |
 | 5 | D-pad | **왼쪽 아래** 이동 패드 보임 · HUD와 겹치지 않음 |
-| 6 | 상호작용 | 테이블 근처 → 상호작용 탭 → 진열 상품 팝업 · 담기 |
+| 6 | 상호작용 | 테이블 근처 → **짧은 가운데 알약**(이름 + 탭·상호작용) **또는** HUD 상호작용 → 진열 팝업 |
 | 7 | 채팅 | 채팅 탭 → 입력 → 전송 · (채팅 중 캐릭터 이동 멈춤) |
 | 8 | 장바구니·전체상품 | 각각 Drawer / ShopPanel 열림 |
 | 9 | 가로 모드 | 폰 가로 → HUD **가로로 늘지 않음** · D-pad 왼쪽 유지 |
@@ -585,6 +587,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-07-31 — PlayWorld 근접 알약 UI (AD-049 · 옵션 C)
+- **Author:** Cursor Agent (User 승인)
+- **Changed:** `PlayProximityPill.tsx` · `play-world.css` · `PlayWorldPage` 긴 배너 제거 · `play.proximityTapHint`
+- **Notes:** Vercel 배포 후 §0 — 테이블 근처 알약 탭 = HUD 상호작용. **다음:** 월드 상태바 몰입(User 1번).
 
 ### 2026-07-31 — 앱 가로 회전 허용 (ISS-030 · AD-048)
 - **Author:** Cursor Agent (User 피드백)
@@ -1999,7 +2006,8 @@ where email = 'demo@owner.com';
 | **진열 슬롯** `(Display Slot)` | 조형물 위 **칸** (예: 테이블 3칸). 점주가 칸마다 상품을 넣고 순서를 바꿈. |
 | **전체 상품** | 매장 **카탈로그 전체** 목록 버튼. **장바구니와 다름** (예전 이름: 「지금 쇼핑하기」). |
 | **장바구니** | 담아 둔 상품·수량·결제 화면. HUD·헤더에 별도 버튼. |
-| **HUD 바** `(하단 조작 바)` | 월드 화면 **아래 알약 모양 버튼 줄**. 시안: 상호작용·채팅·장바구니·전체상품 4칸 (AD-047 · Sprint 4-3). 지금 PlayWorld는 **임시 글자 버튼**. |
+| **HUD 바** `(하단 조작 바)` | 월드 화면 **아래 알약 모양 버튼 줄**. 시안: 상호작용·채팅·장바구니·전체상품 4칸 (AD-047 · Sprint 4-3). |
+| **근접 알약** `(PlayProximityPill)` | 조형물 가까이 갔을 때 **짧은 가운데 알약** — 이름 + 「탭·상호작용」. 탭 = HUD 상호작용과 같음 (AD-049). |
 
 ---
 
@@ -2934,6 +2942,12 @@ Sprint 4-2로 **기능**(진열·담기·장바구니·전체상품)은 됨. UX�
 | 채팅 | PlayWorld에 **채팅 UI 연결** (StorePage 채팅과 동일 소켓 — 4-3에서 HUD에 포함) |
 | 장바구니 | `CartDrawer` |
 | 전체상품 | `ShopPanel` |
+
+### 근접 안내 알약 (AD-049 · 옵션 C — 2026-07-31)
+- **긴 가로 배너**(「탭해서 진열 상품 보기」) **사용 안 함** — D-pad·HUD와 겹침.
+- **`PlayProximityPill`**: 조형물 **이름**(가운데) + 「탭 · 상호작용」 · **탭 = HUD 상호작용**과 동일.
+- 위치: D-pad 오른쪽 영역 **가운데 정렬** · `play-world.css` `--play-dpad-clear`.
+- **엘리베이터/문 (후속):** 같은 알약 · 라벨만 「2층으로」 등 · 실행은 여전히 HUD 상호작용.
 
 ### 구현 메모 (다음 에이전트)
 1. §0 브리핑·User 승인 후 착수
