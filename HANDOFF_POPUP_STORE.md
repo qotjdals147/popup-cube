@@ -538,7 +538,7 @@ popup_store/                          # Turborepo root
 | **User 확인 완료** | 알약(AD-049) · **몰입(AD-050)** · **헤더 스크롤(ISS-032)** — Expo Go SDK 52 (2026-07-31) |
 | **4-4 목표** | 진열 팝업 `바로 구매 (준비 중)` → **mock 결제 완료 UX** (토스트/모달 · 주문번호 가짜 · PG 없음) · `DisplayProductModal.tsx` · §32 시안 버튼 순서 유지 |
 | **범위 밖(당분간)** | PG 실결제 · 풀 TryOn(AD-020) · 동네 필터(AD-035) |
-| **Git** | push 후 `main` 최신 = **ISS-032 + HANDOFF** (몰입 2차는 `164b5f7`/`6a98eb0`) |
+| **Git** | **`a6c5992`** ISS-032 + HANDOFF (몰입 실기 OK) · Vercel 자동 배포 1~2분 |
 
 ### Cursor 다음 1개 (우선)
 
