@@ -6,8 +6,14 @@ import {
   ProductError,
   setProductActive,
   updateProduct,
+  updateProductFulfillment,
 } from '../lib/products';
 import { t } from '../i18n';
+import {
+  formatIntegerDisplay,
+  formatIntegerInputRaw,
+  parseIntegerInput,
+} from '../lib/formatInteger';
 
 interface OwnerProductPanelProps {
   storeId: string;
@@ -24,6 +30,7 @@ interface OwnerProductPanelProps {
  */
 export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }: OwnerProductPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +48,11 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
   const [editName, setEditName] = useState('');
   const [editPrice, setEditPrice] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editStock, setEditStock] = useState('');
+  const [editAutoEnabled, setEditAutoEnabled] = useState(false);
+  const [editAutoLimit, setEditAutoLimit] = useState('');
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
+  const [editPreviewUrl, setEditPreviewUrl] = useState<string | null>(null);
   const [editSaving, setEditSaving] = useState(false);
 
   async function reload() {
@@ -67,6 +79,29 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
     };
   }, [previewUrl]);
 
+  function handleEditFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setEditImageFile(file);
+    setEditPreviewUrl((prev) => {
+      if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
+      return file ? URL.createObjectURL(file) : prev;
+    });
+  }
+
+  function cancelEdit() {
+    setEditPreviewUrl((prev) => {
+      if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setEditImageFile(null);
+    setEditingId(null);
+  }
+
+  function blurFormatInteger(value: string, setter: (v: string) => void) {
+    if (!value.trim()) return;
+    setter(formatIntegerInputRaw(value));
+  }
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
     setImageFile(file);
@@ -78,7 +113,7 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const priceNumber = Number(price);
+    const priceNumber = parseIntegerInput(price);
 
     if (!name.trim() || !price.trim() || !Number.isFinite(priceNumber) || priceNumber < 0) {
       setFormError(t('ownerProducts.errorRequired'));
@@ -126,27 +161,54 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
   }
 
   function startEdit(product: Product) {
+    if (editingId) {
+      setEditPreviewUrl((prev) => {
+        if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
+        return null;
+      });
+    }
     setEditingId(product.id);
     setEditName(product.name);
-    setEditPrice(String(product.price));
+    setEditPrice(formatIntegerDisplay(product.price));
     setEditDescription(product.description ?? '');
+    setEditStock(formatIntegerDisplay(product.stock_quantity));
+    setEditAutoEnabled(product.auto_accept_enabled);
+    setEditAutoLimit(
+      product.auto_accept_limit > 0 ? formatIntegerDisplay(product.auto_accept_limit) : ''
+    );
+    setEditImageFile(null);
+    setEditPreviewUrl(product.image_url);
   }
 
   async function handleSaveEdit(productId: string) {
-    const priceNumber = Number(editPrice);
+    const priceNumber = parseIntegerInput(editPrice);
+    const stockNumber = parseIntegerInput(editStock);
+    const autoLimitNumber = parseIntegerInput(editAutoLimit);
     if (!editName.trim() || !Number.isFinite(priceNumber) || priceNumber < 0) return;
+    if (!Number.isFinite(stockNumber) || stockNumber < 0) return;
+    if (editAutoEnabled && (!Number.isFinite(autoLimitNumber) || autoLimitNumber <= 0)) return;
 
     setEditSaving(true);
     try {
-      await updateProduct(productId, {
+      await updateProduct(userId, productId, {
         name: editName,
         description: editDescription,
         price: Math.round(priceNumber),
+        imageFile: editImageFile,
       });
-      setEditingId(null);
+      await updateProductFulfillment(productId, {
+        stockQuantity: Math.round(stockNumber),
+        autoAcceptEnabled: editAutoEnabled,
+        autoAcceptLimit: editAutoEnabled ? Math.round(autoLimitNumber) : 0,
+      });
+      cancelEdit();
       await reload();
-    } catch {
-      setLoadError(t('ownerProducts.errorGeneric'));
+    } catch (err) {
+      if (err instanceof ProductError && err.code === 'IMAGE_TOO_LARGE') {
+        setLoadError(t('ownerProducts.errorImageTooLarge'));
+      } else {
+        setLoadError(t('ownerProducts.errorGeneric'));
+      }
     } finally {
       setEditSaving(false);
     }
@@ -166,23 +228,24 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
         )}
 
         <form style={styles.form} onSubmit={handleSubmit}>
-          <div style={styles.formRow}>
-            <input
-              style={styles.input}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('ownerProducts.namePlaceholder')}
-              maxLength={120}
-            />
-            <input
-              style={styles.priceInput}
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder={t('ownerProducts.pricePlaceholder')}
-              inputMode="numeric"
-              maxLength={10}
-            />
-          </div>
+          <label style={styles.fieldLabel}>{t('ownerProducts.nameLabel')}</label>
+          <input
+            style={styles.inputFull}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t('ownerProducts.namePlaceholder')}
+            maxLength={120}
+          />
+          <label style={styles.fieldLabel}>{t('ownerProducts.priceLabel')}</label>
+          <input
+            style={styles.inputFull}
+            value={price}
+            onChange={(e) => setPrice(formatIntegerInputRaw(e.target.value))}
+            onBlur={() => blurFormatInteger(price, setPrice)}
+            inputMode="numeric"
+            maxLength={16}
+          />
+          <label style={styles.fieldLabel}>{t('ownerProducts.descriptionLabel')}</label>
           <textarea
             style={styles.textarea}
             value={description}
@@ -191,6 +254,7 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
             maxLength={300}
             rows={2}
           />
+          <label style={styles.fieldLabel}>{t('ownerProducts.editImageLabel')}</label>
           <div style={styles.formRow}>
             <div style={styles.imagePreviewWrap}>
               {previewUrl ? (
@@ -236,26 +300,91 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
 
                 {editingId === product.id ? (
                   <div style={styles.editArea}>
+                    <label style={styles.fieldLabel}>{t('ownerProducts.nameLabel')}</label>
                     <input
-                      style={styles.input}
+                      style={styles.inputFull}
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
+                      placeholder={t('ownerProducts.namePlaceholder')}
                       maxLength={120}
                     />
+                    <label style={styles.fieldLabel}>{t('ownerProducts.priceLabel')}</label>
                     <input
-                      style={styles.priceInput}
+                      style={styles.inputFull}
                       value={editPrice}
-                      onChange={(e) => setEditPrice(e.target.value)}
+                      onChange={(e) => setEditPrice(formatIntegerInputRaw(e.target.value))}
+                      onBlur={() => blurFormatInteger(editPrice, setEditPrice)}
                       inputMode="numeric"
-                      maxLength={10}
+                      maxLength={16}
                     />
+                    <label style={styles.fieldLabel}>{t('ownerProducts.descriptionLabel')}</label>
                     <textarea
                       style={styles.textarea}
                       value={editDescription}
                       onChange={(e) => setEditDescription(e.target.value)}
+                      placeholder={t('ownerProducts.descriptionPlaceholder')}
                       maxLength={300}
                       rows={2}
                     />
+                    <label style={styles.fieldLabel}>{t('ownerProducts.editImageLabel')}</label>
+                    <div style={styles.formRow}>
+                      <div style={styles.imagePreviewWrapLarge}>
+                        {editPreviewUrl ? (
+                          <img src={editPreviewUrl} alt="" style={styles.imagePreview} />
+                        ) : (
+                          <div style={styles.imagePlaceholder}>🖼️</div>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        style={styles.fileButton}
+                        onClick={() => editFileInputRef.current?.click()}
+                      >
+                        {editImageFile ? t('ownerProducts.imageChange') : t('ownerProducts.imageChange')}
+                      </button>
+                      <input
+                        ref={editFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={handleEditFileChange}
+                      />
+                    </div>
+                    <label style={styles.fieldLabel}>{t('ownerProducts.stockLabel')}</label>
+                    <input
+                      style={styles.inputFull}
+                      value={editStock}
+                      onChange={(e) => setEditStock(formatIntegerInputRaw(e.target.value))}
+                      onBlur={() => blurFormatInteger(editStock, setEditStock)}
+                      placeholder={t('ownerProducts.stockPlaceholder')}
+                      inputMode="numeric"
+                      maxLength={16}
+                    />
+                    <label style={styles.checkRow}>
+                      <input
+                        type="checkbox"
+                        checked={editAutoEnabled}
+                        onChange={(e) => setEditAutoEnabled(e.target.checked)}
+                      />
+                      <span>{t('ownerProducts.autoAcceptLabel')}</span>
+                    </label>
+                    {editAutoEnabled && (
+                      <p style={styles.helpText}>{t('ownerProducts.autoAcceptIntro')}</p>
+                    )}
+                    {editAutoEnabled && (
+                      <>
+                        <label style={styles.fieldLabel}>{t('ownerProducts.autoAcceptQuotaLabel')}</label>
+                        <input
+                          style={styles.input}
+                          value={editAutoLimit}
+                          onChange={(e) => setEditAutoLimit(formatIntegerInputRaw(e.target.value))}
+                          inputMode="numeric"
+                          maxLength={12}
+                          placeholder="400"
+                        />
+                        <p style={styles.helpText}>{t('ownerProducts.autoAcceptQuotaHelp')}</p>
+                      </>
+                    )}
                     <div style={styles.editActions}>
                       <button
                         style={styles.smallButton}
@@ -264,7 +393,7 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
                       >
                         {editSaving ? t('ownerProducts.submitting') : t('ownerProducts.save')}
                       </button>
-                      <button style={styles.smallGhostButton} onClick={() => setEditingId(null)}>
+                      <button style={styles.smallGhostButton} type="button" onClick={cancelEdit}>
                         {t('common.back')}
                       </button>
                     </div>
@@ -276,6 +405,20 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
                       {!product.is_active && <span style={styles.hiddenBadge}>{t('ownerProducts.hidden')}</span>}
                     </div>
                     <div style={styles.productPrice}>{formatPrice(product.price)}</div>
+                    <div style={styles.productMeta}>
+                      {t('ownerProducts.stockHint', {
+                        stock: formatIntegerDisplay(product.stock_quantity),
+                      })}
+                      {product.auto_accept_enabled && (
+                        <>
+                          {' · '}
+                          {t('ownerProducts.autoAcceptRemaining', {
+                            n: formatIntegerDisplay(product.auto_accept_remaining),
+                            limit: formatIntegerDisplay(product.auto_accept_limit),
+                          })}
+                        </>
+                      )}
+                    </div>
                     {product.description && <div style={styles.productDesc}>{product.description}</div>}
                     <div style={styles.editActions}>
                       <button style={styles.smallGhostButton} onClick={() => startEdit(product)}>
@@ -373,6 +516,16 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 13,
     boxSizing: 'border-box',
   },
+  inputFull: {
+    width: '100%',
+    padding: '10px 12px',
+    borderRadius: 8,
+    border: '1px solid #2c4270',
+    background: '#0d1730',
+    color: '#fff',
+    fontSize: 13,
+    boxSizing: 'border-box',
+  },
   priceInput: {
     width: 110,
     padding: '10px 12px',
@@ -398,6 +551,18 @@ const styles: Record<string, React.CSSProperties> = {
   imagePreviewWrap: {
     width: 44,
     height: 44,
+    borderRadius: 8,
+    overflow: 'hidden',
+    background: '#0d1730',
+    border: '1px solid #2c4270',
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imagePreviewWrapLarge: {
+    width: 56,
+    height: 56,
     borderRadius: 8,
     overflow: 'hidden',
     background: '#0d1730',
@@ -466,6 +631,10 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '1px 8px',
   },
   productPrice: { color: '#e94560', fontSize: 13, fontWeight: 600, marginTop: 2 },
+  productMeta: { color: '#8ca4d8', fontSize: 11, marginTop: 4, lineHeight: 1.4 },
+  fieldLabel: { color: '#a0a0c0', fontSize: 12, marginTop: 4 },
+  checkRow: { display: 'flex', alignItems: 'center', gap: 8, color: '#d8e4ff', fontSize: 13 },
+  helpText: { color: '#8ca4d8', fontSize: 11, margin: '4px 0 0', lineHeight: 1.45 },
   productDesc: { color: '#a0a0c0', fontSize: 12, marginTop: 4, lineHeight: 1.4 },
   editArea: { flex: 1, display: 'flex', flexDirection: 'column', gap: 6 },
   editActions: { display: 'flex', gap: 8, marginTop: 6 },

@@ -74,6 +74,20 @@
 
 **금지:** jargon만 나열, 영어 약어만 던지고 끝, "당연히 아시겠지만"
 
+### UI·i18n 문구 규칙 (User 2026-08-03 — 필수)
+
+**점주·손님 화면(`apps/web/src/i18n/ko.ts` 등) 카피는 짧고 담백하게.** User가 **따로 요청하기 전까지** 아래를 넣지 않는다.
+
+| 넣지 말 것 | 예 |
+|---|---|
+| **당연한 TMI** | 「쉼표는 자동」, 「입력 예: 890000 → 890,000」 |
+| **AI·매뉴얼 톤** | 과한 안내 문장, 기능 설명 남발, 이모지·느낌표 남용 |
+| **에이전트가 임의로 긴 도움말** | 자동 수락처럼 **처음 도입한 개념**은 User와 합의·요청 후에만 상세 문구 |
+
+**넣어도 되는 것:** 필드 **라벨**(무슨 칸인지), **한 줄 placeholder** 수준, **정말 헷갈리는 것만** 짧은 설명 (User가 「설명 넣어줘」라고 하면 그때 작성).
+
+**HANDOFF·에이전트:** §25 i18n 갱신 시 위 규칙 준수. 불필요한 `helpText` 블록 추가 금지.
+
 ### 다음 작업 우선순위 판단 (User 요청, 2026-07-13)
 
 **"다음 작업은?" 질문에 여러 옵션을 나열해서 사용자가 고르게 하지 말 것.**
@@ -129,7 +143,8 @@
    - User에게 「어떻게 확인해?」「테스트 방법」을 줄 때 **`--clear` 재시작`만 말하고 끝내지 말 것.**
    - **반드시** 제목 **`아래 한 줄씩 복붙:`** (또는 동일 의미) 아래에 **PowerShell 명령 4줄 전체**를 **한 줄씩** 코드 블록으로 넣는다 *(경로·`npm install`·`apps\mobile`·`expo start` 생략 불가)*.
    - 그 다음에 **폰 Expo Go SDK 52** · **데모 계정** · **앱 안 클릭 순서** · **이번에 볼 것(기대 결과)** 를 이어서 적는다.
-   - 웹(Vercel)만 바뀐 경우에도 **앱 WebView 테스트**면 위 Expo 4줄 블록 **항상 포함**.
+   - **PC 점주 웹만** 바뀐 경우 → **PC 웹 3줄 블록**(위 「PC 웹 로컬」) **필수** · 앱 WebView까지면 **Expo 4줄 + PC 3줄**.
+   - 웹(Vercel)만 배포됐고 User가 **로컬 없이** Vercel만 볼 때 → `https://popup-cube-web.vercel.app` + push 후 1~2분 · 그래도 **로컬 dev 권장** 문구 한 줄.
    - 표준 전체 문구는 아래 「User에게 붙여 줄 표준 안내문」과 **동일한 명령 4줄**을 유지한다.
 
 #### 표준 PC 명령 (에이전트 — 확인 방법 설명 시 항상 이 4줄 전체)
@@ -144,6 +159,31 @@ npx expo start --tunnel --port 8082 --clear
 ```
 
 *(위 4줄은 「User에게 붙여 줄 표준 안내문」 2) PC 와 동일 — 한 줄이라도 빼지 말 것.)*
+
+### PC 웹(점주·스토어 관리) 로컬 테스트 안내 규칙 (필수 — 2026-08-03)
+
+**User는 개발자가 아님.** **점주 PC 웹**(`apps/web` — 상품·주문·발주·배송·매장 꾸미기) 작업이 끝나면 (또는 「웹에서 어떻게 봐?」) **매번** Expo와 **같은 톤**으로 **쉬운 말 + 복붙 명령**을 준다.  
+Vercel만 고치고 로컬에서 먼저 보려면 아래 **PC 3줄**을 쓴다. **앱 WebView까지** 보려면 **PC 3줄 + Expo 4줄** 둘 다.
+
+#### 에이전트가 반드시 지킬 것
+1. **브라우저 주소** — `npm run dev` 후 보통 **`http://localhost:5173`** (터미널에 나온 Local URL 그대로)
+2. **점주 계정** — `demo@owner.com` / `demo` → 홈 → 매장 **편집** (`/store/.../edit`)
+3. **확인 방법 형식** — 제목 **`아래 한 줄씩 복붙:`** 아래 **PowerShell 3줄 전체** (생략 금지)
+4. **앱만** 손님 테스트면 §0 Expo 4줄 · **PC만** 점주 테스트면 PC 3줄 · **둘 다**면 **두 블록 모두**
+
+#### 표준 PC 웹 로컬 명령 (점주 UI 확인)
+
+**아래 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+5) 브라우저에서 터미널에 나온 주소 (보통 `http://localhost:5173`) → **스토어 관리자 로그인** → `demo@owner.com` / `demo`  
+6) **이번에 볼 것** — 이번 작업 범위(예: 상품 수정·주문 수락)를 클릭 순서로  
+7) Vercel 반영은 **Git push 후 1~2분** · 로컬과 Vercel이 다르면 **로컬 `npm run dev`가 최신 코드**
 
 #### User에게 붙여 줄 표준 안내문 (복사용)
 
@@ -364,6 +404,10 @@ npx expo start --tunnel --port 8082 --clear
 | AD-049 | **근접 상호작용 UI = 짧은 가운데 알약 (옵션 C)** — 진열: **긴 「탭해서 진열…」 바 제거** · `PlayProximityPill`(이름 + 「탭·상호작용」) · **탭 = HUD 상호작용과 동일** · D-pad 왼쪽 여백(`--play-dpad-clear`) · 가운데 정렬 · max-width. **엘리베이터 등 후속**도 같은 알약 패턴(행동 문구만 변경) | User 2026-07-31: 배너 겹침·HUD 중복 | 2026-07-31 |
 | AD-050 | **월드 몰입 = 시스템 UI 숨김 + 엣지 스와이프 (Android)** — `164b5f7` immersive + ISS-032 WebView scroll lock 병행. 매장 WebView `StatusBar` hidden · `expo-navigation-bar` **hidden + `overlay-swipe`** · `_layout` StatusBar 충돌 제거 · `useWorldImmersiveChrome`. **User 2026-07-31 실기 OK (Expo Go SDK 52)** — OS 바 숨김·엣지 스와이프 확인 | User 2026-07-31 | 2026-07-31 |
 | AD-051 | **몰입 EAS regression (선택)** — Expo Go 실기 **통과** (AD-050). **Preview/Production APK** 빌드 전 **`eas build --profile development`** 로 한 번 더 확인 권장 (스토어 빌드 전용 회귀 게이트) | User 2026-07-31 오전: Go ❌ → **오후: Go ✅** 로 갱신 | 2026-07-31 |
+| AD-052 | **(계획) 점주 PC = 스마트스토어형 판매자센터** — 탭 **「주문」** (수락/거절) · **「발주·배송」** (수락 후 송장·상태). **거절·발송 전 취소 = 재고 반드시 복구**(§52). **자동 수락(AD-053)** = 상품별 ON + **남은 자동 수락 건수** · 취소 시 건수·재고 되돌림. 상세 **§52** · 현재 MVP = 주문 탭만 · `paid` 고정 | User 2026-08-03 | 2026-08-03 |
+| AD-053 | **(계획) 상품별 자동 주문 수락 — 할당 건수(quota)** — 점주가 「자동 수락」 켜고 **몇 건까지 자동 수락할지** 숫자 입력 (예: 재고 892 → 892 입력 → **892번째 주문까지** 자동, **893번째부터** 수동). **1주문 = 1건** 차감. 자동 수락된 주문이 **발송 전 취소/거절**되면 **남은 건수 +1** + 재고 복구 — UI에 짧은 설명 필수 (§52.4). DB·RPC는 §52.5 | User 2026-08-03 | 2026-08-03 |
+| AD-054 | **(계획) 배송완료 · 구매확정 · 7일 자동 + 손님 고지 필수** — 발주·배송: 점주 **배송 시작**→**배송 완료** · 손님 **구매확정**(수동) · **미확정 시 주문(결제)일로부터 7일 경과 시 자동 구매확정** · **결제 완료·주문 조회 등에 위 규칙 고지 필수**(분쟁 방지). §52.7 · 택배사 API·정산 연동은 PG·물류 이후 | User 2026-08-03 | 2026-08-03 |
+| AD-055 | **(계획) 점주 PC 실시간 주문 알림 + 사이드바 뱃지** — 새 주문·상태 변경 시 **새로고침 없이** 목록·카운트 갱신 + **토스트(알림)** · 왼쪽 **「주문」** 빨간 뱃지(건수) · **「발주·배송」** 뱃지 = **발송 처리 필요**(`accepted`) 건수 (§52.8). Supabase Realtime 또는 동등 구독 · Socket.io(월드용)와 **분리** | User 2026-08-03 | 2026-08-03 |
 
 ---
 
@@ -409,6 +453,10 @@ npx expo start --tunnel --port 8082 --clear
 - [x] **Phase 4 Sprint 1 — `apps/mobile` Expo shell (2026-07-27, AD-037/038)** — expo-router: m01 랜딩(이중 로그인) · 로그인/회원가입 · 홈(매장 목록·검색·입장 모달) · `/store/[storeId]` placeholder; Supabase Auth+AsyncStorage; EAS projectId `49c42cb0-...`; `eas.json` · `apps/mobile/README.md`
 
 - [x] **Phase 4 Sprint 2 — 웹 AD-037 + 에디터 MVP (2026-07-27)** — `LandingPage`/`LoginPage` 점주 전용 · `HomePage`→점주 대시보드 · `/store/:storeId/edit` (`StoreEditPage`: 개요·상품·주문·꾸미기 탭) · `/app-only` · `/store/:storeId` 월드→에디터/앱 리다이렉트 · `OwnerProductPanel`/`OwnerOrdersPanel` embedded 모드 · `getMyStore()`
+
+- [x] **ISS-033** — demo owner ↔ GUCCI (`userOwnsStore`, profile migration)
+- [x] **가챠 ↔ 주문 1:1 + 점주 카드 표시 (2026-08-03)** — migration `20260803_gacha_order_link_and_owner_view.sql` · `roll_gacha(storeId, orderId?)` · `get_store_orders` gacha columns · `CartDrawer` 결제 후 roll · `OwnerOrdersPanel` 당첨 블록 · `OwnerOrderView` 타입
+- [x] **ISS-034 Play 장바구니 세로 폭 (2026-08-03)** — `CartDrawer` 2줄 레이아웃 + `play-world.css` `.play-cart-row*`
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -528,28 +576,52 @@ popup_store/                          # Turborepo root
 | ISS-031 | ~~몰입 — Expo Go에서 상·하단 OS UI 계속 표시~~ | Resolved | **오전:** 2차(`164b5f7`) 후에도 ❌ → **오후 User:** **`--clear` + ISS-032(WebView scroll lock) 반영 번들** 후 **✅ 몰입 동작 확인**. 스택: `worldImmersive.ts` · `_layout` · `app.config` sticky-immersive · WebView `scrollEnabled={false}`. |
 | ISS-032 | ~~월드 상단(홈·채널/진열) 잡고 위아래 끌면 화면이 살짝 스크롤~~ | Resolved | `PlayWorldPage` body/overscroll lock · 헤더 `touchmove` 차단 · WebView `overScrollMode="never"`. **User 2026-07-31 실기 OK.** |
 | ISS-033 | ~~demo@owner가 GUCCI 점주인데 주문/에디터 안 됨~~ | Resolved | **DB:** GUCCI `owner_id` = demo owner ✅ · `profiles.store_id` = draft `하이` ❌. **앱:** `profiles.store_id`만 보던 점주 판별 → **`stores.owner_id`** (`userOwnsStore`). **DB:** profile → `popup_gucci_01` migration. |
+| ISS-034 | ~~Play 세로 WebView에서 장바구니 상품명·버튼 줄바꿈 깨짐~~ | Resolved | `CartDrawer` `play-cart-row` 2단 · `play-world.css` narrow rules |
 
 ---
 
 ## 7. Next Steps (Priority Order)
 
-### ⏭ 다음 세션 1순위 — **Sprint 4-4: 바로 구매 mock** (2026-07-31)
+### ⏭ 다음 세션 1순위 — **AD-052 판매자센터형 주문/발주 (설계→구현)**
 
 | 항목 | 값 |
 |---|---|
-| **코드** | ✅ `DisplayProductModal` — 바로 구매 → 배송지 → mock 결제 → `place_order` → 완료 화면 |
-| **User 확인** | ⬜ Vercel 배포 후 §0 Expo · GUCCI 진열 → 바로 구매 |
-| **다음 후 4-4 OK 시** | HUD PNG 폴리시 · PG 연동(후보 확정 후) |
+| **방향** | User 2026-08-03 — **주문** + **발주·배송** · 거절=재고복구 · **AD-053 자동수락 quota** · §52 |
+| **선행 완료** | 가챠=같은 주문 카드 · 장바구니 세로 UI (2026-08-03) |
+| **구현 착수 전** | status 모델·탭 IA 합의 · mock PG와 취소 규칙 |
 
 ### Cursor 다음 1개 (우선)
 
 | # | 작업 | 상태 |
 |---|---|---|
-| **1** | **Sprint 4-4 — 바로 구매 mock** | ✅ 코드 · ⬜ User 실기 |
-| 2 | EAS **development** 빌드 — 몰입 회귀 (AD-051, **선택**) | ⬜ 스토어 APK 전 |
-| 3 | HUD 아이콘 시안 PNG (SVG → 에셋) | ⬜ 폴리시 |
-| 4 | AD-034/035 자동로그인·동네필터 | ⬜ 시안만 |
+| **1** | **AD-052 — `StoreEditPage` 탭 분리 + `orders.status` 워크플로** | ⬜ 설계 OK · 구현 대기 |
+| 2 | **가챠/장바구니 2026-08-03** — push · Vercel · User 실기 | ⬜ 커밋/배포 |
+| 3 | EAS **development** 빌드 (AD-051, 선택) | ⬜ |
+| 4 | HUD PNG 폴리시 | ⬜ |
 | 5 | PG 실결제 | ⬜ User 후보 미정 |
+
+### 사용자가 테스트할 것 (가챠 + 점주 주문 · §0 Expo · PC 웹)
+
+**목표:** 장바구니 결제 → **가챠 선택** → 당첨 · PC 점주 **주문 관리**에 **구매 상품 + 가챠 당첨** 한 카드 · 세로 화면 장바구니 글 안 깨짐
+
+**0)** push 후 Vercel 1~2분 (`https://popup-cube-web.vercel.app`)
+
+**1)** 폰 Expo Go **SDK 52** — §0 APK
+
+**2) PC — Expo 이미 켜져 있으면 `Ctrl+C` 후, 아래 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+**3)** `demo@shopper.com` / `demo` → GUCCI → 장바구니 → 결제 → **가챠** → (당첨 확인)
+
+**4)** PC `demo@owner.com` / `demo` → GUCCI **편집** → **주문** 탭 → 방금 주문에 **가챠 당첨** 블록
+
+### (구 §7 — Sprint 4-4 테스트 · 참고)
 
 ### (완료) Sprint 4-3 실기 — User 2026-07-31
 
@@ -612,6 +684,36 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-03 — AD-055 점주 실시간 주문 알림 · 사이드바 뱃지 (User 요청)
+- **Changed:** AD-055 · **§52.8** · §52.1 · §52.5 · §23 Glossary
+- **Notes:** 주문=수동 수락 대기 건수 · 발주·배송=**발송 전(`accepted`)** 건수 권장 · Realtime은 Supabase 1차.
+
+### 2026-08-03 — AD-054 구매확정·7일 자동·손님 고지 (User 합의)
+- **Changed:** HANDOFF **§52.7** · AD-054 · §23 Glossary · §52.5 체크리스트
+- **Notes:** 구현 전 설계 확정. 배송완료(점주)·수동 구매확정·**주문일+7일 자동** · **고지 필수**.
+
+### 2026-08-03 — §0 UI·i18n 카피 규칙 (TMI 금지) · 가격 도움말 제거
+- **User:** 쉼표/입력 예 안내 등 AI티·불필요 TMI 제거 요청
+- **Changed:** `ko.ts` · `OwnerProductPanel` · HANDOFF §0 · §25
+
+### 2026-08-03 — §0 PC 웹 로컬 테스트 · 상품 폼 라벨·쉼표·수정 시 이미지
+- **Changed:** `OwnerProductPanel` · `formatInteger` · `products.updateProduct`+image · `ko.ts` · HANDOFF §0 PC 3줄 블록
+- **Notes:** 가격/재고 full-width + 라벨 · 수정 시 대표 이미지 변경. **로컬:** §0 PC 웹 3줄.
+
+### 2026-08-03 — AD-052/053 판매자센터 1차 구현 (DB + 점주 UI)
+- **Changed:** migration `20260803_seller_center_orders_stock_auto_accept.sql` · `StoreEditPage` 주문/발주·배송 탭 · `OwnerOrdersPanel` 수락·거절·배송 · `OwnerProductPanel` 재고·자동수락 · `orders.ts`/`products.ts` · `ko.ts`
+- **Notes:** Supabase POPUP에 migration 적용됨. `npm run build` OK. **테스트:** PC 점주 편집 → 상품 재고·자동수락 → 손님 주문 → 주문 탭/발주·배송 탭
+
+### 2026-08-03 — AD-052/053 판매자센터 합의 (재고·발주·배송·자동수락)
+- **Author:** User / Cursor Agent
+- **Changed:** HANDOFF **§52** · AD-052/053 · §23 Glossary
+- **Notes:** 거절·발송 전 취소 → 재고 복구 기본. 탭명 **발주·배송**. 자동수락 = 상품별 남은 **주문 건수** · 취소 시 건수 환원. 구현 전.
+
+### 2026-08-03 — 가챠·주문 연결 + 점주 카드 · 장바구니 세로 UI · AD-052
+- **Author:** Cursor Agent / User
+- **Changed:** `20260803_gacha_order_link_and_owner_view.sql` · `gacha.ts` · `orders.ts` · `CartDrawer.tsx` · `OwnerOrdersPanel.tsx` · `play-world.css` · `ko.ts` · `packages/shared` `OwnerOrderView`
+- **Notes:** 결제 1건 = `orders` 1행 · 가챠는 `gacha_rolls.order_id`. **AD-052** = 스마트스토어형 주문/발주 탭 (다음 구현). `npm run build` OK.
 
 ### 2026-07-31 — ISS-033 demo owner ↔ GUCCI ownership
 - **User:** GUCCI가 demo owner에 귀속 안 된 것 같음
@@ -2029,7 +2131,202 @@ where email = 'demo@owner.com';
 
 ---
 
-*Last updated: 2026-07-13 (Phase 1: Turborepo + Supabase 완료) by Cursor Agent*
+*Last updated: 2026-08-03 (§52 AD-055 실시간·뱃지 User 요청) by Cursor Agent*
+
+---
+
+## 52. 점주 판매자센터 — 주문 · 발주·배송 · 재고 · 자동 수락 (AD-052 / AD-053)
+
+> **쉬운 말:** 점주 PC는 네이버 **스마트스토어 판매자센터**처럼, 「주문 들어옴 → 받을지 말지 결정 → 보낼 준비·송장」 순서로 나눈다.
+
+### 52.1 탭 구조 (`StoreEditPage`)
+
+| 탭 (한글) | 보이는 주문 | 점주 액션 |
+|---|---|---|
+| **주문** | 결제됐지만 아직 **수락 안 한** 건 (+ 수동 대기) | **주문 수락** · **주문 취소(거절)** · 사이드바 **빨간 뱃지** = 수동 수락 대기 건수 (AD-055) |
+| **발주·배송** | **수락된** 건만 | 포장·**송장 입력** · 배송중 · 배송완료 · 사이드바 뱃지 = **발송 시작 전**(`accepted`) 건수 권장 (§52.8) |
+
+- 탭 라벨 **「발주·배송」** — User 2026-08-03 확정 (`발송관리` 대신).
+- 가챠 당첨·할인 정보는 **두 탭 모두** 같은 주문 카드에 표시 (이미 구현된 gacha 블록).
+
+### 52.2 재고 — 거절·취소 시 되돌리기 (User: 당연히 해야 함)
+
+**POP-UP CUBE 기본 규칙 (구현 시 필수):**
+
+| 상황 | 재고 |
+|---|---|
+| 점주 **거절** (수락 전) | ✅ **전량 복구** (주문 수량만큼 `products` 재고 +) |
+| **발송 전** 취소 (점주 또는 손님, 정책 허용 시) | ✅ **전량 복구** |
+| **자동 수락**된 뒤 **발송 전** 취소/거절 | ✅ 재고 복구 **+** 자동수락 **남은 건수 +1** (§52.4) |
+| **배송중·배송완료** 후 취소 | ❌ 즉시 +1 하지 않음 → **반품 입고·검수 후** 복구 (클레임 탭·2차) |
+| 디지털·즉시 지급·이미 소비된 혜택 | 실물 재고와 별도 정책 (팝업 실물 MVP 이후) |
+| 위탁 판매 (남의 재고) | 우리 DB 재고 없음 — 해당 모델 도입 시 예외 표 |
+
+**「거절인데 재고 안 돌려주는」 경우가 있나?**
+
+- **일반 실물 쇼핑몰에서 수락/발송 전 거절** — 업계 기본은 **돌려준다**. 안 돌리면 재고가 영구히 깎인 채로 남아 **품절 오판·매출 손실**이 난다. POP-UP도 여기 맞춘다.
+- **안 돌리거나 나중에 돌리는** 건 보통 **이미 보냈거나**, **상품이 돌아오지 않았거나**, **주문이 재고를 아직 안 잡았던 특수 모델**일 때다 (위 표의 배송 후·반품 전 구간).
+
+**재고 시점 (구현 설계):**
+
+- 권장: **결제(`place_order`) 성공 시 재고 차감(예약)** → 거절/발송 전 취소 시 **같은 트랜잭션으로 복구**.  
+- 수락은 「판매 확정·발주·배송 큐로 이동」 의미만; 재고는 이미 잡혀 있음.
+- **재고 컬럼:** migration `20260803_seller_center_orders_stock_auto_accept.sql` — `products.stock_quantity` · `place_order` / 거절·취소 시 복구 RPC (§52.5).
+
+### 52.3 주문 상태 (초안 — AD-054 반영)
+
+```
+awaiting_accept → accepted → shipped (배송 시작)
+                      ↘ rejected (재고 복구)
+accepted → cancelled_before_ship (재고 복구 + auto quota 환원)
+shipped → delivery_completed (배송 완료, 점주)  ← 구현 예정
+delivery_completed / shipped → purchase_confirmed (손님 수동 구매확정)  ← 구현 예정
+purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (AD-054)
+```
+
+**지금 MVP:** `ship_order` 까지만 UI·RPC 있음. **배송 완료·구매확정·7일 cron** = 미구현.
+
+### 52.7 배송 완료 · 구매확정 · 7일 자동 (AD-054)
+
+> **쉬운 말:** 택배 **보냈다** → **도착/완료** → 손님이 **구매확정** (안 하면 **주문한 날부터 7일 뒤 자동**). 손님은 **미리 알림**으로 규칙을 봐야 분쟁이 줄어듦.
+
+#### 점주 (PC · 발주·배송)
+
+| 단계 | 액션 | 상태 (가칭) |
+|---|---|---|
+| 이미 있음 | **배송 시작** (+ 송장 선택) | `shipped` |
+| **다음 구현** | **배송 완료** (택배 기사·택배앱상 배달 완료 후) | `delivery_completed` 또는 `completed` 로 통일 검토 |
+| 이후 | (선택) 택배 API 연동 시 자동 배송완료 | 2차 |
+
+#### 손님 (앱 · 마이페이지 / 주문 상세)
+
+| 항목 | 규칙 |
+|---|---|
+| **수동 구매확정** | 배송이 진행된 주문에 **「구매확정」** 버튼 (배송 완료 후 활성화 — 구현 시 `shipped` 이상 등 조건 정의) |
+| **자동 구매확정** | 손님이 **직접 구매확정하지 않으면**, **주문(결제)일(`orders.created_at`) 기준 7일**이 지나면 **자동 구매확정** (User 2026-08-03) |
+| **고지 (필수 — 분쟁 방지)** | 아래 문구를 **반드시** 노출 (User 요청). §0 UI·i18n 규칙: 과장·AI 톤 없이 **사실만** 짧게 |
+
+**손님 고지 — 필수 노출 위치 (구현 체크리스트):**
+
+- [ ] **결제·주문 완료 직후** (`CartDrawer` / 바로구매 완료 화면) — 한 번은 무조건
+- [ ] **마이페이지 → 주문 상세** (배송 중·완료 포함) — 상시
+- [ ] (권장) 자동 구매확정 **전날** 앱 푸시/알림 — 2차 (푸시 인프라 후)
+
+**고지 문구 (i18n 초안 — `ko.ts` `orderPolicy.*` / `mypage.*` 구현 시):**
+
+| key (가칭) | 문구 (초안) |
+|---|---|
+| `purchaseConfirmAutoRule` | 구매확정을 직접 하지 않으면, **주문일로부터 7일**이 지난 뒤 자동으로 구매확정됩니다. |
+| `purchaseConfirmManualHint` | 상품을 받으셨다면 **구매확정**을 눌러 주세요. |
+
+*(7일·자동 구매확정은 **약관/운영정책**과 문구를 맞출 것 — PG 연동 전에도 동일 규칙으로 UI·DB 설계.)*
+
+#### DB·배치 (구현 예정)
+
+- [ ] `orders.purchase_confirmed_at` · `orders.auto_confirm_scheduled_at` (또는 `created_at + interval '7 days'`)
+- [ ] RPC `complete_delivery` (점주) · `confirm_purchase` (손님)
+- [ ] **일 1회 cron** (Supabase `pg_cron` / Edge / Vercel Cron): `created_at + 7 days <= now()` 이고 미확정 → `purchase_confirmed_at` 설정
+- [ ] 자동 확정 **이후** 환불·클레임 = 별도 정책 (§52.2 반품 구간)
+
+#### 로드맵 순서 (합의)
+
+1. 점주 **배송 완료** + 손님 **구매확정** 버튼 + **고지 문구** (결제 완료·주문 상세)
+2. **7일 자동** cron + (선택) D-1 알림
+3. 택배사 API · PG 정산 연동
+
+### 52.8 점주 실시간 알림 · 사이드바 뱃지 (AD-055)
+
+> **User 2026-08-03:** 주문 들어오면 **새로고침 없이** 바로 알려 주고, 왼쪽 **「주문」** 옆 **빨간 뱃지 + 숫자**. **「발주·배송」**에도 알릴 만한 게 있는지 — 아래 합의.
+
+#### 왜 Realtime인가
+
+- 지금 `OwnerOrdersPanel`은 **탭 열릴 때 `get_store_orders` 1회** + 액션 후 `reload()` 뿐 (`StoreEditPage` 사이드바 **뱃지 없음**).
+- 점주는 **상품·개요 탭**에 있어도 주문을 놓치면 안 됨 → **DB 변경 구독** + **짧은 토스트**가 스마트스토어형 UX에 맞음.
+- **Socket.io(`server/`)** = 월드 멀티플레이·채팅용. **주문 알림은 Supabase Realtime(`orders` 테이블)** 이 1차 권장 (이미 supabase-js 의존 · 매장 `store_id` 필터).
+
+#### 실시간 동작 (구현 목표)
+
+| 이벤트 | 점주 PC에서 |
+|---|---|
+| `orders` **INSERT** (해당 `store_id`) | 목록·뱃지 갱신 + **토스트** 「새 주문 N건」 또는 「새 주문이 들어왔습니다」 |
+| `orders` **UPDATE** (수락·거절·배송 등) | 해당 탭 목록·**양쪽 뱃지** 재계산 (다른 탭 보고 있어도) |
+| 점주가 이미 **「주문」** 탭 | 토스트만 짧게 또는 생략 (선택 — 중복 알림 줄이기) |
+
+- **브라우저 푸시(Notification API)** · **소리** = 2차 (권한·방해 요소 — MVP는 토스트 + 뱃지).
+- Realtime **RLS**: 점주가 본인 매장 `orders`만 구독 가능한지 migration/정책 확인 필수.
+
+#### 사이드바 뱃지 규칙 (합의)
+
+| 메뉴 | 뱃지 숫자 = | 색 (UI) | 비고 |
+|---|---|---|---|
+| **주문** | **`awaiting_accept`** (및 레거시 `pending`/`paid`가 수동 대기로 남은 건) | **빨간 pill** (User 요청) | 자동 수락된 주문은 여기 **안 잡힘** → 발주·배송으로 바로 |
+| **발주·배송** | **`accepted`** — 수락됐지만 **아직 `ship_order`(배송 시작) 안 한** 건 | **빨간 또는 주황** pill (주문과 동일 패턴) | **「지금 송장 넣어야 하는 일」** — 스마트스토어 「발송 처리」 큐와 동일 |
+| **발주·배송 (2차, AD-054 이후)** | (선택) **`shipped`** 중 **배송 완료** 버튼 안 누른 건 | 숫자 또는 **작은 점**만 | 긴급도는 `accepted`보다 낮음 — v1은 **`accepted`만** 숫자 뱃지 권장 |
+| **배송중만** (`shipped`) | v1 **뱃지 제외** | — | 목록에서 보이면 충분; 숫자까지면 점주가 「뭘 해야 하지?」 혼란 가능 |
+
+**에이전트 의견 (User 질문):** **발주·배송에도 뱃지 있는 게 맞다.** 다만 **「배송중 5건」**보다 **「발송 대기 3건」**이 행동 유도에 훨씬 낫다. `shipped`는 탭 안에서 필터/구역으로 보여 주고, AD-054 **배송 완료** 단계가 생기면 그때 **`shipped` 미처리 건**을 두 번째 뱃지나 서브카운트로 추가하는 게 자연스럽다.
+
+#### API·UI 체크리스트
+
+- [ ] `get_store_order_counts(p_store_id)` RPC — `{ pending_accept, awaiting_ship, shipped_open, … }` (뱃지용 가벼운 집계)
+- [ ] `StoreEditPage` — `useOwnerOrderRealtime(storeId)` + nav 버튼에 `badgeCount`
+- [ ] `OwnerOrdersPanel` — 구독 시 `reload()` 공유 (중복 fetch 줄이기)
+- [ ] 토스트 컴포넌트 + `ko.ts` `ownerOrders.toastNewOrder` 등 (§0 TMI 금지 — 한 줄)
+- [ ] Supabase Dashboard: `orders` **Realtime publication** + RLS 점주 read
+
+### 52.4 자동 수락 (AD-053) — 메커니즘 · 점주 UI 문구
+
+**개념:** 상품마다 「이 상품이 들어간 주문을, **앞으로 N건**까지는 내가 안 눌러도 수락해 줘」.
+
+| 항목 | 규칙 |
+|---|---|
+| 설정 위치 | **상품 등록/수정** (`OwnerProductPanel`) — 매장 전역 1개가 아님 **상품별** |
+| ON/OFF | **자동 수락** 체크 |
+| 숫자 입력 | **자동으로 수락할 주문 건수** (quota). 예: 재고 892 → **892** 입력 → **892번째 주문까지** 자동, **893번째 주문부터** 수동 대기 |
+| 1건의 의미 | **주문 1건(checkout 1번)** = quota **1** 차감 (그 주문에 해당 상품 수량이 여러 개여도 **1건**) |
+| 여러 상품 장바구니 | **모든** line 상품이 자동수락 가능(remaining>0)일 때만 주문 전체 자동 수락; 하나라도 quota 소진·OFF면 **주문 전체** 수동 (v1 단순 규칙) |
+| 재고 표시 | 입력 칸 옆 **참고: 현재 재고 ○○개** — 숫자 맞추기 편의용; quota는 점주가 직접 입력 (재고 초과 입력 시 경고 또는 cap — 구현 시 선택) |
+
+**취소·거절 시 quota 환원 (User 요청 — 반드시 UI에 설명):**
+
+- 조건: `auto_accepted = true` 이고 **아직 발송 전** 취소/거절.
+- DB: 해당 상품 `auto_accept_remaining += 1` (상한은 `auto_accept_limit` 을 넘지 않게 clamp).
+- 점주에게 보이는 요지: **「취소된 주문 1건은 자동 수락 가능 건수에 다시 더해집니다 (발송 전인 경우).」**
+
+**점주용 UI 카피 (i18n 초안 — `ko.ts` `ownerProducts.autoAccept*` / `ownerOrders.*` 구현 시 사용):**
+
+| key (가칭) | 문구 |
+|---|---|
+| `autoAcceptLabel` | 자동 주문 수락 |
+| `autoAcceptHelp` | 이 상품이 포함된 주문을, 아래 **건수만큼** 자동으로 수락합니다. 건수를 모두 쓰면 그다음 주문부터는 **주문** 탭에서 직접 수락해 주세요. |
+| `autoAcceptQuotaLabel` | 자동 수락할 **주문 건수** |
+| `autoAcceptQuotaExample` | 예: **400**을 입력하면 → **400번째 주문까지** 자동 수락, **401번째 주문부터** 수동입니다. |
+| `autoAcceptStockHint` | (참고) 현재 재고 **{stock}**개 |
+| `autoAcceptRemaining` | 자동 수락 **남은 건수: {n}** / {limit} |
+| `autoAcceptQuotaRestored` | 이 주문은 취소되어, 자동 수락 가능 건수가 **1건 복구**되었습니다. |
+
+### 52.5 DB·RPC (구현 체크리스트)
+
+- [x] `products`: `stock_quantity`, `auto_accept_*` (2026-08-03)
+- [x] `orders`: status 확장, `auto_accepted`, 송장·`shipped_at`
+- [x] `place_order` / `accept_order` / `reject_order` / `ship_order` / `update_product_fulfillment`
+- [x] `StoreEditPage` 탭 **주문** / **발주·배송**
+- [ ] **AD-054:** `complete_delivery` · `confirm_purchase` · `purchase_confirmed_at` · 7일 auto cron
+- [ ] **AD-054:** 손님 고지 — 결제 완료 + 주문 상세 (`purchaseConfirmAutoRule`)
+- [ ] **AD-055:** Realtime `orders` · 사이드바 뱃지 · 새 주문 토스트 · `get_store_order_counts`
+
+### 52.6 관련 AD · §
+
+| | |
+|---|---|
+| AD-052 | 탭·상태·재고 복구 원칙 |
+| AD-053 | 자동 수락 quota |
+| AD-054 | 배송완료 · 구매확정 · 7일 자동 · 손님 고지 |
+| AD-055 | 점주 실시간 알림 · 사이드바 뱃지 |
+| AD-037 | PC 웹 = 점주 관리 전용 |
+| §23 Glossary | 판매자센터 · 자동 수락 · 재고 복구 |
+
+*§52 Last updated: 2026-08-03 (AD-055 실시간·뱃지 User 요청)*
 
 ---
 
@@ -2052,6 +2349,12 @@ where email = 'demo@owner.com';
 | **GitHub** `(깃허브)` | **소스 코드 저장 + 버전 관리**. push하면 Vercel이 자동으로 웹을 다시 빌드. repo: `qotjdals147/popup-cube`. **§46** |
 | **Expo / EAS** `(엑스포)` | **React Native 앱**을 Android·iOS로 빌드·배포하는 도구 (post-demo, §39). **§46** |
 | **Mock** `(목)` | **가짜·연습용** — 예: 진짜 결제 없이 "결제됐다"고만 처리. |
+| **판매자센터 (AD-052)** | 네이버 스마트스토어처럼 점주 PC에서 **주문 들어옴 → 수락/거절 → 발송(송장)·배송 상태** 를 나눠 보는 **운영 화면**. POP-UP CUBE 점주 웹의 목표 UX. |
+| **주문 관리 vs 발주·배송** | **주문:** 신규·결제완료 — **수락/거절**. **발주·배송:** 수락된 건만 — 송장·배송중·완료. (탭 이름 **발주·배송** 확정, User 2026-08-03) |
+| **자동 수락 (AD-053)** | 상품마다 「자동 수락」+ **몇 건까지** 숫자. 그만큼 **주문이 들어오면 자동 수락**, 다 쓰면 **다음 주문부터 수동**. 취소되면 **남은 건수 다시 +1**. §52 |
+| **재고 복구** | **거절·발송 전 취소** → 팔린 수량만큼 재고 **되돌림** (기본). 이미 **배송 시작 후**는 반품·검수 후 복구 (§52.2) |
+| **구매확정 (AD-054)** | 손님 **수동** 또는 **주문일+7일 자동** · **결제/주문 화면에 반드시 고지** · §52.7 |
+| **점주 주문 알림 (AD-055)** | Supabase Realtime + **주문/발주·배송 뱃지** + 새 주문 **토스트** · §52.8 |
 | **Scaffold** `(스캐폴드)` | **뼈대만** 먼저 깔아 두는 것. 디테일은 나중. |
 | **Deploy** `(배포)` | 만든 걸 **인터넷에서 쓸 수 있게** 올리는 것. |
 | **Responsive** `(반응형)` | **폰·태블릿·PC 화면 크기**에 맞게 레이아웃이 자동으로 맞춰지는 것. |
@@ -2122,6 +2425,7 @@ where email = 'demo@owner.com';
 - **문구 위치:** `apps/web/src/i18n/ko.ts`
 - **사용법:** `t('store.hud.explore')` → `"탐색"`
 - **규칙:** 사용자에게 보이는 텍스트는 **컴포넌트에 직접 쓰지 말고** `i18n/ko.ts`에 추가
+- **카피 톤 (User 2026-08-03):** §0 「UI·i18n 문구 규칙」 — 당연한 TMI·AI 매뉴얼체 금지. 긴 도움말은 User 요청 시만.
 
 ### 향후 다국어 확장 (post-launch / 글로벌)
 | 단계 | 방법 |

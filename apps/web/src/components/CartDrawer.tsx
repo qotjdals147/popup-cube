@@ -20,6 +20,13 @@ interface CartDrawerProps {
 
 type Phase = 'cart' | 'address' | 'reward' | 'discountResult' | 'gachaRolling' | 'gachaResult';
 
+function orderErrorMessage(err: unknown): string {
+  if (err instanceof OrderError && err.message === 'insufficient_stock') return t('cart.insufficientStock');
+  if (err instanceof OrderError) return t('cart.orderSaveError');
+  if (err instanceof GachaError) return t('cart.gachaError');
+  return t('cart.rewardError');
+}
+
 /**
  * 쉬운 설명: 장바구니 담긴 상품을 보고 수량을 +/- 조절하는 창.
  * "결제하기"는 아직 진짜 결제(PG)가 없는 mock 결제. 결제 흐름은 배송지 선택(AD-030) →
@@ -99,7 +106,7 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
       setFinalTotal(result.totalAmount);
       setPhase('discountResult');
     } catch (err) {
-      setRewardError(err instanceof OrderError ? t('cart.orderSaveError') : t('cart.rewardError'));
+      setRewardError(orderErrorMessage(err));
     }
   }
 
@@ -107,14 +114,12 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
     setRewardError(null);
     setPhase('gachaRolling');
     try {
-      const result = await rollGacha(storeId);
-      await placeOrder(storeId, selectedAddressId, items, 'gacha', null);
+      const orderResult = await placeOrder(storeId, selectedAddressId, items, 'gacha', null);
+      const result = await rollGacha(storeId, orderResult.orderId);
       setGachaResult(result);
       setPhase('gachaResult');
     } catch (err) {
-      setRewardError(
-        err instanceof GachaError ? t('cart.gachaError') : err instanceof OrderError ? t('cart.orderSaveError') : t('cart.rewardError')
-      );
+      setRewardError(orderErrorMessage(err));
       setPhase('reward');
     }
   }
@@ -138,7 +143,7 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
 
   return (
     <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
+      <div className="play-cart-drawer" style={styles.panel} onClick={(e) => e.stopPropagation()}>
         <div style={styles.header}>
           <h3 style={styles.title}>{t('cart.title')}</h3>
           <button style={styles.closeButton} onClick={onClose}>
@@ -282,7 +287,7 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
             <>
               <div style={styles.list}>
                 {items.map((item) => (
-                  <div key={item.productId} style={styles.row}>
+                  <div key={item.productId} className="play-cart-row" style={styles.row}>
                     <div style={styles.thumbWrap}>
                       {item.imageUrl ? (
                         <img src={item.imageUrl} alt={item.name} style={styles.thumb} />
@@ -290,23 +295,29 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
                         <div style={styles.thumbPlaceholder}>🛍️</div>
                       )}
                     </div>
-                    <div style={styles.info}>
-                      <div style={styles.name}>{item.name}</div>
+                    <div className="play-cart-row-main">
+                      <div className="play-cart-row-name" style={styles.name}>
+                        {item.name}
+                      </div>
                       <div style={styles.price}>{formatPrice(item.price)}</div>
+                      <div className="play-cart-row-actions">
+                        <div style={styles.stepper}>
+                          <button style={styles.stepperButton} onClick={() => decrementQuantity(item.productId)}>
+                            −
+                          </button>
+                          <span style={styles.stepperValue}>{item.quantity}</span>
+                          <button style={styles.stepperButton} onClick={() => incrementQuantity(item.productId)}>
+                            +
+                          </button>
+                        </div>
+                        <div className="play-cart-line-total" style={styles.lineTotal}>
+                          {formatPrice(item.price * item.quantity)}
+                        </div>
+                        <button style={styles.removeButton} onClick={() => removeItem(item.productId)}>
+                          ✕
+                        </button>
+                      </div>
                     </div>
-                    <div style={styles.stepper}>
-                      <button style={styles.stepperButton} onClick={() => decrementQuantity(item.productId)}>
-                        −
-                      </button>
-                      <span style={styles.stepperValue}>{item.quantity}</span>
-                      <button style={styles.stepperButton} onClick={() => incrementQuantity(item.productId)}>
-                        +
-                      </button>
-                    </div>
-                    <div style={styles.lineTotal}>{formatPrice(item.price * item.quantity)}</div>
-                    <button style={styles.removeButton} onClick={() => removeItem(item.productId)}>
-                      ✕
-                    </button>
                   </div>
                 ))}
               </div>
@@ -366,7 +377,7 @@ const styles: Record<string, React.CSSProperties> = {
   list: { display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 },
   row: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 10,
     background: '#0f3460',
     borderRadius: 10,
@@ -386,8 +397,14 @@ const styles: Record<string, React.CSSProperties> = {
   // 사진을 잘라내지 않고 비율 그대로 박스 안에 전부 보이게 표시 (여백은 생길 수 있음).
   thumb: { width: '100%', height: '100%', objectFit: 'contain' },
   thumbPlaceholder: { fontSize: 16, opacity: 0.4 },
-  info: { flex: 1, minWidth: 0 },
-  name: { color: '#fff', fontSize: 13, fontWeight: 600 },
+  name: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: 600,
+    lineHeight: 1.35,
+    wordBreak: 'break-word',
+    overflowWrap: 'anywhere',
+  },
   price: { color: '#a0a0c0', fontSize: 12 },
   stepper: {
     display: 'flex',
@@ -407,7 +424,13 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   stepperValue: { width: 26, textAlign: 'center', color: '#fff', fontSize: 12 },
-  lineTotal: { width: 76, textAlign: 'right', color: '#e94560', fontSize: 13, fontWeight: 600, flexShrink: 0 },
+  lineTotal: {
+    textAlign: 'right',
+    color: '#e94560',
+    fontSize: 13,
+    fontWeight: 600,
+    flexShrink: 0,
+  },
   removeButton: {
     background: 'transparent',
     border: 'none',

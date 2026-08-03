@@ -8,7 +8,7 @@ import { OwnerDisplayPanel } from '../components/OwnerDisplayPanel';
 import { t } from '../i18n';
 import type { StoreSummary } from '@popup-cube/shared';
 
-type EditTab = 'overview' | 'products' | 'orders' | 'layout';
+type EditTab = 'overview' | 'products' | 'orders' | 'fulfillment' | 'layout';
 
 export function StoreEditPage() {
   const { storeId } = useParams();
@@ -103,6 +103,7 @@ export function StoreEditPage() {
     { id: 'overview', label: t('ownerEdit.tabOverview') },
     { id: 'products', label: t('ownerEdit.tabProducts') },
     { id: 'orders', label: t('ownerEdit.tabOrders') },
+    { id: 'fulfillment', label: t('ownerEdit.tabFulfillment') },
     { id: 'layout', label: t('ownerEdit.tabLayout') },
   ];
 
@@ -190,7 +191,11 @@ export function StoreEditPage() {
           )}
 
           {!loading && !error && tab === 'orders' && storeId && (
-            <OwnerOrdersPanel storeId={storeId} embedded />
+            <OwnerOrdersPanel storeId={storeId} embedded queue="pending" />
+          )}
+
+          {!loading && !error && tab === 'fulfillment' && storeId && (
+            <OwnerOrdersPanel storeId={storeId} embedded queue="fulfillment" />
           )}
 
           {!loading && !error && tab === 'layout' && storeId && (

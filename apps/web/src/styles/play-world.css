@@ -244,3 +244,43 @@
     max-width: min(240px, calc(100vw - 32px));
   }
 }
+
+/* Play 월드 장바구니 — 세로 WebView 좁은 폭 (ISS-034) */
+.play-world-page .play-cart-drawer .play-cart-row {
+  flex-wrap: wrap;
+}
+
+.play-world-page .play-cart-drawer .play-cart-row-main {
+  flex: 1 1 0;
+  min-width: min(100%, 180px);
+}
+
+.play-world-page .play-cart-drawer .play-cart-row-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.play-world-page .play-cart-drawer .play-cart-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.play-world-page .play-cart-drawer .play-cart-line-total {
+  margin-left: auto;
+}
+
+@media (max-width: 420px) {
+  .play-world-page .play-cart-drawer {
+    max-width: calc(100vw - 24px);
+    padding: 16px;
+  }
+
+  .play-world-page .play-cart-drawer .play-cart-row-actions {
+    width: 100%;
+  }
+}

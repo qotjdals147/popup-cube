@@ -76,6 +76,10 @@ export interface Product {
   price: number;
   image_url: string | null;
   is_active: boolean;
+  stock_quantity: number;
+  auto_accept_enabled: boolean;
+  auto_accept_limit: number;
+  auto_accept_remaining: number;
   created_at: string;
 }
 
@@ -127,7 +131,15 @@ export interface UserAddress {
 export type NewAddressInput = Omit<UserAddress, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
 
 export type RewardType = 'discount' | 'gacha';
-export type OrderStatus = 'pending' | 'paid' | 'shipped' | 'cancelled';
+export type OrderStatus =
+  | 'pending'
+  | 'paid'
+  | 'awaiting_accept'
+  | 'accepted'
+  | 'rejected'
+  | 'shipped'
+  | 'completed'
+  | 'cancelled';
 
 /** 주문 헤더 (AD-030, §10) — `place_order()` 서버 함수로만 생성 (가격 조작 방지). */
 export interface Order {
@@ -139,6 +151,10 @@ export interface Order {
   discount_percent: number | null;
   reward_type: RewardType;
   status: OrderStatus;
+  auto_accepted: boolean;
+  accepted_at: string | null;
+  tracking_number: string | null;
+  shipped_at: string | null;
   created_at: string;
 }
 
@@ -169,6 +185,10 @@ export interface OwnerOrderView extends Order {
   shipping_address_line1: string | null;
   shipping_address_line2: string | null;
   items: OwnerOrderItemView[];
+  /** `reward_type=gacha` — same order card (AD-028, order_id on gacha_rolls) */
+  gacha_prize_name: string | null;
+  gacha_prize_image_url: string | null;
+  gacha_prize_is_product: boolean;
 }
 
 export interface ChannelInfo {

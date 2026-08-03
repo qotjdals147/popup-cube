@@ -14,13 +14,16 @@ export class ProductError extends Error {
   }
 }
 
+const PRODUCT_SELECT =
+  'id, store_id, name, description, price, image_url, is_active, stock_quantity, auto_accept_enabled, auto_accept_limit, auto_accept_remaining, created_at';
+
 /**
  * 소비자용 — 특정 매장의 활성 상품만 조회 (RLS `products_public_read`).
  */
 export async function listActiveProducts(storeId: string): Promise<Product[]> {
   const { data, error } = await supabase
     .from('products')
-    .select('id, store_id, name, description, price, image_url, is_active, created_at')
+    .select(PRODUCT_SELECT)
     .eq('store_id', storeId)
     .eq('is_active', true)
     .order('created_at', { ascending: true });
@@ -35,7 +38,7 @@ export async function listActiveProducts(storeId: string): Promise<Product[]> {
 export async function listMyProducts(storeId: string): Promise<Product[]> {
   const { data, error } = await supabase
     .from('products')
-    .select('id, store_id, name, description, price, image_url, is_active, created_at')
+    .select(PRODUCT_SELECT)
     .eq('store_id', storeId)
     .order('created_at', { ascending: true });
 
@@ -85,11 +88,30 @@ export async function createProduct(userId: string, input: CreateProductInput): 
       price: input.price,
       image_url: imageUrl,
     })
-    .select('id, store_id, name, description, price, image_url, is_active, created_at')
+    .select(PRODUCT_SELECT)
     .single();
 
   if (error) throw new ProductError('SAVE_FAILED', error.message);
-  return data;
+  return data as Product;
+}
+
+export interface ProductFulfillmentInput {
+  stockQuantity: number;
+  autoAcceptEnabled: boolean;
+  autoAcceptLimit: number;
+}
+
+export async function updateProductFulfillment(
+  productId: string,
+  input: ProductFulfillmentInput
+): Promise<void> {
+  const { error } = await supabase.rpc('update_product_fulfillment', {
+    p_product_id: productId,
+    p_stock_quantity: input.stockQuantity,
+    p_auto_accept_enabled: input.autoAcceptEnabled,
+    p_auto_accept_limit: input.autoAcceptLimit,
+  });
+  if (error) throw new ProductError('SAVE_FAILED', error.message);
 }
 
 /** 상품 활성/비활성 토글 (soft delete — 손님 화면에서만 숨김, 주문 이력 보존을 위해 실제 삭제는 하지 않음). */
@@ -102,17 +124,33 @@ export interface UpdateProductInput {
   name: string;
   description: string;
   price: number;
+  imageFile?: File | null;
 }
 
-export async function updateProduct(productId: string, input: UpdateProductInput): Promise<void> {
-  const { error } = await supabase
-    .from('products')
-    .update({
-      name: input.name.trim(),
-      description: input.description.trim() || null,
-      price: input.price,
-    })
-    .eq('id', productId);
+export async function updateProduct(
+  userId: string,
+  productId: string,
+  input: UpdateProductInput
+): Promise<void> {
+  const patch: {
+    name: string;
+    description: string | null;
+    price: number;
+    image_url?: string;
+  } = {
+    name: input.name.trim(),
+    description: input.description.trim() || null,
+    price: input.price,
+  };
+
+  if (input.imageFile) {
+    if (input.imageFile.size > MAX_PRODUCT_IMAGE_BYTES) {
+      throw new ProductError('IMAGE_TOO_LARGE');
+    }
+    patch.image_url = await uploadProductImage(userId, input.imageFile);
+  }
+
+  const { error } = await supabase.from('products').update(patch).eq('id', productId);
 
   if (error) throw new ProductError('SAVE_FAILED', error.message);
 }
