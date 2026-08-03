@@ -228,6 +228,7 @@ export const ko = {
     rewardHint: '실제 결제는 아직 연결되지 않은 데모용 주문이에요.',
     chooseDiscount: '할인 받기',
     chooseGacha: '가챠 뽑기',
+    discountUnavailable: '지금은 할인 프로모션이 없어요. 가챠를 선택해 주세요.',
     discountAppliedTitle: '{percent}% 할인이 적용됐어요!',
     discountAppliedHint: '할인액: {amount}',
     gachaRolling: '가챠를 돌리는 중...',
@@ -300,6 +301,8 @@ export const ko = {
     autoAcceptQuotaHelp:
       '위 칸 숫자 = 자동 수락되는 주문 개수입니다. 400이면 400번째 주문까지 자동, 그다음부터는 왼쪽 「주문」에서 직접 수락해 주세요. (손님 결제 1번 = 1건)',
     autoAcceptRemaining: '자동 수락 남음 {n}건 / {limit}건',
+    autoAcceptOnBadge: '주문 자동 수락 ON',
+    autoAcceptQuotaShort: '주문 자동 수락 {n}건 남음 · 설정 수량 {limit}건',
     stockHint: '재고 {stock}개',
   },
   ownerOrders: {

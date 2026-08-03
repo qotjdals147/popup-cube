@@ -403,22 +403,24 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
                     <div style={styles.productNameRow}>
                       <strong>{product.name}</strong>
                       {!product.is_active && <span style={styles.hiddenBadge}>{t('ownerProducts.hidden')}</span>}
+                      {product.auto_accept_enabled && (
+                        <span style={styles.autoAcceptOnBadge}>{t('ownerProducts.autoAcceptOnBadge')}</span>
+                      )}
                     </div>
                     <div style={styles.productPrice}>{formatPrice(product.price)}</div>
                     <div style={styles.productMeta}>
                       {t('ownerProducts.stockHint', {
                         stock: formatIntegerDisplay(product.stock_quantity),
                       })}
-                      {product.auto_accept_enabled && (
-                        <>
-                          {' · '}
-                          {t('ownerProducts.autoAcceptRemaining', {
-                            n: formatIntegerDisplay(product.auto_accept_remaining),
-                            limit: formatIntegerDisplay(product.auto_accept_limit),
-                          })}
-                        </>
-                      )}
                     </div>
+                    {product.auto_accept_enabled && (
+                      <div style={styles.autoAcceptMeta}>
+                        {t('ownerProducts.autoAcceptQuotaShort', {
+                          n: formatIntegerDisplay(product.auto_accept_remaining),
+                          limit: formatIntegerDisplay(product.auto_accept_limit),
+                        })}
+                      </div>
+                    )}
                     {product.description && <div style={styles.productDesc}>{product.description}</div>}
                     <div style={styles.editActions}>
                       <button style={styles.smallGhostButton} onClick={() => startEdit(product)}>
@@ -630,8 +632,18 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 999,
     padding: '1px 8px',
   },
+  autoAcceptOnBadge: {
+    fontSize: 11,
+    fontWeight: 600,
+    color: '#8ce0b0',
+    border: '1px solid #2c6b4a',
+    background: '#173a2c',
+    borderRadius: 999,
+    padding: '1px 8px',
+  },
   productPrice: { color: '#e94560', fontSize: 13, fontWeight: 600, marginTop: 2 },
   productMeta: { color: '#8ca4d8', fontSize: 11, marginTop: 4, lineHeight: 1.4 },
+  autoAcceptMeta: { color: '#8ce0b0', fontSize: 11, marginTop: 2, lineHeight: 1.4 },
   fieldLabel: { color: '#a0a0c0', fontSize: 12, marginTop: 4 },
   checkRow: { display: 'flex', alignItems: 'center', gap: 8, color: '#d8e4ff', fontSize: 13 },
   helpText: { color: '#8ca4d8', fontSize: 11, margin: '4px 0 0', lineHeight: 1.45 },

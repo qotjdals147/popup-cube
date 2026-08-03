@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import type { Product, UserAddress } from '@popup-cube/shared';
+import type { GachaRollResult, Product, UserAddress } from '@popup-cube/shared';
 import { listActiveProducts } from '../lib/products';
 import { listFixtureDisplayProducts } from '../lib/displayFixtures';
-import { getActivePromotion } from '../lib/gacha';
+import { getActivePromotion, GachaError, rollGacha } from '../lib/gacha';
 import { createAddress, listMyAddresses } from '../lib/addresses';
 import { OrderError, placeOrder } from '../lib/orders';
 import { useCart } from '../context/CartContext';
@@ -24,10 +24,24 @@ interface DisplayProductModalProps {
   onOpenCart: () => void;
 }
 
-type BuyPhase = 'product' | 'address' | 'paying' | 'success';
+type BuyPhase =
+  | 'product'
+  | 'address'
+  | 'reward'
+  | 'paying'
+  | 'gachaRolling'
+  | 'discountResult'
+  | 'gachaResult';
 
 function formatPrice(price: number): string {
   return `${price.toLocaleString('ko-KR')}원`;
+}
+
+function orderErrorMessage(err: unknown): string {
+  if (err instanceof OrderError && err.message === 'insufficient_stock') return t('cart.insufficientStock');
+  if (err instanceof OrderError) return t('cart.orderSaveError');
+  if (err instanceof GachaError) return t('cart.gachaError');
+  return t('cart.rewardError');
 }
 
 /** 진열 조형물 상호작용 팝업 — 슬롯 상품 · 담기 · 바로구매 mock · 착용 미리보기 (AD-033 · Sprint 4-4) */
@@ -56,8 +70,11 @@ export function DisplayProductModal({
   const [addressError, setAddressError] = useState<string | null>(null);
   const [savingAddress, setSavingAddress] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
+  const [rewardError, setRewardError] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [orderTotal, setOrderTotal] = useState<number | null>(null);
+  const [discountPercent, setDiscountPercent] = useState<number | null>(null);
+  const [gachaResult, setGachaResult] = useState<GachaRollResult | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -66,8 +83,11 @@ export function DisplayProductModal({
     setTryOnProduct(null);
     setBuyPhase('product');
     setBuyError(null);
+    setRewardError(null);
     setOrderId(null);
     setOrderTotal(null);
+    setDiscountPercent(null);
+    setGachaResult(null);
 
     async function load() {
       try {
@@ -151,16 +171,9 @@ export function DisplayProductModal({
     }
   }
 
-  async function handleConfirmBuyNow() {
-    if (!previewProduct || !selectedAddressId) {
-      setAddressError(t('cart.addressRequired'));
-      return;
-    }
-    setAddressError(null);
-    setBuyError(null);
-    setBuyPhase('paying');
-
-    const cartLine = {
+  function buildCartLine() {
+    if (!previewProduct) return null;
+    return {
       storeId,
       productId: previewProduct.id,
       name: previewProduct.name,
@@ -168,23 +181,71 @@ export function DisplayProductModal({
       quantity: 1,
       imageUrl: previewProduct.image_url ?? null,
     };
+  }
 
+  function handleContinueToReward() {
+    if (!previewProduct || !selectedAddressId) {
+      setAddressError(t('cart.addressRequired'));
+      return;
+    }
+    setAddressError(null);
+    setBuyError(null);
+    setRewardError(null);
+    setBuyPhase('reward');
+  }
+
+  async function handleChooseDiscount() {
+    const cartLine = buildCartLine();
+    if (!cartLine || !selectedAddressId) return;
+    setRewardError(null);
+    setBuyPhase('paying');
     try {
       const promo = await getActivePromotion(storeId);
       const percent = promo?.discount_percent ?? 0;
+      if (percent <= 0) {
+        setBuyPhase('reward');
+        setRewardError(t('cart.discountUnavailable'));
+        return;
+      }
       const result = await placeOrder(storeId, selectedAddressId, [cartLine], 'discount', percent);
       setOrderId(result.orderId);
+      setDiscountPercent(percent);
       setOrderTotal(result.totalAmount);
-      setBuyPhase('success');
+      setBuyPhase('discountResult');
     } catch (err) {
-      setBuyPhase('address');
-      setBuyError(err instanceof OrderError ? t('cart.orderSaveError') : t('cart.rewardError'));
+      setBuyPhase('reward');
+      setRewardError(orderErrorMessage(err));
     }
   }
 
-  function handleCloseSuccess() {
+  async function handleChooseGacha() {
+    const cartLine = buildCartLine();
+    if (!cartLine || !selectedAddressId) return;
+    setRewardError(null);
+    setBuyPhase('gachaRolling');
+    try {
+      const orderResult = await placeOrder(storeId, selectedAddressId, [cartLine], 'gacha', null);
+      setOrderId(orderResult.orderId);
+      setOrderTotal(orderResult.totalAmount);
+      const result = await rollGacha(storeId, orderResult.orderId);
+      setGachaResult(result);
+      setBuyPhase('gachaResult');
+    } catch (err) {
+      setBuyPhase('reward');
+      setRewardError(orderErrorMessage(err));
+    }
+  }
+
+  function handleFinishBuy() {
     onClose();
   }
+
+  const listPrice = previewProduct?.price ?? 0;
+  const discountAmount =
+    discountPercent != null && orderTotal != null ? Math.max(0, listPrice - orderTotal) : 0;
+  const gachaLabel = gachaResult?.product_name ?? gachaResult?.exclusive_name ?? '';
+  const gachaImage = gachaResult?.product_image_url ?? gachaResult?.exclusive_image_url ?? null;
+  const gachaIsRealProduct = !!gachaResult?.product_id;
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -195,8 +256,11 @@ export function DisplayProductModal({
             <h3 style={styles.title}>
               {buyPhase === 'address'
                 ? t('cart.addressStepTitle')
-                : buyPhase === 'success'
-                  ? t('display.buyNowSuccessTitle')
+                : buyPhase === 'reward' ||
+                    buyPhase === 'discountResult' ||
+                    buyPhase === 'gachaResult' ||
+                    buyPhase === 'gachaRolling'
+                  ? t('cart.rewardTitle')
                   : t('display.title')}
             </h3>
           </div>
@@ -209,15 +273,66 @@ export function DisplayProductModal({
           <p style={styles.hint}>{t('display.buyNowPaying')}</p>
         )}
 
-        {buyPhase === 'success' && orderId && orderTotal !== null && (
-          <div style={styles.successBox}>
-            <p style={styles.successTitle}>{t('display.buyNowSuccessTitle')}</p>
-            <p style={styles.successMeta}>{t('display.buyNowOrderId', { id: orderId.slice(0, 8) })}</p>
-            <p style={styles.successMeta}>
-              {t('display.buyNowTotal', { amount: formatPrice(orderTotal) })}
+        {buyPhase === 'reward' && (
+          <div style={styles.rewardStep}>
+            <div style={styles.rewardIcon}>🎁</div>
+            <p style={styles.rewardTitle}>{t('cart.rewardTitle')}</p>
+            <p style={styles.rewardHint}>{t('cart.rewardHint')}</p>
+            {rewardError && <p style={styles.errorText}>{rewardError}</p>}
+            <div style={styles.rewardChoiceRow}>
+              <button type="button" style={styles.rewardChoiceButton} onClick={() => void handleChooseDiscount()}>
+                💸 {t('cart.chooseDiscount')}
+              </button>
+              <button type="button" style={styles.rewardChoiceButton} onClick={() => void handleChooseGacha()}>
+                🎰 {t('cart.chooseGacha')}
+              </button>
+            </div>
+            <button type="button" style={{ ...styles.cartLink, marginTop: 12 }} onClick={() => setBuyPhase('address')}>
+              {t('common.back')}
+            </button>
+          </div>
+        )}
+
+        {buyPhase === 'gachaRolling' && (
+          <div style={styles.orderComplete}>
+            <div style={styles.orderCompleteIcon}>🎰</div>
+            <p style={styles.orderCompleteText}>{t('cart.gachaRolling')}</p>
+          </div>
+        )}
+
+        {buyPhase === 'discountResult' && orderId && orderTotal !== null && (
+          <div style={styles.orderComplete}>
+            <div style={styles.orderCompleteIcon}>💸</div>
+            <p style={styles.orderCompleteText}>
+              {t('cart.discountAppliedTitle', { percent: discountPercent ?? 0 })}
             </p>
+            <p style={styles.orderCompleteHint}>
+              {t('cart.discountAppliedHint', { amount: formatPrice(discountAmount) })}
+            </p>
+            <p style={styles.successMeta}>{t('display.buyNowOrderId', { id: orderId.slice(0, 8) })}</p>
             <p style={styles.successHint}>{t('display.buyNowMockHint')}</p>
-            <button type="button" style={styles.addButton} onClick={handleCloseSuccess}>
+            <button type="button" style={styles.addButton} onClick={handleFinishBuy}>
+              {t('cart.confirm')}
+            </button>
+          </div>
+        )}
+
+        {buyPhase === 'gachaResult' && gachaResult && orderId && (
+          <div style={styles.orderComplete}>
+            <div style={styles.gachaResultThumbWrap}>
+              {gachaImage ? (
+                <img src={gachaImage} alt={gachaLabel} style={styles.gachaResultThumb} />
+              ) : (
+                <div style={styles.orderCompleteIcon}>🎉</div>
+              )}
+            </div>
+            <p style={styles.orderCompleteText}>{t('cart.gachaWonTitle')}</p>
+            <p style={styles.gachaWonName}>{gachaLabel}</p>
+            <span style={styles.gachaBadge}>
+              {gachaIsRealProduct ? t('cart.gachaBadgeProduct') : t('cart.gachaBadgeExclusive')}
+            </span>
+            <p style={styles.successMeta}>{t('display.buyNowOrderId', { id: orderId.slice(0, 8) })}</p>
+            <button type="button" style={{ ...styles.addButton, marginTop: 16 }} onClick={handleFinishBuy}>
               {t('cart.confirm')}
             </button>
           </div>
@@ -299,14 +414,16 @@ export function DisplayProductModal({
               </div>
             )}
 
-            <button
-              type="button"
-              style={styles.buyButton}
-              disabled={addressLoading || savingAddress}
-              onClick={() => void handleConfirmBuyNow()}
-            >
-              {t('display.buyNow')}
-            </button>
+            {!addAddressOpen && (
+              <button
+                type="button"
+                style={styles.buyButton}
+                disabled={addressLoading || savingAddress}
+                onClick={handleContinueToReward}
+              >
+                {t('cart.addressContinue')}
+              </button>
+            )}
             <button
               type="button"
               style={{ ...styles.cartLink, marginTop: 8 }}
@@ -526,6 +643,38 @@ const styles: Record<string, React.CSSProperties> = {
   successTitle: { color: '#fff', fontSize: 17, fontWeight: 700, margin: '0 0 12px' },
   successMeta: { color: '#d0d8f0', fontSize: 14, margin: '0 0 8px' },
   successHint: { color: '#94a3b8', fontSize: 12, lineHeight: 1.5, margin: '12px 0 20px' },
+  rewardStep: { textAlign: 'center', padding: '10px 0 6px' },
+  rewardIcon: { fontSize: 40, marginBottom: 8 },
+  rewardTitle: { color: '#fff', fontSize: 15, fontWeight: 600, margin: 0 },
+  rewardHint: { color: '#a0a0c0', fontSize: 12, marginTop: 6, marginBottom: 16 },
+  rewardChoiceRow: { display: 'flex', gap: 10 },
+  rewardChoiceButton: {
+    flex: 1,
+    padding: '12px 10px',
+    borderRadius: 10,
+    border: '1px solid #2c4270',
+    background: '#0f3460',
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  orderComplete: { textAlign: 'center', padding: '12px 0 8px' },
+  orderCompleteIcon: { fontSize: 44, marginBottom: 10 },
+  orderCompleteText: { color: '#fff', fontSize: 16, fontWeight: 600, margin: '0 0 8px' },
+  orderCompleteHint: { color: '#a0a0c0', fontSize: 13, margin: '0 0 12px' },
+  gachaResultThumbWrap: { display: 'flex', justifyContent: 'center', marginBottom: 10 },
+  gachaResultThumb: { width: 88, height: 88, borderRadius: 10, objectFit: 'cover' },
+  gachaWonName: { color: '#c9a962', fontSize: 15, fontWeight: 600, margin: '8px 0' },
+  gachaBadge: {
+    display: 'inline-block',
+    fontSize: 11,
+    padding: '4px 10px',
+    borderRadius: 999,
+    background: '#173a2c',
+    color: '#8ce0b0',
+    border: '1px solid #2c6b4a',
+  },
   tryOnBox: {
     background: '#0b1020',
     borderRadius: 12,

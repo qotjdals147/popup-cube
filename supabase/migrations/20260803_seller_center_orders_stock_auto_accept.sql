@@ -80,6 +80,7 @@ CREATE OR REPLACE FUNCTION public.place_order(
 )
 RETURNS TABLE(order_id uuid, total_amount integer)
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path TO 'public', 'pg_temp'
 AS $function$
 DECLARE
