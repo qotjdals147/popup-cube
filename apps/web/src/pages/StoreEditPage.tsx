@@ -5,10 +5,17 @@ import { getMyStore, publishStore, userOwnsStore } from '../lib/stores';
 import { OwnerProductPanel } from '../components/OwnerProductPanel';
 import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
 import { OwnerDisplayPanel } from '../components/OwnerDisplayPanel';
+import { DemoToast } from '../components/DemoToast';
+import { useOwnerOrderRealtime } from '../hooks/useOwnerOrderRealtime';
 import { t } from '../i18n';
 import type { StoreSummary } from '@popup-cube/shared';
 
 type EditTab = 'overview' | 'products' | 'orders' | 'fulfillment' | 'layout';
+
+function formatBadgeCount(n: number): string {
+  if (n <= 0) return '';
+  return n > 99 ? '99+' : String(n);
+}
 
 export function StoreEditPage() {
   const { storeId } = useParams();
@@ -24,6 +31,16 @@ export function StoreEditPage() {
   const [publishErr, setPublishErr] = useState(false);
   const [ownershipChecked, setOwnershipChecked] = useState(false);
   const [ownsStore, setOwnsStore] = useState(false);
+
+  const {
+    pendingAccept,
+    awaitingShip,
+    toastMessage,
+    dismissToast,
+    refreshTick,
+  } = useOwnerOrderRealtime(ownershipChecked && ownsStore ? storeId : undefined, {
+    suppressNewOrderToast: tab === 'orders',
+  });
 
   useEffect(() => {
     if (authLoading) return;
@@ -99,11 +116,11 @@ export function StoreEditPage() {
     return <div style={styles.page}>{t('ownerEdit.loading')}</div>;
   }
 
-  const tabs: { id: EditTab; label: string }[] = [
+  const tabs: { id: EditTab; label: string; badge?: number }[] = [
     { id: 'overview', label: t('ownerEdit.tabOverview') },
     { id: 'products', label: t('ownerEdit.tabProducts') },
-    { id: 'orders', label: t('ownerEdit.tabOrders') },
-    { id: 'fulfillment', label: t('ownerEdit.tabFulfillment') },
+    { id: 'orders', label: t('ownerEdit.tabOrders'), badge: pendingAccept },
+    { id: 'fulfillment', label: t('ownerEdit.tabFulfillment'), badge: awaitingShip },
     { id: 'layout', label: t('ownerEdit.tabLayout') },
   ];
 
@@ -128,19 +145,23 @@ export function StoreEditPage() {
 
       <div style={styles.shell}>
         <nav style={styles.sidebar}>
-          {tabs.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              style={{
-                ...styles.navItem,
-                ...(tab === item.id ? styles.navItemActive : {}),
-              }}
-              onClick={() => setTab(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
+          {tabs.map((item) => {
+            const badgeText = formatBadgeCount(item.badge ?? 0);
+            return (
+              <button
+                key={item.id}
+                type="button"
+                style={{
+                  ...styles.navItem,
+                  ...(tab === item.id ? styles.navItemActive : {}),
+                }}
+                onClick={() => setTab(item.id)}
+              >
+                <span style={styles.navLabel}>{item.label}</span>
+                {badgeText ? <span style={styles.navBadge}>{badgeText}</span> : null}
+              </button>
+            );
+          })}
         </nav>
 
         <main style={styles.main}>
@@ -191,11 +212,21 @@ export function StoreEditPage() {
           )}
 
           {!loading && !error && tab === 'orders' && storeId && (
-            <OwnerOrdersPanel storeId={storeId} embedded queue="pending" />
+            <OwnerOrdersPanel
+              storeId={storeId}
+              embedded
+              queue="pending"
+              refreshTick={refreshTick}
+            />
           )}
 
           {!loading && !error && tab === 'fulfillment' && storeId && (
-            <OwnerOrdersPanel storeId={storeId} embedded queue="fulfillment" />
+            <OwnerOrdersPanel
+              storeId={storeId}
+              embedded
+              queue="fulfillment"
+              refreshTick={refreshTick}
+            />
           )}
 
           {!loading && !error && tab === 'layout' && storeId && (
@@ -203,6 +234,8 @@ export function StoreEditPage() {
           )}
         </main>
       </div>
+
+      <DemoToast message={toastMessage} onDismiss={dismissToast} />
     </div>
   );
 }
@@ -250,6 +283,10 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 6,
   },
   navItem: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
     textAlign: 'left',
     padding: '12px 14px',
     borderRadius: 8,
@@ -263,6 +300,20 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#0f3460',
     color: '#fff',
     fontWeight: 600,
+  },
+  navLabel: { flex: 1, minWidth: 0 },
+  navBadge: {
+    flexShrink: 0,
+    minWidth: 20,
+    height: 20,
+    padding: '0 6px',
+    borderRadius: 999,
+    background: '#e94560',
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: 700,
+    lineHeight: '20px',
+    textAlign: 'center',
   },
   main: { padding: '24px 28px', maxWidth: 1200 },
   panel: {

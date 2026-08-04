@@ -295,3 +295,34 @@ export function isFulfillmentOrderStatus(status: OrderStatus): boolean {
 }
 
 
+
+export interface StoreOrderCounts {
+
+  pendingAccept: number;
+
+  awaitingShip: number;
+
+}
+
+
+
+/** AD-055 — 사이드바 뱃지용 가벼운 집계 */
+export async function getStoreOrderCounts(storeId: string): Promise<StoreOrderCounts> {
+
+  const { data, error } = await supabase.rpc('get_store_order_counts', { p_store_id: storeId });
+
+  if (error) throw new OrderError(error.message);
+
+  const row = Array.isArray(data) ? data[0] : data;
+
+  return {
+
+    pendingAccept: Number(row?.pending_accept ?? 0),
+
+    awaitingShip: Number(row?.awaiting_ship ?? 0),
+
+  };
+
+}
+
+

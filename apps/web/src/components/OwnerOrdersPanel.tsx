@@ -18,6 +18,8 @@ interface OwnerOrdersPanelProps {
   embedded?: boolean;
   /** 에디터 사이드바에서 탭별로 분리 (AD-052) */
   queue?: OwnerOrderQueue;
+  /** AD-055 — Realtime 등 외부 갱신 신호 (증가할 때마다 목록 reload) */
+  refreshTick?: number;
 }
 
 export function OwnerOrdersPanel({
@@ -25,6 +27,7 @@ export function OwnerOrdersPanel({
   onClose,
   embedded = false,
   queue,
+  refreshTick = 0,
 }: OwnerOrdersPanelProps) {
   const [orders, setOrders] = useState<OwnerOrderView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +53,7 @@ export function OwnerOrdersPanel({
 
   useEffect(() => {
     void reload();
-  }, [reload]);
+  }, [reload, refreshTick]);
 
   const filtered = useMemo(() => {
     return orders.filter((o) =>

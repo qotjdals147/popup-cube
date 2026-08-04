@@ -240,8 +240,9 @@ npm run dev
 | **Purpose** | 오프라인 팝업 스토어 한계를 넘는 2D 픽셀 아트 메타버스 커머스 플랫폼 |
 | **Workspace** | `C:\Users\qotjd\Downloads\Cursor\popup_store` |
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
-| **Current Phase** | **Phase 4** — Sprint **4-3 실기 완료**(HUD·알약·**몰입 AD-050**·**헤더 스크롤 ISS-032**) · **다음 = Sprint 4-4 바로 구매 mock** (2026-07-31) |
-| **Version** | `0.2.4` (4-3 실기 OK · 4-4 예정) |
+| **Current Phase** | **Phase 4** — **AD-055** Realtime·뱃지·토스트 **구현** (2026-08-04) · **다음 = 손님 주문 내역 + AD-054** (§53.7) |
+| **Version** | `0.2.6` (AD-055 Realtime · 뱃지 · 토스트) |
+| **Git `main` HEAD** | *(push 직후 갱신)* — AD-055 |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -413,7 +414,7 @@ npm run dev
 | AD-052 | **(계획) 점주 PC = 스마트스토어형 판매자센터** — 탭 **「주문」** (수락/거절) · **「발주·배송」** (수락 후 송장·상태). **거절·발송 전 취소 = 재고 반드시 복구**(§52). **자동 수락(AD-053)** = 상품별 ON + **남은 자동 수락 건수** · 취소 시 건수·재고 되돌림. 상세 **§52** · 현재 MVP = 주문 탭만 · `paid` 고정 | User 2026-08-03 | 2026-08-03 |
 | AD-053 | **(계획) 상품별 자동 주문 수락 — 할당 건수(quota)** — 점주가 「자동 수락」 켜고 **몇 건까지 자동 수락할지** 숫자 입력 (예: 재고 892 → 892 입력 → **892번째 주문까지** 자동, **893번째부터** 수동). **1주문 = 1건** 차감. 자동 수락된 주문이 **발송 전 취소/거절**되면 **남은 건수 +1** + 재고 복구 — UI에 짧은 설명 필수 (§52.4). DB·RPC는 §52.5 | User 2026-08-03 | 2026-08-03 |
 | AD-054 | **(계획) 배송완료 · 구매확정 · 7일 자동 + 손님 고지 필수** — 발주·배송: 점주 **배송 시작**→**배송 완료** · 손님 **구매확정**(수동) · **미확정 시 주문(결제)일로부터 7일 경과 시 자동 구매확정** · **결제 완료·주문 조회 등에 위 규칙 고지 필수**(분쟁 방지). §52.7 · 택배사 API·정산 연동은 PG·물류 이후 | User 2026-08-03 | 2026-08-03 |
-| AD-055 | **(계획) 점주 PC 실시간 주문 알림 + 사이드바 뱃지** — 새 주문·상태 변경 시 **새로고침 없이** 목록·카운트 갱신 + **토스트(알림)** · 왼쪽 **「주문」** 빨간 뱃지(건수) · **「발주·배송」** 뱃지 = **발송 처리 필요**(`accepted`) 건수 (§52.8). Supabase Realtime 또는 동등 구독 · Socket.io(월드용)와 **분리** | User 2026-08-03 | 2026-08-03 |
+| AD-055 | **(구현) 점주 PC 실시간 주문 알림 + 사이드바 뱃지** — `useOwnerOrderRealtime` · `get_store_order_counts` · `orders` Realtime publication · 「주문」/`awaiting_accept`·「발주·배송」/`accepted` 빨간 뱃지 · INSERT 토스트 (§52.8). Socket.io와 분리 | User 2026-08-03 | 2026-08-04 |
 | AD-056 | **(참고) 점주 판매자센터 갭 검토** — 네이버 스마트스토어·쿠팡 Wing 등 대비 **필수(P0)·편의(P1)·후순위(P2)** · POP-UP **차별 항목** · 권장 로드맵 **§53** (항목 구현 시 별도 AD·ISS로 쪼갬) | User 2026-08-03 | 2026-08-03 |
 
 ---
@@ -464,6 +465,11 @@ npm run dev
 - [x] **ISS-033** — demo owner ↔ GUCCI (`userOwnsStore`, profile migration)
 - [x] **가챠 ↔ 주문 1:1 + 점주 카드 표시 (2026-08-03)** — migration `20260803_gacha_order_link_and_owner_view.sql` · `roll_gacha(storeId, orderId?)` · `get_store_orders` gacha columns · `CartDrawer` 결제 후 roll · `OwnerOrdersPanel` 당첨 블록 · `OwnerOrderView` 타입
 - [x] **ISS-034 Play 장바구니 세로 폭 (2026-08-03)** — `CartDrawer` 2줄 레이아웃 + `play-world.css` `.play-cart-row*`
+- [x] **판매자센터 AD-052/053 (2026-08-03)** — `565a969` · 주문/발주·배송 탭 · 재고·자동수락 · owner RPCs · migration `20260803_seller_center_orders_stock_auto_accept.sql`
+- [x] **바로구매·재고 hotfix (2026-08-03)** — `0420759` · `place_order` **SECURITY DEFINER** (`20260803_fix_place_order_security_definer.sql`, **Supabase POPUP 원격 적용됨**) · 바로구매 **할인/가챠 선택** = 장바구니와 동일 · 상품 목록 **주문 자동 수락** 뱃지/quota 문구
+- [x] **User 실기 — 재고 차감 (2026-08-03)** — 주문(`place_order`) 시 `stock_quantity` 감소 확인 (작은 숫자 테스트). **수동 수락·배송 시작 시 추가 차감 없음** (§52.2)
+- [x] **AD-055 점주 Realtime·뱃지·토스트 (2026-08-04)** — migration `20260804_owner_order_realtime_counts.sql` **원격 적용** · `useOwnerOrderRealtime` · `StoreEditPage` nav 뱃지 · `DemoToast` · `OwnerOrdersPanel` `refreshTick` · **실기 테스트 대기**
+- [x] **HANDOFF AD-054~056 · §53 갭·§53.7 우선순위** — 다음 작업 순서 확정 (User 위임)
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -593,19 +599,30 @@ popup_store/                          # Turborepo root
 
 | 항목 | 값 |
 |---|---|
-| **0** | 미푸시 변경 **commit/push** (바로구매 혜택 · DEFINER · i18n) |
-| **1** | **AD-055** Realtime · 뱃지 · 토스트 |
-| **2** | **손님 주문 내역** + **AD-054** (구매확정·7일·고지) |
+| **0** | ~~commit/push~~ ✅ **`0420759`** (2026-08-03) |
+| **1** | ~~**AD-055** Realtime · 뱃지 · 토스트~~ ✅ 구현·push (2026-08-04) · **실기 대기** |
+| **2** | **손님 주문 내역** + **AD-054** (구매확정·7일·고지) — ⬜ **← 다음 (실기 OK 후)** |
 | **3** | 점주 **주문 검색·필터** |
 | **근거** | User 2026-08-03 — 우선순위 **에이전트 확정** · **§53.7** |
+
+### 7.1 세션 인수인계 — **2026-08-04** (AD-055 구현 중)
+
+| | |
+|---|---|
+| **Git** | AD-055 **push** (이 커밋) · 이전 `0420759` |
+| **Supabase POPUP** | `cvrtobxkvpcpcxrcspdp` · **`get_store_order_counts` + `orders` Realtime publication** 원격 적용 (2026-08-04) |
+| **AD-055** | `useOwnerOrderRealtime` · `StoreEditPage` 빨간 뱃지 · INSERT 토스트 · 주문 탭이면 토스트 생략 |
+| **다음** | User **Vercel 실기** → OK면 **손님 주문 내역 + AD-054** |
+| **Untracked 제외** | `apps/mobile/AGENTS.md`, `CLAUDE.md`, `LICENSE` |
+| **실기** | PC: https://popup-cube-web.vercel.app · 점주 `demo@owner.com` · 손님 주문은 앱 |
 
 ### Cursor 다음 1개 (우선)
 
 | # | 작업 | 상태 |
 |---|---|---|
-| **0** | **commit/push** — 로컬 정리 (§53.7 step 0) | ⬜ |
-| **1** | **AD-055** — Realtime · 사이드바 뱃지 · 새 주문 토스트 | ⬜ |
-| **2** | **손님 주문 내역** + **AD-054** — 배송완료 · 구매확정 · 7일 cron · 손님 고지 | ⬜ |
+| **0** | **commit/push** — §53.7 step 0 | ✅ `0420759` |
+| **1** | **AD-055** — Realtime · 사이드바 뱃지 · 새 주문 토스트 | ✅ push · ⬜ 실기 |
+| **2** | **손님 주문 내역** + **AD-054** — 배송완료 · 구매확정 · 7일 cron · 손님 고지 | ⬜ **다음** |
 | **3** | **§53 P0** — 점주 주문 **검색/필터** | ⬜ |
 | **4** | 발송 전 **손님 취소** + **클레임 v1** | ⬜ |
 | **5** | 매장 **정책·배송비** | ⬜ |
@@ -696,6 +713,16 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-04 — AD-055 점주 Realtime · 사이드바 뱃지 · 토스트
+- **Author:** Cursor Agent
+- **Changed:** `20260804_owner_order_realtime_counts.sql` (원격 적용) · `useOwnerOrderRealtime.ts` · `StoreEditPage.tsx` · `OwnerOrdersPanel.tsx` · `orders.ts` `getStoreOrderCounts` · `ko.ts` `toastNewOrder`
+- **Notes:** 「주문」=수락 대기 · 「발주·배송」=`accepted` 발송 대기 · INSERT 시 토스트(주문 탭이면 생략). Vercel 배포 후 실기.
+
+### 2026-08-03 — 세션 종료 인수인계 (User: 재고 OK · 다음 AD-055)
+- **Author:** Cursor Agent / User
+- **Changed:** §5 · **§7.1** · §52.5 · §1 Overview · §53.7 step 0 ✅
+- **Notes:** `main` **`0420759`**. 재고 = `place_order` 시 차감 User 확인. Untracked mobile AGENTS/CLAUDE/LICENSE 제외. **§7.1** 세션 스냅샷 · 다음 = AD-055.
 
 ### 2026-08-03 — §53.7 우선순위 확정 (User 위임 · 스무스 진행)
 - **Changed:** §53.7 · §7 Next Steps
@@ -2163,7 +2190,7 @@ where email = 'demo@owner.com';
 
 ---
 
-*Last updated: 2026-08-03 (§52 AD-055 실시간·뱃지 User 요청) by Cursor Agent*
+*Last updated: 2026-08-03 (§7.1 세션 인수인계 · 재고 User OK · next AD-055) by Cursor Agent*
 
 ---
 
@@ -2300,11 +2327,11 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 
 #### API·UI 체크리스트
 
-- [ ] `get_store_order_counts(p_store_id)` RPC — `{ pending_accept, awaiting_ship, shipped_open, … }` (뱃지용 가벼운 집계)
-- [ ] `StoreEditPage` — `useOwnerOrderRealtime(storeId)` + nav 버튼에 `badgeCount`
-- [ ] `OwnerOrdersPanel` — 구독 시 `reload()` 공유 (중복 fetch 줄이기)
-- [ ] 토스트 컴포넌트 + `ko.ts` `ownerOrders.toastNewOrder` 등 (§0 TMI 금지 — 한 줄)
-- [ ] Supabase Dashboard: `orders` **Realtime publication** + RLS 점주 read
+- [x] `get_store_order_counts(p_store_id)` RPC — `{ pending_accept, awaiting_ship }` (2026-08-04 원격)
+- [x] `StoreEditPage` — `useOwnerOrderRealtime(storeId)` + nav 빨간 pill 뱃지
+- [x] `OwnerOrdersPanel` — `refreshTick`으로 구독 시 `reload()` 공유
+- [x] `DemoToast` + `ko.ts` `ownerOrders.toastNewOrder` (§0 — 한 줄)
+- [x] `orders` **Realtime publication** + RLS `orders_select_store_owner` (이미 존재)
 
 ### 52.4 자동 수락 (AD-053) — 메커니즘 · 점주 UI 문구
 
@@ -2345,7 +2372,8 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 - [x] `StoreEditPage` 탭 **주문** / **발주·배송**
 - [ ] **AD-054:** `complete_delivery` · `confirm_purchase` · `purchase_confirmed_at` · 7일 auto cron
 - [ ] **AD-054:** 손님 고지 — 결제 완료 + 주문 상세 (`purchaseConfirmAutoRule`)
-- [ ] **AD-055:** Realtime `orders` · 사이드바 뱃지 · 새 주문 토스트 · `get_store_order_counts`
+- [x] **AD-055:** Realtime `orders` · 사이드바 뱃지 · 새 주문 토스트 · `get_store_order_counts` (2026-08-04)
+- [x] `place_order` **SECURITY DEFINER** (재고 차감) — migration + 원격 적용 · User 재고 OK 2026-08-03
 
 ### 52.6 관련 AD · §
 
@@ -2359,7 +2387,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | AD-037 | PC 웹 = 점주 관리 전용 |
 | §23 Glossary | 판매자센터 · 자동 수락 · 재고 복구 |
 
-*§52 Last updated: 2026-08-03 (AD-055 실시간·뱃지 User 요청)*
+*§52 Last updated: 2026-08-04 (AD-055 구현 · Realtime publication + counts RPC)*
 
 ---
 
@@ -2394,7 +2422,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 |---|---|---|---|
 | 1 | **실결제(PG)** · 승인/취소/환불 | ✅ | ❌ mock |
 | 2 | **배송완료 → 구매확정** (+ 7일 자동·고지) | ✅ | ⬜ AD-054 |
-| 3 | **새 주문 Realtime + 뱃지** | ✅(알림·앱) | ⬜ AD-055 |
+| 3 | **새 주문 Realtime + 뱃지** | ✅(알림·앱) | ✅ AD-055 구현 · 실기 대기 |
 | 4 | **손님 주문 조회** (마이페이지·주문번호·상태·송장) | ✅ | ❌ |
 | 5 | **발송 전 취소** (손님 요청 + 점주 처리 + 재고·quota 복구) | ✅ | 부분(점주 취소만·손님 UX ❌) |
 | 6 | **반품·교환·클레임** (배송 후) | ✅ | ❌ §52.2만 원칙 |
@@ -2440,8 +2468,8 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 
 | 순서 | 묶음 | 왜 이 순서 |
 |---|---|---|
-| **0** | **로컬 미푸시 정리** — 바로구매 할인/가챠 · `place_order` DEFINER migration · 상품 뱃지 등 **1회 commit/push** | Vercel·앱 WebView·DB와 HANDOFF 기준 맞춤 · 이후 스프린트마다 혼선 방지 |
-| **1** | **AD-055** — Realtime · 사이드바 뱃지 · 토스트 · (선택) 상품 탭 포커스 시 재고 reload | 점주가 **새로고침 없이** 주문 처리 · 이후 주문/클레임 UI 붙일 때도 동일 구독 재사용 |
+| **0** | ~~push~~ | ✅ `0420759` |
+| **1** | ~~**AD-055**~~ ✅ 구현 2026-08-04 (실기·commit 대기) · 상품 탭 재고 Realtime은 선택 미구현 | 점주가 **새로고침 없이** 주문 처리 · 이후 주문/클레임 UI 붙일 때도 동일 구독 재사용 |
 | **2** | **손님 주문 내역** (마이페이지) + **AD-054** — 배송완료 · 구매확정 · 7일 cron · 결제/주문 **고지** | **한 스프린트** — “샀는데 어디서 봐?” + 분쟁 최소선 · DB·손님 UI·cron 같이 가야 반쪽 안 남음 |
 | **3** | **주문 검색·필터·정렬** (점주 P0#7) | 주문 수 늘면 목록만으로 막힘 · Realtime(1) 다음이 자연스러움 |
 | **4** | **발송 전 취소(손님)** + **클레임 v1**(점주 탭 뼈대) + §52 재고·quota 복구 | 주문 내역(2) 있어야 손님 취소 UX 의미 있음 |

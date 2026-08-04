@@ -339,6 +339,7 @@ export const ko = {
     gachaNotLinked: '(예전 주문 — 당첨 연결 전)',
     shippingTo: '배송지',
     noAddress: '배송지 정보 없음',
+    toastNewOrder: '새 주문이 들어왔습니다',
     status: {
       pending: '대기',
       paid: '결제됨',
