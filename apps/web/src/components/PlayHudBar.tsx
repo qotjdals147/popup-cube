@@ -9,6 +9,7 @@ export type PlayHudBarProps = {
   onChat: () => void;
   onCart: () => void;
   onShop: () => void;
+  onMyOrders: () => void;
 };
 
 function PixelIcon({ children }: { children: ReactNode }) {
@@ -33,6 +34,7 @@ export function PlayHudBar({
   onChat,
   onCart,
   onShop,
+  onMyOrders,
 }: PlayHudBarProps) {
   return (
     <nav className="play-hud-bar" aria-label={t('play.hudBarLabel')}>
@@ -85,6 +87,15 @@ export function PlayHudBar({
           <rect x="4" y="9" width="8" height="2" fill="#a8f0c8" />
         </PixelIcon>
         <span className="play-hud-label">{t('store.hud.allProducts')}</span>
+      </button>
+      <button type="button" className="play-hud-slot" onClick={onMyOrders}>
+        <PixelIcon>
+          <rect x="2" y="2" width="12" height="12" fill="#0f3460" stroke="#c9a962" strokeWidth="1" />
+          <rect x="4" y="5" width="8" height="1" fill="#c9a962" />
+          <rect x="4" y="7" width="8" height="1" fill="#c9a962" />
+          <rect x="4" y="9" width="5" height="1" fill="#c9a962" />
+        </PixelIcon>
+        <span className="play-hud-label">{t('store.hud.myOrders')}</span>
       </button>
     </nav>
   );

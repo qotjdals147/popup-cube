@@ -177,6 +177,7 @@ export const ko = {
       allProducts: '전체 상품', // ShopPanel — 매장 전체 카탈로그 (장바구니 아님)
       shopNow: '전체 상품', // 구키 호환
       tryOn: '착용해보기', // 상품 팝업 전용 문구 (HUD 버튼 아님)
+      myOrders: '내 주문', // OrderHistoryPanel — 이 매장에서 내가 주문한 내역 (AD-054)
     },
     owner: {
       label: '점주 도구',
@@ -237,6 +238,7 @@ export const ko = {
     gachaBadgeExclusive: '가챠 전용 아이템',
     rewardError: '혜택을 받지 못했어요. 다시 시도해 주세요.',
     gachaError: '가챠를 돌리지 못했어요. 다시 시도해 주세요.',
+    purchaseConfirmAutoRule: '구매확정을 하지 않으면, 주문일로부터 7일 후 자동으로 구매확정됩니다.',
     addressStepTitle: '배송지를 선택해 주세요',
     addressLoading: '배송지를 불러오는 중...',
     addressEmpty: '저장된 배송지가 없어요. 새 배송지를 추가해 주세요.',
@@ -320,14 +322,19 @@ export const ko = {
     reject: '주문 취소(거절)',
     cancelAcceptedOrder: '주문 취소 (재고 복구)',
     markShipped: '배송 시작',
+    completeDelivery: '배송 완료',
     confirmAccept: '이 주문을 수락할까요?',
     confirmReject: '이 주문을 취소(거절)할까요? 재고가 다시 올라갑니다.',
     confirmShip: '이 주문을 「배송 중」으로 바꿀까요?',
+    confirmCompleteDelivery: '이 주문을 「배송 완료」로 바꿀까요?',
     confirmCancelAccepted:
       '아직 보내지 않은 주문이에요. 취소하면 재고가 다시 올라가고, 자동 수락이었던 건이면 남은 자동 수락 횟수도 1건 돌려받아요. 취소할까요?',
     trackingPlaceholder: '송장 번호 (선택)',
     tracking: '송장',
     shippedAt: '배송 시작:',
+    deliveryCompletedAt: '배송 완료:',
+    purchaseConfirmedAt: '구매확정:',
+    purchaseConfirmedAutoBadge: '주문일+7일 자동 구매확정',
     autoAcceptedBadge: '⚡ 자동 수락된 주문',
     buyer: '구매자',
     itemsCount: '상품 {count}종',
@@ -347,9 +354,22 @@ export const ko = {
       accepted: '수락됨',
       rejected: '거절됨',
       shipped: '배송중',
+      delivery_completed: '배송 완료',
+      purchase_confirmed: '구매확정',
       completed: '완료',
       cancelled: '취소됨',
     },
+  },
+  myOrders: {
+    title: '📦 내 주문',
+    loading: '주문을 불러오는 중...',
+    errorLoad: '주문 목록을 불러오지 못했어요.',
+    empty: '아직 주문한 내역이 없어요.',
+    itemsCount: '상품 {count}종',
+    confirmPurchase: '구매확정',
+    confirmPurchaseConfirm: '구매를 확정할까요? 확정 후에는 되돌릴 수 없어요.',
+    confirmPurchaseError: '구매확정에 실패했어요. 다시 시도해 주세요.',
+    gachaOnOrder: '가챠 당첨',
   },
   roles: {
     shopper: '소비자',

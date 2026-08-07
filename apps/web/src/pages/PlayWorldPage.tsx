@@ -25,6 +25,7 @@ import { PlayWorldChatPanel } from '../components/PlayWorldChatPanel';
 import { DisplayProductModal } from '../components/DisplayProductModal';
 import { CartDrawer } from '../components/CartDrawer';
 import { ShopPanel } from '../components/ShopPanel';
+import { OrderHistoryPanel } from '../components/OrderHistoryPanel';
 import { toFixturePlacement, loadStoreDisplayLayout } from '../lib/displayFixtures';
 import { getStoreSummary } from '../lib/stores';
 import { supabase } from '../lib/supabase';
@@ -121,6 +122,7 @@ export function PlayWorldPage() {
   const [displayOpen, setDisplayOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
+  const [myOrdersOpen, setMyOrdersOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [messages, setMessages] = useState<GameChatMessage[]>([]);
@@ -411,6 +413,7 @@ export function PlayWorldPage() {
             onChat={() => setChatOpen(true)}
             onCart={() => setCartOpen(true)}
             onShop={() => setShopOpen(true)}
+            onMyOrders={() => setMyOrdersOpen(true)}
           />
         </div>
       )}
@@ -455,6 +458,8 @@ export function PlayWorldPage() {
           }}
         />
       )}
+
+      {myOrdersOpen && <OrderHistoryPanel onClose={() => setMyOrdersOpen(false)} />}
     </div>
   );
 }

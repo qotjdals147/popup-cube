@@ -311,6 +311,7 @@ export function DisplayProductModal({
             </p>
             <p style={styles.successMeta}>{t('display.buyNowOrderId', { id: orderId.slice(0, 8) })}</p>
             <p style={styles.successHint}>{t('display.buyNowMockHint')}</p>
+            <p style={styles.autoConfirmNote}>{t('cart.purchaseConfirmAutoRule')}</p>
             <button type="button" style={styles.addButton} onClick={handleFinishBuy}>
               {t('cart.confirm')}
             </button>
@@ -332,6 +333,7 @@ export function DisplayProductModal({
               {gachaIsRealProduct ? t('cart.gachaBadgeProduct') : t('cart.gachaBadgeExclusive')}
             </span>
             <p style={styles.successMeta}>{t('display.buyNowOrderId', { id: orderId.slice(0, 8) })}</p>
+            <p style={styles.autoConfirmNote}>{t('cart.purchaseConfirmAutoRule')}</p>
             <button type="button" style={{ ...styles.addButton, marginTop: 16 }} onClick={handleFinishBuy}>
               {t('cart.confirm')}
             </button>
@@ -643,6 +645,7 @@ const styles: Record<string, React.CSSProperties> = {
   successTitle: { color: '#fff', fontSize: 17, fontWeight: 700, margin: '0 0 12px' },
   successMeta: { color: '#d0d8f0', fontSize: 14, margin: '0 0 8px' },
   successHint: { color: '#94a3b8', fontSize: 12, lineHeight: 1.5, margin: '12px 0 20px' },
+  autoConfirmNote: { color: '#7c8db5', fontSize: 11, lineHeight: 1.5, margin: '0 0 14px' },
   rewardStep: { textAlign: 'center', padding: '10px 0 6px' },
   rewardIcon: { fontSize: 40, marginBottom: 8 },
   rewardTitle: { color: '#fff', fontSize: 15, fontWeight: 600, margin: 0 },

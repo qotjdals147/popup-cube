@@ -138,6 +138,8 @@ export type OrderStatus =
   | 'accepted'
   | 'rejected'
   | 'shipped'
+  | 'delivery_completed'
+  | 'purchase_confirmed'
   | 'completed'
   | 'cancelled';
 
@@ -155,6 +157,12 @@ export interface Order {
   accepted_at: string | null;
   tracking_number: string | null;
   shipped_at: string | null;
+  /** AD-054 — 점주 배송 완료 처리 시각 */
+  delivery_completed_at: string | null;
+  /** AD-054 — 손님 구매확정(수동) 또는 주문일+7일 자동 확정 시각 */
+  purchase_confirmed_at: string | null;
+  /** AD-054 — 손님이 직접 누르지 않고 주문일+7일 자동으로 확정된 건인지 */
+  purchase_confirm_auto: boolean;
   created_at: string;
 }
 
@@ -186,6 +194,20 @@ export interface OwnerOrderView extends Order {
   shipping_address_line2: string | null;
   items: OwnerOrderItemView[];
   /** `reward_type=gacha` — same order card (AD-028, order_id on gacha_rolls) */
+  gacha_prize_name: string | null;
+  gacha_prize_image_url: string | null;
+  gacha_prize_is_product: boolean;
+}
+
+/** 손님 「내 주문」 화면에서 쓰는 조인 결과 (AD-054, §52.7). */
+export interface ShopperOrderView extends Order {
+  store_name: string | null;
+  shipping_recipient_name: string | null;
+  shipping_phone: string | null;
+  shipping_postal_code: string | null;
+  shipping_address_line1: string | null;
+  shipping_address_line2: string | null;
+  items: OwnerOrderItemView[];
   gacha_prize_name: string | null;
   gacha_prize_image_url: string | null;
   gacha_prize_is_product: boolean;

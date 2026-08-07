@@ -240,8 +240,8 @@ npm run dev
 | **Purpose** | 오프라인 팝업 스토어 한계를 넘는 2D 픽셀 아트 메타버스 커머스 플랫폼 |
 | **Workspace** | `C:\Users\qotjd\Downloads\Cursor\popup_store` |
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
-| **Current Phase** | **Phase 4** — **AD-055** Realtime·뱃지·토스트 **구현** (2026-08-04) · **다음 = 손님 주문 내역 + AD-054** (§53.7) |
-| **Version** | `0.2.6` (AD-055 Realtime · 뱃지 · 토스트) |
+| **Current Phase** | **Phase 4** — **AD-054** 배송완료·구매확정·7일 자동·손님 고지 + **손님 「내 주문」** **구현** (2026-08-07) · **다음 = §53 P0 점주 주문 검색·필터** (§53.7) |
+| **Version** | `0.2.7` (AD-054 배송완료 · 구매확정 · 손님 내 주문) |
 | **Git `main` HEAD** | *(push 직후 갱신)* — AD-055 |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
@@ -413,7 +413,7 @@ npm run dev
 | AD-051 | **몰입 EAS regression (선택)** — Expo Go 실기 **통과** (AD-050). **Preview/Production APK** 빌드 전 **`eas build --profile development`** 로 한 번 더 확인 권장 (스토어 빌드 전용 회귀 게이트) | User 2026-07-31 오전: Go ❌ → **오후: Go ✅** 로 갱신 | 2026-07-31 |
 | AD-052 | **(계획) 점주 PC = 스마트스토어형 판매자센터** — 탭 **「주문」** (수락/거절) · **「발주·배송」** (수락 후 송장·상태). **거절·발송 전 취소 = 재고 반드시 복구**(§52). **자동 수락(AD-053)** = 상품별 ON + **남은 자동 수락 건수** · 취소 시 건수·재고 되돌림. 상세 **§52** · 현재 MVP = 주문 탭만 · `paid` 고정 | User 2026-08-03 | 2026-08-03 |
 | AD-053 | **(계획) 상품별 자동 주문 수락 — 할당 건수(quota)** — 점주가 「자동 수락」 켜고 **몇 건까지 자동 수락할지** 숫자 입력 (예: 재고 892 → 892 입력 → **892번째 주문까지** 자동, **893번째부터** 수동). **1주문 = 1건** 차감. 자동 수락된 주문이 **발송 전 취소/거절**되면 **남은 건수 +1** + 재고 복구 — UI에 짧은 설명 필수 (§52.4). DB·RPC는 §52.5 | User 2026-08-03 | 2026-08-03 |
-| AD-054 | **(계획) 배송완료 · 구매확정 · 7일 자동 + 손님 고지 필수** — 발주·배송: 점주 **배송 시작**→**배송 완료** · 손님 **구매확정**(수동) · **미확정 시 주문(결제)일로부터 7일 경과 시 자동 구매확정** · **결제 완료·주문 조회 등에 위 규칙 고지 필수**(분쟁 방지). §52.7 · 택배사 API·정산 연동은 PG·물류 이후 | User 2026-08-03 | 2026-08-03 |
+| AD-054 | **(구현) 배송완료 · 구매확정 · 7일 자동 + 손님 고지 필수** — 발주·배송: 점주 **배송 시작**→**배송 완료** · 손님 **구매확정**(수동) · **미확정 시 주문(결제)일로부터 7일 경과 시 자동 구매확정** · **결제 완료·주문 조회 등에 위 규칙 고지 필수**(분쟁 방지). §52.7 · 택배사 API·정산 연동은 PG·물류 이후 | User 2026-08-03 | 2026-08-07 |
 | AD-055 | **(구현) 점주 PC 실시간 주문 알림 + 사이드바 뱃지** — `useOwnerOrderRealtime` · `get_store_order_counts` · `orders` Realtime publication · 「주문」/`awaiting_accept`·「발주·배송」/`accepted` 빨간 뱃지 · INSERT 토스트 (§52.8). Socket.io와 분리 | User 2026-08-03 | 2026-08-04 |
 | AD-056 | **(참고) 점주 판매자센터 갭 검토** — 네이버 스마트스토어·쿠팡 Wing 등 대비 **필수(P0)·편의(P1)·후순위(P2)** · POP-UP **차별 항목** · 권장 로드맵 **§53** (항목 구현 시 별도 AD·ISS로 쪼갬) | User 2026-08-03 | 2026-08-03 |
 
@@ -470,6 +470,7 @@ npm run dev
 - [x] **User 실기 — 재고 차감 (2026-08-03)** — 주문(`place_order`) 시 `stock_quantity` 감소 확인 (작은 숫자 테스트). **수동 수락·배송 시작 시 추가 차감 없음** (§52.2)
 - [x] **AD-055 점주 Realtime·뱃지·토스트 (2026-08-04)** — migration `20260804_owner_order_realtime_counts.sql` **원격 적용** · `useOwnerOrderRealtime` · `StoreEditPage` nav 뱃지 · `DemoToast` · `OwnerOrdersPanel` `refreshTick` · **실기 테스트 대기**
 - [x] **HANDOFF AD-054~056 · §53 갭·§53.7 우선순위** — 다음 작업 순서 확정 (User 위임)
+- [x] **AD-054 배송완료·구매확정·7일 자동·손님 「내 주문」 (2026-08-07)** — migration `20260807*.sql` 3건 **원격 적용** (컬럼·RPC·`pg_cron` 스케줄) · `OwnerOrdersPanel` **「배송 완료」** 버튼 · `OrderHistoryPanel`(신규) + `PlayHudBar` **「내 주문」** 슬롯(매장 무관 전체 조회) · `CartDrawer`/`DisplayProductModal` 결제완료 화면에 7일 자동확정 고지 · **실기 테스트 대기**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -600,21 +601,21 @@ popup_store/                          # Turborepo root
 | 항목 | 값 |
 |---|---|
 | **0** | ~~commit/push~~ ✅ **`0420759`** (2026-08-03) |
-| **1** | ~~**AD-055** Realtime · 뱃지 · 토스트~~ ✅ 구현·push (2026-08-04) · **실기 대기** |
-| **2** | **손님 주문 내역** + **AD-054** (구매확정·7일·고지) — ⬜ **← 다음 (실기 OK 후)** |
-| **3** | 점주 **주문 검색·필터** |
+| **1** | ~~**AD-055** Realtime · 뱃지 · 토스트~~ ✅ 구현·push (2026-08-04) |
+| **2** | ~~**손님 주문 내역** + **AD-054** (구매확정·7일·고지)~~ ✅ 구현 (2026-08-07) · **실기 대기** |
+| **3** | 점주 **주문 검색·필터** — ⬜ **← 다음** |
 | **근거** | User 2026-08-03 — 우선순위 **에이전트 확정** · **§53.7** |
 
-### 7.1 세션 인수인계 — **2026-08-04** (AD-055 구현 중)
+### 7.1 세션 인수인계 — **2026-08-07** (AD-054 구현)
 
 | | |
 |---|---|
-| **Git** | AD-055 **push** (이 커밋) · 이전 `0420759` |
-| **Supabase POPUP** | `cvrtobxkvpcpcxrcspdp` · **`get_store_order_counts` + `orders` Realtime publication** 원격 적용 (2026-08-04) |
-| **AD-055** | `useOwnerOrderRealtime` · `StoreEditPage` 빨간 뱃지 · INSERT 토스트 · 주문 탭이면 토스트 생략 |
-| **다음** | User **Vercel 실기** → OK면 **손님 주문 내역 + AD-054** |
+| **Git** | AD-054 **push** (이 커밋) · 이전 AD-055 커밋 |
+| **Supabase POPUP** | `cvrtobxkvpcpcxrcspdp` · `orders`에 `delivery_completed_at`·`purchase_confirmed_at`·`purchase_confirm_auto` 컬럼 + `status` CHECK 확장 · `complete_delivery`/`confirm_purchase`/`get_my_orders`/`_auto_confirm_purchases` RPC · `get_store_orders` 컬럼 확장 · **`pg_cron`** 확장 활성화 + `auto_confirm_purchases_daily`(매일 03:00 UTC) 스케줄 원격 적용 (2026-08-07) |
+| **AD-054** | 점주 발주·배송 탭 **「배송 완료」** 버튼(`shipped`→`delivery_completed`) · 손님 **「내 주문」**(`OrderHistoryPanel`, `PlayHudBar` 신규 슬롯, 매장 무관 전체 조회) **「구매확정」** 버튼(`shipped`/`delivery_completed`→`purchase_confirmed`) · **7일 자동 확정** = `pg_cron` **+** `get_my_orders()` 호출 시 lazy PERFORM 안전망(cron 미가동 프로젝트에서도 동작) · 결제완료·바로구매완료·내 주문 화면에 **`cart.purchaseConfirmAutoRule`** 고지 문구 노출 |
+| **다음** | User **Vercel 실기** → OK면 **§53 P0 점주 주문 검색·필터** |
 | **Untracked 제외** | `apps/mobile/AGENTS.md`, `CLAUDE.md`, `LICENSE` |
-| **실기** | PC: https://popup-cube-web.vercel.app · 점주 `demo@owner.com` · 손님 주문은 앱 |
+| **실기** | PC: https://popup-cube-web.vercel.app (점주 발주·배송 「배송 완료」) · 앱: 매장 입장 후 HUD **「내 주문」** (구매확정 버튼) |
 
 ### Cursor 다음 1개 (우선)
 
@@ -622,8 +623,8 @@ popup_store/                          # Turborepo root
 |---|---|---|
 | **0** | **commit/push** — §53.7 step 0 | ✅ `0420759` |
 | **1** | **AD-055** — Realtime · 사이드바 뱃지 · 새 주문 토스트 | ✅ push · ⬜ 실기 |
-| **2** | **손님 주문 내역** + **AD-054** — 배송완료 · 구매확정 · 7일 cron · 손님 고지 | ⬜ **다음** |
-| **3** | **§53 P0** — 점주 주문 **검색/필터** | ⬜ |
+| **2** | **손님 주문 내역** + **AD-054** — 배송완료 · 구매확정 · 7일 cron · 손님 고지 | ✅ push · ⬜ 실기 |
+| **3** | **§53 P0** — 점주 주문 **검색/필터** | ⬜ **다음** |
 | **4** | 발송 전 **손님 취소** + **클레임 v1** | ⬜ |
 | **5** | 매장 **정책·배송비** | ⬜ |
 | 6 | PG 실결제 | ⬜ User 후보 미정 |
@@ -713,6 +714,12 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-07 — AD-054 배송완료 · 구매확정 · 7일 자동 · 손님 「내 주문」 구현
+- **Author:** Cursor Agent
+- **Changed:** `supabase/migrations/20260807_delivery_complete_purchase_confirm.sql` · `20260807b_owner_orders_delivery_columns.sql` · `20260807c_get_my_orders_add_auto_flag.sql` (전부 원격 적용) · `packages/shared/src/types.ts` (`OrderStatus`·`Order`·`ShopperOrderView`) · `apps/web/src/lib/orders.ts` (`completeDelivery`·`confirmPurchase`·`listMyOrders`·`canConfirmPurchase`) · `OwnerOrdersPanel.tsx`(「배송 완료」 버튼) · `OrderHistoryPanel.tsx`(신규) · `PlayHudBar.tsx`(「내 주문」 슬롯) · `PlayWorldPage.tsx` · `CartDrawer.tsx`/`DisplayProductModal.tsx`(7일 자동확정 고지) · `ko.ts`
+- **Notes:** DB: `orders.status` CHECK에 `delivery_completed`/`purchase_confirmed` 추가, `delivery_completed_at`/`purchase_confirmed_at`/`purchase_confirm_auto` 컬럼. RPC `complete_delivery`(점주)·`confirm_purchase`(손님)·`get_my_orders()`(손님, 매장 무관 전체 조회)·내부 `_auto_confirm_purchases()`(EXECUTE 권한 없음, PUBLIC/anon/authenticated 전부 REVOKE). 7일 자동 확정은 **`pg_cron`**(신규 활성화, `auto_confirm_purchases_daily` 매일 03:00 UTC) **+** `get_my_orders()` 호출 시 lazy `PERFORM` 이중 안전망 — cron이 막힌 프로젝트에서도 동작. 손님 진입점은 **매장 WebView `PlayHudBar` → 「내 주문」**(마이페이지 아님, AD-037 PC=점주 전용 유지) — 전체 매장 통합 조회. `get_store_orders`도 배송완료·구매확정 컬럼 추가하며 grant를 `authenticated`로 명시적으로 좁힘(기존 anon 실행 가능 lint 해결). 보안 어드바이저 재확인: 신규 함수로 인한 anon 경고 없음. **실기 대기.**
+- **Security fix:** 기존 `get_store_orders`가 `anon` 롤도 실행 가능했던 문제를 이번 컬럼 확장(DROP+CREATE) 김에 `REVOKE ALL FROM PUBLIC` + `GRANT ... TO authenticated`로 같이 해결.
 
 ### 2026-08-04 — AD-055 점주 Realtime · 사이드바 뱃지 · 토스트
 - **Author:** Cursor Agent
@@ -2232,66 +2239,70 @@ where email = 'demo@owner.com';
 - 수락은 「판매 확정·발주·배송 큐로 이동」 의미만; 재고는 이미 잡혀 있음.
 - **재고 컬럼:** migration `20260803_seller_center_orders_stock_auto_accept.sql` — `products.stock_quantity` · `place_order` / 거절·취소 시 복구 RPC (§52.5).
 
-### 52.3 주문 상태 (초안 — AD-054 반영)
+### 52.3 주문 상태 (구현 완료 — AD-054)
 
 ```
 awaiting_accept → accepted → shipped (배송 시작)
                       ↘ rejected (재고 복구)
 accepted → cancelled_before_ship (재고 복구 + auto quota 환원)
-shipped → delivery_completed (배송 완료, 점주)  ← 구현 예정
-delivery_completed / shipped → purchase_confirmed (손님 수동 구매확정)  ← 구현 예정
-purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (AD-054)
+shipped → delivery_completed (배송 완료, 점주)  ← 구현됨 (2026-08-07)
+delivery_completed / shipped → purchase_confirmed (손님 수동 구매확정)  ← 구현됨
+purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (AD-054)  ← 구현됨 (pg_cron + lazy fallback)
 ```
 
-**지금 MVP:** `ship_order` 까지만 UI·RPC 있음. **배송 완료·구매확정·7일 cron** = 미구현.
+**구현 (2026-08-07):** `complete_delivery` / `confirm_purchase` / `get_my_orders` / `_auto_confirm_purchases` RPC · `orders.status` CHECK에 `delivery_completed`·`purchase_confirmed` 추가 · `orders.delivery_completed_at`/`purchase_confirmed_at`/`purchase_confirm_auto` 컬럼.
 
-### 52.7 배송 완료 · 구매확정 · 7일 자동 (AD-054)
+### 52.7 배송 완료 · 구매확정 · 7일 자동 (AD-054) — **구현 완료 (2026-08-07)**
 
 > **쉬운 말:** 택배 **보냈다** → **도착/완료** → 손님이 **구매확정** (안 하면 **주문한 날부터 7일 뒤 자동**). 손님은 **미리 알림**으로 규칙을 봐야 분쟁이 줄어듦.
 
 #### 점주 (PC · 발주·배송)
 
-| 단계 | 액션 | 상태 (가칭) |
+| 단계 | 액션 | 상태 |
 |---|---|---|
 | 이미 있음 | **배송 시작** (+ 송장 선택) | `shipped` |
-| **다음 구현** | **배송 완료** (택배 기사·택배앱상 배달 완료 후) | `delivery_completed` 또는 `completed` 로 통일 검토 |
+| ✅ **구현** | **「배송 완료」** 버튼 (`OwnerOrdersPanel`, `completeDelivery` RPC) | `delivery_completed` |
 | 이후 | (선택) 택배 API 연동 시 자동 배송완료 | 2차 |
 
-#### 손님 (앱 · 마이페이지 / 주문 상세)
+#### 손님 (앱 WebView · `PlayHudBar` **「내 주문」** → `OrderHistoryPanel`)
 
-| 항목 | 규칙 |
-|---|---|
-| **수동 구매확정** | 배송이 진행된 주문에 **「구매확정」** 버튼 (배송 완료 후 활성화 — 구현 시 `shipped` 이상 등 조건 정의) |
-| **자동 구매확정** | 손님이 **직접 구매확정하지 않으면**, **주문(결제)일(`orders.created_at`) 기준 7일**이 지나면 **자동 구매확정** (User 2026-08-03) |
-| **고지 (필수 — 분쟁 방지)** | 아래 문구를 **반드시** 노출 (User 요청). §0 UI·i18n 규칙: 과장·AI 톤 없이 **사실만** 짧게 |
+| 항목 | 규칙 | 구현 |
+|---|---|---|
+| **수동 구매확정** | `shipped` 또는 `delivery_completed` 주문에 **「구매확정」** 버튼 (`confirmPurchase` RPC) | ✅ |
+| **자동 구매확정** | 손님이 **직접 구매확정하지 않으면**, **주문(결제)일(`orders.created_at`) 기준 7일**이 지나면 **자동 구매확정** (User 2026-08-03) | ✅ `pg_cron` 매일 03:00 UTC **+** `get_my_orders()` 호출 시 lazy 안전망 |
+| **고지 (필수 — 분쟁 방지)** | 아래 문구를 **반드시** 노출 (User 요청). §0 UI·i18n 규칙: 과장·AI 톤 없이 **사실만** 짧게 | ✅ |
 
-**손님 고지 — 필수 노출 위치 (구현 체크리스트):**
+**손님 고지 — 필수 노출 위치:**
 
-- [ ] **결제·주문 완료 직후** (`CartDrawer` / 바로구매 완료 화면) — 한 번은 무조건
-- [ ] **마이페이지 → 주문 상세** (배송 중·완료 포함) — 상시
+- [x] **결제·주문 완료 직후** — `CartDrawer`(discountResult/gachaResult) · `DisplayProductModal`(바로구매 완료) — `cart.purchaseConfirmAutoRule`
+- [x] **내 주문 → 「구매확정」 가능한 카드** — `OrderHistoryPanel` 버튼 아래 상시 노출
 - [ ] (권장) 자동 구매확정 **전날** 앱 푸시/알림 — 2차 (푸시 인프라 후)
 
-**고지 문구 (i18n 초안 — `ko.ts` `orderPolicy.*` / `mypage.*` 구현 시):**
+**고지 문구 (`ko.ts` `cart.purchaseConfirmAutoRule`):**
 
-| key (가칭) | 문구 (초안) |
+| key | 문구 |
 |---|---|
-| `purchaseConfirmAutoRule` | 구매확정을 직접 하지 않으면, **주문일로부터 7일**이 지난 뒤 자동으로 구매확정됩니다. |
-| `purchaseConfirmManualHint` | 상품을 받으셨다면 **구매확정**을 눌러 주세요. |
+| `cart.purchaseConfirmAutoRule` | 구매확정을 하지 않으면, 주문일로부터 7일 후 자동으로 구매확정됩니다. |
+| `myOrders.confirmPurchase` | 구매확정 (버튼) |
+| `myOrders.confirmPurchaseConfirm` | 구매를 확정할까요? 확정 후에는 되돌릴 수 없어요. |
+| `ownerOrders.completeDelivery` | 배송 완료 (버튼) |
+| `ownerOrders.purchaseConfirmedAutoBadge` | 주문일+7일 자동 구매확정 (뱃지 — 점주·손님 화면 공용) |
 
-*(7일·자동 구매확정은 **약관/운영정책**과 문구를 맞출 것 — PG 연동 전에도 동일 규칙으로 UI·DB 설계.)*
+*(7일·자동 구매확정은 **약관/운영정책**과 문구를 맞출 것 — PG 연동 전에도 동일 규칙으로 UI·DB 설계됨.)*
 
-#### DB·배치 (구현 예정)
+#### DB·배치 (구현 완료)
 
-- [ ] `orders.purchase_confirmed_at` · `orders.auto_confirm_scheduled_at` (또는 `created_at + interval '7 days'`)
-- [ ] RPC `complete_delivery` (점주) · `confirm_purchase` (손님)
-- [ ] **일 1회 cron** (Supabase `pg_cron` / Edge / Vercel Cron): `created_at + 7 days <= now()` 이고 미확정 → `purchase_confirmed_at` 설정
+- [x] `orders.delivery_completed_at` · `orders.purchase_confirmed_at` · `orders.purchase_confirm_auto` · `status` CHECK에 `delivery_completed`/`purchase_confirmed` 추가
+- [x] RPC `complete_delivery` (점주) · `confirm_purchase` (손님) · `get_my_orders` (손님 「내 주문」, 매장 무관 전체) · `get_store_orders` 컬럼 확장(점주 발주·배송에 배송완료·구매확정 시각 표시)
+- [x] **`_auto_confirm_purchases()`** (내부, `authenticated`/`anon`/`PUBLIC` EXECUTE 없음 — `get_my_orders()` 내부 `PERFORM`·`pg_cron`에서만 호출) — `created_at + 7 days <= now()` 이고 미확정 → `purchase_confirmed` 자동 전환
+- [x] **`pg_cron`** 확장 활성화 + `auto_confirm_purchases_daily` 스케줄(`0 3 * * *`, UTC) — **cron 미가동 시에도** `get_my_orders()` 호출마다 동일 로직이 lazy 실행되는 안전망 이중화
 - [ ] 자동 확정 **이후** 환불·클레임 = 별도 정책 (§52.2 반품 구간)
 
-#### 로드맵 순서 (합의)
+#### 남은 것 (2차)
 
-1. 점주 **배송 완료** + 손님 **구매확정** 버튼 + **고지 문구** (결제 완료·주문 상세)
-2. **7일 자동** cron + (선택) D-1 알림
-3. 택배사 API · PG 정산 연동
+- 택배사 API 연동 시 자동 배송완료
+- 자동 확정 D-1 알림(푸시 인프라 후)
+- 마이그레이션: `supabase/migrations/20260807_delivery_complete_purchase_confirm.sql` · `20260807b_owner_orders_delivery_columns.sql` · `20260807c_get_my_orders_add_auto_flag.sql`
 
 ### 52.8 점주 실시간 알림 · 사이드바 뱃지 (AD-055)
 
@@ -2370,8 +2381,8 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 - [x] `orders`: status 확장, `auto_accepted`, 송장·`shipped_at`
 - [x] `place_order` / `accept_order` / `reject_order` / `ship_order` / `update_product_fulfillment`
 - [x] `StoreEditPage` 탭 **주문** / **발주·배송**
-- [ ] **AD-054:** `complete_delivery` · `confirm_purchase` · `purchase_confirmed_at` · 7일 auto cron
-- [ ] **AD-054:** 손님 고지 — 결제 완료 + 주문 상세 (`purchaseConfirmAutoRule`)
+- [x] **AD-054:** `complete_delivery` · `confirm_purchase` · `get_my_orders` · `_auto_confirm_purchases` · `pg_cron` (2026-08-07)
+- [x] **AD-054:** 손님 고지 — 결제 완료 + 내 주문 (`cart.purchaseConfirmAutoRule`)
 - [x] **AD-055:** Realtime `orders` · 사이드바 뱃지 · 새 주문 토스트 · `get_store_order_counts` (2026-08-04)
 - [x] `place_order` **SECURITY DEFINER** (재고 차감) — migration + 원격 적용 · User 재고 OK 2026-08-03
 
@@ -2404,33 +2415,33 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | 상품 | 등록/수정/숨기기 · 가격 · **재고** · **주문 자동 수락 quota** · 목록 뱃지 | mock 결제 가격 검증은 RPC |
 | 주문 | **주문** 탭 수락/거절 · **발주·배송** 송장·배송 시작 · 가챠 당첨 표시 | 월드 툴바 주문 패널도 동일 데이터 |
 | 매장 꾸미기 | fixture·슬롯·진열 | §42 — 커머스와 병행 |
-| 손님 | 장바구니·배송지 · mock 결제 · 할인/가챠 | **마이페이지 = 배송지만** (주문 내역 ❌) |
+| 손님 | 장바구니·배송지 · mock 결제 · 할인/가챠 · **「내 주문」**(전체 매장 통합, `OrderHistoryPanel`) | **마이페이지 = 배송지만** (주문 내역은 앱 월드 HUD로 이동) |
 | 결제 | **Mock** | PG 미연동 (§7) |
 
-### 53.2 이미 합의·문서화 · **코드 미완** (§52)
+### 53.2 이미 합의·문서화 (§52)
 
-| ID | 내용 |
-|---|---|
-| AD-054 | 배송 완료 · 구매확정 · 7일 자동 · 손님 고지 |
-| AD-055 | Realtime 주문 · 사이드바 뱃지 · 토스트 |
+| ID | 내용 | 상태 |
+|---|---|---|
+| AD-054 | 배송 완료 · 구매확정 · 7일 자동 · 손님 고지 | ✅ 구현 (2026-08-07) |
+| AD-055 | Realtime 주문 · 사이드바 뱃지 · 토스트 | ✅ 구현 (2026-08-04) |
 
-→ 스마트스토어의 **「배송완료·구매확정·자동확정 안내」** 에 해당하는 **법·분쟁 최소선** — **P0에 포함**.
+→ 스마트스토어의 **「배송완료·구매확정·자동확정 안내」** 에 해당하는 **법·분쟁 최소선** — **P0 완료.**
 
 ### 53.3 실제 점주용 — **없으면 운영이 막히거나 신뢰가 떨어짐 (P0)**
 
 | # | 기능 | 스마트스토어/쿠팡에 | POP-UP |
 |---|---|---|---|
 | 1 | **실결제(PG)** · 승인/취소/환불 | ✅ | ❌ mock |
-| 2 | **배송완료 → 구매확정** (+ 7일 자동·고지) | ✅ | ⬜ AD-054 |
+| 2 | **배송완료 → 구매확정** (+ 7일 자동·고지) | ✅ | ✅ AD-054 구현 · 실기 대기 |
 | 3 | **새 주문 Realtime + 뱃지** | ✅(알림·앱) | ✅ AD-055 구현 · 실기 대기 |
-| 4 | **손님 주문 조회** (마이페이지·주문번호·상태·송장) | ✅ | ❌ |
+| 4 | **손님 주문 조회** (주문번호·상태·송장, 매장 무관 통합) | ✅ | ✅ AD-054 `OrderHistoryPanel` 구현 · 실기 대기 |
 | 5 | **발송 전 취소** (손님 요청 + 점주 처리 + 재고·quota 복구) | ✅ | 부분(점주 취소만·손님 UX ❌) |
 | 6 | **반품·교환·클레임** (배송 후) | ✅ | ❌ §52.2만 원칙 |
 | 7 | **주문 검색·필터** (기간·상태·주문번호·닉네임) | ✅ | ❌ 전체 목록만 |
 | 8 | **매장 운영 정보** (반품지·CS 연락·배송/교환 안내) | ✅ | ❌ |
 | 9 | **배송비 규칙** (무료/유료·조건부) | ✅ | ❌ (현재 금액만) |
 
-**에이전트 의견:** P0 중 **AD-054·055 다음**으로 **손님 주문 내역 + 발송 전 취소 UX** 가 체감이 크다. PG는 User·사업 결정 후지만, **mock만으로는 “진짜 쇼핑몰” 데모 한계**가 분명함 (AD-029).
+**에이전트 의견:** P0 중 **AD-054·055 다음**으로 **주문 검색·필터 + 발송 전 취소 UX** 가 체감이 크다. PG는 User·사업 결정 후지만, **mock만으로는 “진짜 쇼핑몰” 데모 한계**가 분명함 (AD-029).
 
 ### 53.4 있으면 **매일 편해짐 (P1 — 편의)**
 
@@ -2469,9 +2480,9 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | 순서 | 묶음 | 왜 이 순서 |
 |---|---|---|
 | **0** | ~~push~~ | ✅ `0420759` |
-| **1** | ~~**AD-055**~~ ✅ 구현 2026-08-04 (실기·commit 대기) · 상품 탭 재고 Realtime은 선택 미구현 | 점주가 **새로고침 없이** 주문 처리 · 이후 주문/클레임 UI 붙일 때도 동일 구독 재사용 |
-| **2** | **손님 주문 내역** (마이페이지) + **AD-054** — 배송완료 · 구매확정 · 7일 cron · 결제/주문 **고지** | **한 스프린트** — “샀는데 어디서 봐?” + 분쟁 최소선 · DB·손님 UI·cron 같이 가야 반쪽 안 남음 |
-| **3** | **주문 검색·필터·정렬** (점주 P0#7) | 주문 수 늘면 목록만으로 막힘 · Realtime(1) 다음이 자연스러움 |
+| **1** | ~~**AD-055**~~ ✅ 구현 2026-08-04 · 상품 탭 재고 Realtime은 선택 미구현 | 점주가 **새로고침 없이** 주문 처리 · 이후 주문/클레임 UI 붙일 때도 동일 구독 재사용 |
+| **2** | ~~**손님 주문 내역** + **AD-054**~~ ✅ 구현 2026-08-07 (실기 대기) | **한 스프린트** — “샀는데 어디서 봐?” + 분쟁 최소선 · DB·손님 UI·cron 같이 가야 반쪽 안 남음 |
+| **3** | **주문 검색·필터·정렬** (점주 P0#7) — ⬜ **← 다음** | 주문 수 늘면 목록만으로 막힘 · Realtime(1) 다음이 자연스러움 |
 | **4** | **발송 전 취소(손님)** + **클레임 v1**(점주 탭 뼈대) + §52 재고·quota 복구 | 주문 내역(2) 있어야 손님 취소 UX 의미 있음 |
 | **5** | **매장 정책·CS·반품지** + **배송비 규칙** | PG·약관 직전 **신뢰·문구** 고정 |
 | **6** | **PG** (P0#1) | User·계약 후 · Mock → 승인/환불 연동 |
@@ -2487,7 +2498,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 - **§53** = **외부 벤치마크 대비 “뭐가 더 필요한지” 백로그** — 착수 시 `## 7. Next Steps`·새 AD로 끌어올림.
 - **§53.7** = **실행 순서(확정)** — User 2026-08-03 에이전트 우선순위 위임.
 
-*§53 Last updated: 2026-08-03 (§53.7 우선순위 User 위임·에이전트 확정)*
+*§53 Last updated: 2026-08-07 (AD-054 구현 완료 반영 — §53.2/53.3/53.7)*
 
 ---
 
@@ -2530,7 +2541,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **진열 슬롯** `(Display Slot)` | 조형물 위 **칸** (예: 테이블 3칸). 점주가 칸마다 상품을 넣고 순서를 바꿈. |
 | **전체 상품** | 매장 **카탈로그 전체** 목록 버튼. **장바구니와 다름** (예전 이름: 「지금 쇼핑하기」). |
 | **장바구니** | 담아 둔 상품·수량·결제 화면. HUD·헤더에 별도 버튼. |
-| **HUD 바** `(하단 조작 바)` | 월드 화면 **아래 알약 모양 버튼 줄**. 시안: 상호작용·채팅·장바구니·전체상품 4칸 (AD-047 · Sprint 4-3). |
+| **HUD 바** `(하단 조작 바)` | 월드 화면 **아래 알약 모양 버튼 줄**. 상호작용·채팅·장바구니·전체상품·**내 주문**(AD-054, 2026-08-07 추가) 5칸 (AD-047 · Sprint 4-3). |
 | **근접 알약** `(PlayProximityPill)` | 조형물 가까이 갔을 때 **짧은 가운데 알약** — 이름 + 「탭·상호작용」. 탭 = HUD 상호작용과 같음 (AD-049). |
 
 ---

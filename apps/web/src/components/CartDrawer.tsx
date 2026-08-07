@@ -254,6 +254,7 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
             <p style={styles.orderCompleteHint}>
               {t('cart.discountAppliedHint', { amount: formatPrice(discountAmount) })}
             </p>
+            <p style={styles.autoConfirmNote}>{t('cart.purchaseConfirmAutoRule')}</p>
             <button style={styles.checkoutButton} onClick={handleFinish}>
               {t('cart.confirm')}
             </button>
@@ -274,6 +275,7 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
             <span style={styles.gachaBadge}>
               {gachaIsRealProduct ? t('cart.gachaBadgeProduct') : t('cart.gachaBadgeExclusive')}
             </span>
+            <p style={styles.autoConfirmNote}>{t('cart.purchaseConfirmAutoRule')}</p>
             <button style={{ ...styles.checkoutButton, marginTop: 16 }} onClick={handleFinish}>
               {t('cart.confirm')}
             </button>
@@ -463,6 +465,7 @@ const styles: Record<string, React.CSSProperties> = {
   orderCompleteIcon: { fontSize: 40, marginBottom: 10 },
   orderCompleteText: { color: '#fff', fontSize: 15, fontWeight: 600, margin: 0 },
   orderCompleteHint: { color: '#a0a0c0', fontSize: 12, marginTop: 6, marginBottom: 18 },
+  autoConfirmNote: { color: '#7c8db5', fontSize: 11, lineHeight: 1.5, margin: '0 0 14px' },
   rewardStep: { textAlign: 'center', padding: '10px 0 6px' },
   rewardIcon: { fontSize: 40, marginBottom: 8 },
   rewardTitle: { color: '#fff', fontSize: 15, fontWeight: 600, margin: 0 },

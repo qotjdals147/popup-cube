@@ -1,0 +1,239 @@
+import { useCallback, useEffect, useState } from 'react';
+import type { ShopperOrderView } from '@popup-cube/shared';
+import { canConfirmPurchase, confirmPurchase, listMyOrders, OrderError } from '../lib/orders';
+import { t } from '../i18n';
+
+interface OrderHistoryPanelProps {
+  onClose: () => void;
+}
+
+/**
+ * 손님 「내 주문」 (AD-054) — 로그인한 손님이 여러 매장에서 주문한 내역을 모두 모아 보여줌.
+ * 배송 완료 이후 「구매확정」을 직접 누르거나, 누르지 않으면 주문일+7일 후 자동 확정됨.
+ */
+export function OrderHistoryPanel({ onClose }: OrderHistoryPanelProps) {
+  const [orders, setOrders] = useState<ShopperOrderView[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [actionId, setActionId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const reload = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const data = await listMyOrders();
+      setOrders(data);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void reload();
+  }, [reload]);
+
+  async function handleConfirmPurchase(orderId: string) {
+    if (!window.confirm(t('myOrders.confirmPurchaseConfirm'))) return;
+    setActionId(orderId);
+    setActionError(null);
+    try {
+      await confirmPurchase(orderId);
+      await reload();
+    } catch (err) {
+      setActionError(err instanceof OrderError ? err.message : t('myOrders.confirmPurchaseError'));
+    } finally {
+      setActionId(null);
+    }
+  }
+
+  return (
+    <div style={styles.overlay} onClick={onClose}>
+      <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.header}>
+          <h3 style={styles.title}>{t('myOrders.title')}</h3>
+          <button type="button" style={styles.closeButton} onClick={onClose}>
+            ✕
+          </button>
+        </div>
+
+        {loading && <p style={styles.hint}>{t('myOrders.loading')}</p>}
+        {!loading && error && <p style={styles.error}>{t('myOrders.errorLoad')}</p>}
+        {!loading && !error && orders.length === 0 && <p style={styles.hint}>{t('myOrders.empty')}</p>}
+
+        {actionError && <p style={styles.error}>{actionError}</p>}
+
+        {!loading && !error && orders.length > 0 && (
+          <div style={styles.list}>
+            {orders.map((order) => (
+              <div key={order.id} style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <span style={styles.storeName}>{order.store_name ?? '-'}</span>
+                  <span style={styles.statusBadge}>{t(`ownerOrders.status.${order.status}`)}</span>
+                </div>
+
+                {order.status === 'purchase_confirmed' && order.purchase_confirm_auto && (
+                  <p style={styles.autoNote}>{t('ownerOrders.purchaseConfirmedAutoBadge')}</p>
+                )}
+
+                <div style={styles.itemsRow}>{t('myOrders.itemsCount', { count: order.items.length })}</div>
+                {order.items.map((item) => (
+                  <div key={item.id} style={styles.itemLine}>
+                    {item.product_name} × {item.quantity}
+                  </div>
+                ))}
+
+                {order.reward_type === 'gacha' && order.gacha_prize_name && (
+                  <div style={styles.gachaBox}>
+                    <div style={styles.gachaLabel}>{t('myOrders.gachaOnOrder')}</div>
+                    <div style={styles.gachaPrizeRow}>
+                      {order.gacha_prize_image_url ? (
+                        <img src={order.gacha_prize_image_url} alt="" style={styles.gachaThumb} />
+                      ) : (
+                        <span style={styles.gachaEmoji}>🎁</span>
+                      )}
+                      <span style={styles.gachaPrizeName}>{order.gacha_prize_name}</span>
+                    </div>
+                  </div>
+                )}
+
+                {(order.status === 'shipped' ||
+                  order.status === 'delivery_completed' ||
+                  order.status === 'purchase_confirmed') && (
+                  <div style={styles.shippedNote}>
+                    {order.shipped_at && (
+                      <>
+                        {t('ownerOrders.shippedAt')} {formatDate(order.shipped_at)}
+                        {order.tracking_number ? ` · ${t('ownerOrders.tracking')}: ${order.tracking_number}` : ''}
+                      </>
+                    )}
+                    {order.delivery_completed_at && (
+                      <>
+                        <br />
+                        {t('ownerOrders.deliveryCompletedAt')} {formatDate(order.delivery_completed_at)}
+                      </>
+                    )}
+                    {order.purchase_confirmed_at && (
+                      <>
+                        <br />
+                        {t('ownerOrders.purchaseConfirmedAt')} {formatDate(order.purchase_confirmed_at)}
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {canConfirmPurchase(order.status) && (
+                  <div style={styles.actions}>
+                    <button
+                      type="button"
+                      style={styles.primaryBtn}
+                      disabled={actionId === order.id}
+                      onClick={() => void handleConfirmPurchase(order.id)}
+                    >
+                      {t('myOrders.confirmPurchase')}
+                    </button>
+                    <p style={styles.autoConfirmHint}>{t('cart.purchaseConfirmAutoRule')}</p>
+                  </div>
+                )}
+
+                <div style={styles.footerRow}>
+                  <span style={styles.date}>{formatDate(order.created_at)}</span>
+                  <strong style={styles.total}>{formatPrice(order.total_amount)}</strong>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function formatPrice(price: number): string {
+  return `${price.toLocaleString('ko-KR')}원`;
+}
+
+function formatDate(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+const styles: Record<string, React.CSSProperties> = {
+  overlay: {
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(0,0,0,0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 60,
+    padding: 16,
+  },
+  panel: {
+    background: '#16213e',
+    borderRadius: 14,
+    width: '100%',
+    maxWidth: 560,
+    maxHeight: '85vh',
+    overflowY: 'auto',
+    padding: 20,
+    boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
+  },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
+  title: { color: '#fff', fontSize: 17, margin: 0 },
+  closeButton: { background: 'transparent', border: 'none', color: '#a0a0c0', fontSize: 16, cursor: 'pointer' },
+  hint: { color: '#a0a0c0', fontSize: 13, textAlign: 'center', padding: '30px 0' },
+  error: { color: '#ff6b6b', fontSize: 13, textAlign: 'center', padding: '10px 0' },
+  list: { display: 'flex', flexDirection: 'column', gap: 12 },
+  card: { background: '#0f3460', borderRadius: 10, padding: 14, border: '1px solid #2c4270' },
+  cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 8 },
+  storeName: { color: '#fff', fontSize: 13, fontWeight: 600 },
+  statusBadge: {
+    fontSize: 11,
+    color: '#d8e4ff',
+    border: '1px solid #4062a0',
+    borderRadius: 999,
+    padding: '2px 8px',
+    whiteSpace: 'nowrap',
+  },
+  autoNote: { color: '#c9a962', fontSize: 11, margin: '0 0 8px' },
+  itemsRow: { color: '#9db2df', fontSize: 12, marginBottom: 4 },
+  itemLine: { color: '#c9d4ee', fontSize: 12, marginBottom: 2 },
+  gachaBox: {
+    marginTop: 8,
+    padding: 8,
+    borderRadius: 8,
+    background: '#1a2236',
+    border: '1px dashed #c9a96266',
+  },
+  gachaLabel: { color: '#c9a962', fontSize: 11, fontWeight: 600, marginBottom: 6 },
+  gachaPrizeRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  gachaThumb: { width: 36, height: 36, borderRadius: 6, objectFit: 'cover' },
+  gachaEmoji: { fontSize: 22 },
+  gachaPrizeName: { color: '#fff', fontSize: 13, fontWeight: 600, flex: 1, minWidth: 0 },
+  shippedNote: { color: '#8ce0b0', fontSize: 12, marginTop: 10, lineHeight: 1.6 },
+  actions: { marginTop: 10 },
+  primaryBtn: {
+    padding: '8px 12px',
+    borderRadius: 8,
+    border: 'none',
+    background: '#2ecc71',
+    color: '#0d1730',
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  autoConfirmHint: { color: '#7c8db5', fontSize: 11, lineHeight: 1.5, margin: '6px 0 0' },
+  footerRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 8,
+    borderTop: '1px solid #2c4270',
+  },
+  date: { color: '#8ca4d8', fontSize: 11 },
+  total: { color: '#e94560', fontSize: 14 },
+};

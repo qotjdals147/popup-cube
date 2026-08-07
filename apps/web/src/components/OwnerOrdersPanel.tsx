@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { OwnerOrderView } from '@popup-cube/shared';
 import {
   acceptOrder,
+  completeDelivery,
   isFulfillmentOrderStatus,
   isPendingOrderStatus,
   listStoreOrders,
@@ -142,6 +143,9 @@ export function OwnerOrdersPanel({
               {order.auto_accepted && (
                 <p style={styles.autoNote}>{t('ownerOrders.autoAcceptedBadge')}</p>
               )}
+              {order.status === 'purchase_confirmed' && order.purchase_confirm_auto && (
+                <p style={styles.autoNote}>{t('ownerOrders.purchaseConfirmedAutoBadge')}</p>
+              )}
 
               <div style={styles.itemsRow}>{t('ownerOrders.itemsCount', { count: order.items.length })}</div>
               {order.items.map((item) => (
@@ -246,11 +250,42 @@ export function OwnerOrdersPanel({
                 </div>
               )}
 
-              {order.status === 'shipped' && (
+              {activeQueue === 'fulfillment' && order.status === 'shipped' && (
+                <div style={styles.actions}>
+                  <button
+                    type="button"
+                    style={styles.primaryBtn}
+                    disabled={actionId === order.id}
+                    onClick={() =>
+                      void runActionWithConfirm(order.id, t('ownerOrders.confirmCompleteDelivery'), () =>
+                        completeDelivery(order.id)
+                      )
+                    }
+                  >
+                    {t('ownerOrders.completeDelivery')}
+                  </button>
+                </div>
+              )}
+
+              {(order.status === 'shipped' ||
+                order.status === 'delivery_completed' ||
+                order.status === 'purchase_confirmed') && (
                 <div style={styles.shippedNote}>
                   {t('ownerOrders.shippedAt')}{' '}
                   {order.shipped_at ? formatDate(order.shipped_at) : '-'}
                   {order.tracking_number ? ` · ${t('ownerOrders.tracking')}: ${order.tracking_number}` : ''}
+                  {order.delivery_completed_at && (
+                    <>
+                      <br />
+                      {t('ownerOrders.deliveryCompletedAt')} {formatDate(order.delivery_completed_at)}
+                    </>
+                  )}
+                  {order.purchase_confirmed_at && (
+                    <>
+                      <br />
+                      {t('ownerOrders.purchaseConfirmedAt')} {formatDate(order.purchase_confirmed_at)}
+                    </>
+                  )}
                 </div>
               )}
 
