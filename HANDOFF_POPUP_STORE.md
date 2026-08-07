@@ -610,7 +610,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **Git** | AD-054 **push** (이 커밋) · 이전 AD-055 커밋 |
+| **Git** | AD-054 **push** `main` **`7e65241`** · 이전 `0420759` |
 | **Supabase POPUP** | `cvrtobxkvpcpcxrcspdp` · `orders`에 `delivery_completed_at`·`purchase_confirmed_at`·`purchase_confirm_auto` 컬럼 + `status` CHECK 확장 · `complete_delivery`/`confirm_purchase`/`get_my_orders`/`_auto_confirm_purchases` RPC · `get_store_orders` 컬럼 확장 · **`pg_cron`** 확장 활성화 + `auto_confirm_purchases_daily`(매일 03:00 UTC) 스케줄 원격 적용 (2026-08-07) |
 | **AD-054** | 점주 발주·배송 탭 **「배송 완료」** 버튼(`shipped`→`delivery_completed`) · 손님 **「내 주문」**(`OrderHistoryPanel`, `PlayHudBar` 신규 슬롯, 매장 무관 전체 조회) **「구매확정」** 버튼(`shipped`/`delivery_completed`→`purchase_confirmed`) · **7일 자동 확정** = `pg_cron` **+** `get_my_orders()` 호출 시 lazy PERFORM 안전망(cron 미가동 프로젝트에서도 동작) · 결제완료·바로구매완료·내 주문 화면에 **`cart.purchaseConfirmAutoRule`** 고지 문구 노출 |
 | **다음** | User **Vercel 실기** → OK면 **§53 P0 점주 주문 검색·필터** |
