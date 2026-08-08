@@ -720,7 +720,7 @@ npx expo start --tunnel --port 8082 --clear
 - **배경:** 직전 커밋(아래 08-08 항목)의 "HUD 5칸 세로 단축 라벨" 방식은 로컬에만 있고 **커밋·푸시가 안 된 상태**였음. 모바일 앱은 기본적으로 `EXPO_PUBLIC_WEB_ORIGIN=https://popup-cube-web.vercel.app`(운영 배포)를 바라보므로, 실기 테스트에서는 여전히 배포 전 구코드가 뜨고 있었음 — "수정 전이랑 똑같다"는 리포트의 원인. 근본 원인 규명 후 이번 커밋에서 실제로 커밋·푸시함.
 - **설계 변경:** 세로모드에서 하단 액션 바에 5칸(상호작용·채팅·장바구니·전체상품·내 주문)을 구겨 넣는 대신, **「내 주문」을 하단 바에서 완전히 분리**해 상단 헤더(뒤로가기 옆, 여유 폭 있는 영역)에 작은 아이콘 버튼으로 배치. 하단 `PlayHudBar`는 원래대로 **4칸 고정**으로 되돌려 폭 문제 자체를 제거(글자 축소·압축 로직 불필요).
 - **Changed:** `PlayHudBar.tsx`(4칸으로 원복, `onMyOrders`/compact 로직 제거) · `PlayWorldPage.tsx`(헤더에 `play-world-orders-btn` 추가, `onMyOrders` 콜백을 헤더 버튼으로 이동) · `play-world.css`(세로 HUD 5칸용 임시 오버라이드 제거, 헤더 버튼 스타일 추가) · `ko.ts`(미사용 `interactShort`/`chatShort`/`cartShort`/`allProductsShort` 정리, `myOrdersShort`만 헤더 버튼에서 사용)
-- **Notes:** 손님 진입점 갱신 — **매장 WebView 헤더 「📦 주문」 버튼 → `OrderHistoryPanel`** (하단 액션 바 아님). 앱 홈 「내 정보」 탭과 동일 데이터.
+- **Notes:** 손님 진입점 갱신 — **매장 WebView 헤더 「📦 내 주문」 버튼 → `OrderHistoryPanel`** (하단 액션 바 아님). 앱 홈 「내 정보」 탭과 동일 데이터. (User 피드백으로 버튼 문구를 축약형 `주문` → **`내 주문`** 으로 확정, 미사용 `myOrdersShort` i18n 키 제거.)
 
 ### 2026-08-08 — 앱 「내 정보」탭 · 세로 HUD 5칸 레이아웃 (⚠️ 아래 08-08b로 방식 변경됨)
 - **Author:** Cursor Agent

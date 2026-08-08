@@ -177,9 +177,7 @@ export const ko = {
       allProducts: '전체 상품', // ShopPanel — 매장 전체 카탈로그 (장바구니 아님)
       shopNow: '전체 상품', // 구키 호환
       tryOn: '착용해보기', // 상품 팝업 전용 문구 (HUD 버튼 아님)
-      myOrders: '내 주문', // OrderHistoryPanel — 앱 「내 정보」와 동일 데이터
-      /** 헤더 「내 주문」 버튼 — 하단 4칸 액션 바와 분리 (세로모드 폭 확보) */
-      myOrdersShort: '주문',
+      myOrders: '내 주문', // 헤더 「📦 내 주문」 버튼 · OrderHistoryPanel · 앱 「내 정보」와 동일 데이터
     },
     owner: {
       label: '점주 도구',

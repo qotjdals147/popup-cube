@@ -388,7 +388,7 @@ export function PlayWorldPage() {
           style={styles.ordersBtn}
           onClick={() => setMyOrdersOpen(true)}
         >
-          📦 {t('store.hud.myOrdersShort')}
+          📦 {t('store.hud.myOrders')}
         </button>
       </header>
 
