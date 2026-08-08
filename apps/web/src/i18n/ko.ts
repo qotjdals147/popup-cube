@@ -177,7 +177,9 @@ export const ko = {
       allProducts: '전체 상품', // ShopPanel — 매장 전체 카탈로그 (장바구니 아님)
       shopNow: '전체 상품', // 구키 호환
       tryOn: '착용해보기', // 상품 팝업 전용 문구 (HUD 버튼 아님)
-      myOrders: '내 주문', // OrderHistoryPanel — 이 매장에서 내가 주문한 내역 (AD-054)
+      myOrders: '내 주문', // OrderHistoryPanel — 앱 「내 정보」와 동일 데이터
+      /** 헤더 「내 주문」 버튼 — 하단 4칸 액션 바와 분리 (세로모드 폭 확보) */
+      myOrdersShort: '주문',
     },
     owner: {
       label: '점주 도구',
@@ -370,6 +372,14 @@ export const ko = {
     confirmPurchaseConfirm: '구매를 확정할까요? 확정 후에는 되돌릴 수 없어요.',
     confirmPurchaseError: '구매확정에 실패했어요. 다시 시도해 주세요.',
     gachaOnOrder: '가챠 당첨',
+  },
+  /** 앱 WebView `/app/me` — 손님 내 정보 (m10) */
+  shopperAccount: {
+    title: '내 정보',
+    loading: '불러오는 중...',
+    tabsLabel: '내 정보 메뉴',
+    tabOrders: '구매 내역',
+    tabAddresses: '배송지',
   },
   roles: {
     shopper: '소비자',

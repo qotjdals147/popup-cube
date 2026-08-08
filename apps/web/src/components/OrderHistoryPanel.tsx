@@ -4,14 +4,17 @@ import { canConfirmPurchase, confirmPurchase, listMyOrders, OrderError } from '.
 import { t } from '../i18n';
 
 interface OrderHistoryPanelProps {
-  onClose: () => void;
+  /** 월드 모달 — 닫기 필수 */
+  onClose?: () => void;
+  /** 앱 「내 정보」탭 — 전체 페이지에 삽입 */
+  embedded?: boolean;
 }
 
 /**
  * 손님 「내 주문」 (AD-054) — 로그인한 손님이 여러 매장에서 주문한 내역을 모두 모아 보여줌.
  * 배송 완료 이후 「구매확정」을 직접 누르거나, 누르지 않으면 주문일+7일 후 자동 확정됨.
  */
-export function OrderHistoryPanel({ onClose }: OrderHistoryPanelProps) {
+export function OrderHistoryPanel({ onClose, embedded = false }: OrderHistoryPanelProps) {
   const [orders, setOrders] = useState<ShopperOrderView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -49,25 +52,30 @@ export function OrderHistoryPanel({ onClose }: OrderHistoryPanelProps) {
     }
   }
 
-  return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
+  const listBody = (
+    <>
+      {!embedded && (
         <div style={styles.header}>
           <h3 style={styles.title}>{t('myOrders.title')}</h3>
-          <button type="button" style={styles.closeButton} onClick={onClose}>
-            ✕
-          </button>
+          {onClose && (
+            <button type="button" style={styles.closeButton} onClick={onClose}>
+              ✕
+            </button>
+          )}
         </div>
+      )}
 
-        {loading && <p style={styles.hint}>{t('myOrders.loading')}</p>}
-        {!loading && error && <p style={styles.error}>{t('myOrders.errorLoad')}</p>}
-        {!loading && !error && orders.length === 0 && <p style={styles.hint}>{t('myOrders.empty')}</p>}
+      {embedded && <h2 style={styles.embeddedTitle}>{t('myOrders.title')}</h2>}
 
-        {actionError && <p style={styles.error}>{actionError}</p>}
+      {loading && <p style={styles.hint}>{t('myOrders.loading')}</p>}
+      {!loading && error && <p style={styles.error}>{t('myOrders.errorLoad')}</p>}
+      {!loading && !error && orders.length === 0 && <p style={styles.hint}>{t('myOrders.empty')}</p>}
 
-        {!loading && !error && orders.length > 0 && (
-          <div style={styles.list}>
-            {orders.map((order) => (
+      {actionError && <p style={styles.error}>{actionError}</p>}
+
+      {!loading && !error && orders.length > 0 && (
+        <div style={styles.list}>
+          {orders.map((order) => (
               <div key={order.id} style={styles.card}>
                 <div style={styles.cardHeader}>
                   <span style={styles.storeName}>{order.store_name ?? '-'}</span>
@@ -144,8 +152,19 @@ export function OrderHistoryPanel({ onClose }: OrderHistoryPanelProps) {
                 </div>
               </div>
             ))}
-          </div>
-        )}
+        </div>
+      )}
+    </>
+  );
+
+  if (embedded) {
+    return <div style={styles.embeddedRoot}>{listBody}</div>;
+  }
+
+  return (
+    <div style={styles.overlay} onClick={onClose}>
+      <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
+        {listBody}
       </div>
     </div>
   );
@@ -161,6 +180,8 @@ function formatDate(iso: string): string {
 }
 
 const styles: Record<string, React.CSSProperties> = {
+  embeddedRoot: { width: '100%' },
+  embeddedTitle: { color: '#fff', fontSize: 16, margin: '0 0 14px', fontWeight: 600 },
   overlay: {
     position: 'fixed',
     inset: 0,

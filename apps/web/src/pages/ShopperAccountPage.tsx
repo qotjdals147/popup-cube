@@ -1,0 +1,116 @@
+import { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { AddressManagementPanel } from '../components/AddressManagementPanel';
+import { OrderHistoryPanel } from '../components/OrderHistoryPanel';
+import { supabase } from '../lib/supabase';
+import { t } from '../i18n';
+import '../styles/shopper-account.css';
+
+declare global {
+  interface Window {
+    ReactNativeWebView?: { postMessage: (message: string) => void };
+  }
+}
+
+async function bootstrapSessionFromHash(): Promise<void> {
+  const raw = window.location.hash.replace(/^#/, '');
+  if (!raw) return;
+  const params = new URLSearchParams(raw);
+  const access_token = params.get('access_token');
+  const refresh_token = params.get('refresh_token');
+  if (!access_token || !refresh_token) return;
+
+  const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+  if (error) {
+    console.error('[account] setSession failed:', error.message);
+    return;
+  }
+  window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+}
+
+function postToApp(type: string) {
+  window.ReactNativeWebView?.postMessage(JSON.stringify({ type }));
+}
+
+type AccountTab = 'orders' | 'addresses';
+
+/** 모바일 앱 WebView — 손님 「내 정보」(구매 내역 · 배송지) AD-030 · AD-054 */
+export function ShopperAccountPage() {
+  const { userId, nickname, email, loading: authLoading } = useAuth();
+  const [bootstrapping, setBootstrapping] = useState(true);
+  const [tab, setTab] = useState<AccountTab>('orders');
+
+  useEffect(() => {
+    let active = true;
+    bootstrapSessionFromHash().finally(() => {
+      if (active) setBootstrapping(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  function goHome() {
+    postToApp('navigate_home');
+    if (!window.ReactNativeWebView) {
+      window.location.href = '/app-only';
+    }
+  }
+
+  const displayName = nickname ?? email?.split('@')[0] ?? t('common.guest');
+
+  if (bootstrapping || authLoading) {
+    return (
+      <div className="shopper-account-page">
+        <p className="shopper-account-status">{t('shopperAccount.loading')}</p>
+      </div>
+    );
+  }
+
+  if (!userId) {
+    return (
+      <div className="shopper-account-page">
+        <p className="shopper-account-status">{t('play.needLogin')}</p>
+        <button type="button" className="shopper-account-back" onClick={goHome}>
+          {t('play.backHome')}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="shopper-account-page">
+      <header className="shopper-account-header">
+        <button type="button" className="shopper-account-back" onClick={goHome}>
+          {t('play.backHome')}
+        </button>
+        <div className="shopper-account-header-text">
+          <h1 className="shopper-account-title">{t('shopperAccount.title')}</h1>
+          <p className="shopper-account-subtitle">{displayName}</p>
+        </div>
+      </header>
+
+      <nav className="shopper-account-tabs" aria-label={t('shopperAccount.tabsLabel')}>
+        <button
+          type="button"
+          className={`shopper-account-tab${tab === 'orders' ? ' shopper-account-tab-active' : ''}`}
+          onClick={() => setTab('orders')}
+        >
+          {t('shopperAccount.tabOrders')}
+        </button>
+        <button
+          type="button"
+          className={`shopper-account-tab${tab === 'addresses' ? ' shopper-account-tab-active' : ''}`}
+          onClick={() => setTab('addresses')}
+        >
+          {t('shopperAccount.tabAddresses')}
+        </button>
+      </nav>
+
+      <main className="shopper-account-main">
+        {tab === 'orders' && <OrderHistoryPanel embedded />}
+        {tab === 'addresses' && <AddressManagementPanel />}
+      </main>
+    </div>
+  );
+}

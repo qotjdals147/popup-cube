@@ -9,23 +9,20 @@ export type PlayHudBarProps = {
   onChat: () => void;
   onCart: () => void;
   onShop: () => void;
-  onMyOrders: () => void;
 };
 
 function PixelIcon({ children }: { children: ReactNode }) {
   return (
-    <svg
-      className="play-hud-icon"
-      viewBox="0 0 16 16"
-      width={28}
-      height={28}
-      aria-hidden
-    >
+    <svg className="play-hud-icon" viewBox="0 0 16 16" width={28} height={28} aria-hidden>
       {children}
     </svg>
   );
 }
 
+/**
+ * 하단 액션 바 — 항상 4칸 고정 (AD-033/047).
+ * 「내 주문」은 여기 넣지 않고 헤더의 별도 아이콘 버튼으로 분리 (세로 폭 확보).
+ */
 export function PlayHudBar({
   interactDisabled,
   interactActive,
@@ -34,7 +31,6 @@ export function PlayHudBar({
   onChat,
   onCart,
   onShop,
-  onMyOrders,
 }: PlayHudBarProps) {
   return (
     <nav className="play-hud-bar" aria-label={t('play.hudBarLabel')}>
@@ -45,11 +41,7 @@ export function PlayHudBar({
         }`}
         disabled={interactDisabled}
         onClick={onInteract}
-        title={
-          interactActive
-            ? t('display.interactNear')
-            : t('display.interactHint')
-        }
+        title={interactActive ? t('display.interactNear') : t('display.interactHint')}
       >
         <PixelIcon>
           <rect x="2" y="6" width="12" height="8" fill="#c9a962" />
@@ -87,15 +79,6 @@ export function PlayHudBar({
           <rect x="4" y="9" width="8" height="2" fill="#a8f0c8" />
         </PixelIcon>
         <span className="play-hud-label">{t('store.hud.allProducts')}</span>
-      </button>
-      <button type="button" className="play-hud-slot" onClick={onMyOrders}>
-        <PixelIcon>
-          <rect x="2" y="2" width="12" height="12" fill="#0f3460" stroke="#c9a962" strokeWidth="1" />
-          <rect x="4" y="5" width="8" height="1" fill="#c9a962" />
-          <rect x="4" y="7" width="8" height="1" fill="#c9a962" />
-          <rect x="4" y="9" width="5" height="1" fill="#c9a962" />
-        </PixelIcon>
-        <span className="play-hud-label">{t('store.hud.myOrders')}</span>
       </button>
     </nav>
   );

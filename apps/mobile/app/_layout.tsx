@@ -23,7 +23,8 @@ export default function RootLayout() {
         >
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="login" options={{ title: '로그인' }} />
-          <Stack.Screen name="home" options={{ title: 'POP-UP CUBE' }} />
+          <Stack.Screen name="home" options={{ title: 'POP-UP CUBE', headerShown: false }} />
+          <Stack.Screen name="me" options={{ title: '내 정보', headerShown: false }} />
           <Stack.Screen
             name="store/[storeId]"
             options={{

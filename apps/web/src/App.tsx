@@ -9,6 +9,7 @@ import { CreateStorePage } from './pages/CreateStorePage';
 import { StoreEditPage } from './pages/StoreEditPage';
 import { StorePage } from './pages/StorePage';
 import { PlayWorldPage } from './pages/PlayWorldPage';
+import { ShopperAccountPage } from './pages/ShopperAccountPage';
 import { AppOnlyPage } from './pages/AppOnlyPage';
 
 function AppRoutes() {
@@ -22,6 +23,8 @@ function AppRoutes() {
       <Route path="/store/:storeId/edit" element={<StoreEditPage />} />
       {/* 모바일 앱 WebView 전용 플레이 월드 (Sprint 4-1) — AD-037 손님 채널 */}
       <Route path="/play/:storeId" element={<PlayWorldPage />} />
+      {/* 모바일 앱 WebView — 손님 내 정보 (구매 내역 · 배송지) */}
+      <Route path="/app/me" element={<ShopperAccountPage />} />
       <Route path="/mypage" element={<Navigate to="/app-only" replace />} />
       <Route path="/store/:storeId" element={<StorePage />} />
     </Routes>

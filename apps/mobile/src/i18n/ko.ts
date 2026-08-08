@@ -43,6 +43,14 @@ export const t = {
     empty: '아직 열린 매장이 없어요',
     enter: '입장 >',
     logout: '로그아웃',
+    navStores: '매장',
+  },
+  me: {
+    navTitle: '내 정보',
+    loading: '내 정보를 불러오는 중...',
+    loadError: '내 정보를 열지 못했어요. 네트워크를 확인해 주세요.',
+    sessionMissing: '로그인 세션이 없어요. 다시 로그인해 주세요.',
+    backHome: '매장 목록으로',
   },
   enterModal: {
     commerceNote: '실제 상품 구매 · 배송 · 주문이 가능한 온라인 팝업입니다.',

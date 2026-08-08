@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { StoreSummary } from '../src/types/domain';
 import { StoreEnterModal } from '../src/components/StoreEnterModal';
+import { HomeBottomNav } from '../src/components/HomeBottomNav';
 import { useAuth } from '../src/context/AuthContext';
 import { t } from '../src/i18n/ko';
 import { listPublishedStores } from '../src/lib/stores';
@@ -93,78 +94,83 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <View style={styles.header}>
-        <Text style={styles.tagline}>{t.home.tagline}</Text>
-        <TextInput
-          style={styles.search}
-          value={search}
-          onChangeText={setSearch}
-          placeholder={t.home.search}
-          placeholderTextColor={colors.textMuted}
-        />
-        <Pressable onPress={handleLogout}>
-          <Text style={styles.logout}>{t.home.logout}</Text>
-        </Pressable>
-      </View>
-
-      {loading && (
-        <View style={styles.centered}>
-          <ActivityIndicator color={colors.accent} />
-          <Text style={styles.loadingText}>{t.home.loading}</Text>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <View style={styles.flex}>
+        <View style={styles.header}>
+          <Text style={styles.tagline}>{t.home.tagline}</Text>
+          <TextInput
+            style={styles.search}
+            value={search}
+            onChangeText={setSearch}
+            placeholder={t.home.search}
+            placeholderTextColor={colors.textMuted}
+          />
+          <Pressable onPress={handleLogout}>
+            <Text style={styles.logout}>{t.home.logout}</Text>
+          </Pressable>
         </View>
-      )}
 
-      {error && !loading && <Text style={styles.error}>{t.home.error}</Text>}
+        {loading && (
+          <View style={styles.centered}>
+            <ActivityIndicator color={colors.accent} />
+            <Text style={styles.loadingText}>{t.home.loading}</Text>
+          </View>
+        )}
 
-      {!loading && !error && stores.length === 0 && (
-        <Text style={styles.empty}>{t.home.empty}</Text>
-      )}
+        {error && !loading && <Text style={styles.error}>{t.home.error}</Text>}
 
-      {!loading && !error && stores.length > 0 && (
-        <FlatList
-          data={stores}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <Pressable style={styles.card} onPress={() => setSelectedStore(item)}>
-              <View style={styles.thumbWrap}>
-                {item.thumbnail_url ? (
-                  <Image source={{ uri: item.thumbnail_url }} style={styles.thumb} />
-                ) : (
-                  <View style={styles.thumbFallback}>
-                    <Text style={styles.thumbLetter}>{item.name.charAt(0)}</Text>
+        {!loading && !error && stores.length === 0 && (
+          <Text style={styles.empty}>{t.home.empty}</Text>
+        )}
+
+        {!loading && !error && stores.length > 0 && (
+          <FlatList
+            data={stores}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            columnWrapperStyle={styles.row}
+            contentContainerStyle={styles.list}
+            style={styles.flex}
+            renderItem={({ item }) => (
+              <Pressable style={styles.card} onPress={() => setSelectedStore(item)}>
+                <View style={styles.thumbWrap}>
+                  {item.thumbnail_url ? (
+                    <Image source={{ uri: item.thumbnail_url }} style={styles.thumb} />
+                  ) : (
+                    <View style={styles.thumbFallback}>
+                      <Text style={styles.thumbLetter}>{item.name.charAt(0)}</Text>
+                    </View>
+                  )}
+                  <View style={styles.openBadge}>
+                    <Text style={styles.openBadgeText}>OPEN</Text>
                   </View>
-                )}
-                <View style={styles.openBadge}>
-                  <Text style={styles.openBadgeText}>OPEN</Text>
                 </View>
-              </View>
-              <Text style={styles.storeName} numberOfLines={2}>
-                {item.name}
-              </Text>
-              <Text style={styles.enterLink}>{t.home.enter}</Text>
-            </Pressable>
-          )}
-        />
-      )}
+                <Text style={styles.storeName} numberOfLines={2}>
+                  {item.name}
+                </Text>
+                <Text style={styles.enterLink}>{t.home.enter}</Text>
+              </Pressable>
+            )}
+          />
+        )}
 
-      {selectedStore && (
-        <StoreEnterModal
-          store={selectedStore}
-          visible={!!selectedStore}
-          onEnter={() => handleEnterStore(selectedStore.id)}
-          onClose={() => setSelectedStore(null)}
-        />
-      )}
+        {selectedStore && (
+          <StoreEnterModal
+            store={selectedStore}
+            visible={!!selectedStore}
+            onEnter={() => handleEnterStore(selectedStore.id)}
+            onClose={() => setSelectedStore(null)}
+          />
+        )}
+      </View>
+      <HomeBottomNav active="home" />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
+  flex: { flex: 1 },
   header: { paddingHorizontal: 16, paddingBottom: 8 },
   tagline: { color: colors.textSoft, fontSize: 14, marginBottom: 10 },
   search: {

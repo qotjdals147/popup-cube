@@ -381,6 +381,15 @@ export function PlayWorldPage() {
             {fixtureCount > 0 ? ` · ${t('play.fixtureCount', { count: fixtureCount })}` : ''}
           </div>
         </div>
+        {/* 「내 주문」— 하단 액션 바(4칸 고정)에서 분리, 헤더 여유 공간에 배치 (세로모드 폭 확보) */}
+        <button
+          type="button"
+          className="play-world-orders-btn"
+          style={styles.ordersBtn}
+          onClick={() => setMyOrdersOpen(true)}
+        >
+          📦 {t('store.hud.myOrdersShort')}
+        </button>
       </header>
 
       {worldError && <div style={styles.error}>{worldError}</div>}
@@ -413,7 +422,6 @@ export function PlayWorldPage() {
             onChat={() => setChatOpen(true)}
             onCart={() => setCartOpen(true)}
             onShop={() => setShopOpen(true)}
-            onMyOrders={() => setMyOrdersOpen(true)}
           />
         </div>
       )}
@@ -496,6 +504,17 @@ const styles: Record<string, CSSProperties> = {
     fontWeight: 600,
   },
   headerText: { flex: 1, minWidth: 0 },
+  ordersBtn: {
+    flexShrink: 0,
+    border: '1px solid rgba(201, 169, 98, 0.5)',
+    background: 'rgba(201, 169, 98, 0.12)',
+    color: '#e8d5a3',
+    borderRadius: 8,
+    padding: '7px 10px',
+    fontSize: 12,
+    fontWeight: 700,
+    whiteSpace: 'nowrap',
+  },
   title: {
     fontSize: 16,
     fontWeight: 700,

@@ -470,7 +470,7 @@ npm run dev
 - [x] **User 실기 — 재고 차감 (2026-08-03)** — 주문(`place_order`) 시 `stock_quantity` 감소 확인 (작은 숫자 테스트). **수동 수락·배송 시작 시 추가 차감 없음** (§52.2)
 - [x] **AD-055 점주 Realtime·뱃지·토스트 (2026-08-04)** — migration `20260804_owner_order_realtime_counts.sql` **원격 적용** · `useOwnerOrderRealtime` · `StoreEditPage` nav 뱃지 · `DemoToast` · `OwnerOrdersPanel` `refreshTick` · **실기 테스트 대기**
 - [x] **HANDOFF AD-054~056 · §53 갭·§53.7 우선순위** — 다음 작업 순서 확정 (User 위임)
-- [x] **AD-054 배송완료·구매확정·7일 자동·손님 「내 주문」 (2026-08-07)** — migration `20260807*.sql` 3건 **원격 적용** (컬럼·RPC·`pg_cron` 스케줄) · `OwnerOrdersPanel` **「배송 완료」** 버튼 · `OrderHistoryPanel`(신규) + `PlayHudBar` **「내 주문」** 슬롯(매장 무관 전체 조회) · `CartDrawer`/`DisplayProductModal` 결제완료 화면에 7일 자동확정 고지 · **실기 테스트 대기**
+- [x] **AD-054 배송완료·구매확정·7일 자동·손님 「내 주문」 (2026-08-07, 진입점 UI 08-08b 개정)** — migration `20260807*.sql` 3건 **원격 적용** (컬럼·RPC·`pg_cron` 스케줄) · `OwnerOrdersPanel` **「배송 완료」** 버튼 · `OrderHistoryPanel`(신규) + 매장 WebView **헤더 「내 주문」 버튼**(하단 4칸 액션 바와 분리, 매장 무관 전체 조회) · `CartDrawer`/`DisplayProductModal` 결제완료 화면에 7일 자동확정 고지 · **실기 테스트 대기**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -612,10 +612,10 @@ popup_store/                          # Turborepo root
 |---|---|
 | **Git** | AD-054 **push** `main` **`7e65241`** · 이전 `0420759` |
 | **Supabase POPUP** | `cvrtobxkvpcpcxrcspdp` · `orders`에 `delivery_completed_at`·`purchase_confirmed_at`·`purchase_confirm_auto` 컬럼 + `status` CHECK 확장 · `complete_delivery`/`confirm_purchase`/`get_my_orders`/`_auto_confirm_purchases` RPC · `get_store_orders` 컬럼 확장 · **`pg_cron`** 확장 활성화 + `auto_confirm_purchases_daily`(매일 03:00 UTC) 스케줄 원격 적용 (2026-08-07) |
-| **AD-054** | 점주 발주·배송 탭 **「배송 완료」** 버튼(`shipped`→`delivery_completed`) · 손님 **「내 주문」**(`OrderHistoryPanel`, `PlayHudBar` 신규 슬롯, 매장 무관 전체 조회) **「구매확정」** 버튼(`shipped`/`delivery_completed`→`purchase_confirmed`) · **7일 자동 확정** = `pg_cron` **+** `get_my_orders()` 호출 시 lazy PERFORM 안전망(cron 미가동 프로젝트에서도 동작) · 결제완료·바로구매완료·내 주문 화면에 **`cart.purchaseConfirmAutoRule`** 고지 문구 노출 |
+| **AD-054** | 점주 발주·배송 탭 **「배송 완료」** · 손님 **앱 홈 하단 「내 정보」** (`/app/me` WebView: 구매 내역·배송지) · 매장 WebView **헤더 「내 주문」 버튼**(하단 HUD 4칸과 분리) · 결제 완료 7일 고지 |
 | **다음** | User **Vercel 실기** → OK면 **§53 P0 점주 주문 검색·필터** |
 | **Untracked 제외** | `apps/mobile/AGENTS.md`, `CLAUDE.md`, `LICENSE` |
-| **실기** | PC: https://popup-cube-web.vercel.app (점주 발주·배송 「배송 완료」) · 앱: 매장 입장 후 HUD **「내 주문」** (구매확정 버튼) |
+| **실기** | PC: https://popup-cube-web.vercel.app (점주 발주·배송 「배송 완료」) · 앱: 매장 입장 후 **헤더 「내 주문」 버튼** 또는 앱 홈 「내 정보」 탭 (둘 다 구매확정 가능) |
 
 ### Cursor 다음 1개 (우선)
 
@@ -714,6 +714,18 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-08b — 「내 주문」 헤더 버튼 분리 (세로 HUD 오버플로 근본 수정)
+- **Author:** Cursor Agent
+- **배경:** 직전 커밋(아래 08-08 항목)의 "HUD 5칸 세로 단축 라벨" 방식은 로컬에만 있고 **커밋·푸시가 안 된 상태**였음. 모바일 앱은 기본적으로 `EXPO_PUBLIC_WEB_ORIGIN=https://popup-cube-web.vercel.app`(운영 배포)를 바라보므로, 실기 테스트에서는 여전히 배포 전 구코드가 뜨고 있었음 — "수정 전이랑 똑같다"는 리포트의 원인. 근본 원인 규명 후 이번 커밋에서 실제로 커밋·푸시함.
+- **설계 변경:** 세로모드에서 하단 액션 바에 5칸(상호작용·채팅·장바구니·전체상품·내 주문)을 구겨 넣는 대신, **「내 주문」을 하단 바에서 완전히 분리**해 상단 헤더(뒤로가기 옆, 여유 폭 있는 영역)에 작은 아이콘 버튼으로 배치. 하단 `PlayHudBar`는 원래대로 **4칸 고정**으로 되돌려 폭 문제 자체를 제거(글자 축소·압축 로직 불필요).
+- **Changed:** `PlayHudBar.tsx`(4칸으로 원복, `onMyOrders`/compact 로직 제거) · `PlayWorldPage.tsx`(헤더에 `play-world-orders-btn` 추가, `onMyOrders` 콜백을 헤더 버튼으로 이동) · `play-world.css`(세로 HUD 5칸용 임시 오버라이드 제거, 헤더 버튼 스타일 추가) · `ko.ts`(미사용 `interactShort`/`chatShort`/`cartShort`/`allProductsShort` 정리, `myOrdersShort`만 헤더 버튼에서 사용)
+- **Notes:** 손님 진입점 갱신 — **매장 WebView 헤더 「📦 주문」 버튼 → `OrderHistoryPanel`** (하단 액션 바 아님). 앱 홈 「내 정보」 탭과 동일 데이터.
+
+### 2026-08-08 — 앱 「내 정보」탭 · 세로 HUD 5칸 레이아웃 (⚠️ 아래 08-08b로 방식 변경됨)
+- **Author:** Cursor Agent
+- **Changed:** `ShopperAccountPage` (`/app/me`) · `AddressManagementPanel` · `apps/mobile/app/me.tsx` · `HomeBottomNav` · `play-world.css` portrait · `PlayHudBar` 세로 단축 라벨
+- **Notes:** 구매·배송 확인을 월드 입장 없이 홈 하단에서 가능. 세로 WebView HUD 5칸 압축 시도는 실기 미반영(미푸시) 확인 후 08-08b에서 헤더 버튼 분리 방식으로 교체.
 
 ### 2026-08-07 — AD-054 배송완료 · 구매확정 · 7일 자동 · 손님 「내 주문」 구현
 - **Author:** Cursor Agent
@@ -2264,7 +2276,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | ✅ **구현** | **「배송 완료」** 버튼 (`OwnerOrdersPanel`, `completeDelivery` RPC) | `delivery_completed` |
 | 이후 | (선택) 택배 API 연동 시 자동 배송완료 | 2차 |
 
-#### 손님 (앱 WebView · `PlayHudBar` **「내 주문」** → `OrderHistoryPanel`)
+#### 손님 (앱 WebView 헤더 **「내 주문」 버튼** → `OrderHistoryPanel`, 08-08b부터 하단 4칸 액션 바와 분리 · 앱 홈 「내 정보」 탭에서도 동일 화면 접근 가능)
 
 | 항목 | 규칙 | 구현 |
 |---|---|---|
@@ -2415,7 +2427,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | 상품 | 등록/수정/숨기기 · 가격 · **재고** · **주문 자동 수락 quota** · 목록 뱃지 | mock 결제 가격 검증은 RPC |
 | 주문 | **주문** 탭 수락/거절 · **발주·배송** 송장·배송 시작 · 가챠 당첨 표시 | 월드 툴바 주문 패널도 동일 데이터 |
 | 매장 꾸미기 | fixture·슬롯·진열 | §42 — 커머스와 병행 |
-| 손님 | 장바구니·배송지 · mock 결제 · 할인/가챠 · **「내 주문」**(전체 매장 통합, `OrderHistoryPanel`) | **마이페이지 = 배송지만** (주문 내역은 앱 월드 HUD로 이동) |
+| 손님 | 장바구니·배송지 · mock 결제 · 할인/가챠 · **앱 「내 정보」**(구매 내역·배송지, `/app/me`) · 매장 WebView **헤더 「내 주문」 버튼** | PC `/mypage` = 앱 안내 리다이렉트 |
 | 결제 | **Mock** | PG 미연동 (§7) |
 
 ### 53.2 이미 합의·문서화 (§52)
@@ -2541,7 +2553,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **진열 슬롯** `(Display Slot)` | 조형물 위 **칸** (예: 테이블 3칸). 점주가 칸마다 상품을 넣고 순서를 바꿈. |
 | **전체 상품** | 매장 **카탈로그 전체** 목록 버튼. **장바구니와 다름** (예전 이름: 「지금 쇼핑하기」). |
 | **장바구니** | 담아 둔 상품·수량·결제 화면. HUD·헤더에 별도 버튼. |
-| **HUD 바** `(하단 조작 바)` | 월드 화면 **아래 알약 모양 버튼 줄**. 상호작용·채팅·장바구니·전체상품·**내 주문**(AD-054, 2026-08-07 추가) 5칸 (AD-047 · Sprint 4-3). |
+| **HUD 바** `(하단 조작 바)` | 월드 화면 **아래 알약 모양 버튼 줄**. 상호작용·채팅·장바구니·전체상품 **4칸 고정** (AD-047 · Sprint 4-3 · pptx 슬라이드 9 원칙 — 늘리지 않음). **내 주문**(AD-054)은 여기 넣지 않고 헤더 별도 버튼으로 분리(08-08b). |
 | **근접 알약** `(PlayProximityPill)` | 조형물 가까이 갔을 때 **짧은 가운데 알약** — 이름 + 「탭·상호작용」. 탭 = HUD 상호작용과 같음 (AD-049). |
 
 ---
