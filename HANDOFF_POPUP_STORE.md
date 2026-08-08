@@ -610,7 +610,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **Git** | 「내 정보」탭 + 헤더 「내 주문」 버튼 **push** `main` **`381d12c`** · AD-054 `7e65241` · 이전 `0420759` |
+| **Git** | 헤더 버튼 문구 「내 주문」 확정 **push** `main` **`48d9ef6`** · 「내 정보」탭 + 헤더 버튼 분리 `381d12c` · AD-054 `7e65241` · 이전 `0420759` |
 | **Supabase POPUP** | `cvrtobxkvpcpcxrcspdp` · `orders`에 `delivery_completed_at`·`purchase_confirmed_at`·`purchase_confirm_auto` 컬럼 + `status` CHECK 확장 · `complete_delivery`/`confirm_purchase`/`get_my_orders`/`_auto_confirm_purchases` RPC · `get_store_orders` 컬럼 확장 · **`pg_cron`** 확장 활성화 + `auto_confirm_purchases_daily`(매일 03:00 UTC) 스케줄 원격 적용 (2026-08-07) |
 | **AD-054** | 점주 발주·배송 탭 **「배송 완료」** · 손님 **앱 홈 하단 「내 정보」** (`/app/me` WebView: 구매 내역·배송지) · 매장 WebView **헤더 「내 주문」 버튼**(하단 HUD 4칸과 분리) · 결제 완료 7일 고지 |
 | **다음** | User **Vercel 실기** → OK면 **§53 P0 점주 주문 검색·필터** |
