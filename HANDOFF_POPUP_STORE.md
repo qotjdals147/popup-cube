@@ -242,7 +242,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **Phase 4** — AD-057 점주 PC 관리센터 UI **실기 완료** (User) · **다음 = §53.7 순서 5 매장 정책·CS·반품지 + 배송비 규칙** |
 | **Version** | `0.2.10` (점주 관리센터 라이트 테마 · 실기 대기) |
-| **Git `main` HEAD** | `4cbdb90` (§53.7 순서 4 발송 전 취소·클레임 v1, 2026-08-11) |
+| **Git `main` HEAD** | `1d6ab67` (AD-057 점주 PC 관리센터 UI, 2026-08-11) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
