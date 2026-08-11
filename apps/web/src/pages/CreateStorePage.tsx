@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createStore, CreateStoreError } from '../lib/storeCreate';
+import { isValidStoreCode, normalizeStoreCode, suggestStoreCodeFromName } from '../lib/orderRef';
 import { t } from '../i18n';
 
 export function CreateStorePage() {
@@ -10,6 +11,8 @@ export function CreateStorePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState('');
+  const [storeCode, setStoreCode] = useState('');
+  const [codeTouched, setCodeTouched] = useState(false);
   const [description, setDescription] = useState('');
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -28,6 +31,18 @@ export function CreateStorePage() {
     };
   }, [previewUrl]);
 
+  function handleNameChange(value: string) {
+    setName(value);
+    if (!codeTouched) {
+      setStoreCode(suggestStoreCodeFromName(value));
+    }
+  }
+
+  function handleStoreCodeChange(value: string) {
+    setCodeTouched(true);
+    setStoreCode(normalizeStoreCode(value));
+  }
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
     setThumbnailFile(file);
@@ -41,8 +56,15 @@ export function CreateStorePage() {
     e.preventDefault();
     if (!userId) return;
 
+    const code = normalizeStoreCode(storeCode);
+
     if (!name.trim() || !description.trim() || !thumbnailFile) {
       setError(t('createStore.errorRequired'));
+      return;
+    }
+
+    if (!isValidStoreCode(code)) {
+      setError(t('createStore.errorStoreCodeInvalid'));
       return;
     }
 
@@ -52,6 +74,7 @@ export function CreateStorePage() {
     try {
       const { storeId } = await createStore(userId, {
         name,
+        storeCode: code,
         description,
         thumbnailFile,
       });
@@ -62,6 +85,13 @@ export function CreateStorePage() {
         setError(t('createStore.errorThumbnailTooLarge'));
       } else if (err instanceof CreateStoreError && err.code === 'UPLOAD_FAILED') {
         setError(t('createStore.errorUploadFailed'));
+      } else if (
+        err instanceof CreateStoreError &&
+        (err.message?.includes('store_code') ||
+          err.message?.toLowerCase().includes('duplicate') ||
+          err.message?.includes('stores_store_code_key'))
+      ) {
+        setError(t('createStore.errorStoreCodeDuplicate'));
       } else if (err instanceof CreateStoreError && err.message && err.message !== 'CREATE_FAILED') {
         setError(err.message);
       } else {
@@ -71,14 +101,15 @@ export function CreateStorePage() {
     }
   }
 
+  const previewRef =
+    storeCode && isValidStoreCode(storeCode)
+      ? t('createStore.storeCodePreview', { code: storeCode, number: '1042' })
+      : null;
+
   return (
     <div style={styles.page}>
       <form style={styles.card} onSubmit={handleSubmit}>
-        <button
-          type="button"
-          style={styles.backButton}
-          onClick={() => navigate('/home')}
-        >
+        <button type="button" style={styles.backButton} onClick={() => navigate('/home')}>
           {t('common.back')}
         </button>
 
@@ -89,10 +120,23 @@ export function CreateStorePage() {
         <input
           style={styles.input}
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => handleNameChange(e.target.value)}
           placeholder={t('createStore.namePlaceholder')}
           maxLength={80}
         />
+
+        <label style={styles.label}>{t('createStore.storeCodeLabel')}</label>
+        <p style={styles.hint}>{t('createStore.storeCodeHint')}</p>
+        <input
+          style={styles.input}
+          value={storeCode}
+          onChange={(e) => handleStoreCodeChange(e.target.value)}
+          placeholder={t('createStore.storeCodePlaceholder')}
+          maxLength={12}
+          autoCapitalize="characters"
+          spellCheck={false}
+        />
+        {previewRef && <p style={styles.preview}>{previewRef}</p>}
 
         <label style={styles.label}>{t('createStore.thumbnailLabel')}</label>
         <p style={styles.hint}>{t('createStore.thumbnailHint')}</p>
@@ -170,7 +214,8 @@ const styles: Record<string, React.CSSProperties> = {
   title: { color: '#fff', fontSize: 20, margin: 0 },
   subtitle: { color: '#a0a0c0', fontSize: 13, marginTop: 8, marginBottom: 24, lineHeight: 1.5 },
   label: { display: 'block', color: '#fff', fontSize: 13, fontWeight: 600, marginBottom: 6 },
-  hint: { color: '#a0a0c0', fontSize: 12, marginTop: -2, marginBottom: 8 },
+  hint: { color: '#a0a0c0', fontSize: 12, marginTop: -2, marginBottom: 8, lineHeight: 1.45 },
+  preview: { color: '#c9a962', fontSize: 12, marginTop: -8, marginBottom: 16, fontWeight: 600 },
   input: {
     width: '100%',
     padding: '12px',

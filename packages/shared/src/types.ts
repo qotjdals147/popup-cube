@@ -58,6 +58,8 @@ export type StoreStatus = 'draft' | 'published';
 export interface StoreSummary {
   id: string;
   name: string;
+  /** 주문번호 접두어 — 영문·숫자 (예: GUCCI). 사람용 주문번호 = `{store_code}-{order_number}` */
+  store_code: string;
   description: string | null;
   thumbnail_url: string | null;
   status: StoreStatus;
@@ -163,6 +165,8 @@ export interface Order {
   purchase_confirmed_at: string | null;
   /** AD-054 — 손님이 직접 누르지 않고 주문일+7일 자동으로 확정된 건인지 */
   purchase_confirm_auto: boolean;
+  /** 매장별 순번 — 사람용 주문번호의 숫자 부분 (§53 P0#7) */
+  order_number: number;
   created_at: string;
 }
 
@@ -185,6 +189,8 @@ export interface OwnerOrderItemView {
 }
 
 export interface OwnerOrderView extends Order {
+  /** 주문번호 접두어 (stores.store_code) */
+  store_code: string;
   buyer_nickname: string | null;
   shipping_label: string | null;
   shipping_recipient_name: string | null;
@@ -202,6 +208,8 @@ export interface OwnerOrderView extends Order {
 /** 손님 「내 주문」 화면에서 쓰는 조인 결과 (AD-054, §52.7). */
 export interface ShopperOrderView extends Order {
   store_name: string | null;
+  /** 주문번호 접두어 (stores.store_code) */
+  store_code: string | null;
   shipping_recipient_name: string | null;
   shipping_phone: string | null;
   shipping_postal_code: string | null;

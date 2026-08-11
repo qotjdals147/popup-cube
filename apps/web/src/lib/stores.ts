@@ -9,7 +9,7 @@ import { supabase } from './supabase';
 export async function listPublishedStores(search?: string): Promise<StoreSummary[]> {
   let query = supabase
     .from('stores')
-    .select('id, name, description, thumbnail_url, status')
+    .select('id, name, store_code, description, thumbnail_url, status')
     .eq('is_active', true)
     .eq('status', 'published')
     .order('name', { ascending: true });
@@ -27,7 +27,7 @@ export async function listPublishedStores(search?: string): Promise<StoreSummary
 export async function getStoreSummary(storeId: string): Promise<StoreSummary | null> {
   const { data, error } = await supabase
     .from('stores')
-    .select('id, name, description, thumbnail_url, status')
+    .select('id, name, store_code, description, thumbnail_url, status')
     .eq('id', storeId)
     .maybeSingle();
 
@@ -39,7 +39,7 @@ export async function getStoreSummary(storeId: string): Promise<StoreSummary | n
 export async function getMyStore(storeId: string): Promise<StoreSummary | null> {
   const { data, error } = await supabase
     .from('stores')
-    .select('id, name, description, thumbnail_url, status')
+    .select('id, name, store_code, description, thumbnail_url, status')
     .eq('id', storeId)
     .maybeSingle();
 
@@ -64,12 +64,26 @@ export async function userOwnsStore(userId: string, storeId: string): Promise<bo
 export async function listOwnedStores(userId: string): Promise<StoreSummary[]> {
   const { data, error } = await supabase
     .from('stores')
-    .select('id, name, description, thumbnail_url, status')
+    .select('id, name, store_code, description, thumbnail_url, status')
     .eq('owner_id', userId)
     .order('name', { ascending: true });
 
   if (error) throw error;
   return data ?? [];
+}
+
+/** 점주 매장 주문 코드 변경 — 주문번호 앞부분 (§53 P0#7) */
+export async function updateStoreCode(storeId: string, storeCode: string): Promise<StoreSummary> {
+  const code = storeCode.trim().toUpperCase();
+  const { data, error } = await supabase
+    .from('stores')
+    .update({ store_code: code })
+    .eq('id', storeId)
+    .select('id, name, store_code, description, thumbnail_url, status')
+    .single();
+
+  if (error) throw error;
+  return data;
 }
 
 /** 점주 매장 출시 — draft → published (AD-021, Sprint 3) */
@@ -78,7 +92,7 @@ export async function publishStore(storeId: string): Promise<StoreSummary> {
     .from('stores')
     .update({ status: 'published' })
     .eq('id', storeId)
-    .select('id, name, description, thumbnail_url, status')
+    .select('id, name, store_code, description, thumbnail_url, status')
     .single();
 
   if (error) throw error;

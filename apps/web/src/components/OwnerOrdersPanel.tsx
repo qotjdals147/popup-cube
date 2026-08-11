@@ -9,6 +9,13 @@ import {
   rejectOrder,
   shipOrder,
 } from '../lib/orders';
+import { formatOrderRef } from '../lib/orderRef';
+import {
+  DEFAULT_OWNER_ORDER_FILTERS,
+  filterAndSortOwnerOrders,
+  ownerOrderStatusOptions,
+  type OwnerOrderFilters,
+} from '../lib/ownerOrderFilters';
 import { t } from '../i18n';
 
 export type OwnerOrderQueue = 'pending' | 'fulfillment';
@@ -36,6 +43,7 @@ export function OwnerOrdersPanel({
   const [actionId, setActionId] = useState<string | null>(null);
   const [trackingDraft, setTrackingDraft] = useState<Record<string, string>>({});
   const [internalQueue, setInternalQueue] = useState<OwnerOrderQueue>('pending');
+  const [filters, setFilters] = useState<OwnerOrderFilters>(DEFAULT_OWNER_ORDER_FILTERS);
 
   const activeQueue = queue ?? internalQueue;
 
@@ -57,10 +65,13 @@ export function OwnerOrdersPanel({
   }, [reload, refreshTick]);
 
   const filtered = useMemo(() => {
-    return orders.filter((o) =>
+    const byQueue = orders.filter((o) =>
       activeQueue === 'pending' ? isPendingOrderStatus(o.status) : isFulfillmentOrderStatus(o.status)
     );
-  }, [orders, activeQueue]);
+    return filterAndSortOwnerOrders(byQueue, filters);
+  }, [orders, activeQueue, filters]);
+
+  const statusOptions = useMemo(() => ownerOrderStatusOptions(activeQueue), [activeQueue]);
 
   async function runAction(orderId: string, fn: () => Promise<void>) {
     setActionId(orderId);
@@ -121,11 +132,61 @@ export function OwnerOrdersPanel({
         </div>
       )}
 
+      <div style={styles.filterBar}>
+        <input
+          style={styles.filterSearch}
+          value={filters.query}
+          onChange={(e) => setFilters((f) => ({ ...f, query: e.target.value }))}
+          placeholder={t('ownerOrders.filterSearchPlaceholder')}
+        />
+        <select
+          style={styles.filterSelect}
+          value={filters.status}
+          onChange={(e) =>
+            setFilters((f) => ({ ...f, status: e.target.value as OwnerOrderFilters['status'] }))
+          }
+        >
+          {statusOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {t(opt.labelKey)}
+            </option>
+          ))}
+        </select>
+        <input
+          type="date"
+          style={styles.filterDate}
+          value={filters.dateFrom}
+          onChange={(e) => setFilters((f) => ({ ...f, dateFrom: e.target.value }))}
+          aria-label={t('ownerOrders.filterDateFrom')}
+        />
+        <input
+          type="date"
+          style={styles.filterDate}
+          value={filters.dateTo}
+          onChange={(e) => setFilters((f) => ({ ...f, dateTo: e.target.value }))}
+          aria-label={t('ownerOrders.filterDateTo')}
+        />
+        <select
+          style={styles.filterSelect}
+          value={filters.sort}
+          onChange={(e) =>
+            setFilters((f) => ({ ...f, sort: e.target.value as OwnerOrderFilters['sort'] }))
+          }
+        >
+          <option value="newest">{t('ownerOrders.sortNewest')}</option>
+          <option value="oldest">{t('ownerOrders.sortOldest')}</option>
+        </select>
+      </div>
+
       {loading && <p style={styles.hint}>{t('ownerOrders.loading')}</p>}
       {!loading && error && <p style={styles.error}>{t('ownerOrders.errorLoad')}</p>}
       {!loading && !error && filtered.length === 0 && (
         <p style={styles.hint}>
-          {activeQueue === 'pending' ? t('ownerOrders.emptyPending') : t('ownerOrders.emptyFulfillment')}
+          {orders.length > 0 && (filters.query || filters.status !== 'all' || filters.dateFrom || filters.dateTo)
+            ? t('ownerOrders.emptyFiltered')
+            : activeQueue === 'pending'
+              ? t('ownerOrders.emptyPending')
+              : t('ownerOrders.emptyFulfillment')}
         </p>
       )}
 
@@ -134,9 +195,14 @@ export function OwnerOrdersPanel({
           {filtered.map((order) => (
             <div key={order.id} style={styles.card}>
               <div style={styles.cardHeader}>
-                <span style={styles.buyer}>
-                  {t('ownerOrders.buyer')}: {order.buyer_nickname ?? '-'}
-                </span>
+                <div style={styles.cardHeaderLeft}>
+                  <span style={styles.orderRef}>
+                    {t('ownerOrders.orderRef')}: {formatOrderRef(order.store_code, order.order_number)}
+                  </span>
+                  <span style={styles.buyer}>
+                    {t('ownerOrders.buyer')}: {order.buyer_nickname ?? '-'}
+                  </span>
+                </div>
                 <span style={styles.statusBadge}>{t(`ownerOrders.status.${order.status}`)}</span>
               </div>
 
@@ -370,12 +436,48 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   subNavActive: { background: '#0f3460', color: '#fff', fontWeight: 600 },
+  filterBar: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 14,
+  },
+  filterSearch: {
+    flex: '1 1 160px',
+    minWidth: 140,
+    padding: '8px 10px',
+    borderRadius: 8,
+    border: '1px solid #2c4270',
+    background: '#0d1730',
+    color: '#fff',
+    fontSize: 12,
+  },
+  filterSelect: {
+    flex: '0 1 auto',
+    padding: '8px 10px',
+    borderRadius: 8,
+    border: '1px solid #2c4270',
+    background: '#0d1730',
+    color: '#fff',
+    fontSize: 12,
+  },
+  filterDate: {
+    flex: '0 1 auto',
+    padding: '7px 8px',
+    borderRadius: 8,
+    border: '1px solid #2c4270',
+    background: '#0d1730',
+    color: '#fff',
+    fontSize: 12,
+  },
   hint: { color: '#a0a0c0', fontSize: 13, textAlign: 'center', padding: '30px 0' },
   error: { color: '#ff6b6b', fontSize: 13, textAlign: 'center', padding: '30px 0' },
   list: { display: 'flex', flexDirection: 'column', gap: 12 },
   card: { background: '#0f3460', borderRadius: 10, padding: 14, border: '1px solid #2c4270' },
-  cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 8 },
-  buyer: { color: '#fff', fontSize: 13, fontWeight: 600 },
+  cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, gap: 8 },
+  cardHeaderLeft: { display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 },
+  orderRef: { color: '#c9a962', fontSize: 13, fontWeight: 700 },
+  buyer: { color: '#fff', fontSize: 12, fontWeight: 600 },
   statusBadge: {
     fontSize: 11,
     color: '#d8e4ff',

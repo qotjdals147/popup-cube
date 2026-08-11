@@ -5,6 +5,7 @@ export const MAX_THUMBNAIL_BYTES = 5 * 1024 * 1024; // 5MB
 
 export interface CreateStoreInput {
   name: string;
+  storeCode: string;
   description: string;
   thumbnailFile: File;
 }
@@ -62,6 +63,7 @@ export async function createStore(
   const { error } = await supabase.rpc('create_owner_store', {
     p_id: storeId,
     p_name: input.name.trim(),
+    p_store_code: input.storeCode.trim(),
     p_description: input.description.trim(),
     p_thumbnail_url: thumbnailUrl,
   });

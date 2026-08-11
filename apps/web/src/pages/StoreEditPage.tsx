@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getMyStore, publishStore, userOwnsStore } from '../lib/stores';
+import { getMyStore, publishStore, updateStoreCode, userOwnsStore } from '../lib/stores';
 import { OwnerProductPanel } from '../components/OwnerProductPanel';
 import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
 import { OwnerDisplayPanel } from '../components/OwnerDisplayPanel';
 import { DemoToast } from '../components/DemoToast';
 import { useOwnerOrderRealtime } from '../hooks/useOwnerOrderRealtime';
+import { isValidStoreCode, normalizeStoreCode } from '../lib/orderRef';
 import { t } from '../i18n';
 import type { StoreSummary } from '@popup-cube/shared';
 
@@ -29,6 +30,10 @@ export function StoreEditPage() {
   const [publishing, setPublishing] = useState(false);
   const [publishMsg, setPublishMsg] = useState<string | null>(null);
   const [publishErr, setPublishErr] = useState(false);
+  const [storeCodeDraft, setStoreCodeDraft] = useState('');
+  const [savingStoreCode, setSavingStoreCode] = useState(false);
+  const [storeCodeMsg, setStoreCodeMsg] = useState<string | null>(null);
+  const [storeCodeErr, setStoreCodeErr] = useState(false);
   const [ownershipChecked, setOwnershipChecked] = useState(false);
   const [ownsStore, setOwnsStore] = useState(false);
 
@@ -78,6 +83,7 @@ export function StoreEditPage() {
     try {
       const data = await getMyStore(storeId);
       setStore(data);
+      setStoreCodeDraft(data?.store_code ?? '');
     } catch {
       setError(true);
     } finally {
@@ -94,6 +100,30 @@ export function StoreEditPage() {
   async function handleSignOut() {
     await signOut();
     navigate('/');
+  }
+
+  async function handleSaveStoreCode() {
+    if (!storeId) return;
+    const code = normalizeStoreCode(storeCodeDraft);
+    if (!isValidStoreCode(code)) {
+      setStoreCodeErr(true);
+      setStoreCodeMsg(t('ownerEdit.storeCodeInvalid'));
+      return;
+    }
+    setSavingStoreCode(true);
+    setStoreCodeMsg(null);
+    setStoreCodeErr(false);
+    try {
+      const updated = await updateStoreCode(storeId, code);
+      setStore(updated);
+      setStoreCodeDraft(updated.store_code);
+      setStoreCodeMsg(t('ownerEdit.storeCodeSaved'));
+    } catch {
+      setStoreCodeErr(true);
+      setStoreCodeMsg(t('ownerEdit.storeCodeSaveError'));
+    } finally {
+      setSavingStoreCode(false);
+    }
   }
 
   async function handlePublish() {
@@ -189,6 +219,35 @@ export function StoreEditPage() {
                   <p style={styles.description}>
                     {store.description?.trim() || t('ownerEdit.noDescription')}
                   </p>
+                  <div style={styles.storeCodeBox}>
+                    <div style={styles.metaLabel}>{t('ownerEdit.storeCodeLabel')}</div>
+                    <p style={styles.storeCodeHint}>{t('ownerEdit.storeCodeHint')}</p>
+                    <div style={styles.storeCodeRow}>
+                      <input
+                        style={styles.storeCodeInput}
+                        value={storeCodeDraft}
+                        onChange={(e) => setStoreCodeDraft(normalizeStoreCode(e.target.value))}
+                        maxLength={12}
+                        spellCheck={false}
+                      />
+                      <button
+                        type="button"
+                        style={styles.storeCodeSaveBtn}
+                        disabled={savingStoreCode || storeCodeDraft === store.store_code}
+                        onClick={() => void handleSaveStoreCode()}
+                      >
+                        {savingStoreCode ? t('ownerEdit.storeCodeSaving') : t('ownerEdit.storeCodeSave')}
+                      </button>
+                    </div>
+                    {storeCodeDraft && isValidStoreCode(storeCodeDraft) && (
+                      <p style={styles.storeCodePreview}>
+                        {t('ownerEdit.storeCodePreview', { code: storeCodeDraft, number: '1042' })}
+                      </p>
+                    )}
+                    {storeCodeMsg && (
+                      <p style={storeCodeErr ? styles.error : styles.success}>{storeCodeMsg}</p>
+                    )}
+                  </div>
                   <p style={styles.note}>{isDraft ? t('ownerEdit.draftNote') : t('ownerEdit.publishedNote')}</p>
                   {isDraft && (
                     <button
@@ -363,6 +422,38 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #6b5a2c',
   },
   description: { color: '#d8e4ff', fontSize: 14, lineHeight: 1.6, margin: 0 },
+  storeCodeBox: {
+    marginTop: 16,
+    padding: 14,
+    borderRadius: 10,
+    background: '#0f3460',
+    border: '1px solid #2c4270',
+  },
+  storeCodeHint: { color: '#a0a0c0', fontSize: 12, lineHeight: 1.45, margin: '6px 0 10px' },
+  storeCodeRow: { display: 'flex', gap: 8, flexWrap: 'wrap' },
+  storeCodeInput: {
+    flex: '1 1 120px',
+    minWidth: 120,
+    padding: '10px 12px',
+    borderRadius: 8,
+    border: '1px solid #2c4270',
+    background: '#16213e',
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 700,
+    letterSpacing: '0.04em',
+  },
+  storeCodeSaveBtn: {
+    padding: '10px 14px',
+    borderRadius: 8,
+    border: '1px solid #2c4270',
+    background: '#1e293b',
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  storeCodePreview: { color: '#c9a962', fontSize: 12, marginTop: 10, fontWeight: 600 },
   note: { color: '#a0a0c0', fontSize: 13, marginTop: 16, lineHeight: 1.5 },
   publishButton: {
     marginTop: 16,

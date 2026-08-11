@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ShopperOrderView } from '@popup-cube/shared';
 import { canConfirmPurchase, confirmPurchase, listMyOrders, OrderError } from '../lib/orders';
+import { formatOrderRef } from '../lib/orderRef';
 import { t } from '../i18n';
 
 interface OrderHistoryPanelProps {
@@ -78,7 +79,14 @@ export function OrderHistoryPanel({ onClose, embedded = false }: OrderHistoryPan
           {orders.map((order) => (
               <div key={order.id} style={styles.card}>
                 <div style={styles.cardHeader}>
-                  <span style={styles.storeName}>{order.store_name ?? '-'}</span>
+                  <div style={styles.cardHeaderLeft}>
+                    <span style={styles.storeName}>{order.store_name ?? '-'}</span>
+                    {order.store_code && (
+                      <span style={styles.orderRef}>
+                        {t('myOrders.orderRef')}: {formatOrderRef(order.store_code, order.order_number)}
+                      </span>
+                    )}
+                  </div>
                   <span style={styles.statusBadge}>{t(`ownerOrders.status.${order.status}`)}</span>
                 </div>
 
@@ -209,8 +217,10 @@ const styles: Record<string, React.CSSProperties> = {
   error: { color: '#ff6b6b', fontSize: 13, textAlign: 'center', padding: '10px 0' },
   list: { display: 'flex', flexDirection: 'column', gap: 12 },
   card: { background: '#0f3460', borderRadius: 10, padding: 14, border: '1px solid #2c4270' },
-  cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 8 },
+  cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, gap: 8 },
+  cardHeaderLeft: { display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 },
   storeName: { color: '#fff', fontSize: 13, fontWeight: 600 },
+  orderRef: { color: '#c9a962', fontSize: 12, fontWeight: 700 },
   statusBadge: {
     fontSize: 11,
     color: '#d8e4ff',

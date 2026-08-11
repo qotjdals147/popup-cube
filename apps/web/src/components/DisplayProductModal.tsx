@@ -72,6 +72,7 @@ export function DisplayProductModal({
   const [buyError, setBuyError] = useState<string | null>(null);
   const [rewardError, setRewardError] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [orderRef, setOrderRef] = useState<string | null>(null);
   const [orderTotal, setOrderTotal] = useState<number | null>(null);
   const [discountPercent, setDiscountPercent] = useState<number | null>(null);
   const [gachaResult, setGachaResult] = useState<GachaRollResult | null>(null);
@@ -209,6 +210,7 @@ export function DisplayProductModal({
       }
       const result = await placeOrder(storeId, selectedAddressId, [cartLine], 'discount', percent);
       setOrderId(result.orderId);
+      setOrderRef(result.orderRef);
       setDiscountPercent(percent);
       setOrderTotal(result.totalAmount);
       setBuyPhase('discountResult');
@@ -226,6 +228,7 @@ export function DisplayProductModal({
     try {
       const orderResult = await placeOrder(storeId, selectedAddressId, [cartLine], 'gacha', null);
       setOrderId(orderResult.orderId);
+      setOrderRef(orderResult.orderRef);
       setOrderTotal(orderResult.totalAmount);
       const result = await rollGacha(storeId, orderResult.orderId);
       setGachaResult(result);
@@ -300,7 +303,7 @@ export function DisplayProductModal({
           </div>
         )}
 
-        {buyPhase === 'discountResult' && orderId && orderTotal !== null && (
+        {buyPhase === 'discountResult' && orderRef && orderTotal !== null && (
           <div style={styles.orderComplete}>
             <div style={styles.orderCompleteIcon}>💸</div>
             <p style={styles.orderCompleteText}>
@@ -309,7 +312,7 @@ export function DisplayProductModal({
             <p style={styles.orderCompleteHint}>
               {t('cart.discountAppliedHint', { amount: formatPrice(discountAmount) })}
             </p>
-            <p style={styles.successMeta}>{t('display.buyNowOrderId', { id: orderId.slice(0, 8) })}</p>
+            <p style={styles.successMeta}>{t('display.buyNowOrderRef', { ref: orderRef })}</p>
             <p style={styles.successHint}>{t('display.buyNowMockHint')}</p>
             <p style={styles.autoConfirmNote}>{t('cart.purchaseConfirmAutoRule')}</p>
             <button type="button" style={styles.addButton} onClick={handleFinishBuy}>
@@ -318,7 +321,7 @@ export function DisplayProductModal({
           </div>
         )}
 
-        {buyPhase === 'gachaResult' && gachaResult && orderId && (
+        {buyPhase === 'gachaResult' && gachaResult && orderRef && (
           <div style={styles.orderComplete}>
             <div style={styles.gachaResultThumbWrap}>
               {gachaImage ? (
@@ -332,7 +335,7 @@ export function DisplayProductModal({
             <span style={styles.gachaBadge}>
               {gachaIsRealProduct ? t('cart.gachaBadgeProduct') : t('cart.gachaBadgeExclusive')}
             </span>
-            <p style={styles.successMeta}>{t('display.buyNowOrderId', { id: orderId.slice(0, 8) })}</p>
+            <p style={styles.successMeta}>{t('display.buyNowOrderRef', { ref: orderRef })}</p>
             <p style={styles.autoConfirmNote}>{t('cart.purchaseConfirmAutoRule')}</p>
             <button type="button" style={{ ...styles.addButton, marginTop: 16 }} onClick={handleFinishBuy}>
               {t('cart.confirm')}

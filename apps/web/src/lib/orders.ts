@@ -1,6 +1,7 @@
 import type { CartItem, OwnerOrderView, OrderStatus, RewardType, ShopperOrderView } from '@popup-cube/shared';
 
 import { supabase } from './supabase';
+import { formatOrderRef } from './orderRef';
 
 
 
@@ -13,6 +14,12 @@ export interface PlaceOrderResult {
   orderId: string;
 
   totalAmount: number;
+
+  orderNumber: number;
+
+  storeCode: string;
+
+  orderRef: string;
 
 }
 
@@ -76,7 +83,17 @@ export async function placeOrder(
 
   if (!result) throw new OrderError('empty_result');
 
-  return { orderId: result.order_id, totalAmount: result.total_amount };
+  const orderNumber = Number(result.order_number);
+
+  const storeCode = String(result.store_code ?? '');
+
+  return {
+    orderId: result.order_id,
+    totalAmount: result.total_amount,
+    orderNumber,
+    storeCode,
+    orderRef: formatOrderRef(storeCode, orderNumber),
+  };
 
 }
 
@@ -85,6 +102,10 @@ export async function placeOrder(
 interface StoreOrderRow {
 
   order_id: string;
+
+  order_number: number;
+
+  store_code: string;
 
   total_amount: number;
 
@@ -175,6 +196,10 @@ export async function listStoreOrders(storeId: string): Promise<OwnerOrderView[]
         id: row.order_id,
 
         store_id: storeId,
+
+        order_number: row.order_number,
+
+        store_code: row.store_code,
 
         user_id: '',
 
@@ -365,7 +390,11 @@ interface MyOrderRow {
 
   order_id: string;
 
+  order_number: number;
+
   store_id: string;
+
+  store_code: string | null;
 
   store_name: string | null;
 
@@ -455,6 +484,10 @@ export async function listMyOrders(): Promise<ShopperOrderView[]> {
         id: row.order_id,
 
         store_id: row.store_id,
+
+        order_number: row.order_number,
+
+        store_code: row.store_code,
 
         store_name: row.store_name,
 
