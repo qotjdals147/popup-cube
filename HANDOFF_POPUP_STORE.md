@@ -242,7 +242,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **Phase 4** — §53.7 순서 5 매장 정책·CS·반품지 + 배송비 규칙 **구현 완료** · **실기 대기** |
 | **Version** | `0.2.11` (매장 운영·배송 정책 + 배송비 규칙 · 실기 대기) |
-| **Git `main` HEAD** | `1d6ab67` (AD-057 점주 PC 관리센터 UI, 2026-08-11) |
+| **Git `main` HEAD** | `a4ba6e0` (§53.7 step 5 매장 정책·배송비, 2026-08-11) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -647,7 +647,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **Supabase POPUP** | migration `store_policy_shipping` **원격 적용** · `stores`에 CS·반품지·배송/교환 안내·`shipping_fee_type`/`shipping_fee_amount`/`shipping_free_threshold` · `orders`에 `subtotal_amount`/`shipping_fee` · RPC `calc_store_shipping_fee` · `place_order`/`get_store_orders`/`get_my_orders` 재정의(배송비 스냅샷 반환) |
-| **Git** | **이번 세션 commit/push 예정** (AD-057 push `03ba378` 이후) |
+| **Git** | push `main` **`a4ba6e0`** |
 | **핵심** | 점주 **「운영·배송」** 탭에서 CS 연락처·반품지·안내 문구·배송비 규칙(무료/고정/조건부 무료) 설정 · 손님 장바구니에서 **상품 합계 + 배송비 예상 + 결제 금액** 표시 · `place_order`가 할인 후 상품합 기준 배송비 계산 후 `total_amount`에 반영 |
 | **UI** | `OwnerStorePolicyPanel` · `StoreEditPage` 사이드바 `운영·배송` 탭 · `CartDrawer` 배송비 미리보기 · `OrderHistoryPanel`/`OwnerOrdersPanel` 결제 내역(배송비>0일 때 상품합·배송비 줄) · `storePolicy.ts`(`calcShippingFee` — 서버와 동일 로직) |
 | **범위 밖 — 제주·도서산간 (User 2026-08-11 확정)** | **지금은 구현 안 함.** 전국 도서산간 우편번호는 **공공 API 없음** · 택배사(CJ·롯데 등) **계약 후 제공하는 권역 API 또는 우편번호 엑셀**로 붙일 예정. **그때 수정 포인트:** `calc_store_shipping_fee`(또는 신규 surcharge RPC) · `place_order`에서 `user_addresses.postal_code` 조회 후 추가비 합산 · `CartDrawer`/`DisplayProductModal` 배송지 선택 시 재계산 · (선택) `orders.shipping_fee`를 base+regional로 쪼개거나 단일 합계 유지. **임시:** `shipping_guide`에 「제주·도서산간 추가비 별도 안내」 문구. |
@@ -673,7 +673,7 @@ popup_store/                          # Turborepo root
 | **2** | **손님 주문 내역** + **AD-054** — 배송완료 · 구매확정 · 7일 cron · 손님 고지 | ✅ push · ⬜ 실기 |
 | **3** | **§53 P0** — 점주 주문 **검색/필터** | ✅ push · ⬜ 실기 |
 | **4** | 발송 전 **손님 취소** + **클레임 v1** | ✅ push · ⬜ 실기 |
-| **5** | 매장 **정책·배송비** | ✅ 구현 · ⬜ **실기** |
+| **5** | 매장 **정책·배송비** | ✅ push `a4ba6e0` · ⬜ **실기** |
 | 6 | PG 실결제 | ⬜ User 후보 미정 |
 | 7 | EAS **development** 빌드 (AD-051, 선택) | ⬜ |
 
@@ -764,6 +764,7 @@ npx expo start --tunnel --port 8082 --clear
 
 ### 2026-08-11e — §53.7 순서 5 — 매장 정책·CS·반품지 + 배송비 규칙
 - **Author:** Cursor Agent
+- **Git:** `a4ba6e0` (push 완료)
 - **Supabase:** migration `store_policy_shipping` 원격 적용 — `stores` CS·반품지·안내·배송비 규칙 컬럼 · `orders.subtotal_amount`/`shipping_fee` · `calc_store_shipping_fee` · `place_order`/`get_store_orders`/`get_my_orders` 재정의
 - **Changed:** `packages/shared/src/types.ts`(`StorePolicy`/`StoreShippingFeeType` · `Order.subtotal_amount`/`shipping_fee`) · `apps/web/src/lib/storePolicy.ts`(신규) · `stores.ts`(`updateStorePolicy`) · `OwnerStorePolicyPanel.tsx`(신규) · `StoreEditPage.tsx`(`운영·배송` 탭) · `CartDrawer.tsx` · `OrderHistoryPanel.tsx` · `OwnerOrdersPanel.tsx` · `orders.ts` · `i18n/ko.ts`
 - **Notes:** **실기 대기.** 제주·도서산간 추가배송비는 **택배사 계약 후 API 연동(P1)** — User 2026-08-11 확정. 다음 = §53.7 순서 6 PG.
