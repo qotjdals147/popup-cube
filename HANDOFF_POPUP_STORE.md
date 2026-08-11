@@ -240,8 +240,8 @@ npm run dev
 | **Purpose** | 오프라인 팝업 스토어 한계를 넘는 2D 픽셀 아트 메타버스 커머스 플랫폼 |
 | **Workspace** | `C:\Users\qotjd\Downloads\Cursor\popup_store` |
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
-| **Current Phase** | **Phase 4** — AD-057 점주 PC 관리센터 UI **실기 완료** (User) · **다음 = §53.7 순서 5 매장 정책·CS·반품지 + 배송비 규칙** |
-| **Version** | `0.2.10` (점주 관리센터 라이트 테마 · 실기 대기) |
+| **Current Phase** | **Phase 4** — §53.7 순서 5 매장 정책·CS·반품지 + 배송비 규칙 **구현 완료** · **실기 대기** |
+| **Version** | `0.2.11` (매장 운영·배송 정책 + 배송비 규칙 · 실기 대기) |
 | **Git `main` HEAD** | `1d6ab67` (AD-057 점주 PC 관리센터 UI, 2026-08-11) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
@@ -605,7 +605,8 @@ popup_store/                          # Turborepo root
 | **2** | ~~**손님 주문 내역** + **AD-054** (구매확정·7일·고지)~~ ✅ 구현 (2026-08-07) · **실기 완료 (2026-08-08, User)** |
 | **3** | ~~**주문 검색·필터·정렬** (점주 P0#7)~~ ✅ 구현 (2026-08-11) · **실기 대기** |
 | **4** | ~~**발송 전 취소(손님)** + **클레임 v1**~~ ✅ 구현 (2026-08-11) · **실기 대기** |
-| **5** | **매장 정책·CS·반품지 + 배송비 규칙** — ⬜ **← 다음** |
+| **5** | ~~**매장 정책·CS·반품지 + 배송비 규칙**~~ ✅ 구현 (2026-08-11) · **실기 대기** |
+| **6** | **PG 실결제** — ⬜ **← 다음** (User·계약 후) |
 | **근거** | User 2026-08-03 — 우선순위 **에이전트 확정** · **§53.7** |
 
 ### 7.1 세션 인수인계 — **2026-08-07** (AD-054 구현)
@@ -639,7 +640,19 @@ popup_store/                          # Turborepo root
 | **클레임 v1(뼈대)** | 배송중~구매확정(`shipped`·`delivery_completed`·`purchase_confirmed`·`completed`) 주문에 손님이 **문의 1건** 남기면 점주가 **답변 등록 = 종료**(`resolved`) · **주문당 활성 클레임 1건**(테이블 분리 없이 `orders` 컬럼에 직접 저장 — v1 뼈대) · 종료 후 손님은 같은 주문에 **재문의 가능** |
 | **UI** | `OrderHistoryPanel`(손님 「내 주문」) — **주문 취소** 버튼(취소 가능 상태만) · **문의하기** 버튼+폼 · 접수/답변 상태 표시. `OwnerOrdersPanel`(점주 발주·배송) — 손님 취소 안내 문구 · 문의 배지(답변 대기/완료) + **답변 등록** 폼 · 발주·배송 상태 필터에 `취소됨` 옵션 추가 |
 | **범위 밖(v2)** | 클레임 전용 테이블·다건 스레드·첨부파일·점주 알림(뱃지/토스트) — 필요해지면 §53.7 순서 5 이후 확장 |
-| **다음** | User PC(+앱) 실기 → OK면 **§53.7 순서 5 매장 정책·CS·반품지 + 배송비 규칙** |
+| **다음** | User PC(+앱) 실기 → OK면 **§53.7 순서 6 PG** (User·계약 후) |
+
+### 7.5 세션 인수인계 — **2026-08-11e** (§53.7 순서 5 — 매장 정책·CS·반품지 + 배송비 규칙 **구현**)
+
+| | |
+|---|---|
+| **Supabase POPUP** | migration `store_policy_shipping` **원격 적용** · `stores`에 CS·반품지·배송/교환 안내·`shipping_fee_type`/`shipping_fee_amount`/`shipping_free_threshold` · `orders`에 `subtotal_amount`/`shipping_fee` · RPC `calc_store_shipping_fee` · `place_order`/`get_store_orders`/`get_my_orders` 재정의(배송비 스냅샷 반환) |
+| **Git** | **이번 세션 commit/push 예정** (AD-057 push `03ba378` 이후) |
+| **핵심** | 점주 **「운영·배송」** 탭에서 CS 연락처·반품지·안내 문구·배송비 규칙(무료/고정/조건부 무료) 설정 · 손님 장바구니에서 **상품 합계 + 배송비 예상 + 결제 금액** 표시 · `place_order`가 할인 후 상품합 기준 배송비 계산 후 `total_amount`에 반영 |
+| **UI** | `OwnerStorePolicyPanel` · `StoreEditPage` 사이드바 `운영·배송` 탭 · `CartDrawer` 배송비 미리보기 · `OrderHistoryPanel`/`OwnerOrdersPanel` 결제 내역(배송비>0일 때 상품합·배송비 줄) · `storePolicy.ts`(`calcShippingFee` — 서버와 동일 로직) |
+| **범위 밖 — 제주·도서산간 (User 2026-08-11 확정)** | **지금은 구현 안 함.** 전국 도서산간 우편번호는 **공공 API 없음** · 택배사(CJ·롯데 등) **계약 후 제공하는 권역 API 또는 우편번호 엑셀**로 붙일 예정. **그때 수정 포인트:** `calc_store_shipping_fee`(또는 신규 surcharge RPC) · `place_order`에서 `user_addresses.postal_code` 조회 후 추가비 합산 · `CartDrawer`/`DisplayProductModal` 배송지 선택 시 재계산 · (선택) `orders.shipping_fee`를 base+regional로 쪼개거나 단일 합계 유지. **임시:** `shipping_guide`에 「제주·도서산간 추가비 별도 안내」 문구. |
+| **실기** | PC `npm run dev` → `demo@owner.com`/`demo` → GUCCI 매장 관리 → **운영·배송** 탭 저장 → 손님 계정 장바구니에서 배송비 줄 확인 → 주문 후 **내 주문**·점주 **발주·배송** 금액 breakdown |
+| **다음** | User 실기 → **§53.7 순서 6 PG** (User 후보·계약) · 제주·도서산간 = **택배 연동(P1)** |
 
 ### 7.3 세션 인수인계 — **2026-08-10** (§53 P0 점주 주문 검색·필터 착수 — superseded by 7.2)
 
@@ -660,7 +673,7 @@ popup_store/                          # Turborepo root
 | **2** | **손님 주문 내역** + **AD-054** — 배송완료 · 구매확정 · 7일 cron · 손님 고지 | ✅ push · ⬜ 실기 |
 | **3** | **§53 P0** — 점주 주문 **검색/필터** | ✅ push · ⬜ 실기 |
 | **4** | 발송 전 **손님 취소** + **클레임 v1** | ✅ push · ⬜ 실기 |
-| **5** | 매장 **정책·배송비** | ⬜ **다음** |
+| **5** | 매장 **정책·배송비** | ✅ 구현 · ⬜ **실기** |
 | 6 | PG 실결제 | ⬜ User 후보 미정 |
 | 7 | EAS **development** 빌드 (AD-051, 선택) | ⬜ |
 
@@ -748,6 +761,12 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-11e — §53.7 순서 5 — 매장 정책·CS·반품지 + 배송비 규칙
+- **Author:** Cursor Agent
+- **Supabase:** migration `store_policy_shipping` 원격 적용 — `stores` CS·반품지·안내·배송비 규칙 컬럼 · `orders.subtotal_amount`/`shipping_fee` · `calc_store_shipping_fee` · `place_order`/`get_store_orders`/`get_my_orders` 재정의
+- **Changed:** `packages/shared/src/types.ts`(`StorePolicy`/`StoreShippingFeeType` · `Order.subtotal_amount`/`shipping_fee`) · `apps/web/src/lib/storePolicy.ts`(신규) · `stores.ts`(`updateStorePolicy`) · `OwnerStorePolicyPanel.tsx`(신규) · `StoreEditPage.tsx`(`운영·배송` 탭) · `CartDrawer.tsx` · `OrderHistoryPanel.tsx` · `OwnerOrdersPanel.tsx` · `orders.ts` · `i18n/ko.ts`
+- **Notes:** **실기 대기.** 제주·도서산간 추가배송비는 **택배사 계약 후 API 연동(P1)** — User 2026-08-11 확정. 다음 = §53.7 순서 6 PG.
 
 ### 2026-08-11c — User 실기 확인: §53.7 순서 4 취소·클레임 OK
 - **Author:** User
@@ -2513,8 +2532,8 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | 5 | **발송 전 취소** (손님 요청 + 점주 처리 + 재고·quota 복구) | ✅ | ✅ `cancel_order_by_shopper` 구현 (2026-08-11) · 실기 대기 |
 | 6 | **반품·교환·클레임** (배송 후) | ✅ | 🔶 v1 뼈대 구현 (2026-08-11, `create_order_claim`/`resolve_order_claim` — 주문당 1건, 별도 테이블·다건 스레드는 v2) · 실기 대기 |
 | 7 | **주문 검색·필터** (기간·상태·주문번호·닉네임) | ✅ | ✅ §53 P0#7 구현 (2026-08-11) · 실기 대기 |
-| 8 | **매장 운영 정보** (반품지·CS 연락·배송/교환 안내) | ✅ | ❌ |
-| 9 | **배송비 규칙** (무료/유료·조건부) | ✅ | ❌ (현재 금액만) |
+| 8 | **매장 운영 정보** (반품지·CS 연락·배송/교환 안내) | ✅ §53.7 step 5 (2026-08-11) · 실기 대기 |
+| 9 | **배송비 규칙** (무료/유료·조건부) | ✅ §53.7 step 5 — **매장 기본 배송비만** · **제주·도서산간 추가비는 택배사 API 연동 후(P1)** |
 
 **에이전트 의견:** P0 중 **AD-054·055 다음**으로 **주문 검색·필터 + 발송 전 취소 UX** 가 체감이 크다. PG는 User·사업 결정 후지만, **mock만으로는 “진짜 쇼핑몰” 데모 한계**가 분명함 (AD-029).
 
@@ -2525,7 +2544,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | 1 | **주문 엑셀/CSV 내보내기** | 팝업 기간 마감 정산·오프라인 대조 |
 | 2 | **일괄 발송 처리** (선택 주문 동일 송장·상태 일괄) | 주문 폭주 시 |
 | 3 | **주문 상세 — 배송지 복사·출력** (포장 스티커) | 택배 접수 |
-| 4 | **택배사 연동** (송장 자동 등록·추적) | 스마트스토어 핵심 편의 — 2차 |
+| 4 | **택배사 연동** (송장 자동 등록·추적·**제주·도서산간 권역 API/우편번호 DB**) | 스마트스토어 핵심 편의 — step 5 이후 · **User 2026-08-11: 도서산간은 택배 계약 후 API로** |
 | 5 | **개요/홈 대시보드** (오늘 주문·매출·발송 대기·**재고 부족**·자동수락 소진) | 들어오자마자 할 일 |
 | 6 | **상품 옵션** (색·사이즈·SKU) | 패션 팝업 **실무 필수에 가까움** |
 | 7 | **상품 복제·정렬·간단 카테고리/태그** | 시즌 재진열 |
@@ -2559,7 +2578,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **2** | ~~**손님 주문 내역** + **AD-054**~~ ✅ 구현 2026-08-07 · **실기 완료 2026-08-08** (User: 배송완료·구매확정·헤더 「내 주문」 버튼 모두 확인) | **한 스프린트** — “샀는데 어디서 봐?” + 분쟁 최소선 · DB·손님 UI·cron 같이 가야 반쪽 안 남음 |
 | **3** | **주문 검색·필터·정렬** (점주 P0#7) — ✅ 구현 2026-08-11 · 실기 대기 | 주문 수 늘면 목록만으로 막힘 · Realtime(1) 다음이 자연스러움 |
 | **4** | **발송 전 취소(손님)** + **클레임 v1**(점주 탭 뼈대) + §52 재고·quota 복구 — ✅ 구현 2026-08-11 · 실기 대기 | 주문 내역(2) 있어야 손님 취소 UX 의미 있음 |
-| **5** | **매장 정책·CS·반품지** + **배송비 규칙** — ⬜ **← 다음** | PG·약관 직전 **신뢰·문구** 고정 |
+| **5** | **매장 정책·CS·반품지** + **배송비 규칙** — ✅ 구현 2026-08-11 · 실기 대기 | PG·약관 직전 **신뢰·문구** 고정 |
 | **6** | **PG** (P0#1) | User·계약 후 · Mock → 승인/환불 연동 |
 | **7** | **P1** — 대시보드 · 엑셀 · 일괄발송 · 옵션 · 택배 API · 문의 등 | 운영 숙련·트래픽 보며 단계적 |
 
@@ -2573,7 +2592,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 - **§53** = **외부 벤치마크 대비 “뭐가 더 필요한지” 백로그** — 착수 시 `## 7. Next Steps`·새 AD로 끌어올림.
 - **§53.7** = **실행 순서(확정)** — User 2026-08-03 에이전트 우선순위 위임.
 
-*§53 Last updated: 2026-08-11 (발송 전 취소(손님) + 클레임 v1 구현 완료 반영 — §53.3/53.7)*
+*§53 Last updated: 2026-08-11 (매장 정책·배송비 규칙 §53.7 step 5 구현 완료)*
 
 ---
 

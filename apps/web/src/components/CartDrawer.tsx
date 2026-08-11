@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
-import type { GachaRollResult, UserAddress } from '@popup-cube/shared';
+import { useEffect, useMemo, useState } from 'react';
+import type { GachaRollResult, StoreSummary, UserAddress } from '@popup-cube/shared';
 import { useCart } from '../context/CartContext';
 import { getActivePromotion, GachaError, rollGacha } from '../lib/gacha';
 import { createAddress, listMyAddresses } from '../lib/addresses';
 import { OrderError, placeOrder } from '../lib/orders';
+import { getStoreSummary } from '../lib/stores';
+import { calcShippingFee } from '../lib/storePolicy';
 import {
   AddressFormFields,
   EMPTY_ADDRESS_FORM,
@@ -49,6 +51,20 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
   const [finalTotal, setFinalTotal] = useState<number | null>(null);
   const [gachaResult, setGachaResult] = useState<GachaRollResult | null>(null);
   const [rewardError, setRewardError] = useState<string | null>(null);
+  const [storeInfo, setStoreInfo] = useState<StoreSummary | null>(null);
+
+  useEffect(() => {
+    void getStoreSummary(storeId)
+      .then(setStoreInfo)
+      .catch(() => setStoreInfo(null));
+  }, [storeId]);
+
+  const estimatedShipping = useMemo(() => {
+    if (!storeInfo) return 0;
+    return calcShippingFee(storeInfo, totalPrice);
+  }, [storeInfo, totalPrice]);
+
+  const estimatedPayTotal = totalPrice + estimatedShipping;
 
   function handleMockCheckout() {
     setPhase('address');
@@ -327,8 +343,17 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
               <div style={styles.footer}>
                 <div style={styles.totalRow}>
                   <span>{t('cart.total')}</span>
-                  <strong style={styles.totalValue}>{formatPrice(totalPrice)}</strong>
+                  <strong>{formatPrice(totalPrice)}</strong>
                 </div>
+                <div style={styles.totalRow}>
+                  <span>{t('cart.shippingFee')}</span>
+                  <strong>{estimatedShipping === 0 ? t('cart.shippingFree') : formatPrice(estimatedShipping)}</strong>
+                </div>
+                <div style={{ ...styles.totalRow, ...styles.payTotalRow }}>
+                  <span>{t('cart.payTotal')}</span>
+                  <strong style={styles.totalValue}>{formatPrice(estimatedPayTotal)}</strong>
+                </div>
+                <p style={styles.shippingNote}>{t('cart.shippingEstimateNote')}</p>
                 <button style={styles.checkoutButton} onClick={handleMockCheckout}>
                   {t('cart.checkout')}
                 </button>
@@ -447,8 +472,10 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     color: '#fff',
     fontSize: 14,
-    marginBottom: 12,
+    marginBottom: 8,
   },
+  payTotalRow: { marginBottom: 4, fontWeight: 600 },
+  shippingNote: { color: '#8ca4d8', fontSize: 12, lineHeight: 1.45, margin: '0 0 12px' },
   totalValue: { color: '#e94560', fontSize: 17 },
   checkoutButton: {
     width: '100%',

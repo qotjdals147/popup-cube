@@ -260,7 +260,21 @@ export function OrderHistoryPanel({ onClose, embedded = false }: OrderHistoryPan
 
                 <div style={styles.footerRow}>
                   <span style={styles.date}>{formatDate(order.created_at)}</span>
-                  <strong style={styles.total}>{formatPrice(order.total_amount)}</strong>
+                  <div style={styles.amountBlock}>
+                    {(order.shipping_fee ?? 0) > 0 && (
+                      <div style={styles.amountLine}>
+                        <span>{t('myOrders.productSubtotal')}</span>
+                        <span>{formatPrice(order.subtotal_amount ?? order.total_amount)}</span>
+                      </div>
+                    )}
+                    {(order.shipping_fee ?? 0) > 0 && (
+                      <div style={styles.amountLine}>
+                        <span>{t('myOrders.shippingFee')}</span>
+                        <span>{formatPrice(order.shipping_fee ?? 0)}</span>
+                      </div>
+                    )}
+                    <strong style={styles.total}>{formatPrice(order.total_amount)}</strong>
+                  </div>
                 </div>
               </div>
             ))}
@@ -405,11 +419,14 @@ const styles: Record<string, React.CSSProperties> = {
   footerRow: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     marginTop: 10,
     paddingTop: 8,
     borderTop: '1px solid #2c4270',
+    gap: 12,
   },
+  amountBlock: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 },
+  amountLine: { display: 'flex', gap: 10, color: '#a0a0c0', fontSize: 12 },
   date: { color: '#8ca4d8', fontSize: 11 },
   total: { color: '#e94560', fontSize: 14 },
 };

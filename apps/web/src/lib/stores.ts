@@ -1,5 +1,20 @@
-import type { StoreSummary } from '@popup-cube/shared';
+import type { StorePolicy, StoreSummary } from '@popup-cube/shared';
 import { supabase } from './supabase';
+import { mapStorePolicyRow, STORE_POLICY_SELECT } from './storePolicy';
+
+const STORE_SUMMARY_SELECT = `id, name, store_code, description, thumbnail_url, status, ${STORE_POLICY_SELECT}`;
+
+function mapStoreSummary(row: Record<string, unknown>): StoreSummary {
+  return {
+    id: String(row.id),
+    name: String(row.name),
+    store_code: String(row.store_code ?? ''),
+    description: (row.description as string | null) ?? null,
+    thumbnail_url: (row.thumbnail_url as string | null) ?? null,
+    status: row.status as StoreSummary['status'],
+    ...mapStorePolicyRow(row),
+  };
+}
 
 /**
  * 홈 허브(§26)용 매장 목록 조회.
@@ -9,7 +24,7 @@ import { supabase } from './supabase';
 export async function listPublishedStores(search?: string): Promise<StoreSummary[]> {
   let query = supabase
     .from('stores')
-    .select('id, name, store_code, description, thumbnail_url, status')
+    .select(STORE_SUMMARY_SELECT)
     .eq('is_active', true)
     .eq('status', 'published')
     .order('name', { ascending: true });
@@ -21,30 +36,30 @@ export async function listPublishedStores(search?: string): Promise<StoreSummary
 
   const { data, error } = await query;
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []).map((row) => mapStoreSummary(row as Record<string, unknown>));
 }
 
 export async function getStoreSummary(storeId: string): Promise<StoreSummary | null> {
   const { data, error } = await supabase
     .from('stores')
-    .select('id, name, store_code, description, thumbnail_url, status')
+    .select(STORE_SUMMARY_SELECT)
     .eq('id', storeId)
     .maybeSingle();
 
   if (error) throw error;
-  return data;
+  return data ? mapStoreSummary(data as Record<string, unknown>) : null;
 }
 
 /** 점주 본인 매장 — draft 포함 (RLS owner read) */
 export async function getMyStore(storeId: string): Promise<StoreSummary | null> {
   const { data, error } = await supabase
     .from('stores')
-    .select('id, name, store_code, description, thumbnail_url, status')
+    .select(STORE_SUMMARY_SELECT)
     .eq('id', storeId)
     .maybeSingle();
 
   if (error) throw error;
-  return data;
+  return data ? mapStoreSummary(data as Record<string, unknown>) : null;
 }
 
 /** 점주가 해당 매장의 소유자인지 — `stores.owner_id` 기준 (profiles.store_id와 다를 수 있음) */
@@ -64,12 +79,38 @@ export async function userOwnsStore(userId: string, storeId: string): Promise<bo
 export async function listOwnedStores(userId: string): Promise<StoreSummary[]> {
   const { data, error } = await supabase
     .from('stores')
-    .select('id, name, store_code, description, thumbnail_url, status')
+    .select(STORE_SUMMARY_SELECT)
     .eq('owner_id', userId)
     .order('name', { ascending: true });
 
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []).map((row) => mapStoreSummary(row as Record<string, unknown>));
+}
+
+/** 점주 매장 운영·배송 정책 저장 (§53 P0#8·#9) */
+export async function updateStorePolicy(storeId: string, policy: StorePolicy): Promise<StoreSummary> {
+  const { data, error } = await supabase
+    .from('stores')
+    .update({
+      cs_phone: policy.cs_phone?.trim() || null,
+      cs_email: policy.cs_email?.trim() || null,
+      return_recipient_name: policy.return_recipient_name?.trim() || null,
+      return_phone: policy.return_phone?.trim() || null,
+      return_postal_code: policy.return_postal_code?.trim() || null,
+      return_address_line1: policy.return_address_line1?.trim() || null,
+      return_address_line2: policy.return_address_line2?.trim() || null,
+      shipping_guide: policy.shipping_guide?.trim() || null,
+      exchange_return_guide: policy.exchange_return_guide?.trim() || null,
+      shipping_fee_type: policy.shipping_fee_type,
+      shipping_fee_amount: Math.max(0, Math.round(policy.shipping_fee_amount)),
+      shipping_free_threshold: Math.max(0, Math.round(policy.shipping_free_threshold)),
+    })
+    .eq('id', storeId)
+    .select(STORE_SUMMARY_SELECT)
+    .single();
+
+  if (error) throw error;
+  return mapStoreSummary(data as Record<string, unknown>);
 }
 
 /** 점주 매장 주문 코드 변경 — 주문번호 앞부분 (§53 P0#7) */
@@ -79,11 +120,11 @@ export async function updateStoreCode(storeId: string, storeCode: string): Promi
     .from('stores')
     .update({ store_code: code })
     .eq('id', storeId)
-    .select('id, name, store_code, description, thumbnail_url, status')
+    .select(STORE_SUMMARY_SELECT)
     .single();
 
   if (error) throw error;
-  return data;
+  return mapStoreSummary(data as Record<string, unknown>);
 }
 
 /** 점주 매장 출시 — draft → published (AD-021, Sprint 3) */
@@ -92,9 +133,9 @@ export async function publishStore(storeId: string): Promise<StoreSummary> {
     .from('stores')
     .update({ status: 'published' })
     .eq('id', storeId)
-    .select('id, name, store_code, description, thumbnail_url, status')
+    .select(STORE_SUMMARY_SELECT)
     .single();
 
   if (error) throw error;
-  return data;
+  return mapStoreSummary(data as Record<string, unknown>);
 }

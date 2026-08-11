@@ -5,6 +5,7 @@ import { getMyStore, publishStore, updateStoreCode, userOwnsStore } from '../lib
 import { OwnerProductPanel } from '../components/OwnerProductPanel';
 import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
 import { OwnerDisplayPanel } from '../components/OwnerDisplayPanel';
+import { OwnerStorePolicyPanel } from '../components/OwnerStorePolicyPanel';
 import { DemoToast } from '../components/DemoToast';
 import { useOwnerOrderRealtime } from '../hooks/useOwnerOrderRealtime';
 import { isValidStoreCode, normalizeStoreCode } from '../lib/orderRef';
@@ -12,7 +13,7 @@ import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/own
 import { t } from '../i18n';
 import type { StoreSummary } from '@popup-cube/shared';
 
-type EditTab = 'overview' | 'products' | 'orders' | 'fulfillment' | 'layout';
+type EditTab = 'overview' | 'products' | 'orders' | 'fulfillment' | 'layout' | 'policy';
 
 function formatBadgeCount(n: number): string {
   if (n <= 0) return '';
@@ -152,6 +153,7 @@ export function StoreEditPage() {
     { id: 'products', label: t('ownerEdit.tabProducts') },
     { id: 'orders', label: t('ownerEdit.tabOrders'), badge: pendingAccept },
     { id: 'fulfillment', label: t('ownerEdit.tabFulfillment'), badge: awaitingShip },
+    { id: 'policy', label: t('ownerEdit.tabPolicy') },
     { id: 'layout', label: t('ownerEdit.tabLayout') },
   ];
 
@@ -304,6 +306,10 @@ export function StoreEditPage() {
 
           {!loading && !error && tab === 'layout' && storeId && (
             <OwnerDisplayPanel storeId={storeId} embedded />
+          )}
+
+          {!loading && !error && tab === 'policy' && storeId && (
+            <OwnerStorePolicyPanel storeId={storeId} />
           )}
           </main>
         </div>

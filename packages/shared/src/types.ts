@@ -51,11 +51,30 @@ export interface Store {
 
 export type StoreStatus = 'draft' | 'published';
 
+/** §53 P0#9 — 배송비 규칙 */
+export type StoreShippingFeeType = 'free' | 'flat' | 'conditional_free';
+
+/** §53 P0#8·#9 — 매장 운영·배송 정책 (stores 테이블 1:1) */
+export interface StorePolicy {
+  cs_phone: string | null;
+  cs_email: string | null;
+  return_recipient_name: string | null;
+  return_phone: string | null;
+  return_postal_code: string | null;
+  return_address_line1: string | null;
+  return_address_line2: string | null;
+  shipping_guide: string | null;
+  exchange_return_guide: string | null;
+  shipping_fee_type: StoreShippingFeeType;
+  shipping_fee_amount: number;
+  shipping_free_threshold: number;
+}
+
 /**
  * 홈 허브(§26)에서 매장 카드·입장 모달에 쓰는 요약 정보.
  * DB 컬럼명(snake_case)을 그대로 사용 — Supabase 클라이언트 조회 결과와 1:1.
  */
-export interface StoreSummary {
+export interface StoreSummary extends StorePolicy {
   id: string;
   name: string;
   /** 주문번호 접두어 — 영문·숫자 (예: GUCCI). 사람용 주문번호 = `{store_code}-{order_number}` */
@@ -157,6 +176,10 @@ export interface Order {
   store_id: string;
   user_id: string;
   shipping_address_id: string | null;
+  /** 할인 적용 후 상품 합계 (배송비 제외) */
+  subtotal_amount: number | null;
+  /** 주문 시점 배송비 스냅샷 */
+  shipping_fee: number;
   total_amount: number;
   discount_percent: number | null;
   reward_type: RewardType;

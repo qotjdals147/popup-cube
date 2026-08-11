@@ -237,7 +237,21 @@ export function OwnerOrdersPanel({
                       <span style={styles.dateInline}>{formatDate(order.created_at)}</span>
                     </div>
                   </div>
-                  <strong style={styles.totalHighlight}>{formatPrice(order.total_amount)}</strong>
+                  <div style={styles.amountBlock}>
+                    {(order.shipping_fee ?? 0) > 0 && (
+                      <div style={styles.amountLine}>
+                        <span>{t('myOrders.productSubtotal')}</span>
+                        <span>{formatPrice(order.subtotal_amount ?? order.total_amount)}</span>
+                      </div>
+                    )}
+                    {(order.shipping_fee ?? 0) > 0 && (
+                      <div style={styles.amountLine}>
+                        <span>{t('myOrders.shippingFee')}</span>
+                        <span>{formatPrice(order.shipping_fee ?? 0)}</span>
+                      </div>
+                    )}
+                    <strong style={styles.totalHighlight}>{formatPrice(order.total_amount)}</strong>
+                  </div>
                 </div>
 
                 <div style={styles.cardGrid}>
@@ -597,6 +611,8 @@ const styles: Record<string, React.CSSProperties> = {
   metaSep: { color: oc.textMuted },
   dateInline: { color: oc.textMuted },
   totalHighlight: { color: oc.price, fontSize: fs.xl, fontWeight: 700, whiteSpace: 'nowrap' },
+  amountBlock: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 },
+  amountLine: { display: 'flex', gap: 10, color: oc.muted, fontSize: fs.sm },
   cardGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',

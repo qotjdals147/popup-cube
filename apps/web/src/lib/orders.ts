@@ -10,17 +10,13 @@ export class OrderError extends Error {}
 
 
 export interface PlaceOrderResult {
-
   orderId: string;
-
   totalAmount: number;
-
+  subtotalAmount: number;
+  shippingFee: number;
   orderNumber: number;
-
   storeCode: string;
-
   orderRef: string;
-
 }
 
 
@@ -90,6 +86,8 @@ export async function placeOrder(
   return {
     orderId: result.order_id,
     totalAmount: result.total_amount,
+    subtotalAmount: Number(result.subtotal_amount ?? result.total_amount),
+    shippingFee: Number(result.shipping_fee ?? 0),
     orderNumber,
     storeCode,
     orderRef: formatOrderRef(storeCode, orderNumber),
@@ -108,7 +106,8 @@ interface StoreOrderRow {
   store_code: string;
 
   total_amount: number;
-
+  subtotal_amount: number;
+  shipping_fee: number;
   discount_percent: number | null;
 
   reward_type: 'discount' | 'gacha';
@@ -218,6 +217,10 @@ export async function listStoreOrders(storeId: string): Promise<OwnerOrderView[]
         user_id: '',
 
         shipping_address_id: null,
+
+        subtotal_amount: row.subtotal_amount,
+
+        shipping_fee: row.shipping_fee,
 
         total_amount: row.total_amount,
 
@@ -491,7 +494,8 @@ interface MyOrderRow {
   store_name: string | null;
 
   total_amount: number;
-
+  subtotal_amount: number;
+  shipping_fee: number;
   discount_percent: number | null;
 
   reward_type: 'discount' | 'gacha';
@@ -600,6 +604,10 @@ export async function listMyOrders(): Promise<ShopperOrderView[]> {
         user_id: '',
 
         shipping_address_id: null,
+
+        subtotal_amount: row.subtotal_amount,
+
+        shipping_fee: row.shipping_fee,
 
         total_amount: row.total_amount,
 
