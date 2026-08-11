@@ -242,7 +242,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **Phase 4** — **AD-054** 배송완료·구매확정·7일 자동·손님 「내 주문」 **구현+실기 확인 완료** (2026-08-08, User) · **진행 중 = §53 P0 점주 주문 검색·필터** (§53.7 순서 3) |
 | **Version** | `0.2.8` (AD-054 실기 확인 완료 · 다음 스프린트 시작) |
-| **Git `main` HEAD** | `48d9ef6` (헤더 「내 주문」 문구 확정, 2026-08-08) |
+| **Git `main` HEAD** | `d8e3ffa` (§53 P0#7 주문 코드·검색·필터, 2026-08-11) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -623,9 +623,10 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **Supabase POPUP** | migration `store_code_order_number` + `store_code_order_number_rpcs` **원격 적용** · `stores.store_code` · `orders.order_number` · GUCCI=`GUCCI` |
+| **Git** | **push** `main` **`d8e3ffa`** |
 | **핵심** | 사람용 주문번호 **`{store_code}-{order_number}`** (매장명 한글과 분리) · 점주 **주문 코드** 입력 시 「주문번호 앞부분」 설명 포함 |
 | **UI** | `CreateStorePage`/`StoreEditPage` 개요 · `OwnerOrdersPanel` 검색·상태·기간·정렬 · 손님/결제완료 `GUCCI-1042` 표시 |
-| **다음** | commit/push → User PC 실기 → **§53.7 순서 4 발송 전 취소(손님)** |
+| **다음** | User PC 실기 → **§53.7 순서 4 발송 전 취소(손님)** |
 
 ### 7.3 세션 인수인계 — **2026-08-10** (§53 P0 점주 주문 검색·필터 착수 — superseded by 7.2)
 
@@ -737,6 +738,7 @@ npx expo start --tunnel --port 8082 --clear
 
 ### 2026-08-11 — §53 P0#7 주문 코드·주문번호·점주 검색·필터
 - **Author:** Cursor Agent
+- **Git:** `d8e3ffa` (push 완료)
 - **Changed:** `supabase/migrations/20260811_store_code_order_number.sql` (원격 적용 2건) · `stores.store_code` + `orders.order_number` · `place_order`/`get_store_orders`/`get_my_orders`/`create_owner_store` RPC · `orderRef.ts` · `ownerOrderFilters.ts` · `CreateStorePage`/`StoreEditPage`(주문 코드 입력·설명) · `OwnerOrdersPanel`(검색·상태·기간·정렬 + `GUCCI-1042` 표시) · `OrderHistoryPanel`/`DisplayProductModal` · `packages/shared` 타입
 - **Notes:** 사람용 주문번호 = **`{store_code}-{order_number}`** — 매장명(한글 가능)과 분리. GUCCI 데모 `store_code=GUCCI`. 기존 주문은 `created_at` 순으로 매장별 순번 backfill. **실기 대기.**
 
