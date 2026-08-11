@@ -242,7 +242,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **Phase 4** — §53 P0#7 주문 검색·필터 **구현 완료** (2026-08-11) · **진행 중 = §53.7 순서 4 발송 전 취소(손님) + 클레임 v1** **구현 완료** · **실기 대기** |
 | **Version** | `0.2.9` (발송 전 취소·클레임 v1 구현 · 실기 대기) |
-| **Git `main` HEAD** | `d883f89` (§53.7 순서 4 발송 전 취소·클레임 v1, 2026-08-11) |
+| **Git `main` HEAD** | `4cbdb90` (§53.7 순서 4 발송 전 취소·클레임 v1, 2026-08-11) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -634,7 +634,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **Supabase POPUP** | migration `shopper_cancel_and_claims` **원격 적용** · `orders`에 `cancelled_at`·`cancelled_by`·`claim_status`·`claim_message`·`claim_reply`·`claim_created_at`·`claim_resolved_at` 컬럼 · RPC `cancel_order_by_shopper`·`create_order_claim`·`resolve_order_claim` 신규 · `get_store_orders`/`get_my_orders` 재정의(신규 컬럼 + **`rejected`만 숨김, `cancelled`도 목록에 노출**) |
-| **Git** | push `main` **`d883f89`** |
+| **Git** | push `main` **`4cbdb90`** |
 | **핵심 결정** | 손님 취소 = **`cancelled`** 상태(점주 거절 `rejected`와 구분) · **재고·자동수락 quota 복구**는 기존 `_restore_order_stock`/`_restore_auto_accept_quota` 재사용 · 손님이 발송 전(`awaiting_accept`·`accepted`) 주문만 직접 취소 가능 · **취소된 주문도 점주/본인 목록에 계속 노출**(사라지면 "취소가 됐는지" 혼란 방지) — `isFulfillmentOrderStatus`에 `cancelled` 포함 |
 | **클레임 v1(뼈대)** | 배송중~구매확정(`shipped`·`delivery_completed`·`purchase_confirmed`·`completed`) 주문에 손님이 **문의 1건** 남기면 점주가 **답변 등록 = 종료**(`resolved`) · **주문당 활성 클레임 1건**(테이블 분리 없이 `orders` 컬럼에 직접 저장 — v1 뼈대) · 종료 후 손님은 같은 주문에 **재문의 가능** |
 | **UI** | `OrderHistoryPanel`(손님 「내 주문」) — **주문 취소** 버튼(취소 가능 상태만) · **문의하기** 버튼+폼 · 접수/답변 상태 표시. `OwnerOrdersPanel`(점주 발주·배송) — 손님 취소 안내 문구 · 문의 배지(답변 대기/완료) + **답변 등록** 폼 · 발주·배송 상태 필터에 `취소됨` 옵션 추가 |
@@ -751,7 +751,7 @@ npx expo start --tunnel --port 8082 --clear
 
 ### 2026-08-11b — §53.7 순서 4 — 발송 전 취소(손님) + 클레임 v1 뼈대
 - **Author:** Cursor Agent
-- **Git:** `d883f89` (push 완료)
+- **Git:** `4cbdb90` (push 완료)
 - **Supabase:** migration `shopper_cancel_and_claims` 원격 적용 — `orders.cancelled_at`/`cancelled_by`/`claim_status`/`claim_message`/`claim_reply`/`claim_created_at`/`claim_resolved_at` 컬럼 · RPC `cancel_order_by_shopper`(발송 전 손님 취소 — 재고·자동수락 quota 복구) · `create_order_claim`(손님 문의 등록) · `resolve_order_claim`(점주 답변→종료) · `get_store_orders`/`get_my_orders` 재정의(`rejected`만 숨김, `cancelled`도 노출)
 - **Changed:** `packages/shared/src/types.ts`(`OrderCancelledBy`/`OrderClaimStatus` + `Order` 필드 추가) · `apps/web/src/lib/orders.ts`(`cancelOrderByShopper`/`createOrderClaim`/`resolveOrderClaim`/`isCancellableByShopper`/`canFileClaim`, `isFulfillmentOrderStatus`에 `cancelled` 포함) · `apps/web/src/lib/ownerOrderFilters.ts`(발주·배송 상태 필터에 `cancelled` 옵션) · `OrderHistoryPanel.tsx`(손님 — 주문 취소 버튼 · 문의하기 폼 · 접수/답변 표시) · `OwnerOrdersPanel.tsx`(점주 — 손님 취소 안내 문구 · 문의 배지 + 답변 등록 폼) · `i18n/ko.ts`
 - **핵심 결정:** 손님 취소는 `rejected`(점주 거절)와 구분되는 **`cancelled`** 상태 사용 · 클레임 v1은 **주문당 활성 1건**만(별도 테이블·다건 스레드는 v2) · 취소된 주문도 점주/본인 목록에서 **계속 보이게** 유지(사라지면 취소 여부 혼란) — `rejected`만 계속 숨김.
