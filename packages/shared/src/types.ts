@@ -145,6 +145,12 @@ export type OrderStatus =
   | 'completed'
   | 'cancelled';
 
+/** §53 P0#8 — 주문 취소자 (점주 거절 vs 손님 발송전 취소) */
+export type OrderCancelledBy = 'owner' | 'shopper';
+
+/** §53 P0#8 — 배송중~구매확정 주문 클레임(문의) v1 뼈대: 주문당 활성 클레임 1건 */
+export type OrderClaimStatus = 'none' | 'open' | 'resolved';
+
 /** 주문 헤더 (AD-030, §10) — `place_order()` 서버 함수로만 생성 (가격 조작 방지). */
 export interface Order {
   id: string;
@@ -167,6 +173,15 @@ export interface Order {
   purchase_confirm_auto: boolean;
   /** 매장별 순번 — 사람용 주문번호의 숫자 부분 (§53 P0#7) */
   order_number: number;
+  /** §53 P0#8 — 손님이 발송 전 직접 취소했을 때만 채워짐 */
+  cancelled_at: string | null;
+  cancelled_by: OrderCancelledBy | null;
+  /** §53 P0#8 — 클레임(문의) v1 뼈대 */
+  claim_status: OrderClaimStatus;
+  claim_message: string | null;
+  claim_reply: string | null;
+  claim_created_at: string | null;
+  claim_resolved_at: string | null;
   created_at: string;
 }
 

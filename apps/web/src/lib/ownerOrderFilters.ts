@@ -83,5 +83,6 @@ export function ownerOrderStatusOptions(
     { value: 'delivery_completed', labelKey: 'ownerOrders.status.delivery_completed' },
     { value: 'purchase_confirmed', labelKey: 'ownerOrders.status.purchase_confirmed' },
     { value: 'completed', labelKey: 'ownerOrders.status.completed' },
+    { value: 'cancelled', labelKey: 'ownerOrders.status.cancelled' },
   ];
 }

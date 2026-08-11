@@ -240,9 +240,9 @@ npm run dev
 | **Purpose** | 오프라인 팝업 스토어 한계를 넘는 2D 픽셀 아트 메타버스 커머스 플랫폼 |
 | **Workspace** | `C:\Users\qotjd\Downloads\Cursor\popup_store` |
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
-| **Current Phase** | **Phase 4** — **AD-054** 배송완료·구매확정·7일 자동·손님 「내 주문」 **구현+실기 확인 완료** (2026-08-08, User) · **진행 중 = §53 P0 점주 주문 검색·필터** (§53.7 순서 3) |
-| **Version** | `0.2.8` (AD-054 실기 확인 완료 · 다음 스프린트 시작) |
-| **Git `main` HEAD** | `d8e3ffa` (§53 P0#7 주문 코드·검색·필터, 2026-08-11) |
+| **Current Phase** | **Phase 4** — §53 P0#7 주문 검색·필터 **구현 완료** (2026-08-11) · **진행 중 = §53.7 순서 4 발송 전 취소(손님) + 클레임 v1** **구현 완료** · **실기 대기** |
+| **Version** | `0.2.9` (발송 전 취소·클레임 v1 구현 · 실기 대기) |
+| **Git `main` HEAD** | `d883f89` (§53.7 순서 4 발송 전 취소·클레임 v1, 2026-08-11) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -604,7 +604,8 @@ popup_store/                          # Turborepo root
 | **1** | ~~**AD-055** Realtime · 뱃지 · 토스트~~ ✅ 구현·push (2026-08-04) |
 | **2** | ~~**손님 주문 내역** + **AD-054** (구매확정·7일·고지)~~ ✅ 구현 (2026-08-07) · **실기 완료 (2026-08-08, User)** |
 | **3** | ~~**주문 검색·필터·정렬** (점주 P0#7)~~ ✅ 구현 (2026-08-11) · **실기 대기** |
-| **4** | **발송 전 취소(손님)** + **클레임 v1** — ⬜ **← 다음** |
+| **4** | ~~**발송 전 취소(손님)** + **클레임 v1**~~ ✅ 구현 (2026-08-11) · **실기 대기** |
+| **5** | **매장 정책·CS·반품지 + 배송비 규칙** — ⬜ **← 다음** |
 | **근거** | User 2026-08-03 — 우선순위 **에이전트 확정** · **§53.7** |
 
 ### 7.1 세션 인수인계 — **2026-08-07** (AD-054 구현)
@@ -628,6 +629,18 @@ popup_store/                          # Turborepo root
 | **UI** | `CreateStorePage`/`StoreEditPage` 개요 · `OwnerOrdersPanel` 검색·상태·기간·정렬 · 손님/결제완료 `GUCCI-1042` 표시 |
 | **다음** | User PC 실기 → **§53.7 순서 4 발송 전 취소(손님)** |
 
+### 7.4 세션 인수인계 — **2026-08-11b** (§53.7 순서 4 — 발송 전 취소(손님) + 클레임 v1 뼈대 **구현**)
+
+| | |
+|---|---|
+| **Supabase POPUP** | migration `shopper_cancel_and_claims` **원격 적용** · `orders`에 `cancelled_at`·`cancelled_by`·`claim_status`·`claim_message`·`claim_reply`·`claim_created_at`·`claim_resolved_at` 컬럼 · RPC `cancel_order_by_shopper`·`create_order_claim`·`resolve_order_claim` 신규 · `get_store_orders`/`get_my_orders` 재정의(신규 컬럼 + **`rejected`만 숨김, `cancelled`도 목록에 노출**) |
+| **Git** | push `main` **`d883f89`** |
+| **핵심 결정** | 손님 취소 = **`cancelled`** 상태(점주 거절 `rejected`와 구분) · **재고·자동수락 quota 복구**는 기존 `_restore_order_stock`/`_restore_auto_accept_quota` 재사용 · 손님이 발송 전(`awaiting_accept`·`accepted`) 주문만 직접 취소 가능 · **취소된 주문도 점주/본인 목록에 계속 노출**(사라지면 "취소가 됐는지" 혼란 방지) — `isFulfillmentOrderStatus`에 `cancelled` 포함 |
+| **클레임 v1(뼈대)** | 배송중~구매확정(`shipped`·`delivery_completed`·`purchase_confirmed`·`completed`) 주문에 손님이 **문의 1건** 남기면 점주가 **답변 등록 = 종료**(`resolved`) · **주문당 활성 클레임 1건**(테이블 분리 없이 `orders` 컬럼에 직접 저장 — v1 뼈대) · 종료 후 손님은 같은 주문에 **재문의 가능** |
+| **UI** | `OrderHistoryPanel`(손님 「내 주문」) — **주문 취소** 버튼(취소 가능 상태만) · **문의하기** 버튼+폼 · 접수/답변 상태 표시. `OwnerOrdersPanel`(점주 발주·배송) — 손님 취소 안내 문구 · 문의 배지(답변 대기/완료) + **답변 등록** 폼 · 발주·배송 상태 필터에 `취소됨` 옵션 추가 |
+| **범위 밖(v2)** | 클레임 전용 테이블·다건 스레드·첨부파일·점주 알림(뱃지/토스트) — 필요해지면 §53.7 순서 5 이후 확장 |
+| **다음** | User PC(+앱) 실기 → OK면 **§53.7 순서 5 매장 정책·CS·반품지 + 배송비 규칙** |
+
 ### 7.3 세션 인수인계 — **2026-08-10** (§53 P0 점주 주문 검색·필터 착수 — superseded by 7.2)
 
 | | |
@@ -645,9 +658,9 @@ popup_store/                          # Turborepo root
 | **0** | **commit/push** — §53.7 step 0 | ✅ `0420759` |
 | **1** | **AD-055** — Realtime · 사이드바 뱃지 · 새 주문 토스트 | ✅ push · ⬜ 실기 |
 | **2** | **손님 주문 내역** + **AD-054** — 배송완료 · 구매확정 · 7일 cron · 손님 고지 | ✅ push · ⬜ 실기 |
-| **3** | **§53 P0** — 점주 주문 **검색/필터** | ⬜ **다음** |
-| **4** | 발송 전 **손님 취소** + **클레임 v1** | ⬜ |
-| **5** | 매장 **정책·배송비** | ⬜ |
+| **3** | **§53 P0** — 점주 주문 **검색/필터** | ✅ push · ⬜ 실기 |
+| **4** | 발송 전 **손님 취소** + **클레임 v1** | ✅ push · ⬜ 실기 |
+| **5** | 매장 **정책·배송비** | ⬜ **다음** |
 | 6 | PG 실결제 | ⬜ User 후보 미정 |
 | 7 | EAS **development** 빌드 (AD-051, 선택) | ⬜ |
 
@@ -735,6 +748,14 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-11b — §53.7 순서 4 — 발송 전 취소(손님) + 클레임 v1 뼈대
+- **Author:** Cursor Agent
+- **Git:** `d883f89` (push 완료)
+- **Supabase:** migration `shopper_cancel_and_claims` 원격 적용 — `orders.cancelled_at`/`cancelled_by`/`claim_status`/`claim_message`/`claim_reply`/`claim_created_at`/`claim_resolved_at` 컬럼 · RPC `cancel_order_by_shopper`(발송 전 손님 취소 — 재고·자동수락 quota 복구) · `create_order_claim`(손님 문의 등록) · `resolve_order_claim`(점주 답변→종료) · `get_store_orders`/`get_my_orders` 재정의(`rejected`만 숨김, `cancelled`도 노출)
+- **Changed:** `packages/shared/src/types.ts`(`OrderCancelledBy`/`OrderClaimStatus` + `Order` 필드 추가) · `apps/web/src/lib/orders.ts`(`cancelOrderByShopper`/`createOrderClaim`/`resolveOrderClaim`/`isCancellableByShopper`/`canFileClaim`, `isFulfillmentOrderStatus`에 `cancelled` 포함) · `apps/web/src/lib/ownerOrderFilters.ts`(발주·배송 상태 필터에 `cancelled` 옵션) · `OrderHistoryPanel.tsx`(손님 — 주문 취소 버튼 · 문의하기 폼 · 접수/답변 표시) · `OwnerOrdersPanel.tsx`(점주 — 손님 취소 안내 문구 · 문의 배지 + 답변 등록 폼) · `i18n/ko.ts`
+- **핵심 결정:** 손님 취소는 `rejected`(점주 거절)와 구분되는 **`cancelled`** 상태 사용 · 클레임 v1은 **주문당 활성 1건**만(별도 테이블·다건 스레드는 v2) · 취소된 주문도 점주/본인 목록에서 **계속 보이게** 유지(사라지면 취소 여부 혼란) — `rejected`만 계속 숨김.
+- **Notes:** **실기 대기.** 다음 세션 = §53.7 순서 5 매장 정책·CS·반품지 + 배송비 규칙.
 
 ### 2026-08-11 — §53 P0#7 주문 코드·주문번호·점주 검색·필터
 - **Author:** Cursor Agent
@@ -2479,8 +2500,8 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | 2 | **배송완료 → 구매확정** (+ 7일 자동·고지) | ✅ | ✅ AD-054 구현 · **실기 완료(2026-08-08 User)** |
 | 3 | **새 주문 Realtime + 뱃지** | ✅(알림·앱) | ✅ AD-055 구현 · 실기 대기 |
 | 4 | **손님 주문 조회** (주문번호·상태·송장, 매장 무관 통합) | ✅ | ✅ AD-054 `OrderHistoryPanel` 구현 · **실기 완료(2026-08-08 User)** |
-| 5 | **발송 전 취소** (손님 요청 + 점주 처리 + 재고·quota 복구) | ✅ | 부분(점주 취소만·손님 UX ❌) |
-| 6 | **반품·교환·클레임** (배송 후) | ✅ | ❌ §52.2만 원칙 |
+| 5 | **발송 전 취소** (손님 요청 + 점주 처리 + 재고·quota 복구) | ✅ | ✅ `cancel_order_by_shopper` 구현 (2026-08-11) · 실기 대기 |
+| 6 | **반품·교환·클레임** (배송 후) | ✅ | 🔶 v1 뼈대 구현 (2026-08-11, `create_order_claim`/`resolve_order_claim` — 주문당 1건, 별도 테이블·다건 스레드는 v2) · 실기 대기 |
 | 7 | **주문 검색·필터** (기간·상태·주문번호·닉네임) | ✅ | ✅ §53 P0#7 구현 (2026-08-11) · 실기 대기 |
 | 8 | **매장 운영 정보** (반품지·CS 연락·배송/교환 안내) | ✅ | ❌ |
 | 9 | **배송비 규칙** (무료/유료·조건부) | ✅ | ❌ (현재 금액만) |
@@ -2527,8 +2548,8 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **1** | ~~**AD-055**~~ ✅ 구현 2026-08-04 · 상품 탭 재고 Realtime은 선택 미구현 | 점주가 **새로고침 없이** 주문 처리 · 이후 주문/클레임 UI 붙일 때도 동일 구독 재사용 |
 | **2** | ~~**손님 주문 내역** + **AD-054**~~ ✅ 구현 2026-08-07 · **실기 완료 2026-08-08** (User: 배송완료·구매확정·헤더 「내 주문」 버튼 모두 확인) | **한 스프린트** — “샀는데 어디서 봐?” + 분쟁 최소선 · DB·손님 UI·cron 같이 가야 반쪽 안 남음 |
 | **3** | **주문 검색·필터·정렬** (점주 P0#7) — ✅ 구현 2026-08-11 · 실기 대기 | 주문 수 늘면 목록만으로 막힘 · Realtime(1) 다음이 자연스러움 |
-| **4** | **발송 전 취소(손님)** + **클레임 v1**(점주 탭 뼈대) + §52 재고·quota 복구 — ⬜ **← 다음** | 주문 내역(2) 있어야 손님 취소 UX 의미 있음 |
-| **5** | **매장 정책·CS·반품지** + **배송비 규칙** | PG·약관 직전 **신뢰·문구** 고정 |
+| **4** | **발송 전 취소(손님)** + **클레임 v1**(점주 탭 뼈대) + §52 재고·quota 복구 — ✅ 구현 2026-08-11 · 실기 대기 | 주문 내역(2) 있어야 손님 취소 UX 의미 있음 |
+| **5** | **매장 정책·CS·반품지** + **배송비 규칙** — ⬜ **← 다음** | PG·약관 직전 **신뢰·문구** 고정 |
 | **6** | **PG** (P0#1) | User·계약 후 · Mock → 승인/환불 연동 |
 | **7** | **P1** — 대시보드 · 엑셀 · 일괄발송 · 옵션 · 택배 API · 문의 등 | 운영 숙련·트래픽 보며 단계적 |
 
@@ -2542,7 +2563,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 - **§53** = **외부 벤치마크 대비 “뭐가 더 필요한지” 백로그** — 착수 시 `## 7. Next Steps`·새 AD로 끌어올림.
 - **§53.7** = **실행 순서(확정)** — User 2026-08-03 에이전트 우선순위 위임.
 
-*§53 Last updated: 2026-08-07 (AD-054 구현 완료 반영 — §53.2/53.3/53.7)*
+*§53 Last updated: 2026-08-11 (발송 전 취소(손님) + 클레임 v1 구현 완료 반영 — §53.3/53.7)*
 
 ---
 

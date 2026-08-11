@@ -7,6 +7,7 @@ import {
   isPendingOrderStatus,
   listStoreOrders,
   rejectOrder,
+  resolveOrderClaim,
   shipOrder,
 } from '../lib/orders';
 import { formatOrderRef } from '../lib/orderRef';
@@ -42,6 +43,7 @@ export function OwnerOrdersPanel({
   const [error, setError] = useState(false);
   const [actionId, setActionId] = useState<string | null>(null);
   const [trackingDraft, setTrackingDraft] = useState<Record<string, string>>({});
+  const [claimReplyDraft, setClaimReplyDraft] = useState<Record<string, string>>({});
   const [internalQueue, setInternalQueue] = useState<OwnerOrderQueue>('pending');
   const [filters, setFilters] = useState<OwnerOrderFilters>(DEFAULT_OWNER_ORDER_FILTERS);
 
@@ -92,6 +94,17 @@ export function OwnerOrdersPanel({
   ) {
     if (!window.confirm(confirmMessage)) return;
     await runAction(orderId, fn);
+  }
+
+  async function handleResolveClaim(orderId: string) {
+    const reply = (claimReplyDraft[orderId] ?? '').trim();
+    if (!reply) {
+      window.alert(t('ownerOrders.claimReplyRequired'));
+      return;
+    }
+    if (!window.confirm(t('ownerOrders.confirmResolveClaim'))) return;
+    await runAction(orderId, () => resolveOrderClaim(orderId, reply));
+    setClaimReplyDraft((prev) => ({ ...prev, [orderId]: '' }));
   }
 
   const titleKey =
@@ -249,6 +262,51 @@ export function OwnerOrdersPanel({
                   <div style={styles.shippingText}>{t('ownerOrders.noAddress')}</div>
                 )}
               </div>
+
+              {order.status === 'cancelled' && order.cancelled_by === 'shopper' && (
+                <p style={styles.cancelledNote}>{t('ownerOrders.cancelledByShopperNote')}</p>
+              )}
+
+              {order.claim_status !== 'none' && (
+                <div style={styles.claimBox}>
+                  <div style={styles.claimHeader}>
+                    <span style={styles.claimTitle}>{t('ownerOrders.claimTitle')}</span>
+                    <span style={order.claim_status === 'open' ? styles.claimBadgeOpen : styles.claimBadgeResolved}>
+                      {order.claim_status === 'open'
+                        ? t('ownerOrders.claimOpenBadge')
+                        : t('ownerOrders.claimResolvedBadge')}
+                    </span>
+                  </div>
+                  <div style={styles.claimLabel}>{t('ownerOrders.claimMessageLabel')}</div>
+                  <p style={styles.claimText}>{order.claim_message}</p>
+
+                  {order.claim_status === 'open' ? (
+                    <div style={styles.claimReplyRow}>
+                      <textarea
+                        style={styles.claimTextarea}
+                        value={claimReplyDraft[order.id] ?? ''}
+                        onChange={(e) =>
+                          setClaimReplyDraft((prev) => ({ ...prev, [order.id]: e.target.value }))
+                        }
+                        placeholder={t('ownerOrders.claimReplyPlaceholder')}
+                      />
+                      <button
+                        type="button"
+                        style={styles.primaryBtn}
+                        disabled={actionId === order.id}
+                        onClick={() => void handleResolveClaim(order.id)}
+                      >
+                        {actionId === order.id ? t('ownerOrders.claimReplySaving') : t('ownerOrders.claimReplyButton')}
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div style={styles.claimLabel}>{t('ownerOrders.claimReplyLabel')}</div>
+                      <p style={styles.claimText}>{order.claim_reply}</p>
+                    </>
+                  )}
+                </div>
+              )}
 
               {activeQueue === 'pending' && isPendingOrderStatus(order.status) && (
                 <div style={styles.actions}>
@@ -535,6 +593,43 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 12,
   },
   shippedNote: { color: '#8ce0b0', fontSize: 12, marginTop: 10 },
+  cancelledNote: { color: '#ff9a9a', fontSize: 12, marginTop: 8 },
+  claimBox: {
+    marginTop: 8,
+    padding: 10,
+    borderRadius: 8,
+    background: '#241a2e',
+    border: '1px solid #6b3f6b',
+  },
+  claimHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  claimTitle: { color: '#e0a9e0', fontSize: 12, fontWeight: 700 },
+  claimBadgeOpen: {
+    fontSize: 11,
+    color: '#ffd8a8',
+    border: '1px solid #a0703a',
+    borderRadius: 999,
+    padding: '2px 8px',
+  },
+  claimBadgeResolved: {
+    fontSize: 11,
+    color: '#8ce0b0',
+    border: '1px solid #3a7a55',
+    borderRadius: 999,
+    padding: '2px 8px',
+  },
+  claimLabel: { color: '#c9a6d8', fontSize: 11, marginBottom: 3 },
+  claimText: { color: '#e8d8ee', fontSize: 12, lineHeight: 1.5, margin: '0 0 8px', whiteSpace: 'pre-wrap' },
+  claimReplyRow: { display: 'flex', flexDirection: 'column', gap: 6 },
+  claimTextarea: {
+    minHeight: 60,
+    padding: '8px 10px',
+    borderRadius: 8,
+    border: '1px solid #6b3f6b',
+    background: '#0d1730',
+    color: '#fff',
+    fontSize: 12,
+    resize: 'vertical',
+  },
   footerRow: {
     display: 'flex',
     justifyContent: 'space-between',

@@ -129,6 +129,20 @@ interface StoreOrderRow {
 
   purchase_confirm_auto: boolean;
 
+  cancelled_at: string | null;
+
+  cancelled_by: 'owner' | 'shopper' | null;
+
+  claim_status: 'none' | 'open' | 'resolved';
+
+  claim_message: string | null;
+
+  claim_reply: string | null;
+
+  claim_created_at: string | null;
+
+  claim_resolved_at: string | null;
+
   created_at: string;
 
   buyer_nickname: string | null;
@@ -226,6 +240,20 @@ export async function listStoreOrders(storeId: string): Promise<OwnerOrderView[]
         purchase_confirmed_at: row.purchase_confirmed_at,
 
         purchase_confirm_auto: row.purchase_confirm_auto,
+
+        cancelled_at: row.cancelled_at,
+
+        cancelled_by: row.cancelled_by,
+
+        claim_status: row.claim_status,
+
+        claim_message: row.claim_message,
+
+        claim_reply: row.claim_reply,
+
+        claim_created_at: row.claim_created_at,
+
+        claim_resolved_at: row.claim_resolved_at,
 
         created_at: row.created_at,
 
@@ -339,6 +367,45 @@ export async function confirmPurchase(orderId: string): Promise<void> {
 
 
 
+/** §53 P0#8 — 손님: 발송 전(수락 대기·수락됨) 주문 직접 취소 */
+export async function cancelOrderByShopper(orderId: string): Promise<void> {
+
+  const { error } = await supabase.rpc('cancel_order_by_shopper', { p_order_id: orderId });
+
+  if (error) throw new OrderError(error.message);
+
+}
+
+
+
+/** §53 P0#8 — 손님: 배송중~구매확정 주문에 문의(클레임) 등록 */
+export async function createOrderClaim(orderId: string, message: string): Promise<void> {
+
+  const { error } = await supabase.rpc('create_order_claim', {
+    p_order_id: orderId,
+    p_message: message,
+  });
+
+  if (error) throw new OrderError(error.message);
+
+}
+
+
+
+/** §53 P0#8 — 점주: 접수된 클레임에 답변 → 종료 */
+export async function resolveOrderClaim(orderId: string, reply: string): Promise<void> {
+
+  const { error } = await supabase.rpc('resolve_order_claim', {
+    p_order_id: orderId,
+    p_reply: reply,
+  });
+
+  if (error) throw new OrderError(error.message);
+
+}
+
+
+
 export function isPendingOrderStatus(status: OrderStatus): boolean {
 
   return status === 'awaiting_accept' || status === 'pending' || status === 'paid';
@@ -359,7 +426,9 @@ export function isFulfillmentOrderStatus(status: OrderStatus): boolean {
 
     status === 'purchase_confirmed' ||
 
-    status === 'completed'
+    status === 'completed' ||
+
+    status === 'cancelled'
 
   );
 
@@ -371,6 +440,29 @@ export function isFulfillmentOrderStatus(status: OrderStatus): boolean {
 export function canConfirmPurchase(status: OrderStatus): boolean {
 
   return status === 'shipped' || status === 'delivery_completed';
+
+}
+
+
+
+/** §53 P0#8 — 손님이 지금 주문을 직접 취소할 수 있는 상태인지 (발송 전) */
+export function isCancellableByShopper(status: OrderStatus): boolean {
+
+  return status === 'awaiting_accept' || status === 'accepted';
+
+}
+
+
+
+/** §53 P0#8 — 손님이 지금 문의(클레임)를 남길 수 있는 상태인지 (배송중~구매확정) */
+export function canFileClaim(status: OrderStatus): boolean {
+
+  return (
+    status === 'shipped' ||
+    status === 'delivery_completed' ||
+    status === 'purchase_confirmed' ||
+    status === 'completed'
+  );
 
 }
 
@@ -419,6 +511,20 @@ interface MyOrderRow {
   purchase_confirmed_at: string | null;
 
   purchase_confirm_auto: boolean;
+
+  cancelled_at: string | null;
+
+  cancelled_by: 'owner' | 'shopper' | null;
+
+  claim_status: 'none' | 'open' | 'resolved';
+
+  claim_message: string | null;
+
+  claim_reply: string | null;
+
+  claim_created_at: string | null;
+
+  claim_resolved_at: string | null;
 
   created_at: string;
 
@@ -516,6 +622,20 @@ export async function listMyOrders(): Promise<ShopperOrderView[]> {
         purchase_confirmed_at: row.purchase_confirmed_at,
 
         purchase_confirm_auto: row.purchase_confirm_auto,
+
+        cancelled_at: row.cancelled_at,
+
+        cancelled_by: row.cancelled_by,
+
+        claim_status: row.claim_status,
+
+        claim_message: row.claim_message,
+
+        claim_reply: row.claim_reply,
+
+        claim_created_at: row.claim_created_at,
+
+        claim_resolved_at: row.claim_resolved_at,
 
         created_at: row.created_at,
 

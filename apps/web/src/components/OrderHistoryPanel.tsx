@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ShopperOrderView } from '@popup-cube/shared';
-import { canConfirmPurchase, confirmPurchase, listMyOrders, OrderError } from '../lib/orders';
+import {
+  canConfirmPurchase,
+  canFileClaim,
+  cancelOrderByShopper,
+  confirmPurchase,
+  createOrderClaim,
+  isCancellableByShopper,
+  listMyOrders,
+  OrderError,
+} from '../lib/orders';
 import { formatOrderRef } from '../lib/orderRef';
 import { t } from '../i18n';
 
@@ -21,6 +30,8 @@ export function OrderHistoryPanel({ onClose, embedded = false }: OrderHistoryPan
   const [error, setError] = useState(false);
   const [actionId, setActionId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [claimFormId, setClaimFormId] = useState<string | null>(null);
+  const [claimDraft, setClaimDraft] = useState<Record<string, string>>({});
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -48,6 +59,40 @@ export function OrderHistoryPanel({ onClose, embedded = false }: OrderHistoryPan
       await reload();
     } catch (err) {
       setActionError(err instanceof OrderError ? err.message : t('myOrders.confirmPurchaseError'));
+    } finally {
+      setActionId(null);
+    }
+  }
+
+  async function handleCancelOrder(orderId: string) {
+    if (!window.confirm(t('myOrders.confirmCancelOrder'))) return;
+    setActionId(orderId);
+    setActionError(null);
+    try {
+      await cancelOrderByShopper(orderId);
+      await reload();
+    } catch (err) {
+      setActionError(err instanceof OrderError ? err.message : t('myOrders.cancelOrderError'));
+    } finally {
+      setActionId(null);
+    }
+  }
+
+  async function handleSubmitClaim(orderId: string) {
+    const message = (claimDraft[orderId] ?? '').trim();
+    if (!message) {
+      setActionError(t('myOrders.claimEmptyError'));
+      return;
+    }
+    setActionId(orderId);
+    setActionError(null);
+    try {
+      await createOrderClaim(orderId, message);
+      setClaimFormId(null);
+      setClaimDraft((prev) => ({ ...prev, [orderId]: '' }));
+      await reload();
+    } catch (err) {
+      setActionError(err instanceof OrderError ? err.message : t('myOrders.claimSubmitError'));
     } finally {
       setActionId(null);
     }
@@ -115,6 +160,8 @@ export function OrderHistoryPanel({ onClose, embedded = false }: OrderHistoryPan
                   </div>
                 )}
 
+                {order.status === 'cancelled' && <p style={styles.cancelledNote}>{t('myOrders.cancelledNote')}</p>}
+
                 {(order.status === 'shipped' ||
                   order.status === 'delivery_completed' ||
                   order.status === 'purchase_confirmed') && (
@@ -151,6 +198,63 @@ export function OrderHistoryPanel({ onClose, embedded = false }: OrderHistoryPan
                       {t('myOrders.confirmPurchase')}
                     </button>
                     <p style={styles.autoConfirmHint}>{t('cart.purchaseConfirmAutoRule')}</p>
+                  </div>
+                )}
+
+                {isCancellableByShopper(order.status) && (
+                  <div style={styles.actions}>
+                    <button
+                      type="button"
+                      style={styles.dangerBtn}
+                      disabled={actionId === order.id}
+                      onClick={() => void handleCancelOrder(order.id)}
+                    >
+                      {t('myOrders.cancelOrder')}
+                    </button>
+                  </div>
+                )}
+
+                {order.claim_status !== 'none' && (
+                  <div style={styles.claimBox}>
+                    <div style={styles.claimLabel}>{t('myOrders.claimMessageLabel')}</div>
+                    <p style={styles.claimText}>{order.claim_message}</p>
+                    {order.claim_status === 'open' ? (
+                      <p style={styles.claimOpenNote}>{t('myOrders.claimOpenNote')}</p>
+                    ) : (
+                      <>
+                        <div style={styles.claimLabel}>{t('myOrders.claimReplyLabel')}</div>
+                        <p style={styles.claimText}>{order.claim_reply}</p>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {canFileClaim(order.status) && order.claim_status !== 'open' && (
+                  <div style={styles.actions}>
+                    {claimFormId === order.id ? (
+                      <div style={styles.claimFormRow}>
+                        <textarea
+                          style={styles.claimTextarea}
+                          value={claimDraft[order.id] ?? ''}
+                          onChange={(e) =>
+                            setClaimDraft((prev) => ({ ...prev, [order.id]: e.target.value }))
+                          }
+                          placeholder={t('myOrders.claimPlaceholder')}
+                        />
+                        <button
+                          type="button"
+                          style={styles.primaryBtn}
+                          disabled={actionId === order.id}
+                          onClick={() => void handleSubmitClaim(order.id)}
+                        >
+                          {actionId === order.id ? t('myOrders.claimSubmitting') : t('myOrders.claimSubmit')}
+                        </button>
+                      </div>
+                    ) : (
+                      <button type="button" style={styles.secondaryBtn} onClick={() => setClaimFormId(order.id)}>
+                        {order.claim_status === 'resolved' ? t('myOrders.claimAgain') : t('myOrders.claimButton')}
+                      </button>
+                    )}
                   </div>
                 )}
 
@@ -245,6 +349,7 @@ const styles: Record<string, React.CSSProperties> = {
   gachaEmoji: { fontSize: 22 },
   gachaPrizeName: { color: '#fff', fontSize: 13, fontWeight: 600, flex: 1, minWidth: 0 },
   shippedNote: { color: '#8ce0b0', fontSize: 12, marginTop: 10, lineHeight: 1.6 },
+  cancelledNote: { color: '#ff9a9a', fontSize: 12, margin: '0 0 8px' },
   actions: { marginTop: 10 },
   primaryBtn: {
     padding: '8px 12px',
@@ -255,6 +360,46 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 12,
     fontWeight: 600,
     cursor: 'pointer',
+  },
+  secondaryBtn: {
+    padding: '8px 12px',
+    borderRadius: 8,
+    border: '1px solid #4062a0',
+    background: 'transparent',
+    color: '#d8e4ff',
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  dangerBtn: {
+    padding: '8px 12px',
+    borderRadius: 8,
+    border: '1px solid #8b3a3a',
+    background: 'transparent',
+    color: '#ff9a9a',
+    fontSize: 12,
+    cursor: 'pointer',
+  },
+  claimBox: {
+    marginTop: 8,
+    padding: 10,
+    borderRadius: 8,
+    background: '#241a2e',
+    border: '1px solid #6b3f6b',
+  },
+  claimLabel: { color: '#c9a6d8', fontSize: 11, marginBottom: 3 },
+  claimText: { color: '#e8d8ee', fontSize: 12, lineHeight: 1.5, margin: '0 0 8px', whiteSpace: 'pre-wrap' },
+  claimOpenNote: { color: '#ffd8a8', fontSize: 12, margin: 0 },
+  claimFormRow: { display: 'flex', flexDirection: 'column', gap: 6 },
+  claimTextarea: {
+    minHeight: 60,
+    padding: '8px 10px',
+    borderRadius: 8,
+    border: '1px solid #6b3f6b',
+    background: '#0d1730',
+    color: '#fff',
+    fontSize: 12,
+    resize: 'vertical',
   },
   autoConfirmHint: { color: '#7c8db5', fontSize: 11, lineHeight: 1.5, margin: '6px 0 0' },
   footerRow: {
