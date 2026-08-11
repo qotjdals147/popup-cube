@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+import { ownerColors as oc, ownerFont } from '../styles/ownerAdminTheme';
+
 interface DemoToastProps {
   message: string | null;
   onDismiss: () => void;
@@ -28,16 +30,15 @@ const styles: Record<string, React.CSSProperties> = {
     left: '50%',
     transform: 'translateX(-50%)',
     zIndex: 2000,
-    background: 'rgba(15, 52, 96, 0.96)',
+    background: oc.text,
     color: '#fff',
     padding: '12px 20px',
     borderRadius: 10,
     fontSize: 14,
-    boxShadow: '0 8px 24px rgba(0,0,0,0.45)',
-    border: '1px solid #2c4270',
+    boxShadow: oc.shadowMd,
     maxWidth: 'min(92vw, 420px)',
     textAlign: 'center',
-    fontFamily: "'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif",
+    fontFamily: ownerFont,
     pointerEvents: 'none',
   },
 };

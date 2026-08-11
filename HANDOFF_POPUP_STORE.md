@@ -240,8 +240,8 @@ npm run dev
 | **Purpose** | 오프라인 팝업 스토어 한계를 넘는 2D 픽셀 아트 메타버스 커머스 플랫폼 |
 | **Workspace** | `C:\Users\qotjd\Downloads\Cursor\popup_store` |
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
-| **Current Phase** | **Phase 4** — §53 P0#7 주문 검색·필터 **구현 완료** (2026-08-11) · **진행 중 = §53.7 순서 4 발송 전 취소(손님) + 클레임 v1** **구현 완료** · **실기 대기** |
-| **Version** | `0.2.9` (발송 전 취소·클레임 v1 구현 · 실기 대기) |
+| **Current Phase** | **Phase 4** — AD-057 점주 PC 관리센터 UI **실기 완료** (User) · **다음 = §53.7 순서 5 매장 정책·CS·반품지 + 배송비 규칙** |
+| **Version** | `0.2.10` (점주 관리센터 라이트 테마 · 실기 대기) |
 | **Git `main` HEAD** | `4cbdb90` (§53.7 순서 4 발송 전 취소·클레임 v1, 2026-08-11) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
@@ -748,6 +748,16 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-11c — User 실기 확인: §53.7 순서 4 취소·클레임 OK
+- **Author:** User
+- **Confirmed:** 손님 발송 전 **주문 취소** · 배송 후 **문의하기/점주 답변** 정상 동작.
+- **Notes:** 다음 = §53.7 순서 5 매장 정책·CS·반품지 + 배송비 규칙 (또는 User 요청 = 점주 PC UI 라이트 테마).
+
+### 2026-08-11d — AD-057 점주 PC 관리센터 화이트/그레이 UI 리디자인
+- **Author:** Cursor Agent (User 요청)
+- **Changed:** `apps/web/src/styles/ownerAdminTheme.ts` · `ownerOrderStatusBadge.ts` · `HomePage` · `CreateStorePage` · `StoreEditPage` · `OwnerProductPanel` · `OwnerOrdersPanel` · `OwnerDisplayPanel` · `DemoToast` · `ko.ts`
+- **Notes:** 스마트스토어·배민·쿠팡이츠형 화이트/그레이 + 에이블리형 **사이드바 전체 높이 네이비** · 발주·배송 **주문 카드·상태 뱃지 색** · 상품 **접이식 등록 폼 + 썸네일 카드** · 글자 +2pt. 손님 월드 다크 유지. **User 실기 OK (2026-08-11).**
 
 ### 2026-08-11b — §53.7 순서 4 — 발송 전 취소(손님) + 클레임 v1 뼈대
 - **Author:** Cursor Agent

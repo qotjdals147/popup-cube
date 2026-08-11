@@ -16,6 +16,7 @@ import {
   loadStoreDisplayLayout,
   setDisplaySlotProduct,
 } from '../lib/displayFixtures';
+import { ownerColors as oc, ownerFont } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 
 const CELL_PX = 22;
@@ -149,9 +150,9 @@ export function OwnerDisplayPanel({ storeId, embedded = false }: OwnerDisplayPan
     const isOrigin = fixture && fixture.origin_x === x && fixture.origin_y === y;
     const isSelected = fixtureId === selectedFixtureId;
 
-    let bg = '#1e2a45';
+    let bg = oc.surfaceMuted;
     if (cell?.occupied && fixture) {
-      bg = isSelected ? '#3d5a80' : '#2a4060';
+      bg = isSelected ? '#dbe4ff' : '#e9ecef';
     }
 
     return (
@@ -163,11 +164,11 @@ export function OwnerDisplayPanel({ storeId, embedded = false }: OwnerDisplayPan
           width: CELL_PX,
           height: CELL_PX,
           padding: 0,
-          border: isSelected ? '2px solid #ffd580' : '1px solid #2c4270',
+          border: isSelected ? `2px solid ${oc.primary}` : `1px solid ${oc.borderStrong}`,
           background: bg,
           cursor: paletteTemplate ? 'crosshair' : fixtureId ? 'pointer' : 'default',
           fontSize: 8,
-          color: '#d8e4ff',
+          color: oc.textSecondary,
           lineHeight: 1.1,
           overflow: 'hidden',
         }}
@@ -207,7 +208,7 @@ export function OwnerDisplayPanel({ storeId, embedded = false }: OwnerDisplayPan
       >
         <header style={headerStyle}>
           <div>
-            <h2 style={{ margin: 0, fontSize: 18 }}>{t('ownerDisplay.title')}</h2>
+            <h2 style={{ margin: 0, fontSize: 18, color: oc.text, fontWeight: 600 }}>{t('ownerDisplay.title')}</h2>
             <p style={hintStyle}>{t('ownerDisplay.hint')}</p>
           </div>
           {paletteTemplate && (
@@ -260,7 +261,7 @@ export function OwnerDisplayPanel({ storeId, embedded = false }: OwnerDisplayPan
                   gridTemplateColumns: `repeat(${mapSize.width}, ${CELL_PX}px)`,
                   gap: 0,
                   width: 'fit-content',
-                  border: '1px solid #2c4270',
+                  border: `1px solid ${oc.borderStrong}`,
                 }}
               >
                 {Array.from({ length: mapSize.width * mapSize.height }, (_, i) => {
@@ -317,13 +318,16 @@ export function OwnerDisplayPanel({ storeId, embedded = false }: OwnerDisplayPan
 }
 
 const panelStyle: React.CSSProperties = {
-  background: '#16213e',
+  background: oc.surface,
   borderRadius: 12,
-  border: '1px solid #2c4270',
+  border: `1px solid ${oc.border}`,
   padding: 20,
   width: '100%',
   maxWidth: 1100,
   overflow: 'auto',
+  boxShadow: oc.shadow,
+  color: oc.text,
+  fontFamily: ownerFont,
 };
 
 const headerStyle: React.CSSProperties = {
@@ -335,10 +339,10 @@ const headerStyle: React.CSSProperties = {
   marginBottom: 12,
 };
 
-const hintStyle: React.CSSProperties = { color: '#a0a0c0', fontSize: 13, lineHeight: 1.5, margin: 0 };
-const errorStyle: React.CSSProperties = { color: '#ff6b6b', fontSize: 13, margin: '8px 0' };
+const hintStyle: React.CSSProperties = { color: oc.textMuted, fontSize: 13, lineHeight: 1.5, margin: 0 };
+const errorStyle: React.CSSProperties = { color: oc.danger, fontSize: 13, margin: '8px 0' };
 const sectionLabel: React.CSSProperties = {
-  color: '#a0a0c0',
+  color: oc.textMuted,
   fontSize: 12,
   margin: '0 0 8px',
   fontWeight: 600,
@@ -356,46 +360,47 @@ const paletteBtn: React.CSSProperties = {
   textAlign: 'left',
   padding: '8px 10px',
   borderRadius: 8,
-  border: '1px solid #2c4270',
-  background: '#0f3460',
-  color: '#d8e4ff',
+  border: `1px solid ${oc.borderStrong}`,
+  background: oc.surface,
+  color: oc.textSecondary,
   cursor: 'pointer',
   fontSize: 12,
 };
 const paletteBtnActive: React.CSSProperties = {
-  borderColor: '#ffd580',
-  background: '#173a55',
+  borderColor: oc.primary,
+  background: oc.navActiveBg,
+  color: oc.navActiveText,
 };
-const paletteMeta: React.CSSProperties = { display: 'block', color: '#a0a0c0', fontSize: 11, marginTop: 2 };
+const paletteMeta: React.CSSProperties = { display: 'block', color: oc.textMuted, fontSize: 11, marginTop: 2 };
 const paletteHelp: React.CSSProperties = { ...hintStyle, marginTop: 8, fontSize: 11 };
 
 const gridWrapStyle: React.CSSProperties = { overflow: 'auto', maxWidth: '100%' };
 const detailStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 8 };
-const detailName: React.CSSProperties = { margin: 0, fontSize: 15, fontWeight: 600 };
+const detailName: React.CSSProperties = { margin: 0, fontSize: 15, fontWeight: 600, color: oc.text };
 const dangerBtn: React.CSSProperties = {
   padding: '8px 12px',
   borderRadius: 8,
-  border: '1px solid #7f1d1d',
-  background: '#450a0a',
-  color: '#fca5a5',
+  border: `1px solid ${oc.dangerBorder}`,
+  background: oc.dangerBg,
+  color: oc.dangerText,
   cursor: 'pointer',
   fontSize: 13,
 };
 const slotRow: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 };
-const slotLabel: React.CSSProperties = { fontSize: 12, color: '#a0a0c0' };
+const slotLabel: React.CSSProperties = { fontSize: 12, color: oc.textMuted };
 const selectStyle: React.CSSProperties = {
   padding: '6px 8px',
   borderRadius: 6,
-  border: '1px solid #2c4270',
-  background: '#0f3460',
-  color: '#fff',
+  border: `1px solid ${oc.borderStrong}`,
+  background: oc.surface,
+  color: oc.text,
   fontSize: 13,
 };
 const badgeStyle: React.CSSProperties = {
   fontSize: 12,
   padding: '6px 10px',
   borderRadius: 999,
-  background: '#173a2c',
-  color: '#8ce0b0',
-  border: '1px solid #2c6b4a',
+  background: oc.successBg,
+  color: oc.successText,
+  border: `1px solid ${oc.successBorder}`,
 };

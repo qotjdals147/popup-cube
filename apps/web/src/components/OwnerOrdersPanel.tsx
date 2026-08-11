@@ -17,6 +17,8 @@ import {
   ownerOrderStatusOptions,
   type OwnerOrderFilters,
 } from '../lib/ownerOrderFilters';
+import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
+import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 
 export type OwnerOrderQueue = 'pending' | 'fulfillment';
@@ -145,289 +147,315 @@ export function OwnerOrdersPanel({
         </div>
       )}
 
-      <div style={styles.filterBar}>
-        <input
-          style={styles.filterSearch}
-          value={filters.query}
-          onChange={(e) => setFilters((f) => ({ ...f, query: e.target.value }))}
-          placeholder={t('ownerOrders.filterSearchPlaceholder')}
-        />
-        <select
-          style={styles.filterSelect}
-          value={filters.status}
-          onChange={(e) =>
-            setFilters((f) => ({ ...f, status: e.target.value as OwnerOrderFilters['status'] }))
-          }
-        >
-          {statusOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {t(opt.labelKey)}
-            </option>
-          ))}
-        </select>
-        <input
-          type="date"
-          style={styles.filterDate}
-          value={filters.dateFrom}
-          onChange={(e) => setFilters((f) => ({ ...f, dateFrom: e.target.value }))}
-          aria-label={t('ownerOrders.filterDateFrom')}
-        />
-        <input
-          type="date"
-          style={styles.filterDate}
-          value={filters.dateTo}
-          onChange={(e) => setFilters((f) => ({ ...f, dateTo: e.target.value }))}
-          aria-label={t('ownerOrders.filterDateTo')}
-        />
-        <select
-          style={styles.filterSelect}
-          value={filters.sort}
-          onChange={(e) =>
-            setFilters((f) => ({ ...f, sort: e.target.value as OwnerOrderFilters['sort'] }))
-          }
-        >
-          <option value="newest">{t('ownerOrders.sortNewest')}</option>
-          <option value="oldest">{t('ownerOrders.sortOldest')}</option>
-        </select>
+      <div style={styles.filterCard}>
+        <div style={styles.filterBar}>
+          <input
+            style={styles.filterSearch}
+            value={filters.query}
+            onChange={(e) => setFilters((f) => ({ ...f, query: e.target.value }))}
+            placeholder={t('ownerOrders.filterSearchPlaceholder')}
+          />
+          <select
+            style={styles.filterSelect}
+            value={filters.status}
+            onChange={(e) =>
+              setFilters((f) => ({ ...f, status: e.target.value as OwnerOrderFilters['status'] }))
+            }
+          >
+            {statusOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {t(opt.labelKey)}
+              </option>
+            ))}
+          </select>
+          <input
+            type="date"
+            style={styles.filterDate}
+            value={filters.dateFrom}
+            onChange={(e) => setFilters((f) => ({ ...f, dateFrom: e.target.value }))}
+            aria-label={t('ownerOrders.filterDateFrom')}
+          />
+          <input
+            type="date"
+            style={styles.filterDate}
+            value={filters.dateTo}
+            onChange={(e) => setFilters((f) => ({ ...f, dateTo: e.target.value }))}
+            aria-label={t('ownerOrders.filterDateTo')}
+          />
+          <select
+            style={styles.filterSelect}
+            value={filters.sort}
+            onChange={(e) =>
+              setFilters((f) => ({ ...f, sort: e.target.value as OwnerOrderFilters['sort'] }))
+            }
+          >
+            <option value="newest">{t('ownerOrders.sortNewest')}</option>
+            <option value="oldest">{t('ownerOrders.sortOldest')}</option>
+          </select>
+        </div>
       </div>
 
-      {loading && <p style={styles.hint}>{t('ownerOrders.loading')}</p>}
-      {!loading && error && <p style={styles.error}>{t('ownerOrders.errorLoad')}</p>}
-      {!loading && !error && filtered.length === 0 && (
-        <p style={styles.hint}>
-          {orders.length > 0 && (filters.query || filters.status !== 'all' || filters.dateFrom || filters.dateTo)
-            ? t('ownerOrders.emptyFiltered')
-            : activeQueue === 'pending'
-              ? t('ownerOrders.emptyPending')
-              : t('ownerOrders.emptyFulfillment')}
-        </p>
-      )}
+      <div style={styles.listArea}>
+        {loading && <p style={styles.hint}>{t('ownerOrders.loading')}</p>}
+        {!loading && error && <p style={styles.error}>{t('ownerOrders.errorLoad')}</p>}
+        {!loading && !error && filtered.length === 0 && (
+          <p style={styles.hint}>
+            {orders.length > 0 && (filters.query || filters.status !== 'all' || filters.dateFrom || filters.dateTo)
+              ? t('ownerOrders.emptyFiltered')
+              : activeQueue === 'pending'
+                ? t('ownerOrders.emptyPending')
+                : t('ownerOrders.emptyFulfillment')}
+          </p>
+        )}
 
-      {!loading && !error && filtered.length > 0 && (
-        <div style={styles.list}>
-          {filtered.map((order) => (
-            <div key={order.id} style={styles.card}>
-              <div style={styles.cardHeader}>
-                <div style={styles.cardHeaderLeft}>
-                  <span style={styles.orderRef}>
-                    {t('ownerOrders.orderRef')}: {formatOrderRef(order.store_code, order.order_number)}
-                  </span>
-                  <span style={styles.buyer}>
-                    {t('ownerOrders.buyer')}: {order.buyer_nickname ?? '-'}
-                  </span>
-                </div>
-                <span style={styles.statusBadge}>{t(`ownerOrders.status.${order.status}`)}</span>
-              </div>
-
-              {order.auto_accepted && (
-                <p style={styles.autoNote}>{t('ownerOrders.autoAcceptedBadge')}</p>
-              )}
-              {order.status === 'purchase_confirmed' && order.purchase_confirm_auto && (
-                <p style={styles.autoNote}>{t('ownerOrders.purchaseConfirmedAutoBadge')}</p>
-              )}
-
-              <div style={styles.itemsRow}>{t('ownerOrders.itemsCount', { count: order.items.length })}</div>
-              {order.items.map((item) => (
-                <div key={item.id} style={styles.itemLine}>
-                  {item.product_name} × {item.quantity}
-                </div>
-              ))}
-
-              {order.reward_type === 'gacha' && (
-                <div style={styles.gachaBox}>
-                  <div style={styles.gachaLabel}>{t('ownerOrders.gachaOnOrder')}</div>
-                  {order.gacha_prize_name ? (
-                    <div style={styles.gachaPrizeRow}>
-                      {order.gacha_prize_image_url ? (
-                        <img src={order.gacha_prize_image_url} alt="" style={styles.gachaThumb} />
-                      ) : (
-                        <span style={styles.gachaEmoji}>🎁</span>
+        {!loading && !error && filtered.length > 0 && (
+          <div style={styles.list}>
+            {filtered.map((order) => (
+              <div key={order.id} style={styles.card}>
+                <div style={styles.cardTop}>
+                  <div style={styles.cardTopMain}>
+                    <div style={styles.cardRefRow}>
+                      <span style={styles.orderRef}>
+                        {formatOrderRef(order.store_code, order.order_number)}
+                      </span>
+                      <span style={orderStatusBadgeStyle(order.status)}>
+                        {t(`ownerOrders.status.${order.status}`)}
+                      </span>
+                      {order.auto_accepted && (
+                        <span style={styles.chipAuto}>{t('ownerOrders.autoAcceptedBadge')}</span>
                       )}
-                      <span style={styles.gachaPrizeName}>{order.gacha_prize_name}</span>
+                      {order.status === 'purchase_confirmed' && order.purchase_confirm_auto && (
+                        <span style={styles.chipAuto}>{t('ownerOrders.purchaseConfirmedAutoBadge')}</span>
+                      )}
                     </div>
-                  ) : (
-                    <div style={styles.shippingText}>{t('ownerOrders.gachaNotLinked')}</div>
-                  )}
-                </div>
-              )}
-
-              <div style={styles.shippingBox}>
-                <div style={styles.shippingLabel}>{t('ownerOrders.shippingTo')}</div>
-                {order.shipping_recipient_name ? (
-                  <div style={styles.shippingText}>
-                    {order.shipping_recipient_name} · {order.shipping_phone} <br />({order.shipping_postal_code}){' '}
-                    {order.shipping_address_line1} {order.shipping_address_line2 ?? ''}
+                    <div style={styles.cardMeta}>
+                      <span>
+                        {t('ownerOrders.buyer')}:{' '}
+                        <strong style={styles.buyerName}>{order.buyer_nickname ?? '-'}</strong>
+                      </span>
+                      <span style={styles.metaSep}>·</span>
+                      <span style={styles.dateInline}>{formatDate(order.created_at)}</span>
+                    </div>
                   </div>
-                ) : (
-                  <div style={styles.shippingText}>{t('ownerOrders.noAddress')}</div>
+                  <strong style={styles.totalHighlight}>{formatPrice(order.total_amount)}</strong>
+                </div>
+
+                <div style={styles.cardGrid}>
+                  <div style={styles.cardSection}>
+                    <div style={styles.sectionLabel}>
+                      {t('ownerOrders.itemsCount', { count: order.items.length })}
+                    </div>
+                    <ul style={styles.itemList}>
+                      {order.items.map((item) => (
+                        <li key={item.id} style={styles.itemRow}>
+                          <span style={styles.itemName}>{item.product_name}</span>
+                          <span style={styles.itemQty}>× {item.quantity}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {order.reward_type === 'gacha' && (
+                      <div style={styles.gachaBox}>
+                        <div style={styles.gachaLabel}>{t('ownerOrders.gachaOnOrder')}</div>
+                        {order.gacha_prize_name ? (
+                          <div style={styles.gachaPrizeRow}>
+                            {order.gacha_prize_image_url ? (
+                              <img src={order.gacha_prize_image_url} alt="" style={styles.gachaThumb} />
+                            ) : (
+                              <span style={styles.gachaEmoji}>🎁</span>
+                            )}
+                            <span style={styles.gachaPrizeName}>{order.gacha_prize_name}</span>
+                          </div>
+                        ) : (
+                          <div style={styles.shippingText}>{t('ownerOrders.gachaNotLinked')}</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={styles.cardSection}>
+                    <div style={styles.sectionLabel}>{t('ownerOrders.shippingTo')}</div>
+                    {order.shipping_recipient_name ? (
+                      <div style={styles.shippingBlock}>
+                        <div style={styles.shippingNameRow}>
+                          {order.shipping_recipient_name} · {order.shipping_phone}
+                        </div>
+                        <div style={styles.shippingAddr}>
+                          ({order.shipping_postal_code}) {order.shipping_address_line1}{' '}
+                          {order.shipping_address_line2 ?? ''}
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={styles.shippingText}>{t('ownerOrders.noAddress')}</div>
+                    )}
+                  </div>
+                </div>
+
+                {order.status === 'cancelled' && order.cancelled_by === 'shopper' && (
+                  <p style={styles.cancelledNote}>{t('ownerOrders.cancelledByShopperNote')}</p>
+                )}
+
+                {order.claim_status !== 'none' && (
+                  <div style={styles.claimBox}>
+                    <div style={styles.claimHeader}>
+                      <span style={styles.claimTitle}>{t('ownerOrders.claimTitle')}</span>
+                      <span style={order.claim_status === 'open' ? styles.claimBadgeOpen : styles.claimBadgeResolved}>
+                        {order.claim_status === 'open'
+                          ? t('ownerOrders.claimOpenBadge')
+                          : t('ownerOrders.claimResolvedBadge')}
+                      </span>
+                    </div>
+                    <div style={styles.claimLabel}>{t('ownerOrders.claimMessageLabel')}</div>
+                    <p style={styles.claimText}>{order.claim_message}</p>
+
+                    {order.claim_status === 'open' ? (
+                      <div style={styles.claimReplyRow}>
+                        <textarea
+                          style={styles.claimTextarea}
+                          value={claimReplyDraft[order.id] ?? ''}
+                          onChange={(e) =>
+                            setClaimReplyDraft((prev) => ({ ...prev, [order.id]: e.target.value }))
+                          }
+                          placeholder={t('ownerOrders.claimReplyPlaceholder')}
+                        />
+                        <button
+                          type="button"
+                          style={styles.primaryBtn}
+                          disabled={actionId === order.id}
+                          onClick={() => void handleResolveClaim(order.id)}
+                        >
+                          {actionId === order.id ? t('ownerOrders.claimReplySaving') : t('ownerOrders.claimReplyButton')}
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div style={styles.claimLabel}>{t('ownerOrders.claimReplyLabel')}</div>
+                        <p style={styles.claimText}>{order.claim_reply}</p>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {(order.status === 'shipped' ||
+                  order.status === 'delivery_completed' ||
+                  order.status === 'purchase_confirmed') && (
+                  <div style={styles.timelineRow}>
+                    {order.shipped_at && (
+                      <span style={styles.timelineChip}>
+                        {t('ownerOrders.shippedAt')} {formatDate(order.shipped_at)}
+                      </span>
+                    )}
+                    {order.tracking_number && (
+                      <span style={styles.timelineChip}>
+                        {t('ownerOrders.tracking')}: {order.tracking_number}
+                      </span>
+                    )}
+                    {order.delivery_completed_at && (
+                      <span style={styles.timelineChip}>
+                        {t('ownerOrders.deliveryCompletedAt')} {formatDate(order.delivery_completed_at)}
+                      </span>
+                    )}
+                    {order.purchase_confirmed_at && (
+                      <span style={styles.timelineChipSuccess}>
+                        {t('ownerOrders.purchaseConfirmedAt')} {formatDate(order.purchase_confirmed_at)}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {activeQueue === 'pending' && isPendingOrderStatus(order.status) && (
+                  <div style={styles.actionBar}>
+                    <button
+                      type="button"
+                      style={styles.primaryBtn}
+                      disabled={actionId === order.id}
+                      onClick={() =>
+                        void runActionWithConfirm(order.id, t('ownerOrders.confirmAccept'), () =>
+                          acceptOrder(order.id)
+                        )
+                      }
+                    >
+                      {t('ownerOrders.accept')}
+                    </button>
+                    <button
+                      type="button"
+                      style={styles.dangerBtn}
+                      disabled={actionId === order.id}
+                      onClick={() =>
+                        void runActionWithConfirm(order.id, t('ownerOrders.confirmReject'), () =>
+                          rejectOrder(order.id)
+                        )
+                      }
+                    >
+                      {t('ownerOrders.reject')}
+                    </button>
+                  </div>
+                )}
+
+                {activeQueue === 'fulfillment' && order.status === 'accepted' && (
+                  <div style={styles.actionBar}>
+                    <input
+                      style={styles.trackingInput}
+                      value={trackingDraft[order.id] ?? ''}
+                      onChange={(e) =>
+                        setTrackingDraft((prev) => ({ ...prev, [order.id]: e.target.value }))
+                      }
+                      placeholder={t('ownerOrders.trackingPlaceholder')}
+                    />
+                    <button
+                      type="button"
+                      style={styles.primaryBtn}
+                      disabled={actionId === order.id}
+                      onClick={() =>
+                        void runActionWithConfirm(order.id, t('ownerOrders.confirmShip'), () =>
+                          shipOrder(order.id, trackingDraft[order.id] ?? null)
+                        )
+                      }
+                    >
+                      {t('ownerOrders.markShipped')}
+                    </button>
+                    <button
+                      type="button"
+                      style={styles.dangerBtn}
+                      disabled={actionId === order.id}
+                      onClick={() =>
+                        void runActionWithConfirm(order.id, t('ownerOrders.confirmCancelAccepted'), () =>
+                          rejectOrder(order.id)
+                        )
+                      }
+                    >
+                      {t('ownerOrders.cancelAcceptedOrder')}
+                    </button>
+                  </div>
+                )}
+
+                {activeQueue === 'fulfillment' && order.status === 'shipped' && (
+                  <div style={styles.actionBar}>
+                    <button
+                      type="button"
+                      style={styles.primaryBtn}
+                      disabled={actionId === order.id}
+                      onClick={() =>
+                        void runActionWithConfirm(order.id, t('ownerOrders.confirmCompleteDelivery'), () =>
+                          completeDelivery(order.id)
+                        )
+                      }
+                    >
+                      {t('ownerOrders.completeDelivery')}
+                    </button>
+                  </div>
                 )}
               </div>
-
-              {order.status === 'cancelled' && order.cancelled_by === 'shopper' && (
-                <p style={styles.cancelledNote}>{t('ownerOrders.cancelledByShopperNote')}</p>
-              )}
-
-              {order.claim_status !== 'none' && (
-                <div style={styles.claimBox}>
-                  <div style={styles.claimHeader}>
-                    <span style={styles.claimTitle}>{t('ownerOrders.claimTitle')}</span>
-                    <span style={order.claim_status === 'open' ? styles.claimBadgeOpen : styles.claimBadgeResolved}>
-                      {order.claim_status === 'open'
-                        ? t('ownerOrders.claimOpenBadge')
-                        : t('ownerOrders.claimResolvedBadge')}
-                    </span>
-                  </div>
-                  <div style={styles.claimLabel}>{t('ownerOrders.claimMessageLabel')}</div>
-                  <p style={styles.claimText}>{order.claim_message}</p>
-
-                  {order.claim_status === 'open' ? (
-                    <div style={styles.claimReplyRow}>
-                      <textarea
-                        style={styles.claimTextarea}
-                        value={claimReplyDraft[order.id] ?? ''}
-                        onChange={(e) =>
-                          setClaimReplyDraft((prev) => ({ ...prev, [order.id]: e.target.value }))
-                        }
-                        placeholder={t('ownerOrders.claimReplyPlaceholder')}
-                      />
-                      <button
-                        type="button"
-                        style={styles.primaryBtn}
-                        disabled={actionId === order.id}
-                        onClick={() => void handleResolveClaim(order.id)}
-                      >
-                        {actionId === order.id ? t('ownerOrders.claimReplySaving') : t('ownerOrders.claimReplyButton')}
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <div style={styles.claimLabel}>{t('ownerOrders.claimReplyLabel')}</div>
-                      <p style={styles.claimText}>{order.claim_reply}</p>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {activeQueue === 'pending' && isPendingOrderStatus(order.status) && (
-                <div style={styles.actions}>
-                  <button
-                    type="button"
-                    style={styles.primaryBtn}
-                    disabled={actionId === order.id}
-                    onClick={() =>
-                      void runActionWithConfirm(order.id, t('ownerOrders.confirmAccept'), () =>
-                        acceptOrder(order.id)
-                      )
-                    }
-                  >
-                    {t('ownerOrders.accept')}
-                  </button>
-                  <button
-                    type="button"
-                    style={styles.dangerBtn}
-                    disabled={actionId === order.id}
-                    onClick={() =>
-                      void runActionWithConfirm(order.id, t('ownerOrders.confirmReject'), () =>
-                        rejectOrder(order.id)
-                      )
-                    }
-                  >
-                    {t('ownerOrders.reject')}
-                  </button>
-                </div>
-              )}
-
-              {activeQueue === 'fulfillment' && order.status === 'accepted' && (
-                <div style={styles.actions}>
-                  <input
-                    style={styles.trackingInput}
-                    value={trackingDraft[order.id] ?? ''}
-                    onChange={(e) =>
-                      setTrackingDraft((prev) => ({ ...prev, [order.id]: e.target.value }))
-                    }
-                    placeholder={t('ownerOrders.trackingPlaceholder')}
-                  />
-                  <button
-                    type="button"
-                    style={styles.primaryBtn}
-                    disabled={actionId === order.id}
-                    onClick={() =>
-                      void runActionWithConfirm(order.id, t('ownerOrders.confirmShip'), () =>
-                        shipOrder(order.id, trackingDraft[order.id] ?? null)
-                      )
-                    }
-                  >
-                    {t('ownerOrders.markShipped')}
-                  </button>
-                  <button
-                    type="button"
-                    style={styles.dangerBtn}
-                    disabled={actionId === order.id}
-                    onClick={() =>
-                      void runActionWithConfirm(order.id, t('ownerOrders.confirmCancelAccepted'), () =>
-                        rejectOrder(order.id)
-                      )
-                    }
-                  >
-                    {t('ownerOrders.cancelAcceptedOrder')}
-                  </button>
-                </div>
-              )}
-
-              {activeQueue === 'fulfillment' && order.status === 'shipped' && (
-                <div style={styles.actions}>
-                  <button
-                    type="button"
-                    style={styles.primaryBtn}
-                    disabled={actionId === order.id}
-                    onClick={() =>
-                      void runActionWithConfirm(order.id, t('ownerOrders.confirmCompleteDelivery'), () =>
-                        completeDelivery(order.id)
-                      )
-                    }
-                  >
-                    {t('ownerOrders.completeDelivery')}
-                  </button>
-                </div>
-              )}
-
-              {(order.status === 'shipped' ||
-                order.status === 'delivery_completed' ||
-                order.status === 'purchase_confirmed') && (
-                <div style={styles.shippedNote}>
-                  {t('ownerOrders.shippedAt')}{' '}
-                  {order.shipped_at ? formatDate(order.shipped_at) : '-'}
-                  {order.tracking_number ? ` · ${t('ownerOrders.tracking')}: ${order.tracking_number}` : ''}
-                  {order.delivery_completed_at && (
-                    <>
-                      <br />
-                      {t('ownerOrders.deliveryCompletedAt')} {formatDate(order.delivery_completed_at)}
-                    </>
-                  )}
-                  {order.purchase_confirmed_at && (
-                    <>
-                      <br />
-                      {t('ownerOrders.purchaseConfirmedAt')} {formatDate(order.purchase_confirmed_at)}
-                    </>
-                  )}
-                </div>
-              )}
-
-              <div style={styles.footerRow}>
-                <span style={styles.date}>{formatDate(order.created_at)}</span>
-                <strong style={styles.total}>{formatPrice(order.total_amount)}</strong>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </>
   );
 
   if (embedded) {
     return (
       <section style={styles.embeddedPanel}>
-        <h2 style={styles.embeddedTitle}>{t(titleKey)}</h2>
         {panelBody}
       </section>
     );
@@ -453,16 +481,16 @@ function formatDate(iso: string): string {
 
 const styles: Record<string, React.CSSProperties> = {
   embeddedPanel: {
-    background: '#16213e',
+    background: oc.surface,
     borderRadius: 12,
-    padding: 24,
-    border: '1px solid #2c4270',
+    border: `1px solid ${oc.border}`,
+    boxShadow: oc.shadow,
+    overflow: 'hidden',
   },
-  embeddedTitle: { margin: '0 0 16px', fontSize: 18, color: '#fff' },
   overlay: {
     position: 'fixed',
     inset: 0,
-    background: 'rgba(0,0,0,0.5)',
+    background: oc.overlay,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -470,174 +498,244 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 16,
   },
   panel: {
-    background: '#16213e',
-    borderRadius: 14,
+    background: oc.surface,
+    borderRadius: 12,
     width: '100%',
     maxWidth: 560,
     maxHeight: '85vh',
     overflowY: 'auto',
     padding: 20,
-    boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
+    boxShadow: oc.shadowMd,
+    border: `1px solid ${oc.border}`,
   },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  title: { color: '#fff', fontSize: 17, margin: 0 },
-  closeButton: { background: 'transparent', border: 'none', color: '#a0a0c0', fontSize: 16, cursor: 'pointer' },
-  subNav: { display: 'flex', gap: 8, marginBottom: 14 },
+  title: { color: oc.text, fontSize: fs.lg, margin: 0, fontWeight: 600 },
+  closeButton: { background: 'transparent', border: 'none', color: oc.textMuted, fontSize: fs.md, cursor: 'pointer' },
+  subNav: { display: 'flex', gap: 8, marginBottom: 14, padding: '0 20px' },
   subNavBtn: {
     flex: 1,
-    padding: '8px 10px',
+    padding: '9px 12px',
     borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: 'transparent',
-    color: '#a0a0c0',
-    fontSize: 13,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.textMuted,
+    fontSize: fs.sm,
     cursor: 'pointer',
   },
-  subNavActive: { background: '#0f3460', color: '#fff', fontWeight: 600 },
+  subNavActive: { background: oc.navActiveBg, color: oc.navActiveText, fontWeight: 600, border: `1px solid ${oc.border}` },
+  filterCard: {
+    padding: '16px 20px',
+    background: oc.surfaceMuted,
+    borderBottom: `1px solid ${oc.border}`,
+  },
   filterBar: {
     display: 'flex',
     flexWrap: 'wrap',
     gap: 8,
-    marginBottom: 14,
   },
   filterSearch: {
-    flex: '1 1 160px',
-    minWidth: 140,
-    padding: '8px 10px',
+    flex: '1 1 200px',
+    minWidth: 160,
+    padding: '10px 12px',
     borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: '#0d1730',
-    color: '#fff',
-    fontSize: 12,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.text,
+    fontSize: fs.sm,
   },
   filterSelect: {
     flex: '0 1 auto',
-    padding: '8px 10px',
+    padding: '10px 12px',
     borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: '#0d1730',
-    color: '#fff',
-    fontSize: 12,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.text,
+    fontSize: fs.sm,
   },
   filterDate: {
     flex: '0 1 auto',
-    padding: '7px 8px',
+    padding: '9px 10px',
     borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: '#0d1730',
-    color: '#fff',
-    fontSize: 12,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.text,
+    fontSize: fs.sm,
   },
-  hint: { color: '#a0a0c0', fontSize: 13, textAlign: 'center', padding: '30px 0' },
-  error: { color: '#ff6b6b', fontSize: 13, textAlign: 'center', padding: '30px 0' },
-  list: { display: 'flex', flexDirection: 'column', gap: 12 },
-  card: { background: '#0f3460', borderRadius: 10, padding: 14, border: '1px solid #2c4270' },
-  cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, gap: 8 },
-  cardHeaderLeft: { display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 },
-  orderRef: { color: '#c9a962', fontSize: 13, fontWeight: 700 },
-  buyer: { color: '#fff', fontSize: 12, fontWeight: 600 },
-  statusBadge: {
-    fontSize: 11,
-    color: '#d8e4ff',
-    border: '1px solid #4062a0',
+  listArea: { padding: '16px 20px 20px', background: oc.pageBg },
+  hint: { color: oc.textMuted, fontSize: fs.base, textAlign: 'center', padding: '30px 0' },
+  error: { color: oc.danger, fontSize: fs.base, textAlign: 'center', padding: '30px 0' },
+  list: { display: 'flex', flexDirection: 'column', gap: 16 },
+  card: {
+    background: oc.surface,
+    borderRadius: 12,
+    padding: '16px 18px',
+    border: `2px solid ${oc.borderStrong}`,
+    boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+  },
+  cardTop: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 16,
+    marginBottom: 14,
+    paddingBottom: 14,
+    borderBottom: `1px solid ${oc.border}`,
+  },
+  cardTopMain: { flex: 1, minWidth: 0 },
+  cardRefRow: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 6 },
+  orderRef: { color: oc.orderRef, fontSize: fs.md, fontWeight: 700 },
+  chipAuto: {
+    fontSize: fs.xs,
+    color: oc.warningText,
+    background: oc.warningBg,
+    border: `1px solid ${oc.warningBorder}`,
     borderRadius: 999,
     padding: '2px 8px',
-    whiteSpace: 'nowrap',
   },
-  autoNote: { color: '#c9a962', fontSize: 11, margin: '0 0 8px' },
-  itemsRow: { color: '#9db2df', fontSize: 12, marginBottom: 4 },
-  itemLine: { color: '#c9d4ee', fontSize: 12, marginBottom: 2 },
+  cardMeta: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, color: oc.textSecondary, fontSize: fs.sm },
+  buyerName: { color: oc.text, fontWeight: 600 },
+  metaSep: { color: oc.textMuted },
+  dateInline: { color: oc.textMuted },
+  totalHighlight: { color: oc.price, fontSize: fs.xl, fontWeight: 700, whiteSpace: 'nowrap' },
+  cardGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+    gap: 12,
+    marginBottom: 4,
+  },
+  cardSection: {
+    padding: '12px 14px',
+    borderRadius: 10,
+    background: oc.surfaceMuted,
+    border: `1.5px solid ${oc.borderStrong}`,
+  },
+  sectionLabel: {
+    color: oc.textMuted,
+    fontSize: fs.xs,
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginBottom: 8,
+  },
+  itemList: { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 },
+  itemRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    gap: 10,
+    fontSize: fs.base,
+    color: oc.text,
+  },
+  itemName: { flex: 1, minWidth: 0, lineHeight: 1.4 },
+  itemQty: { color: oc.textSecondary, fontWeight: 600, flexShrink: 0 },
   gachaBox: {
-    marginTop: 8,
-    padding: 8,
+    marginTop: 10,
+    padding: 10,
     borderRadius: 8,
-    background: '#1a2236',
-    border: '1px dashed #c9a96266',
+    background: oc.warningBg,
+    border: `1px dashed ${oc.warningBorder}`,
   },
-  gachaLabel: { color: '#c9a962', fontSize: 11, fontWeight: 600, marginBottom: 6 },
+  gachaLabel: { color: oc.warningText, fontSize: fs.xs, fontWeight: 600, marginBottom: 6 },
   gachaPrizeRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  gachaThumb: { width: 36, height: 36, borderRadius: 6, objectFit: 'cover' },
-  gachaEmoji: { fontSize: 22 },
-  gachaPrizeName: { color: '#fff', fontSize: 13, fontWeight: 600, flex: 1, minWidth: 0 },
-  shippingBox: { marginTop: 8, padding: 8, borderRadius: 8, background: '#0d1730' },
-  shippingLabel: { color: '#8ca4d8', fontSize: 11, marginBottom: 3 },
-  shippingText: { color: '#c9d4ee', fontSize: 12, lineHeight: 1.5 },
-  actions: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 },
+  gachaThumb: { width: 40, height: 40, borderRadius: 6, objectFit: 'cover' },
+  gachaEmoji: { fontSize: 24 },
+  gachaPrizeName: { color: oc.text, fontSize: fs.base, fontWeight: 600, flex: 1, minWidth: 0 },
+  shippingBlock: { display: 'flex', flexDirection: 'column', gap: 4 },
+  shippingNameRow: { color: oc.text, fontSize: fs.base, fontWeight: 600 },
+  shippingAddr: { color: oc.textSecondary, fontSize: fs.sm, lineHeight: 1.5 },
+  shippingText: { color: oc.textSecondary, fontSize: fs.sm, lineHeight: 1.5 },
+  timelineRow: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 },
+  timelineChip: {
+    fontSize: fs.xs,
+    color: oc.textSecondary,
+    background: oc.surfaceMuted,
+    border: `1px solid ${oc.border}`,
+    borderRadius: 999,
+    padding: '4px 10px',
+  },
+  timelineChipSuccess: {
+    fontSize: fs.xs,
+    color: oc.successText,
+    background: oc.successBg,
+    border: `1px solid ${oc.successBorder}`,
+    borderRadius: 999,
+    padding: '4px 10px',
+  },
+  actionBar: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 14,
+    paddingTop: 14,
+    borderTop: `1px solid ${oc.border}`,
+  },
   primaryBtn: {
-    padding: '8px 12px',
+    padding: '10px 14px',
     borderRadius: 8,
     border: 'none',
-    background: '#2ecc71',
-    color: '#0d1730',
-    fontSize: 12,
+    background: oc.primary,
+    color: '#fff',
+    fontSize: fs.sm,
     fontWeight: 600,
     cursor: 'pointer',
   },
   dangerBtn: {
-    padding: '8px 12px',
+    padding: '10px 14px',
     borderRadius: 8,
-    border: '1px solid #8b3a3a',
-    background: 'transparent',
-    color: '#ff9a9a',
-    fontSize: 12,
+    border: `1px solid ${oc.dangerBorder}`,
+    background: oc.dangerBg,
+    color: oc.dangerText,
+    fontSize: fs.sm,
     cursor: 'pointer',
   },
   trackingInput: {
-    flex: '1 1 140px',
-    minWidth: 120,
-    padding: '8px 10px',
+    flex: '1 1 180px',
+    minWidth: 140,
+    padding: '10px 12px',
     borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: '#0d1730',
-    color: '#fff',
-    fontSize: 12,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.text,
+    fontSize: fs.sm,
   },
-  shippedNote: { color: '#8ce0b0', fontSize: 12, marginTop: 10 },
-  cancelledNote: { color: '#ff9a9a', fontSize: 12, marginTop: 8 },
+  cancelledNote: { color: oc.dangerText, fontSize: fs.sm, marginTop: 10 },
   claimBox: {
-    marginTop: 8,
-    padding: 10,
+    marginTop: 12,
+    padding: 12,
     borderRadius: 8,
-    background: '#241a2e',
-    border: '1px solid #6b3f6b',
+    background: '#f8f0fc',
+    border: `1px solid #e9d5ff`,
   },
   claimHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  claimTitle: { color: '#e0a9e0', fontSize: 12, fontWeight: 700 },
+  claimTitle: { color: '#7c3aed', fontSize: fs.sm, fontWeight: 700 },
   claimBadgeOpen: {
-    fontSize: 11,
-    color: '#ffd8a8',
-    border: '1px solid #a0703a',
+    fontSize: fs.xs,
+    color: oc.warningText,
+    border: `1px solid ${oc.warningBorder}`,
+    background: oc.warningBg,
     borderRadius: 999,
     padding: '2px 8px',
   },
   claimBadgeResolved: {
-    fontSize: 11,
-    color: '#8ce0b0',
-    border: '1px solid #3a7a55',
+    fontSize: fs.xs,
+    color: oc.successText,
+    border: `1px solid ${oc.successBorder}`,
+    background: oc.successBg,
     borderRadius: 999,
     padding: '2px 8px',
   },
-  claimLabel: { color: '#c9a6d8', fontSize: 11, marginBottom: 3 },
-  claimText: { color: '#e8d8ee', fontSize: 12, lineHeight: 1.5, margin: '0 0 8px', whiteSpace: 'pre-wrap' },
+  claimLabel: { color: '#7c3aed', fontSize: fs.xs, marginBottom: 3 },
+  claimText: { color: oc.textSecondary, fontSize: fs.sm, lineHeight: 1.5, margin: '0 0 8px', whiteSpace: 'pre-wrap' },
   claimReplyRow: { display: 'flex', flexDirection: 'column', gap: 6 },
   claimTextarea: {
-    minHeight: 60,
-    padding: '8px 10px',
+    minHeight: 64,
+    padding: '10px 12px',
     borderRadius: 8,
-    border: '1px solid #6b3f6b',
-    background: '#0d1730',
-    color: '#fff',
-    fontSize: 12,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.text,
+    fontSize: fs.sm,
     resize: 'vertical',
+    fontFamily: ownerFont,
   },
-  footerRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 10,
-    paddingTop: 8,
-    borderTop: '1px solid #2c4270',
-  },
-  date: { color: '#8ca4d8', fontSize: 11 },
-  total: { color: '#e94560', fontSize: 14 },
 };

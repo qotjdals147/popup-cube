@@ -14,6 +14,7 @@ import {
   formatIntegerInputRaw,
   parseIntegerInput,
 } from '../lib/formatInteger';
+import { ownerColors as oc, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 
 interface OwnerProductPanelProps {
   storeId: string;
@@ -54,6 +55,7 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
   const [editImageFile, setEditImageFile] = useState<File | null>(null);
   const [editPreviewUrl, setEditPreviewUrl] = useState<string | null>(null);
   const [editSaving, setEditSaving] = useState(false);
+  const [createFormOpen, setCreateFormOpen] = useState(false);
 
   async function reload() {
     setLoading(true);
@@ -102,6 +104,24 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
     setter(formatIntegerInputRaw(value));
   }
 
+  useEffect(() => {
+    if (!loading && products.length === 0) {
+      setCreateFormOpen(true);
+    }
+  }, [loading, products.length]);
+
+  function resetCreateForm() {
+    setName('');
+    setPrice('');
+    setDescription('');
+    setImageFile(null);
+    setPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setFormError(null);
+  }
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
     setImageFile(file);
@@ -139,6 +159,7 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
         if (prev) URL.revokeObjectURL(prev);
         return null;
       });
+      setCreateFormOpen(false);
       await reload();
     } catch (err) {
       if (err instanceof ProductError && err.code === 'IMAGE_TOO_LARGE') {
@@ -161,6 +182,7 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
   }
 
   function startEdit(product: Product) {
+    setCreateFormOpen(false);
     if (editingId) {
       setEditPreviewUrl((prev) => {
         if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
@@ -227,6 +249,23 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
           </div>
         )}
 
+        <div style={styles.toolbar}>
+          <button
+            type="button"
+            style={styles.addToggle}
+            onClick={() => {
+              setCreateFormOpen((open) => {
+                if (open) resetCreateForm();
+                return !open;
+              });
+            }}
+          >
+            {createFormOpen ? t('ownerProducts.addProductCollapse') : t('ownerProducts.addProductToggle')}
+          </button>
+        </div>
+
+        {createFormOpen && (
+        <div style={styles.formCard}>
         <form style={styles.form} onSubmit={handleSubmit}>
           <label style={styles.fieldLabel}>{t('ownerProducts.nameLabel')}</label>
           <input
@@ -279,8 +318,10 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
           </div>
           {formError && <p style={styles.error}>{formError}</p>}
         </form>
+        </div>
+        )}
 
-        <div style={styles.listWrap}>
+        <div style={styles.listArea}>
           {loading ? (
             <p style={styles.hint}>{t('ownerProducts.loading')}</p>
           ) : loadError ? (
@@ -288,16 +329,9 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
           ) : products.length === 0 ? (
             <p style={styles.hint}>{t('ownerProducts.empty')}</p>
           ) : (
-            products.map((product) => (
-              <div key={product.id} style={styles.productRow}>
-                <div style={styles.productThumbWrap}>
-                  {product.image_url ? (
-                    <img src={product.image_url} alt="" style={styles.productThumb} />
-                  ) : (
-                    <div style={styles.imagePlaceholder}>🖼️</div>
-                  )}
-                </div>
-
+            <div style={styles.list}>
+            {products.map((product) => (
+              <div key={product.id} style={styles.card}>
                 {editingId === product.id ? (
                   <div style={styles.editArea}>
                     <label style={styles.fieldLabel}>{t('ownerProducts.nameLabel')}</label>
@@ -399,41 +433,67 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
                     </div>
                   </div>
                 ) : (
-                  <div style={styles.productInfo}>
-                    <div style={styles.productNameRow}>
-                      <strong>{product.name}</strong>
-                      {!product.is_active && <span style={styles.hiddenBadge}>{t('ownerProducts.hidden')}</span>}
-                      {product.auto_accept_enabled && (
-                        <span style={styles.autoAcceptOnBadge}>{t('ownerProducts.autoAcceptOnBadge')}</span>
+                  <div style={styles.cardBody}>
+                    <div style={styles.productThumbLarge}>
+                      {product.image_url ? (
+                        <img src={product.image_url} alt="" style={styles.productThumb} />
+                      ) : (
+                        <div style={styles.imagePlaceholder}>🖼️</div>
                       )}
                     </div>
-                    <div style={styles.productPrice}>{formatPrice(product.price)}</div>
-                    <div style={styles.productMeta}>
-                      {t('ownerProducts.stockHint', {
-                        stock: formatIntegerDisplay(product.stock_quantity),
-                      })}
-                    </div>
-                    {product.auto_accept_enabled && (
-                      <div style={styles.autoAcceptMeta}>
-                        {t('ownerProducts.autoAcceptQuotaShort', {
-                          n: formatIntegerDisplay(product.auto_accept_remaining),
-                          limit: formatIntegerDisplay(product.auto_accept_limit),
-                        })}
+
+                    <div style={styles.cardContent}>
+                      <div style={styles.cardHeaderRow}>
+                        <div style={styles.nameBlock}>
+                          <span style={styles.productName}>{product.name}</span>
+                          <div style={styles.badgeRow}>
+                            {!product.is_active && (
+                              <span style={styles.hiddenBadge}>{t('ownerProducts.hidden')}</span>
+                            )}
+                            {product.auto_accept_enabled && (
+                              <span style={styles.autoAcceptOnBadge}>{t('ownerProducts.autoAcceptOnBadge')}</span>
+                            )}
+                          </div>
+                        </div>
+                        <strong style={styles.priceHighlight}>{formatPrice(product.price)}</strong>
                       </div>
-                    )}
-                    {product.description && <div style={styles.productDesc}>{product.description}</div>}
-                    <div style={styles.editActions}>
-                      <button style={styles.smallGhostButton} onClick={() => startEdit(product)}>
-                        {t('ownerProducts.edit')}
-                      </button>
-                      <button style={styles.smallGhostButton} onClick={() => handleToggleActive(product)}>
-                        {product.is_active ? t('ownerProducts.hide') : t('ownerProducts.show')}
-                      </button>
+
+                      {product.description ? (
+                        <p style={styles.productDesc}>{product.description}</p>
+                      ) : (
+                        <p style={styles.productDescEmpty}>{t('ownerProducts.noDescription')}</p>
+                      )}
+
+                      <div style={styles.metaRow}>
+                        <span style={styles.metaItem}>
+                          {t('ownerProducts.stockHint', {
+                            stock: formatIntegerDisplay(product.stock_quantity),
+                          })}
+                        </span>
+                        {product.auto_accept_enabled && (
+                          <span style={styles.autoAcceptChip}>
+                            {t('ownerProducts.autoAcceptChip', {
+                              n: formatIntegerDisplay(product.auto_accept_remaining),
+                              limit: formatIntegerDisplay(product.auto_accept_limit),
+                            })}
+                          </span>
+                        )}
+                      </div>
+
+                      <div style={styles.actionBar}>
+                        <button style={styles.smallGhostButton} onClick={() => startEdit(product)}>
+                          {t('ownerProducts.edit')}
+                        </button>
+                        <button style={styles.smallGhostButton} onClick={() => handleToggleActive(product)}>
+                          {product.is_active ? t('ownerProducts.hide') : t('ownerProducts.show')}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
-            ))
+            ))}
+            </div>
           )}
         </div>
     </>
@@ -442,7 +502,6 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
   if (embedded) {
     return (
       <section style={styles.embeddedPanel}>
-        <h2 style={styles.embeddedTitle}>{t('ownerProducts.title')}</h2>
         {panelBody}
       </section>
     );
@@ -463,16 +522,16 @@ function formatPrice(price: number): string {
 
 const styles: Record<string, React.CSSProperties> = {
   embeddedPanel: {
-    background: '#16213e',
+    background: oc.surface,
     borderRadius: 12,
-    padding: 24,
-    border: '1px solid #2c4270',
+    border: `1px solid ${oc.border}`,
+    boxShadow: oc.shadow,
+    overflow: 'hidden',
   },
-  embeddedTitle: { margin: '0 0 16px', fontSize: 18, color: '#fff' },
   overlay: {
     position: 'fixed',
     inset: 0,
-    background: 'rgba(0,0,0,0.5)',
+    background: oc.overlay,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -480,72 +539,93 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 16,
   },
   panel: {
-    background: '#16213e',
-    borderRadius: 14,
+    background: oc.surface,
+    borderRadius: 12,
     width: '100%',
     maxWidth: 520,
     maxHeight: '85vh',
     overflowY: 'auto',
     padding: 20,
-    boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
+    boxShadow: oc.shadowMd,
+    border: `1px solid ${oc.border}`,
   },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  title: { color: '#fff', fontSize: 17, margin: 0 },
+  title: { color: oc.text, fontSize: fs.lg, margin: 0, fontWeight: 600 },
   closeButton: {
     background: 'transparent',
     border: 'none',
-    color: '#a0a0c0',
-    fontSize: 16,
+    color: oc.textMuted,
+    fontSize: fs.md,
+    cursor: 'pointer',
+  },
+  formCard: {
+    padding: '0 20px 16px',
+    background: oc.surface,
+    borderBottom: `1px solid ${oc.border}`,
+  },
+  toolbar: {
+    padding: '14px 20px',
+    background: oc.surfaceMuted,
+    borderBottom: `1px solid ${oc.border}`,
+  },
+  addToggle: {
+    padding: '10px 16px',
+    borderRadius: 8,
+    border: `1px solid ${oc.primary}`,
+    background: oc.surface,
+    color: oc.primary,
+    fontSize: fs.base,
+    fontWeight: 600,
     cursor: 'pointer',
   },
   form: {
-    background: '#0f3460',
+    background: oc.surfaceMuted,
     borderRadius: 10,
-    padding: 14,
-    marginBottom: 16,
+    padding: 16,
     display: 'flex',
     flexDirection: 'column',
-    gap: 8,
+    gap: 10,
+    border: `1px solid ${oc.border}`,
   },
   formRow: { display: 'flex', gap: 8, alignItems: 'center' },
   input: {
     flex: 1,
     padding: '10px 12px',
     borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: '#0d1730',
-    color: '#fff',
-    fontSize: 13,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.text,
+    fontSize: fs.base,
     boxSizing: 'border-box',
   },
   inputFull: {
     width: '100%',
     padding: '10px 12px',
     borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: '#0d1730',
-    color: '#fff',
-    fontSize: 13,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.text,
+    fontSize: fs.base,
     boxSizing: 'border-box',
   },
   priceInput: {
     width: 110,
     padding: '10px 12px',
     borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: '#0d1730',
-    color: '#fff',
-    fontSize: 13,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.text,
+    fontSize: fs.base,
     boxSizing: 'border-box',
   },
   textarea: {
     width: '100%',
     padding: '10px 12px',
     borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: '#0d1730',
-    color: '#fff',
-    fontSize: 13,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.text,
+    fontSize: fs.base,
     boxSizing: 'border-box',
     resize: 'vertical',
     fontFamily: 'inherit',
@@ -555,8 +635,8 @@ const styles: Record<string, React.CSSProperties> = {
     height: 44,
     borderRadius: 8,
     overflow: 'hidden',
-    background: '#0d1730',
-    border: '1px solid #2c4270',
+    background: oc.surfaceMuted,
+    border: `1px solid ${oc.border}`,
     flexShrink: 0,
     display: 'flex',
     alignItems: 'center',
@@ -567,23 +647,22 @@ const styles: Record<string, React.CSSProperties> = {
     height: 56,
     borderRadius: 8,
     overflow: 'hidden',
-    background: '#0d1730',
-    border: '1px solid #2c4270',
+    background: oc.surfaceMuted,
+    border: `1px solid ${oc.border}`,
     flexShrink: 0,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // 사진을 잘라내지 않고 비율 그대로 박스 안에 전부 보이게 표시 (여백은 생길 수 있음).
   imagePreview: { width: '100%', height: '100%', objectFit: 'contain' },
-  imagePlaceholder: { fontSize: 18, opacity: 0.5 },
+  imagePlaceholder: { fontSize: fs.lg, color: oc.textMuted },
   fileButton: {
     padding: '9px 10px',
     borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: 'transparent',
-    color: '#fff',
-    fontSize: 12,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.textSecondary,
+    fontSize: fs.sm,
     cursor: 'pointer',
     whiteSpace: 'nowrap',
   },
@@ -592,81 +671,117 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '10px 16px',
     borderRadius: 8,
     border: 'none',
-    background: '#e94560',
+    background: oc.primary,
     color: '#fff',
-    fontSize: 13,
+    fontSize: fs.base,
     fontWeight: 600,
     cursor: 'pointer',
     whiteSpace: 'nowrap',
   },
-  error: { color: '#ff6b6b', fontSize: 12, margin: 0 },
-  hint: { color: '#a0a0c0', fontSize: 13, textAlign: 'center', padding: '20px 0' },
-  listWrap: { display: 'flex', flexDirection: 'column', gap: 10 },
-  productRow: {
-    display: 'flex',
-    gap: 10,
-    background: '#0f3460',
-    borderRadius: 10,
-    padding: 10,
+  error: { color: oc.danger, fontSize: fs.sm, margin: 0 },
+  hint: { color: oc.textMuted, fontSize: fs.base, textAlign: 'center', padding: '20px 0' },
+  listArea: { padding: '16px 20px 20px', background: oc.pageBg },
+  list: { display: 'flex', flexDirection: 'column', gap: 16 },
+  card: {
+    background: oc.surface,
+    borderRadius: 12,
+    padding: '18px 20px',
+    border: `2px solid ${oc.borderStrong}`,
+    boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
   },
-  productThumbWrap: {
-    width: 56,
-    height: 56,
-    borderRadius: 8,
+  cardBody: {
+    display: 'flex',
+    gap: 18,
+    alignItems: 'flex-start',
+  },
+  productThumbLarge: {
+    width: 96,
+    height: 96,
+    borderRadius: 10,
     overflow: 'hidden',
-    background: '#0d1730',
-    border: '1px solid #2c4270',
+    background: oc.surfaceMuted,
+    border: `1px solid ${oc.border}`,
     flexShrink: 0,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // 사진을 잘라내지 않고 비율 그대로 박스 안에 전부 보이게 표시 (여백은 생길 수 있음).
   productThumb: { width: '100%', height: '100%', objectFit: 'contain' },
-  productInfo: { flex: 1, minWidth: 0 },
-  productNameRow: { display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontSize: 14 },
+  cardContent: {
+    flex: 1,
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
+  },
+  cardHeaderRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 16,
+  },
+  nameBlock: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 },
+  badgeRow: { display: 'flex', flexWrap: 'wrap', gap: 6 },
+  productName: { color: oc.text, fontSize: fs.lg, fontWeight: 700, lineHeight: 1.35 },
+  priceHighlight: { color: oc.price, fontSize: fs.xl, fontWeight: 700, whiteSpace: 'nowrap' },
+  metaRow: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 },
+  metaItem: { color: oc.textSecondary, fontSize: fs.sm },
+  autoAcceptChip: {
+    fontSize: fs.xs,
+    fontWeight: 600,
+    color: oc.successText,
+    background: oc.successBg,
+    border: `1px solid ${oc.successBorder}`,
+    borderRadius: 999,
+    padding: '3px 10px',
+  },
+  actionBar: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 4,
+  },
   hiddenBadge: {
-    fontSize: 11,
-    color: '#ffd580',
-    border: '1px solid #6b5320',
+    fontSize: fs.xs,
+    color: oc.warningText,
+    border: `1px solid ${oc.warningBorder}`,
+    background: oc.warningBg,
     borderRadius: 999,
     padding: '1px 8px',
   },
   autoAcceptOnBadge: {
-    fontSize: 11,
+    fontSize: fs.xs,
     fontWeight: 600,
-    color: '#8ce0b0',
-    border: '1px solid #2c6b4a',
-    background: '#173a2c',
+    color: oc.successText,
+    border: `1px solid ${oc.successBorder}`,
+    background: oc.successBg,
     borderRadius: 999,
-    padding: '1px 8px',
+    padding: '3px 10px',
   },
-  productPrice: { color: '#e94560', fontSize: 13, fontWeight: 600, marginTop: 2 },
-  productMeta: { color: '#8ca4d8', fontSize: 11, marginTop: 4, lineHeight: 1.4 },
-  autoAcceptMeta: { color: '#8ce0b0', fontSize: 11, marginTop: 2, lineHeight: 1.4 },
-  fieldLabel: { color: '#a0a0c0', fontSize: 12, marginTop: 4 },
-  checkRow: { display: 'flex', alignItems: 'center', gap: 8, color: '#d8e4ff', fontSize: 13 },
-  helpText: { color: '#8ca4d8', fontSize: 11, margin: '4px 0 0', lineHeight: 1.45 },
-  productDesc: { color: '#a0a0c0', fontSize: 12, marginTop: 4, lineHeight: 1.4 },
-  editArea: { flex: 1, display: 'flex', flexDirection: 'column', gap: 6 },
+  fieldLabel: { color: oc.textMuted, fontSize: fs.sm, marginTop: 2 },
+  checkRow: { display: 'flex', alignItems: 'center', gap: 8, color: oc.textSecondary, fontSize: fs.base },
+  helpText: { color: oc.textMuted, fontSize: fs.xs, margin: '4px 0 0', lineHeight: 1.45 },
+  productDesc: { color: oc.textSecondary, fontSize: fs.base, lineHeight: 1.55, margin: 0 },
+  productDescEmpty: { color: oc.textMuted, fontSize: fs.sm, lineHeight: 1.55, margin: 0 },
+  editArea: { display: 'flex', flexDirection: 'column', gap: 6 },
   editActions: { display: 'flex', gap: 8, marginTop: 6 },
   smallButton: {
     padding: '6px 12px',
     borderRadius: 8,
     border: 'none',
-    background: '#e94560',
+    background: oc.primary,
     color: '#fff',
-    fontSize: 12,
+    fontSize: fs.sm,
     fontWeight: 600,
     cursor: 'pointer',
   },
   smallGhostButton: {
-    padding: '6px 12px',
+    padding: '10px 14px',
     borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: 'transparent',
-    color: '#d8e4ff',
-    fontSize: 12,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.textSecondary,
+    fontSize: fs.sm,
     cursor: 'pointer',
   },
 };
