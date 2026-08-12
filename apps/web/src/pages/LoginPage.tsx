@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { t, getAuthErrorMessage } from '../i18n';
 import { checkNicknameAvailable, isNicknameLengthValid } from '../lib/nickname';
-import { userOwnsStore } from '../lib/stores';
-import { DEMO_STORE_ID } from '@popup-cube/shared';
+import { ownerColors as oc, ownerFont, ownerFontSize as fs, ownerInput } from '../styles/ownerAdminTheme';
 
 type Mode = 'login' | 'signup';
 type NicknameStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
@@ -12,7 +11,7 @@ type NicknameStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
 /** AD-037 — PC 웹 로그인: 스토어 관리자 전용 */
 export function LoginPage() {
   const navigate = useNavigate();
-  const { signInWithPassword, signUp, userId, role, storeId, loading: authLoading } = useAuth();
+  const { signInWithPassword, signUp, userId, role, loading: authLoading } = useAuth();
 
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
@@ -29,20 +28,8 @@ export function LoginPage() {
       navigate('/home', { replace: true });
       return;
     }
-    if (role === 'owner') {
-      void (async () => {
-        if (userId && (await userOwnsStore(userId, DEMO_STORE_ID))) {
-          navigate(`/store/${DEMO_STORE_ID}/edit`, { replace: true });
-        } else if (storeId) {
-          navigate(`/store/${storeId}/edit`, { replace: true });
-        } else {
-          navigate('/home', { replace: true });
-        }
-      })();
-      return;
-    }
     navigate('/home', { replace: true });
-  }, [authLoading, userId, role, storeId, navigate]);
+  }, [authLoading, userId, role, navigate]);
 
   function toggleMode() {
     setMode((m) => (m === 'login' ? 'signup' : 'login'));
@@ -129,6 +116,7 @@ export function LoginPage() {
         style={styles.card}
         onSubmit={mode === 'login' ? handleLoginSubmit : handleSignupSubmit}
       >
+        <div style={styles.brandBar} />
         <h2 style={styles.title}>{t('login.ownerTitle')}</h2>
         <p style={styles.subtitle}>{t('login.ownerSubtitle')}</p>
         <p style={styles.pcHint}>{t('login.ownerPcHint')}</p>
@@ -195,7 +183,7 @@ export function LoginPage() {
         </button>
 
         <button style={styles.backButton} type="button" onClick={() => navigate('/')}>
-          {t('common.back')}
+          {t('login.backToLanding')}
         </button>
       </form>
     </div>
@@ -208,79 +196,84 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
-    fontFamily: "'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif",
+    background: oc.pageBg,
+    fontFamily: ownerFont,
     padding: 24,
   },
   card: {
-    background: '#0f3460',
-    padding: '36px 32px',
-    borderRadius: 16,
+    position: 'relative',
+    background: oc.surface,
+    padding: '32px 32px 28px',
+    borderRadius: 12,
     width: '100%',
-    maxWidth: 380,
-    boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+    maxWidth: 400,
+    border: `1px solid ${oc.border}`,
+    boxShadow: oc.shadowMd,
+    overflow: 'hidden',
   },
-  title: { color: '#fff', fontSize: 20, margin: 0 },
-  subtitle: { color: '#a0a0c0', fontSize: 13, marginTop: 8, marginBottom: 4 },
+  brandBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    background: oc.sidebarBg,
+  },
+  title: { color: oc.text, fontSize: fs.xl, margin: '4px 0 0', fontWeight: 700 },
+  subtitle: { color: oc.textSecondary, fontSize: fs.sm, marginTop: 8, marginBottom: 4, lineHeight: 1.5 },
   pcHint: {
-    color: '#8ea6dd',
-    fontSize: 12,
+    color: oc.textMuted,
+    fontSize: fs.xs,
     marginTop: 0,
-    marginBottom: 16,
+    marginBottom: 20,
     lineHeight: 1.5,
   },
   input: {
+    ...ownerInput,
     width: '100%',
     padding: '12px',
     marginBottom: 10,
-    borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: '#16213e',
-    color: '#fff',
-    fontSize: 14,
-    boxSizing: 'border-box',
+    fontSize: fs.base,
   },
-  error: { color: '#ff6b6b', fontSize: 13, marginBottom: 10 },
+  error: { color: oc.dangerText, fontSize: fs.sm, marginBottom: 10, lineHeight: 1.45 },
   info: {
-    color: '#8ce0b0',
-    background: '#173a2c',
-    border: '1px solid #2c6b4a',
+    color: oc.successText,
+    background: oc.successBg,
+    border: `1px solid ${oc.successBorder}`,
     borderRadius: 8,
     padding: '8px 10px',
-    fontSize: 12,
+    fontSize: fs.sm,
     marginBottom: 12,
+    lineHeight: 1.45,
   },
   nicknameRow: { display: 'flex', gap: 8, marginBottom: 6 },
   nicknameInput: {
+    ...ownerInput,
     flex: 1,
     padding: '12px',
-    borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: '#16213e',
-    color: '#fff',
-    fontSize: 14,
-    boxSizing: 'border-box',
+    fontSize: fs.base,
   },
   checkButton: {
     padding: '0 14px',
     borderRadius: 8,
-    border: '1px solid #4062a0',
-    background: '#203c70',
-    color: '#fff',
-    fontSize: 13,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surfaceMuted,
+    color: oc.text,
+    fontSize: fs.sm,
+    fontWeight: 600,
     cursor: 'pointer',
     whiteSpace: 'nowrap',
   },
-  hintOk: { color: '#8ce0b0', fontSize: 12, marginTop: 0, marginBottom: 10 },
-  hintWarn: { color: '#ffb454', fontSize: 12, marginTop: 0, marginBottom: 10 },
+  hintOk: { color: oc.successText, fontSize: fs.sm, marginTop: 0, marginBottom: 10 },
+  hintWarn: { color: oc.warningText, fontSize: fs.sm, marginTop: 0, marginBottom: 10 },
   toggleButton: {
     width: '100%',
     padding: '8px',
     borderRadius: 8,
     border: 'none',
     background: 'transparent',
-    color: '#8ea6dd',
-    fontSize: 12,
+    color: oc.primary,
+    fontSize: fs.sm,
     cursor: 'pointer',
     marginBottom: 2,
   },
@@ -289,9 +282,9 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '12px',
     borderRadius: 8,
     border: 'none',
-    background: '#e94560',
-    color: '#fff',
-    fontSize: 15,
+    background: oc.primary,
+    color: oc.primaryText,
+    fontSize: fs.base,
     fontWeight: 600,
     cursor: 'pointer',
     marginBottom: 10,
@@ -302,8 +295,8 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 8,
     border: 'none',
     background: 'transparent',
-    color: '#a0a0c0',
-    fontSize: 13,
+    color: oc.textMuted,
+    fontSize: fs.sm,
     cursor: 'pointer',
   },
 };

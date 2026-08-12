@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getMyStore, publishStore, updateStoreCode, userOwnsStore } from '../lib/stores';
+import { getMyStore, publishStore, updateStoreCode, userOwnsStore, countActiveOrdersForStoreDelete, deleteOwnerStore, unpublishStore, StoreDeleteError } from '../lib/stores';
+import { DEMO_STORE_ID } from '@popup-cube/shared';
 import { OwnerProductPanel } from '../components/OwnerProductPanel';
 import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
 import { OwnerDisplayPanel } from '../components/OwnerDisplayPanel';
@@ -30,8 +31,11 @@ export function StoreEditPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const [publishMsg, setPublishMsg] = useState<string | null>(null);
-  const [publishErr, setPublishErr] = useState(false);
+  const [unpublishing, setUnpublishing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [lifecycleMsg, setLifecycleMsg] = useState<string | null>(null);
+  const [lifecycleErr, setLifecycleErr] = useState<string | null>(null);
+  const [activeOrderCount, setActiveOrderCount] = useState(0);
   const [storeCodeDraft, setStoreCodeDraft] = useState('');
   const [savingStoreCode, setSavingStoreCode] = useState(false);
   const [storeCodeMsg, setStoreCodeMsg] = useState<string | null>(null);
@@ -86,6 +90,14 @@ export function StoreEditPage() {
       const data = await getMyStore(storeId);
       setStore(data);
       setStoreCodeDraft(data?.store_code ?? '');
+      if (data) {
+        try {
+          const count = await countActiveOrdersForStoreDelete(storeId);
+          setActiveOrderCount(count);
+        } catch {
+          setActiveOrderCount(0);
+        }
+      }
     } catch {
       setError(true);
     } finally {
@@ -131,16 +143,70 @@ export function StoreEditPage() {
   async function handlePublish() {
     if (!storeId || store?.status === 'published') return;
     setPublishing(true);
-    setPublishMsg(null);
-    setPublishErr(false);
+    setLifecycleMsg(null);
+    setLifecycleErr(null);
     try {
       const updated = await publishStore(storeId);
       setStore(updated);
-      setPublishMsg(t('ownerEdit.publishSuccess'));
+      setLifecycleMsg(t('ownerEdit.openSuccess'));
     } catch {
-      setPublishErr(true);
+      setLifecycleErr(t('ownerEdit.openError'));
     } finally {
       setPublishing(false);
+    }
+  }
+
+  async function handleUnpublish() {
+    if (!storeId || !store || store.status !== 'published') return;
+    if (!window.confirm(t('ownerEdit.offConfirm', { name: store.name }))) return;
+
+    setUnpublishing(true);
+    setLifecycleMsg(null);
+    setLifecycleErr(null);
+    try {
+      const updated = await unpublishStore(storeId);
+      setStore(updated);
+      setLifecycleMsg(t('ownerEdit.offSuccess'));
+    } catch {
+      setLifecycleErr(t('ownerEdit.offError'));
+    } finally {
+      setUnpublishing(false);
+    }
+  }
+
+  async function handleDeleteStore() {
+    if (!storeId || !store || storeId === DEMO_STORE_ID) return;
+
+    if (store.status === 'published') {
+      setLifecycleErr(t('ownerEdit.deleteBlockedPublished'));
+      return;
+    }
+    if (activeOrderCount > 0) {
+      setLifecycleErr(t('ownerEdit.deleteBlockedOrders'));
+      return;
+    }
+    if (!window.confirm(t('ownerEdit.deleteConfirm', { name: store.name }))) return;
+
+    setDeleting(true);
+    setLifecycleMsg(null);
+    setLifecycleErr(null);
+    try {
+      await deleteOwnerStore(storeId);
+      navigate('/home', { replace: true });
+    } catch (err) {
+      if (err instanceof StoreDeleteError) {
+        if (err.code === 'still_published') {
+          setLifecycleErr(t('ownerEdit.deleteBlockedPublished'));
+        } else if (err.code === 'active_orders') {
+          setLifecycleErr(t('ownerEdit.deleteBlockedOrders'));
+        } else {
+          setLifecycleErr(t('ownerEdit.deleteError'));
+        }
+      } else {
+        setLifecycleErr(t('ownerEdit.deleteError'));
+      }
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -158,6 +224,9 @@ export function StoreEditPage() {
   ];
 
   const isDraft = store?.status === 'draft';
+  const isDemo = storeId === DEMO_STORE_ID;
+  const lifecycleBusy = publishing || unpublishing || deleting;
+  const canDelete = !isDemo && isDraft && activeOrderCount === 0;
 
   const activeTabLabel = tabs.find((item) => item.id === tab)?.label ?? '';
 
@@ -208,6 +277,14 @@ export function StoreEditPage() {
         <div style={styles.mainColumn}>
           <header style={styles.mainTopBar}>
             <h2 style={styles.mainTopTitle}>{activeTabLabel}</h2>
+            <div style={styles.topBarActions}>
+              <button style={styles.topBarBackBtn} type="button" onClick={() => navigate('/home')}>
+                {t('ownerEdit.backDashboard')}
+              </button>
+              <button style={styles.topBarLogoutBtn} type="button" onClick={() => void handleSignOut()}>
+                {t('common.logout')}
+              </button>
+            </div>
           </header>
 
           <main style={styles.main}>
@@ -265,18 +342,59 @@ export function StoreEditPage() {
                     )}
                   </div>
                   <p style={styles.note}>{isDraft ? t('ownerEdit.draftNote') : t('ownerEdit.publishedNote')}</p>
-                  {isDraft && (
-                    <button
-                      type="button"
-                      style={styles.publishButton}
-                      disabled={publishing}
-                      onClick={handlePublish}
-                    >
-                      {publishing ? t('ownerEdit.publishing') : t('ownerEdit.publishButton')}
-                    </button>
+                  {!isDemo && !isDraft && (
+                    <p style={styles.lifecycleHint}>{t('ownerEdit.deleteHintUnpublish')}</p>
                   )}
-                  {publishMsg && <p style={styles.success}>{publishMsg}</p>}
-                  {publishErr && <p style={styles.error}>{t('ownerEdit.publishError')}</p>}
+                  {!isDemo && isDraft && activeOrderCount > 0 && (
+                    <p style={styles.lifecycleHintWarn}>
+                      {t('ownerEdit.deleteHintActiveOrders', { count: activeOrderCount })}
+                    </p>
+                  )}
+                  {isDemo && <p style={styles.lifecycleHint}>{t('ownerEdit.demoStoreNoDelete')}</p>}
+                  <div style={styles.lifecycleActions}>
+                    {isDraft && (
+                      <button
+                        type="button"
+                        style={styles.primaryActionBtn}
+                        disabled={lifecycleBusy}
+                        onClick={() => void handlePublish()}
+                      >
+                        {publishing ? t('ownerEdit.opening') : t('ownerEdit.storeOpen')}
+                      </button>
+                    )}
+                    {!isDraft && (
+                      <button
+                        type="button"
+                        style={styles.secondaryActionBtn}
+                        disabled={lifecycleBusy}
+                        onClick={() => void handleUnpublish()}
+                      >
+                        {unpublishing ? t('ownerEdit.offing') : t('ownerEdit.storeOff')}
+                      </button>
+                    )}
+                    {!isDemo && (
+                      <button
+                        type="button"
+                        style={{
+                          ...styles.dangerActionBtn,
+                          ...(canDelete ? null : styles.dangerActionBtnDisabled),
+                        }}
+                        disabled={lifecycleBusy || !canDelete}
+                        title={
+                          !canDelete
+                            ? !isDraft
+                              ? t('ownerEdit.deleteBlockedPublished')
+                              : t('ownerEdit.deleteBlockedOrders')
+                            : undefined
+                        }
+                        onClick={() => void handleDeleteStore()}
+                      >
+                        {deleting ? t('ownerEdit.deleting') : t('ownerEdit.deleteStore')}
+                      </button>
+                    )}
+                  </div>
+                  {lifecycleMsg && <p style={styles.success}>{lifecycleMsg}</p>}
+                  {lifecycleErr && <p style={styles.error}>{lifecycleErr}</p>}
                 </div>
               </div>
             </section>
@@ -322,7 +440,8 @@ export function StoreEditPage() {
 
 const styles: Record<string, React.CSSProperties> = {
   page: {
-    minHeight: '100vh',
+    height: '100vh',
+    overflow: 'hidden',
     background: oc.pageBg,
     color: oc.text,
     fontFamily: ownerFont,
@@ -330,7 +449,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   shell: {
     display: 'flex',
-    minHeight: '100vh',
+    height: '100vh',
+    overflow: 'hidden',
   },
   sidebar: {
     width: 220,
@@ -339,7 +459,8 @@ const styles: Record<string, React.CSSProperties> = {
     borderRight: `1px solid ${oc.sidebarBorder}`,
     display: 'flex',
     flexDirection: 'column',
-    minHeight: '100vh',
+    height: '100vh',
+    overflow: 'hidden',
   },
   sidebarBrand: {
     padding: '20px 16px 16px',
@@ -374,6 +495,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sidebarNav: {
     flex: 1,
+    minHeight: 0,
     padding: '12px 10px',
     display: 'flex',
     flexDirection: 'column',
@@ -381,6 +503,7 @@ const styles: Record<string, React.CSSProperties> = {
     overflowY: 'auto',
   },
   sidebarFooter: {
+    flexShrink: 0,
     padding: '12px 10px 16px',
     borderTop: `1px solid ${oc.sidebarBorder}`,
     display: 'flex',
@@ -437,12 +560,19 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     background: oc.pageBg,
+    height: '100vh',
+    overflow: 'hidden',
   },
   mainTopBar: {
     padding: '18px 28px',
     background: oc.surface,
     borderBottom: `1px solid ${oc.border}`,
     flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+    flexWrap: 'wrap',
   },
   mainTopTitle: {
     margin: 0,
@@ -450,7 +580,42 @@ const styles: Record<string, React.CSSProperties> = {
     color: oc.text,
     fontWeight: 700,
   },
-  main: { padding: '24px 28px', maxWidth: 1200, flex: 1, width: '100%' },
+  topBarBackBtn: {
+    padding: '8px 14px',
+    borderRadius: 8,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.textSecondary,
+    fontSize: fs.sm,
+    fontWeight: 500,
+    cursor: 'pointer',
+    flexShrink: 0,
+  },
+  topBarActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    flexShrink: 0,
+  },
+  topBarLogoutBtn: {
+    padding: '8px 14px',
+    borderRadius: 8,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.textSecondary,
+    fontSize: fs.sm,
+    fontWeight: 500,
+    cursor: 'pointer',
+    flexShrink: 0,
+  },
+  main: {
+    padding: '24px 28px',
+    maxWidth: 1200,
+    flex: 1,
+    minHeight: 0,
+    width: '100%',
+    overflowY: 'auto',
+  },
   panel: {
     background: oc.surface,
     borderRadius: 12,
@@ -534,8 +699,17 @@ const styles: Record<string, React.CSSProperties> = {
   },
   storeCodePreview: { color: oc.orderRef, fontSize: 12, marginTop: 10, fontWeight: 600 },
   note: { color: oc.textMuted, fontSize: 13, marginTop: 16, lineHeight: 1.5 },
-  publishButton: {
+  lifecycleHint: { color: oc.textMuted, fontSize: fs.xs, marginTop: 10, lineHeight: 1.45 },
+  lifecycleHintWarn: { color: oc.warningText, fontSize: fs.xs, marginTop: 10, lineHeight: 1.45 },
+  lifecycleActions: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 8,
     marginTop: 16,
+    paddingTop: 16,
+    borderTop: `1px solid ${oc.border}`,
+  },
+  primaryActionBtn: {
     padding: '10px 18px',
     borderRadius: 8,
     border: 'none',
@@ -544,6 +718,31 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: fs.base,
     fontWeight: 600,
     cursor: 'pointer',
+  },
+  secondaryActionBtn: {
+    padding: '10px 18px',
+    borderRadius: 8,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.textSecondary,
+    fontSize: fs.base,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  dangerActionBtn: {
+    padding: '10px 18px',
+    borderRadius: 8,
+    border: `1px solid ${oc.dangerBorder}`,
+    background: oc.dangerBg,
+    color: oc.dangerText,
+    fontSize: fs.base,
+    fontWeight: 600,
+    cursor: 'pointer',
+    marginLeft: 'auto',
+  },
+  dangerActionBtnDisabled: {
+    opacity: 0.45,
+    cursor: 'not-allowed',
   },
   success: { color: oc.successText, fontSize: 13, marginTop: 12 },
   hint: { color: oc.textMuted, fontSize: 14, lineHeight: 1.6 },

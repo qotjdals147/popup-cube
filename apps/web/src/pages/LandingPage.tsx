@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { t } from '../i18n';
+import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 
 /** AD-037 — PC 웹: 스토어 관리자 로그인만 */
 export function LandingPage() {
@@ -8,11 +9,12 @@ export function LandingPage() {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
+        <div style={styles.brandBar} />
         <h1 style={styles.title}>{t('landing.title')}</h1>
         <p style={styles.subtitle}>{t('landing.subtitle')}</p>
         <p style={styles.tagline}>{t('landing.tagline')}</p>
 
-        <button style={styles.primaryButton} onClick={() => navigate('/login')}>
+        <button style={styles.primaryButton} type="button" onClick={() => navigate('/login')}>
           {t('landing.ownerButton')}
         </button>
 
@@ -28,54 +30,66 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
-    fontFamily: "'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif",
+    background: oc.pageBg,
+    fontFamily: ownerFont,
     padding: 24,
   },
   card: {
-    background: '#0f3460',
-    padding: '40px 32px',
-    borderRadius: 16,
+    position: 'relative',
+    background: oc.surface,
+    padding: '36px 32px 32px',
+    borderRadius: 12,
     textAlign: 'center',
     width: '100%',
-    maxWidth: 380,
-    boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+    maxWidth: 400,
+    border: `1px solid ${oc.border}`,
+    boxShadow: oc.shadowMd,
+    overflow: 'hidden',
+  },
+  brandBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    background: oc.sidebarBg,
   },
   title: {
-    color: '#fff',
-    fontSize: 28,
-    margin: 0,
-    letterSpacing: 1,
+    color: oc.text,
+    fontSize: fs.xxl,
+    margin: '4px 0 0',
+    letterSpacing: 0.5,
+    fontWeight: 700,
   },
   subtitle: {
-    color: '#d8e4ff',
-    marginTop: 8,
+    color: oc.textSecondary,
+    marginTop: 10,
     marginBottom: 8,
-    fontSize: 15,
-    fontWeight: 500,
+    fontSize: fs.md,
+    fontWeight: 600,
   },
   tagline: {
-    color: '#a0a0c0',
+    color: oc.textMuted,
     marginTop: 0,
     marginBottom: 28,
-    fontSize: 13,
-    lineHeight: 1.5,
+    fontSize: fs.sm,
+    lineHeight: 1.55,
   },
   primaryButton: {
     width: '100%',
     padding: '14px',
-    borderRadius: 10,
+    borderRadius: 8,
     border: 'none',
-    background: '#e94560',
-    color: '#fff',
-    fontSize: 16,
+    background: oc.primary,
+    color: oc.primaryText,
+    fontSize: fs.md,
     fontWeight: 600,
     cursor: 'pointer',
   },
   appNote: {
-    color: '#8ea6dd',
-    fontSize: 12,
-    lineHeight: 1.5,
+    color: oc.textMuted,
+    fontSize: fs.xs,
+    lineHeight: 1.55,
     marginTop: 20,
     marginBottom: 0,
   },

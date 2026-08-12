@@ -240,9 +240,9 @@ npm run dev
 | **Purpose** | 오프라인 팝업 스토어 한계를 넘는 2D 픽셀 아트 메타버스 커머스 플랫폼 |
 | **Workspace** | `C:\Users\qotjd\Downloads\Cursor\popup_store` |
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
-| **Current Phase** | **Phase 4** — §53.7 순서 5 매장 정책·CS·반품지 + 배송비 규칙 **구현 완료** · **실기 대기** |
-| **Version** | `0.2.11` (매장 운영·배송 정책 + 배송비 규칙 · 실기 대기) |
-| **Git `main` HEAD** | `a4ba6e0` (§53.7 step 5 매장 정책·배송비, 2026-08-11) |
+| **Current Phase** | **Phase 4** — §53.7 순서 5 정책·배송비 **구현 완료** + **점주 매장 생명주기 UX** (OPEN/OFF/삭제·대시보드·로그인·탭명) **로컬 구현 완료** · **commit/push·실기 대기** |
+| **Version** | `0.2.12` (매장 생명주기 UX + 관리센터 로그인 테마 · commit/push 대기) |
+| **Git `main` HEAD** | `2078d50` (HANDOFF only) · **로컬 미커밋:** §53.7 step 5 `a4ba6e0` 이후 — 매장 삭제 RPC + 점주 UX 일괄 (2026-08-12) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -416,6 +416,8 @@ npm run dev
 | AD-054 | **(구현) 배송완료 · 구매확정 · 7일 자동 + 손님 고지 필수** — 발주·배송: 점주 **배송 시작**→**배송 완료** · 손님 **구매확정**(수동) · **미확정 시 주문(결제)일로부터 7일 경과 시 자동 구매확정** · **결제 완료·주문 조회 등에 위 규칙 고지 필수**(분쟁 방지). §52.7 · 택배사 API·정산 연동은 PG·물류 이후 | User 2026-08-03 | 2026-08-07 |
 | AD-055 | **(구현) 점주 PC 실시간 주문 알림 + 사이드바 뱃지** — `useOwnerOrderRealtime` · `get_store_order_counts` · `orders` Realtime publication · 「주문」/`awaiting_accept`·「발주·배송」/`accepted` 빨간 뱃지 · INSERT 토스트 (§52.8). Socket.io와 분리 | User 2026-08-03 | 2026-08-04 |
 | AD-056 | **(참고) 점주 판매자센터 갭 검토** — 네이버 스마트스토어·쿠팡 Wing 등 대비 **필수(P0)·편의(P1)·후순위(P2)** · POP-UP **차별 항목** · 권장 로드맵 **§53** (항목 구현 시 별도 AD·ISS로 쪼갬) | User 2026-08-03 | 2026-08-03 |
+| AD-057 | **(구현) 점주 PC 관리센터 라이트 테마** — `ownerAdminTheme.ts` 화이트/그레이 본문 + 네이비 사이드바 · 주문/상품 카드 · 상태 뱃지 · +2pt 가독성 | User 2026-08-11 | 2026-08-11 |
+| AD-058 | **(구현) 점주 매장 생명주기·대시보드 UX** — **`/home` 대시보드**=매장 카드+「매장 관리 열기」만 · **매장 개요**=「매장 OPEN」/「매장 OFF」/「매장 삭제」(조건부) · 로그인 성공→**항상 `/home`**(마지막 매장/GUCCI 직행 제거) · `StoreEditPage` **사이드바+상단바** 「대시보드로 이동」+ 로그아웃 **항상 노출**(본문 스크롤과 분리 `100vh`) · **GUCCI(`popup_gucci_01`)**=삭제만 UI·RPC 보호, OPEN/OFF는 일반 매장과 동일 · 탭명 **「매장 개요」**·**「운영·배송 안내」**(발주·배송과 구분) · `LandingPage`/`LoginPage` **ownerAdminTheme** 통일 | User 2026-08-12 | 2026-08-12 |
 
 ---
 
@@ -471,6 +473,8 @@ npm run dev
 - [x] **AD-055 점주 Realtime·뱃지·토스트 (2026-08-04)** — migration `20260804_owner_order_realtime_counts.sql` **원격 적용** · `useOwnerOrderRealtime` · `StoreEditPage` nav 뱃지 · `DemoToast` · `OwnerOrdersPanel` `refreshTick` · **실기 테스트 대기**
 - [x] **HANDOFF AD-054~056 · §53 갭·§53.7 우선순위** — 다음 작업 순서 확정 (User 위임)
 - [x] **AD-054 배송완료·구매확정·7일 자동·손님 「내 주문」 (2026-08-07, 진입점 UI 08-08b 개정)** — migration `20260807*.sql` 3건 **원격 적용** (컬럼·RPC·`pg_cron` 스케줄) · `OwnerOrdersPanel` **「배송 완료」** 버튼 · `OrderHistoryPanel`(신규) + 매장 WebView **헤더 「내 주문」 버튼**(하단 4칸 액션 바와 분리, 매장 무관 전체 조회) · `CartDrawer`/`DisplayProductModal` 결제완료 화면에 7일 자동확정 고지 · **실기 테스트 대기**
+- [x] **§53.7 step 5 — 매장 정책·CS·반품지 + 배송비 (2026-08-11)** — push `a4ba6e0` · migration `store_policy_shipping` 원격 적용 · **실기 대기**
+- [x] **점주 매장 생명주기 UX + 삭제 RPC (2026-08-12, AD-058)** — migration `20260812_owner_delete_store.sql` **`unpublish_store`/`delete_owner_store` 원격 적용** · `stores.ts` · `HomePage`(카드 목록·스크롤·「매장 관리 열기」만) · `StoreEditPage`(매장 개요 OPEN/OFF/삭제 · `100vh` 레이아웃 · 상단바+사이드바 네비) · `LoginPage`→`/home` · `LandingPage`/`LoginPage` ownerAdminTheme · `ko.ts` 탭명 · **⬜ commit/push · ⬜ 실기**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -606,6 +610,7 @@ popup_store/                          # Turborepo root
 | **3** | ~~**주문 검색·필터·정렬** (점주 P0#7)~~ ✅ 구현 (2026-08-11) · **실기 대기** |
 | **4** | ~~**발송 전 취소(손님)** + **클레임 v1**~~ ✅ 구현 (2026-08-11) · **실기 대기** |
 | **5** | ~~**매장 정책·CS·반품지 + 배송비 규칙**~~ ✅ 구현 (2026-08-11) · **실기 대기** |
+| **5b** | ~~**점주 매장 생명주기 UX** (AD-058)~~ ✅ 로컬 구현 (2026-08-12) · **commit/push·실기 대기** |
 | **6** | **PG 실결제** — ⬜ **← 다음** (User·계약 후) |
 | **근거** | User 2026-08-03 — 우선순위 **에이전트 확정** · **§53.7** |
 
@@ -648,11 +653,24 @@ popup_store/                          # Turborepo root
 |---|---|
 | **Supabase POPUP** | migration `store_policy_shipping` **원격 적용** · `stores`에 CS·반품지·배송/교환 안내·`shipping_fee_type`/`shipping_fee_amount`/`shipping_free_threshold` · `orders`에 `subtotal_amount`/`shipping_fee` · RPC `calc_store_shipping_fee` · `place_order`/`get_store_orders`/`get_my_orders` 재정의(배송비 스냅샷 반환) |
 | **Git** | push `main` **`a4ba6e0`** |
-| **핵심** | 점주 **「운영·배송」** 탭에서 CS 연락처·반품지·안내 문구·배송비 규칙(무료/고정/조건부 무료) 설정 · 손님 장바구니에서 **상품 합계 + 배송비 예상 + 결제 금액** 표시 · `place_order`가 할인 후 상품합 기준 배송비 계산 후 `total_amount`에 반영 |
-| **UI** | `OwnerStorePolicyPanel` · `StoreEditPage` 사이드바 `운영·배송` 탭 · `CartDrawer` 배송비 미리보기 · `OrderHistoryPanel`/`OwnerOrdersPanel` 결제 내역(배송비>0일 때 상품합·배송비 줄) · `storePolicy.ts`(`calcShippingFee` — 서버와 동일 로직) |
+| **핵심** | 점주 **「운영·배송 안내」** 탭에서 CS 연락처·반품지·안내 문구·배송비 규칙(무료/고정/조건부 무료) 설정 · 손님 장바구니에서 **상품 합계 + 배송비 예상 + 결제 금액** 표시 · `place_order`가 할인 후 상품합 기준 배송비 계산 후 `total_amount`에 반영 |
+| **UI** | `OwnerStorePolicyPanel` · `StoreEditPage` 사이드바 **「운영·배송 안내」** 탭 · `CartDrawer` 배송비 미리보기 · `OrderHistoryPanel`/`OwnerOrdersPanel` 결제 내역(배송비>0일 때 상품합·배송비 줄) · `storePolicy.ts`(`calcShippingFee` — 서버와 동일 로직) |
 | **범위 밖 — 제주·도서산간 (User 2026-08-11 확정)** | **지금은 구현 안 함.** 전국 도서산간 우편번호는 **공공 API 없음** · 택배사(CJ·롯데 등) **계약 후 제공하는 권역 API 또는 우편번호 엑셀**로 붙일 예정. **그때 수정 포인트:** `calc_store_shipping_fee`(또는 신규 surcharge RPC) · `place_order`에서 `user_addresses.postal_code` 조회 후 추가비 합산 · `CartDrawer`/`DisplayProductModal` 배송지 선택 시 재계산 · (선택) `orders.shipping_fee`를 base+regional로 쪼개거나 단일 합계 유지. **임시:** `shipping_guide`에 「제주·도서산간 추가비 별도 안내」 문구. |
-| **실기** | PC `npm run dev` → `demo@owner.com`/`demo` → GUCCI 매장 관리 → **운영·배송** 탭 저장 → 손님 계정 장바구니에서 배송비 줄 확인 → 주문 후 **내 주문**·점주 **발주·배송** 금액 breakdown |
+| **실기** | PC `npm run dev` → `demo@owner.com`/`demo` → GUCCI 매장 관리 → **운영·배송 안내** 탭 저장 → 손님 계정 장바구니에서 배송비 줄 확인 → 주문 후 **내 주문**·점주 **발주·배송** 금액 breakdown |
 | **다음** | User 실기 → **§53.7 순서 6 PG** (User 후보·계약) · 제주·도서산간 = **택배 연동(P1)** |
+
+### 7.6 세션 인수인계 — **2026-08-12** (점주 매장 생명주기 UX + 삭제 RPC **구현**)
+
+| | |
+|---|---|
+| **Supabase POPUP** | migration `20260812_owner_delete_store` **원격 적용** · RPC `unpublish_store`(published→draft) · `delete_owner_store`(draft + 활성 주문 0건만 · CASCADE로 연관 데이터) |
+| **Git** | **로컬 미커밋** — `HomePage` · `StoreEditPage` · `LoginPage` · `LandingPage` · `stores.ts` · `ko.ts` · migration 파일 |
+| **핵심 (User UX)** | **대시보드(`/home`)** — 매장당 「매장 관리 열기」만 (OPEN/OFF/삭제는 개요로 이동) · **매장 개요** — 「매장 OPEN」「매장 OFF」「매장 삭제」 · **로그인** — 점주도 **항상 매장 목록** (`/home`), GUCCI/마지막 매장 자동 진입 **제거** · **네비** — 모든 탭 **상단바** 「대시보드로 이동」+ 로그아웃 + **사이드바 하단** 동일 (운영·배송 안내 등 긴 폼 스크롤 시에도 안 사라지게 `100vh` 고정 레이아웃) · **탭명** — `개요`→**매장 개요** · `운영·배송`→**운영·배송 안내** (발주·배송과 구분) |
+| **GUCCI 데모** | `DEMO_STORE_ID`=`popup_gucci_01` — **삭제만** UI+클라이언트 차단 · **OPEN/OFF·정책·주문**은 DB 일반 매장과 동일 · **손님 3D 월드**만 `game-core` 하드코드(§43) — 관리센터 변경과 별개 |
+| **삭제 규칙** | `published`면 삭제 불가 → 먼저 OFF · 활성 주문(`purchase_confirmed`/`completed`/`rejected`/`cancelled` **외**) 있으면 삭제 불가 · Storage orphan 파일 정리 **아직 없음** (§26 기술 부채) |
+| **UI 테마** | `LandingPage`/`LoginPage` — 남색 그라데이션 제거 → **`ownerAdminTheme`** (관리센터와 동일 화이트/그레이 + 파란 primary) |
+| **실기** | PC `npm run dev` → `demo@owner.com`/`demo` → **매장 목록** 먼저 → GUCCI **매장 개요** OPEN/OFF · 테스트 매장 **삭제** (draft+주문 없을 때) → **운영·배송 안내** 탭 스크롤해도 상단·사이드바 네비 유지 |
+| **다음** | User **commit/push 요청 시** 일괄 커밋 → 실기 OK면 **§53.7 순서 6 PG** · User 질문 대기 중 |
 
 ### 7.3 세션 인수인계 — **2026-08-10** (§53 P0 점주 주문 검색·필터 착수 — superseded by 7.2)
 
@@ -674,6 +692,7 @@ popup_store/                          # Turborepo root
 | **3** | **§53 P0** — 점주 주문 **검색/필터** | ✅ push · ⬜ 실기 |
 | **4** | 발송 전 **손님 취소** + **클레임 v1** | ✅ push · ⬜ 실기 |
 | **5** | 매장 **정책·배송비** | ✅ push `a4ba6e0` · ⬜ **실기** |
+| **5b** | **점주 매장 생명주기 UX** (AD-058) | ✅ 로컬 · ⬜ **commit/push·실기** |
 | 6 | PG 실결제 | ⬜ User 후보 미정 |
 | 7 | EAS **development** 빌드 (AD-051, 선택) | ⬜ |
 
@@ -761,6 +780,12 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-12 — 점주 매장 생명주기 UX + 삭제 RPC (AD-058)
+- **Author:** Cursor Agent (User UX 피드백)
+- **Supabase:** migration `20260812_owner_delete_store` **원격 적용** — `unpublish_store` · `delete_owner_store`
+- **Changed:** `apps/web/src/lib/stores.ts`(`unpublishStore`/`deleteOwnerStore`/`countActiveOrdersForStoreDelete`/`StoreDeleteError`) · `HomePage.tsx` · `StoreEditPage.tsx` · `LoginPage.tsx` · `LandingPage.tsx` · `i18n/ko.ts` · `supabase/migrations/20260812_owner_delete_store.sql`
+- **Notes:** **commit/push 대기.** 대시보드=관리 열기만 · 개요=OPEN/OFF/삭제 · 로그인→`/home` · 탭명 「매장 개요」「운영·배송 안내」 · GUCCI=삭제만 보호. Storage orphan 정리는 미구현.
 
 ### 2026-08-11e — §53.7 순서 5 — 매장 정책·CS·반품지 + 배송비 규칙
 - **Author:** Cursor Agent
@@ -2546,7 +2571,8 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | 2 | **일괄 발송 처리** (선택 주문 동일 송장·상태 일괄) | 주문 폭주 시 |
 | 3 | **주문 상세 — 배송지 복사·출력** (포장 스티커) | 택배 접수 |
 | 4 | **택배사 연동** (송장 자동 등록·추적·**제주·도서산간 권역 API/우편번호 DB**) | 스마트스토어 핵심 편의 — step 5 이후 · **User 2026-08-11: 도서산간은 택배 계약 후 API로** |
-| 5 | **개요/홈 대시보드** (오늘 주문·매출·발송 대기·**재고 부족**·자동수락 소진) | 들어오자마자 할 일 |
+| 5 | **개요/홈 대시보드** (오늘 주문·매출·발송 대기·**재고 부족**·자동수락 소진) | 들어오자마자 할 일 — **2026-08-12:** `/home` 매장 목록+카드 UX만 (AD-058) · KPI 위젯은 ⬜ |
+| 6 | **매장 OPEN/OFF·삭제** (테스트 매장 정리) | 🔶 AD-058 — **매장 개요** 탭 · draft+활성주문0 · GUCCI 삭제 보호 · Storage orphan ⬜ |
 | 6 | **상품 옵션** (색·사이즈·SKU) | 패션 팝업 **실무 필수에 가까움** |
 | 7 | **상품 복제·정렬·간단 카테고리/태그** | 시즌 재진열 |
 | 8 | **주문 메모** (점주만) | “VIP / 선물 포장” |
@@ -2593,7 +2619,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 - **§53** = **외부 벤치마크 대비 “뭐가 더 필요한지” 백로그** — 착수 시 `## 7. Next Steps`·새 AD로 끌어올림.
 - **§53.7** = **실행 순서(확정)** — User 2026-08-03 에이전트 우선순위 위임.
 
-*§53 Last updated: 2026-08-11 (매장 정책·배송비 규칙 §53.7 step 5 구현 완료)*
+*§53 Last updated: 2026-08-12 (AD-058 점주 매장 생명주기 UX · §53.7 step 5 실기 대기)*
 
 ---
 
@@ -2694,6 +2720,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 - **규칙:** 사용자에게 보이는 텍스트는 **컴포넌트에 직접 쓰지 말고** `i18n/ko.ts`에 추가
 - **카피 톤 (User 2026-08-03):** §0 「UI·i18n 문구 규칙」 — 당연한 TMI·AI 매뉴얼체 금지. 긴 도움말은 User 요청 시만.
 - **라벨 직관성:** §0 — 주어 있는 짧은 문장 (재고 vs **주문 자동 수락** quota 구분). 상품 목록: `ownerProducts.autoAcceptOnBadge` · `autoAcceptQuotaShort`.
+- **점주 PC 탭명 (AD-058, 2026-08-12):** `ownerEdit.tabOverview` = **「매장 개요」** · `tabPolicy` = **「운영·배송 안내」** (발주·배송 처리 탭과 구분) · `tabFulfillment` = **「발주·배송」** · 사이드바/상단바 「대시보드로 이동」(화살표 없음).
 
 ### 향후 다국어 확장 (post-launch / 글로벌)
 | 단계 | 방법 |
@@ -2882,7 +2909,7 @@ END; $$;
 | | 소비자 | 점주 |
 |---|---|---|
 | 로그인 입구 | 쇼핑하기 | 매장 관리 |
-| 로그인 후 | **동일 `/home`** | **동일 `/home`** + 매장 만들기 버튼 |
+| 로그인 후 | **동일 `/home`** | **`/home` 매장 목록** (2026-08-12: GUCCI/마지막 매장 자동 진입 **제거**) + 매장 만들기 버튼 |
 | 월드 안 UI | 기본 HUD | **동일 HUD** + 점주 툴바 (본인 매장일 때만) |
 
 → 로그인 종류는 다르지만, **탐색 화면(홈)은 같고** 점주만 **만들기·편집 권한**이 추가됨.
@@ -2910,15 +2937,15 @@ END; $$;
 - **매장 개수 제한 없음** — 같은 owner가 여러 번 만들면 `profiles.store_id`가 매번 최신 매장으로 바뀜(의도된 단순화, 위 "정책 결정" 참고)
 - **비로그인 직링크 `/store/:id`** — 아직 로그인 가드 없음 (StorePage 자체에 리다이렉트 미구현)
 - **REST `/api/stores` 목록 엔드포인트** — 만들지 않기로 결정(위 참고); 필요해지면 재검토
-- **환불/삭제 시 Storage 파일 정리 없음** — 매장 삭제 기능 자체가 없어 지금은 해당 없음; 나중에 추가 시 orphan 파일 정리 로직 필요
-- **매장 "삭제" UI 없음** — 테스트로 만든 중복 매장을 사용자가 스스로 지울 방법이 없음(현재는 SQL로만 제거 가능)
+- **환불/삭제 시 Storage 파일 정리 없음** — `delete_owner_store` RPC는 DB 행만 삭제 · `store-assets` 버킷 orphan 파일 **수동/후속 작업 필요**
+- **매장 삭제 UI** — ✅ **매장 개요** 탭 (draft + 활성 주문 0 + GUCCI 제외) · 대시보드에는 없음 (AD-058)
 
 ### 버그 수정 기록 (2026-07-13)
 
 - **ISS-014 (로그인 2번 해야 진입되는 문제)**: `AuthContext.signInWithPassword`가 로그인 시작 시 `loading` 플래그를 세팅하지 않던 게 원인. 로그인 API 호출이 끝나고 `navigate('/home')`이 실행되는 시점과, `onAuthStateChange`가 감지해 `profiles`(role/store_id)를 다 읽어오는 시점 사이에 시간차가 있는데, 그 사이의 "아직 못 읽음" 상태를 `HomePage`/`CreateStorePage`의 가드가 "로그인 안 된 사용자"로 착각해 `/`로 돌려보냈음 → 재로그인해야 그때는 이미 profile이 로드돼 있어서 성공. **수정**: 로그인 시도 시작 시 `loading: true`로 바꾸고, `profiles` 로드가 끝날 때까지(`onAuthStateChange → loadProfile`) `true`를 유지하도록 변경. 이제 홈 이동은 profile이 다 로드된 뒤에만 "로그인 완료"로 판단함.
 - **ISS-015 (매장 만들기 후 홈에 안 보임)**: 새 매장이 `status: 'draft'`로 생성되는데 홈 목록은 `status: 'published'`만 보여줘서 발생. 아직 "출시" 버튼도 없어서 draft 상태에서 빠져나올 방법이 없는 막다른 흐름이었음. **수정**: `create_owner_store` 함수가 처음부터 `status: 'published'`로 매장을 생성하도록 변경(에디터가 없는 지금은 "출시 전 숨김" 단계가 불필요). 기존에 테스트로 만들어진 draft 매장 2개("Mr. Sim & Bee" 중복 2건)도 published로 일괄 전환.
 
-*Last updated: 2026-07-13 (로그인 재시도 버그 + 매장 미노출 버그 수정: ISS-014, ISS-015) by Cursor Agent*
+*Last updated: 2026-08-12 (§7.6 점주 매장 생명주기 UX AD-058 · commit/push 대기) by Cursor Agent*
 
 ---
 

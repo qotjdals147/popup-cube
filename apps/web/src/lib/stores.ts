@@ -139,3 +139,44 @@ export async function publishStore(storeId: string): Promise<StoreSummary> {
   if (error) throw error;
   return mapStoreSummary(data as Record<string, unknown>);
 }
+
+/** 점주 매장 출시 해제 — published → draft (손님 월드 off) */
+export async function unpublishStore(storeId: string): Promise<void> {
+  const { error } = await supabase.rpc('unpublish_store', { p_store_id: storeId });
+  if (error) throw error;
+}
+
+export class StoreDeleteError extends Error {
+  constructor(public readonly code: 'not_owner' | 'still_published' | 'active_orders' | 'unknown') {
+    super(code);
+  }
+}
+
+const TERMINAL_ORDER_STATUSES = ['purchase_confirmed', 'completed', 'rejected', 'cancelled'] as const;
+
+/** 삭제 전 UI용 — 미구매확정(활성) 주문 건수 */
+export async function countActiveOrdersForStoreDelete(storeId: string): Promise<number> {
+  const { data, error } = await supabase.from('orders').select('status').eq('store_id', storeId);
+
+  if (error) throw error;
+  return (data ?? []).filter(
+    (row) => !(TERMINAL_ORDER_STATUSES as readonly string[]).includes(String(row.status))
+  ).length;
+}
+
+/** 점주 매장 삭제 — draft + 활성 주문 없을 때만 (RPC) */
+export async function deleteOwnerStore(storeId: string): Promise<void> {
+  const { error } = await supabase.rpc('delete_owner_store', { p_store_id: storeId });
+  if (!error) return;
+
+  if (error.message.includes('not_store_owner')) {
+    throw new StoreDeleteError('not_owner');
+  }
+  if (error.message.includes('store_still_published')) {
+    throw new StoreDeleteError('still_published');
+  }
+  if (error.message.includes('store_has_active_orders')) {
+    throw new StoreDeleteError('active_orders');
+  }
+  throw new StoreDeleteError('unknown');
+}

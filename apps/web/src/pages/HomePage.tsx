@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { listOwnedStores } from '../lib/stores';
 import { DEMO_STORE_ID } from '@popup-cube/shared';
-import { ownerColors as oc, ownerFont } from '../styles/ownerAdminTheme';
+import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 import type { StoreSummary } from '@popup-cube/shared';
 
@@ -15,6 +15,28 @@ export function HomePage() {
   const [stores, setStores] = useState<StoreSummary[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const reload = useCallback(async () => {
+    if (!userId || role !== 'owner') {
+      setStores([]);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await listOwnedStores(userId);
+      const sorted = [...data].sort((a, b) => {
+        if (a.id === DEMO_STORE_ID) return -1;
+        if (b.id === DEMO_STORE_ID) return 1;
+        return a.name.localeCompare(b.name, 'ko');
+      });
+      setStores(sorted);
+    } catch {
+      setStores([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, role]);
+
   useEffect(() => {
     if (authLoading) return;
     if (!userId) {
@@ -23,34 +45,8 @@ export function HomePage() {
   }, [authLoading, userId, navigate]);
 
   useEffect(() => {
-    if (!userId || role !== 'owner') {
-      setStores([]);
-      return;
-    }
-
-    let active = true;
-    setLoading(true);
-    listOwnedStores(userId)
-      .then((data) => {
-        if (!active) return;
-        const sorted = [...data].sort((a, b) => {
-          if (a.id === DEMO_STORE_ID) return -1;
-          if (b.id === DEMO_STORE_ID) return 1;
-          return a.name.localeCompare(b.name, 'ko');
-        });
-        setStores(sorted);
-      })
-      .catch(() => {
-        if (active) setStores([]);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [userId, role]);
+    void reload();
+  }, [reload]);
 
   async function handleSignOut() {
     await signOut();
@@ -90,42 +86,51 @@ export function HomePage() {
         {role === 'owner' && (
           <section style={styles.panel}>
             {loading && <p style={styles.hint}>{t('ownerDashboard.loading')}</p>}
-            {!loading &&
-              stores.map((store) => (
-                <div key={store.id} style={{ ...styles.storeRow, marginBottom: 24 }}>
-                  <div style={styles.thumbWrap}>
-                    {store.thumbnail_url ? (
-                      <img src={store.thumbnail_url} alt="" style={styles.thumb} />
-                    ) : (
-                      <div style={styles.thumbFallback}>{store.name.charAt(0)}</div>
-                    )}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={styles.nameRow}>
-                      <h2 style={styles.storeName}>{store.name}</h2>
-                      <span
-                        style={
-                          store.status === 'draft' ? styles.badgeDraft : styles.badgePublished
-                        }
-                      >
-                        {store.status === 'draft'
-                          ? t('ownerDashboard.statusDraft')
-                          : t('ownerDashboard.statusPublished')}
-                      </span>
-                    </div>
-                    <p style={styles.storeDesc}>
-                      {store.description?.trim() || t('ownerEdit.noDescription')}
-                    </p>
-                    <button
-                      style={styles.primaryButton}
-                      type="button"
-                      onClick={() => navigate(`/store/${store.id}/edit`)}
-                    >
-                      {t('ownerDashboard.manageStore')}
-                    </button>
-                  </div>
-                </div>
-              ))}
+
+            {!loading && stores.length > 0 && (
+              <div style={styles.storeList}>
+                {stores.map((store) => {
+                  const isPublished = store.status === 'published';
+
+                  return (
+                    <article key={store.id} style={styles.storeCard}>
+                      <div style={styles.cardBody}>
+                        <div style={styles.thumbWrap}>
+                          {store.thumbnail_url ? (
+                            <img src={store.thumbnail_url} alt="" style={styles.thumb} />
+                          ) : (
+                            <div style={styles.thumbFallback}>{store.name.charAt(0)}</div>
+                          )}
+                        </div>
+                        <div style={styles.cardMain}>
+                          <div style={styles.nameRow}>
+                            <h2 style={styles.storeName}>{store.name}</h2>
+                            <span style={isPublished ? styles.badgePublished : styles.badgeDraft}>
+                              {isPublished
+                                ? t('ownerDashboard.statusPublished')
+                                : t('ownerDashboard.statusDraft')}
+                            </span>
+                          </div>
+                          <p style={styles.storeDesc}>
+                            {store.description?.trim() || t('ownerEdit.noDescription')}
+                          </p>
+                        </div>
+                      </div>
+                      <div style={styles.cardActions}>
+                        <button
+                          style={styles.primaryButton}
+                          type="button"
+                          onClick={() => navigate(`/store/${store.id}/edit`)}
+                        >
+                          {t('ownerDashboard.manageStore')}
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+
             {!loading && stores.length === 0 && (
               <>
                 <p style={styles.body}>{t('ownerDashboard.storeMissing')}</p>
@@ -133,6 +138,14 @@ export function HomePage() {
                   {t('ownerDashboard.createStore')}
                 </button>
               </>
+            )}
+
+            {!loading && stores.length > 0 && (
+              <div style={styles.footerActions}>
+                <button style={styles.secondaryButton} type="button" onClick={() => navigate('/store/create')}>
+                  {t('ownerDashboard.createStore')}
+                </button>
+              </div>
             )}
           </section>
         )}
@@ -158,8 +171,8 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: `1px solid ${oc.border}`,
     flexWrap: 'wrap',
   },
-  title: { fontSize: 22, margin: 0, color: oc.text, fontWeight: 700 },
-  tagline: { margin: '4px 0 0', fontSize: 13, color: oc.textMuted },
+  title: { fontSize: fs.xxl, margin: 0, color: oc.text, fontWeight: 700 },
+  tagline: { margin: '4px 0 0', fontSize: fs.sm, color: oc.textMuted },
   logoutButton: {
     background: oc.surface,
     border: `1px solid ${oc.borderStrong}`,
@@ -167,23 +180,47 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 8,
     padding: '8px 14px',
     cursor: 'pointer',
-    fontSize: 13,
+    fontSize: fs.sm,
   },
   main: { padding: '28px', maxWidth: 720, margin: '0 auto' },
   panel: {
     background: oc.surface,
     borderRadius: 12,
-    padding: 28,
+    padding: '20px 22px',
     border: `1px solid ${oc.border}`,
     boxShadow: oc.shadow,
+    display: 'flex',
+    flexDirection: 'column',
+    maxHeight: 'calc(100vh - 140px)',
   },
-  panelTitle: { margin: '0 0 12px', fontSize: 18, color: oc.text, fontWeight: 600 },
-  body: { color: oc.textSecondary, fontSize: 14, lineHeight: 1.6, margin: '0 0 20px' },
-  hint: { color: oc.textMuted, fontSize: 14 },
-  storeRow: { display: 'flex', gap: 16, marginBottom: 20, flexWrap: 'wrap' },
+  panelTitle: { margin: '0 0 12px', fontSize: fs.lg, color: oc.text, fontWeight: 600 },
+  body: { color: oc.textSecondary, fontSize: fs.base, lineHeight: 1.6, margin: '0 0 20px' },
+  hint: { color: oc.textMuted, fontSize: fs.base, margin: 0 },
+  storeList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 14,
+    overflowY: 'auto',
+    flex: 1,
+    minHeight: 0,
+    paddingRight: 4,
+  },
+  storeCard: {
+    background: oc.surface,
+    borderRadius: 12,
+    padding: '16px 18px',
+    border: `2px solid ${oc.borderStrong}`,
+    boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+    flexShrink: 0,
+  },
+  cardBody: {
+    display: 'flex',
+    gap: 16,
+    alignItems: 'flex-start',
+  },
   thumbWrap: {
-    width: 120,
-    height: 90,
+    width: 96,
+    height: 72,
     borderRadius: 10,
     overflow: 'hidden',
     background: oc.surfaceMuted,
@@ -197,15 +234,16 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 700,
     color: oc.textMuted,
     background: oc.surfaceMuted,
   },
-  storeName: { margin: 0, fontSize: 18, color: oc.text, fontWeight: 600 },
-  nameRow: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 4 },
+  cardMain: { flex: 1, minWidth: 0 },
+  storeName: { margin: 0, fontSize: fs.lg, color: oc.text, fontWeight: 600 },
+  nameRow: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 },
   badgePublished: {
-    fontSize: 11,
+    fontSize: fs.xs,
     padding: '3px 8px',
     borderRadius: 999,
     background: oc.successBg,
@@ -213,33 +251,55 @@ const styles: Record<string, React.CSSProperties> = {
     border: `1px solid ${oc.successBorder}`,
   },
   badgeDraft: {
-    fontSize: 11,
+    fontSize: fs.xs,
     padding: '3px 8px',
     borderRadius: 999,
     background: oc.warningBg,
     color: oc.warningText,
     border: `1px solid ${oc.warningBorder}`,
   },
-  storeDesc: { margin: '8px 0 0', fontSize: 13, color: oc.textMuted, lineHeight: 1.5 },
+  storeDesc: {
+    margin: 0,
+    fontSize: fs.sm,
+    color: oc.textMuted,
+    lineHeight: 1.5,
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden',
+  },
+  cardActions: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 14,
+    paddingTop: 14,
+    borderTop: `1px solid ${oc.border}`,
+  },
   primaryButton: {
-    padding: '12px 20px',
+    padding: '9px 16px',
     borderRadius: 8,
     border: 'none',
     background: oc.primary,
     color: '#fff',
-    fontSize: 15,
+    fontSize: fs.sm,
     fontWeight: 600,
     cursor: 'pointer',
   },
   secondaryButton: {
-    marginTop: 12,
-    padding: '10px 16px',
+    padding: '9px 16px',
     borderRadius: 8,
     border: `1px solid ${oc.borderStrong}`,
     background: oc.surface,
     color: oc.textSecondary,
-    fontSize: 13,
+    fontSize: fs.sm,
+    fontWeight: 500,
     cursor: 'pointer',
   },
+  footerActions: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTop: `1px solid ${oc.border}`,
+    flexShrink: 0,
+  },
 };
-
