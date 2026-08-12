@@ -243,7 +243,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **Phase 4 → PG 직전** — §53.7 순서 **5c~5e(§54·§55·§56) 로컬 구현 완료** · Supabase 원격 ✅ · Git **커밋/푸시 전** · **다음 = commit/push → PG(§53.7 순서 6)** |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | `9e83134` *(push `74a355b` HANDOFF 기록)* — **로컬 워킹 트리에 §54~§56+스크롤fix 미커밋** · 마지막 코드 push `74a355b` (AD-058, 2026-08-12) |
+| **Git `main` HEAD** | **`78e4bb2`** (§54-56 상품 상세·리뷰·블록 에디터 + ISS-035, 2026-08-12) · push ✅ |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -611,8 +611,8 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **상세페이지(§54+§55+§56) + 리뷰 + 블록 에디터 + 스크롤 fix = 로컬 완료 · Supabase 원격 ✅ · Git 미커밋** → **User commit/push 요청 시 일괄 커밋** → **PG(§53.7 순서 6)** |
-| **Git 상태** | 원격 `main` HEAD **`9e83134`** (코드 push **`74a355b`** AD-058) · **§54~§56 전부 로컬만** — `git status`에 modified 11 + untracked 8 (mobile AGENTS/CLAUDE/LICENSE **제외**) |
+| **한 줄 요약** | **§54+§55+§56 + ISS-035 push ✅ `78e4bb2`** · Supabase 원격 ✅ · **다음 = PG(§53.7 순서 6)** |
+| **Git 상태** | `main` **`78e4bb2`** push 완료 · Vercel 자동 배포 1~2분 후 `popup-cube-web.vercel.app` 반영 |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · migrations **`20260812b_product_detail_and_reviews`** + **`20260812c_product_detail_blocks`** **원격 적용 완료** |
 | **런칭 진행률 (대략)** | PG 연동 전 **~80%** · P1(대시보드 KPI·택배 API·상품 옵션 등) 포함 **전체 ~55–60%** |
 | **User 미확인 실기** | AD-055~058 + §54~§56 — **로컬 `npm run dev` + localhost:5173** 에서만 최신 UI (Vercel/Expo WebView **아직 없음**) |
@@ -673,11 +673,11 @@ npm run dev
 | **4** | ~~**발송 전 취소(손님)** + **클레임 v1**~~ ✅ 구현 (2026-08-11) · **실기 대기** |
 | **5** | ~~**매장 정책·CS·반품지 + 배송비 규칙**~~ ✅ 구현 (2026-08-11) · **실기 대기** |
 | **5b** | ~~**점주 매장 생명주기 UX** (AD-058)~~ ✅ push `74a355b` (2026-08-12) · **실기 대기** |
-| **5c** | **상품 상세 + 리뷰** (§54) — ✅ MVP 구현 (2026-08-12) · Supabase ✅ · Git **커밋 전** |
-| **5d** | **상품 상세페이지 UX 1차** (§55 · AD-059-1~5) — ✅ 구현 (2026-08-12d) · 통합·미리보기·큰 화면·리뷰진입 · Git **커밋 전** · **실기 대기** |
-| **5e** | ~~**상품 상세 블록 에디터** (§56 · AD-060)~~ ✅ 구현 (2026-08-12f) + **스크롤 fix** (2026-08-12g) · Git **커밋 전** · **실기 대기** |
-| **6** | **PG 실결제** — ⬜ **← 코드상 다음 1순위** (User·PG 후보·계약 후) |
-| **6a** | **commit/push** — §54+§55+§56 일괄 | ⬜ User 명시 요청 시 · **PG/Vercel 반영 전 필수** |
+| **5c** | ~~**상품 상세 + 리뷰** (§54)~~ ✅ push `78e4bb2` · Supabase ✅ · **실기 대기** |
+| **5d** | ~~**상품 상세페이지 UX 1차** (§55 · AD-059-1~5)~~ ✅ push `78e4bb2` · **실기 대기** |
+| **5e** | ~~**상품 상세 블록 에디터** (§56 · AD-060)~~ ✅ push `78e4bb2` · **실기 대기** |
+| **6a** | ~~**commit/push** §54~§56~~ ✅ **`78e4bb2`** (2026-08-12g) |
+| **6** | **PG 실결제** — ⬜ **← 다음 1순위** (User·PG 후보·계약 후) |
 | **근거** | User 2026-08-12e — 스마트스토어식 **한글/워드처럼 글·이미지 자유 배치** 에디터 없으면 「상세 완성」 아님 → **AD-060으로 완성** (2026-08-12f) |
 
 ### 7.1 세션 인수인계 — **2026-08-07** (AD-054 구현)
@@ -853,7 +853,7 @@ npm run dev
 | **5c** | **상품 상세 + 리뷰 MVP** (§54) | ✅ 로컬 · Supabase ✅ |
 | **5d** | **상품 상세 UX 1차** (§55 · AD-059-1~5) | ✅ 로컬 · Git 커밋 전 · **실기 대기** |
 | **5e** | **상품 상세 블록 에디터** (§56 · AD-060) + ISS-035 | ✅ 로컬 · Git 커밋 전 · **실기 대기** |
-| **6a** | **commit/push** §54~§56 | ⬜ User 요청 시 |
+| **6a** | **commit/push** §54~§56 | ✅ **`78e4bb2`** |
 | 6 | PG 실결제 | ⬜ **← 기능상 다음** (User PG 후보 미정) |
 | 7 | EAS **development** 빌드 (AD-051, 선택) | ⬜ |
 
@@ -941,6 +941,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-12h — push `78e4bb2` (§54-56 상품 상세·리뷰·블록 에디터 + ISS-035)
+- **Author:** Cursor Agent (User 「커밋푸시하자」·스크롤 fix 실기 OK)
+- **Git:** push `main` **`78e4bb2`** · `9e83134..78e4bb2`
+- **Notes:** Vercel 1~2분 후 반영 · 다음 = PG
 
 ### 2026-08-12g — 블록 추가할 때마다 스크롤이 맨 위로 튀는 버그 수정 (ISS-035) + HANDOFF 정리
 - **Author:** Cursor Agent (User 실기 중 발견)
