@@ -240,9 +240,9 @@ npm run dev
 | **Purpose** | 오프라인 팝업 스토어 한계를 넘는 2D 픽셀 아트 메타버스 커머스 플랫폼 |
 | **Workspace** | `C:\Users\qotjd\Downloads\Cursor\popup_store` |
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
-| **Current Phase** | **Phase 4** — §53.7 순서 5 정책·배송비 **구현 완료** + **점주 매장 생명주기 UX** (OPEN/OFF/삭제·대시보드·로그인·탭명) **로컬 구현 완료** · **commit/push·실기 대기** |
-| **Version** | `0.2.12` (매장 생명주기 UX + 관리센터 로그인 테마 · commit/push 대기) |
-| **Git `main` HEAD** | `2078d50` (HANDOFF only) · **로컬 미커밋:** §53.7 step 5 `a4ba6e0` 이후 — 매장 삭제 RPC + 점주 UX 일괄 (2026-08-12) |
+| **Current Phase** | **Phase 4** — §53.7 순서 5 정책·배송비 **구현 완료** + **AD-058 점주 매장 생명주기 UX** push `74a355b` · **실기 대기** |
+| **Version** | `0.2.12` (매장 생명주기 UX + 관리센터 로그인 테마) |
+| **Git `main` HEAD** | `74a355b` (AD-058 점주 매장 생명주기 UX + delete RPC, 2026-08-12) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -610,7 +610,7 @@ popup_store/                          # Turborepo root
 | **3** | ~~**주문 검색·필터·정렬** (점주 P0#7)~~ ✅ 구현 (2026-08-11) · **실기 대기** |
 | **4** | ~~**발송 전 취소(손님)** + **클레임 v1**~~ ✅ 구현 (2026-08-11) · **실기 대기** |
 | **5** | ~~**매장 정책·CS·반품지 + 배송비 규칙**~~ ✅ 구현 (2026-08-11) · **실기 대기** |
-| **5b** | ~~**점주 매장 생명주기 UX** (AD-058)~~ ✅ 로컬 구현 (2026-08-12) · **commit/push·실기 대기** |
+| **5b** | ~~**점주 매장 생명주기 UX** (AD-058)~~ ✅ push `74a355b` (2026-08-12) · **실기 대기** |
 | **6** | **PG 실결제** — ⬜ **← 다음** (User·계약 후) |
 | **근거** | User 2026-08-03 — 우선순위 **에이전트 확정** · **§53.7** |
 
@@ -664,7 +664,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **Supabase POPUP** | migration `20260812_owner_delete_store` **원격 적용** · RPC `unpublish_store`(published→draft) · `delete_owner_store`(draft + 활성 주문 0건만 · CASCADE로 연관 데이터) |
-| **Git** | **로컬 미커밋** — `HomePage` · `StoreEditPage` · `LoginPage` · `LandingPage` · `stores.ts` · `ko.ts` · migration 파일 |
+| **Git** | push `main` **`74a355b`** |
 | **핵심 (User UX)** | **대시보드(`/home`)** — 매장당 「매장 관리 열기」만 (OPEN/OFF/삭제는 개요로 이동) · **매장 개요** — 「매장 OPEN」「매장 OFF」「매장 삭제」 · **로그인** — 점주도 **항상 매장 목록** (`/home`), GUCCI/마지막 매장 자동 진입 **제거** · **네비** — 모든 탭 **상단바** 「대시보드로 이동」+ 로그아웃 + **사이드바 하단** 동일 (운영·배송 안내 등 긴 폼 스크롤 시에도 안 사라지게 `100vh` 고정 레이아웃) · **탭명** — `개요`→**매장 개요** · `운영·배송`→**운영·배송 안내** (발주·배송과 구분) |
 | **GUCCI 데모** | `DEMO_STORE_ID`=`popup_gucci_01` — **삭제만** UI+클라이언트 차단 · **OPEN/OFF·정책·주문**은 DB 일반 매장과 동일 · **손님 3D 월드**만 `game-core` 하드코드(§43) — 관리센터 변경과 별개 |
 | **삭제 규칙** | `published`면 삭제 불가 → 먼저 OFF · 활성 주문(`purchase_confirmed`/`completed`/`rejected`/`cancelled` **외**) 있으면 삭제 불가 · Storage orphan 파일 정리 **아직 없음** (§26 기술 부채) |
@@ -692,7 +692,7 @@ popup_store/                          # Turborepo root
 | **3** | **§53 P0** — 점주 주문 **검색/필터** | ✅ push · ⬜ 실기 |
 | **4** | 발송 전 **손님 취소** + **클레임 v1** | ✅ push · ⬜ 실기 |
 | **5** | 매장 **정책·배송비** | ✅ push `a4ba6e0` · ⬜ **실기** |
-| **5b** | **점주 매장 생명주기 UX** (AD-058) | ✅ 로컬 · ⬜ **commit/push·실기** |
+| **5b** | **점주 매장 생명주기 UX** (AD-058) | ✅ push `74a355b` · ⬜ **실기** |
 | 6 | PG 실결제 | ⬜ User 후보 미정 |
 | 7 | EAS **development** 빌드 (AD-051, 선택) | ⬜ |
 
@@ -783,9 +783,10 @@ npx expo start --tunnel --port 8082 --clear
 
 ### 2026-08-12 — 점주 매장 생명주기 UX + 삭제 RPC (AD-058)
 - **Author:** Cursor Agent (User UX 피드백)
-- **Supabase:** migration `20260812_owner_delete_store` **원격 적용** — `unpublish_store` · `delete_owner_store`
+- **Git:** `74a355b` (push 완료)
 - **Changed:** `apps/web/src/lib/stores.ts`(`unpublishStore`/`deleteOwnerStore`/`countActiveOrdersForStoreDelete`/`StoreDeleteError`) · `HomePage.tsx` · `StoreEditPage.tsx` · `LoginPage.tsx` · `LandingPage.tsx` · `i18n/ko.ts` · `supabase/migrations/20260812_owner_delete_store.sql`
-- **Notes:** **commit/push 대기.** 대시보드=관리 열기만 · 개요=OPEN/OFF/삭제 · 로그인→`/home` · 탭명 「매장 개요」「운영·배송 안내」 · GUCCI=삭제만 보호. Storage orphan 정리는 미구현.
+- **Git:** `74a355b` (push 완료)
+- **Notes:** **실기 대기.** 대시보드=관리 열기만 · 개요=OPEN/OFF/삭제 · 로그인→`/home` · 탭명 「매장 개요」「운영·배송 안내」 · GUCCI=삭제만 보호. Storage orphan 정리는 미구현.
 
 ### 2026-08-11e — §53.7 순서 5 — 매장 정책·CS·반품지 + 배송비 규칙
 - **Author:** Cursor Agent
