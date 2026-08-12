@@ -15,7 +15,7 @@ export class ProductError extends Error {
 }
 
 const PRODUCT_SELECT =
-  'id, store_id, name, description, price, image_url, is_active, stock_quantity, auto_accept_enabled, auto_accept_limit, auto_accept_remaining, created_at';
+  'id, store_id, name, description, price, image_url, is_active, stock_quantity, auto_accept_enabled, auto_accept_limit, auto_accept_remaining, created_at, detail_description';
 
 /**
  * 소비자용 — 특정 매장의 활성 상품만 조회 (RLS `products_public_read`).
@@ -117,6 +117,15 @@ export async function updateProductFulfillment(
 /** 상품 활성/비활성 토글 (soft delete — 손님 화면에서만 숨김, 주문 이력 보존을 위해 실제 삭제는 하지 않음). */
 export async function setProductActive(productId: string, isActive: boolean): Promise<void> {
   const { error } = await supabase.from('products').update({ is_active: isActive }).eq('id', productId);
+  if (error) throw new ProductError('SAVE_FAILED', error.message);
+}
+
+/** §54 — 상세페이지에 직접 쓰는 긴 설명 글 저장 (RLS `products_owner_update` 재사용). */
+export async function updateProductDetailDescription(productId: string, detailDescription: string): Promise<void> {
+  const { error } = await supabase
+    .from('products')
+    .update({ detail_description: detailDescription.trim() || null })
+    .eq('id', productId);
   if (error) throw new ProductError('SAVE_FAILED', error.message);
 }
 

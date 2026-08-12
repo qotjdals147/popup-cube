@@ -15,6 +15,8 @@ import {
   parseIntegerInput,
 } from '../lib/formatInteger';
 import { ownerColors as oc, ownerFontSize as fs } from '../styles/ownerAdminTheme';
+import { OwnerProductBlockEditor } from './OwnerProductBlockEditor';
+import { ProductDetailModal } from './ProductDetailModal';
 
 interface OwnerProductPanelProps {
   storeId: string;
@@ -56,9 +58,13 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
   const [editPreviewUrl, setEditPreviewUrl] = useState<string | null>(null);
   const [editSaving, setEditSaving] = useState(false);
   const [createFormOpen, setCreateFormOpen] = useState(false);
+  const [previewProductId, setPreviewProductId] = useState<string | null>(null);
 
   async function reload() {
-    setLoading(true);
+    // 이미 목록을 한 번 불러온 뒤라면(=상세페이지 블록 추가/삭제 등 배경 새로고침)
+    // loading 표시로 목록 전체를 잠깐 비웠다가 다시 그리지 않음 — 그러면 리스트 DOM이
+    // 통째로 사라졌다 다시 생기면서 스크롤이 맨 위로 튐. 최초 로딩일 때만 안내문 표시.
+    if (products.length === 0) setLoading(true);
     setLoadError(null);
     try {
       const data = await listMyProducts(storeId);
@@ -431,6 +437,18 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
                         {t('common.back')}
                       </button>
                     </div>
+
+                    <div style={styles.detailDivider} />
+                    <h4 style={styles.detailSectionTitle}>{t('ownerProducts.detailSectionTitle')}</h4>
+                    <p style={styles.detailIntro}>{t('ownerProducts.detailIntro')}</p>
+                    <OwnerProductBlockEditor product={product} userId={userId} onSaved={reload} />
+                    <button
+                      type="button"
+                      style={styles.previewButton}
+                      onClick={() => setPreviewProductId(product.id)}
+                    >
+                      {t('ownerProducts.previewButton')}
+                    </button>
                   </div>
                 ) : (
                   <div style={styles.cardBody}>
@@ -499,10 +517,22 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
     </>
   );
 
+  const previewProduct = previewProductId ? products.find((p) => p.id === previewProductId) ?? null : null;
+  const previewModal = previewProduct && (
+    <ProductDetailModal
+      product={previewProduct}
+      storeId={storeId}
+      previewMode
+      onClose={() => setPreviewProductId(null)}
+      onOpenCart={() => setPreviewProductId(null)}
+    />
+  );
+
   if (embedded) {
     return (
       <section style={styles.embeddedPanel}>
         {panelBody}
+        {previewModal}
       </section>
     );
   }
@@ -512,6 +542,7 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
       <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
         {panelBody}
       </div>
+      {previewModal}
     </div>
   );
 }
@@ -765,6 +796,21 @@ const styles: Record<string, React.CSSProperties> = {
   productDescEmpty: { color: oc.textMuted, fontSize: fs.sm, lineHeight: 1.55, margin: 0 },
   editArea: { display: 'flex', flexDirection: 'column', gap: 6 },
   editActions: { display: 'flex', gap: 8, marginTop: 6 },
+  detailDivider: { height: 1, background: oc.border, margin: '14px 0 12px' },
+  detailSectionTitle: { color: oc.text, fontSize: fs.base, fontWeight: 700, margin: '0 0 4px' },
+  detailIntro: { color: oc.textMuted, fontSize: fs.xs, lineHeight: 1.5, margin: '0 0 10px' },
+  previewButton: {
+    marginTop: 10,
+    padding: '10px 14px',
+    borderRadius: 8,
+    border: `1px solid ${oc.primary}`,
+    background: oc.surface,
+    color: oc.primary,
+    fontSize: fs.sm,
+    fontWeight: 600,
+    cursor: 'pointer',
+    alignSelf: 'flex-start',
+  },
   smallButton: {
     padding: '6px 12px',
     borderRadius: 8,

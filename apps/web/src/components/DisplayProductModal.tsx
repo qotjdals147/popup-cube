@@ -12,6 +12,7 @@ import {
   isAddressFormValid,
   type AddressFormValues,
 } from './AddressFormFields';
+import { ProductDetailModal } from './ProductDetailModal';
 import { t } from '../i18n';
 
 interface DisplayProductModalProps {
@@ -60,6 +61,7 @@ export function DisplayProductModal({
   const [addedId, setAddedId] = useState<string | null>(null);
   const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
   const [tryOnProduct, setTryOnProduct] = useState<Product | null>(null);
+  const [detailProduct, setDetailProduct] = useState<Product | null>(null);
 
   const [buyPhase, setBuyPhase] = useState<BuyPhase>('product');
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
@@ -494,6 +496,13 @@ export function DisplayProductModal({
                       <button type="button" style={styles.cartLink} onClick={onOpenCart}>
                         {t('display.openCart')}
                       </button>
+                      <button
+                        type="button"
+                        style={styles.cartLink}
+                        onClick={() => setDetailProduct(previewProduct)}
+                      >
+                        {t('display.viewDetail')}
+                      </button>
                     </div>
 
                     <div style={styles.tryOnBox}>
@@ -534,6 +543,18 @@ export function DisplayProductModal({
           </>
         )}
       </div>
+
+      {detailProduct && (
+        <ProductDetailModal
+          product={detailProduct}
+          storeId={storeId}
+          onClose={() => setDetailProduct(null)}
+          onOpenCart={() => {
+            setDetailProduct(null);
+            onOpenCart();
+          }}
+        />
+      )}
     </div>
   );
 }

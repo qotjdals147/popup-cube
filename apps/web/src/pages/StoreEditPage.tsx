@@ -164,8 +164,8 @@ export function StoreEditPage() {
     setLifecycleMsg(null);
     setLifecycleErr(null);
     try {
-      const updated = await unpublishStore(storeId);
-      setStore(updated);
+      await unpublishStore(storeId);
+      await loadStore();
       setLifecycleMsg(t('ownerEdit.offSuccess'));
     } catch {
       setLifecycleErr(t('ownerEdit.offError'));

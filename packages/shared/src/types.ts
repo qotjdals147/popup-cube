@@ -102,6 +102,43 @@ export interface Product {
   auto_accept_limit: number;
   auto_accept_remaining: number;
   created_at: string;
+  /** §54 — 상세페이지에 직접 쓰는 긴 설명 글 (선택, 상세 이미지와 함께/대신 사용) */
+  detail_description: string | null;
+}
+
+/** §54 — 상품 상세페이지 이미지 1장 (여러 장을 세로로 쌓아 표시). @deprecated §56 블록 에디터로 대체 — 레거시 데이터 호환용으로만 남김. */
+export interface ProductDetailImage {
+  id: string;
+  product_id: string;
+  image_url: string;
+  sort_order: number;
+  created_at: string;
+}
+
+export type ProductDetailBlockType = 'text' | 'image';
+
+/**
+ * §56 (AD-060) — 상품 상세페이지 블록 1개. 글/이미지 블록을 `sort_order`대로 이어붙여
+ * 워드/구글독스처럼 자유롭게 배치·재정렬할 수 있게 함 (`product_detail_blocks` 테이블).
+ */
+export interface ProductDetailBlock {
+  id: string;
+  product_id: string;
+  sort_order: number;
+  block_type: ProductDetailBlockType;
+  text_content: string | null;
+  image_url: string | null;
+  created_at: string;
+}
+
+/** §54 — 상품 리뷰 1건 (구매확정된 주문에서만 작성 가능, `create_product_review` RPC). */
+export interface ProductReview {
+  review_id: string;
+  rating: number;
+  body: string;
+  created_at: string;
+  reviewer_nickname: string | null;
+  image_urls: string[];
 }
 
 /** 장바구니 담기 MVP(§10) — 아직 서버/DB에 저장하지 않는 클라이언트 전용 상태. */

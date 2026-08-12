@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Product } from '@popup-cube/shared';
 import { listActiveProducts } from '../lib/products';
 import { useCart } from '../context/CartContext';
+import { ProductDetailModal } from './ProductDetailModal';
 import { t } from '../i18n';
 
 interface ShopPanelProps {
@@ -18,6 +19,7 @@ export function ShopPanel({ storeId, onClose, onOpenCart }: ShopPanelProps) {
   const [error, setError] = useState<string | null>(null);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [addedId, setAddedId] = useState<string | null>(null);
+  const [detailProduct, setDetailProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -89,6 +91,10 @@ export function ShopPanel({ storeId, onClose, onOpenCart }: ShopPanelProps) {
                   <div style={styles.price}>{formatPrice(product.price)}</div>
                   {product.description && <div style={styles.desc}>{product.description}</div>}
 
+                  <button type="button" style={styles.detailLink} onClick={() => setDetailProduct(product)}>
+                    {t('shop.viewDetail')}
+                  </button>
+
                   <div style={styles.cardFooter}>
                     <div style={styles.stepper}>
                       <button
@@ -115,6 +121,18 @@ export function ShopPanel({ storeId, onClose, onOpenCart }: ShopPanelProps) {
           </div>
         )}
       </div>
+
+      {detailProduct && (
+        <ProductDetailModal
+          product={detailProduct}
+          storeId={storeId}
+          onClose={() => setDetailProduct(null)}
+          onOpenCart={() => {
+            setDetailProduct(null);
+            onOpenCart();
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -193,6 +211,16 @@ const styles: Record<string, React.CSSProperties> = {
   name: { color: '#fff', fontSize: 14, fontWeight: 600 },
   price: { color: '#e94560', fontSize: 13, fontWeight: 600 },
   desc: { color: '#a0a0c0', fontSize: 12, lineHeight: 1.4 },
+  detailLink: {
+    alignSelf: 'flex-start',
+    background: 'transparent',
+    border: 'none',
+    color: '#8ca4d8',
+    fontSize: 11,
+    textDecoration: 'underline',
+    cursor: 'pointer',
+    padding: 0,
+  },
   cardFooter: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 },
   stepper: {
     display: 'flex',

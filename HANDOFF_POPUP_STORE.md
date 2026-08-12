@@ -1,7 +1,8 @@
 # POP-UP CUBE — Agent Handoff Document
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
-> **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**
+> **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** (2026-08-12g) → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -240,9 +241,9 @@ npm run dev
 | **Purpose** | 오프라인 팝업 스토어 한계를 넘는 2D 픽셀 아트 메타버스 커머스 플랫폼 |
 | **Workspace** | `C:\Users\qotjd\Downloads\Cursor\popup_store` |
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
-| **Current Phase** | **Phase 4** — §53.7 순서 5 정책·배송비 **구현 완료** + **AD-058 점주 매장 생명주기 UX** push `74a355b` · **실기 대기** |
-| **Version** | `0.2.12` (매장 생명주기 UX + 관리센터 로그인 테마) |
-| **Git `main` HEAD** | `74a355b` (AD-058 점주 매장 생명주기 UX + delete RPC, 2026-08-12) |
+| **Current Phase** | **Phase 4 → PG 직전** — §53.7 순서 **5c~5e(§54·§55·§56) 로컬 구현 완료** · Supabase 원격 ✅ · Git **커밋/푸시 전** · **다음 = commit/push → PG(§53.7 순서 6)** |
+| **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
+| **Git `main` HEAD** | `9e83134` *(push `74a355b` HANDOFF 기록)* — **로컬 워킹 트리에 §54~§56+스크롤fix 미커밋** · 마지막 코드 push `74a355b` (AD-058, 2026-08-12) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -418,6 +419,7 @@ npm run dev
 | AD-056 | **(참고) 점주 판매자센터 갭 검토** — 네이버 스마트스토어·쿠팡 Wing 등 대비 **필수(P0)·편의(P1)·후순위(P2)** · POP-UP **차별 항목** · 권장 로드맵 **§53** (항목 구현 시 별도 AD·ISS로 쪼갬) | User 2026-08-03 | 2026-08-03 |
 | AD-057 | **(구현) 점주 PC 관리센터 라이트 테마** — `ownerAdminTheme.ts` 화이트/그레이 본문 + 네이비 사이드바 · 주문/상품 카드 · 상태 뱃지 · +2pt 가독성 | User 2026-08-11 | 2026-08-11 |
 | AD-058 | **(구현) 점주 매장 생명주기·대시보드 UX** — **`/home` 대시보드**=매장 카드+「매장 관리 열기」만 · **매장 개요**=「매장 OPEN」/「매장 OFF」/「매장 삭제」(조건부) · 로그인 성공→**항상 `/home`**(마지막 매장/GUCCI 직행 제거) · `StoreEditPage` **사이드바+상단바** 「대시보드로 이동」+ 로그아웃 **항상 노출**(본문 스크롤과 분리 `100vh`) · **GUCCI(`popup_gucci_01`)**=삭제만 UI·RPC 보호, OPEN/OFF는 일반 매장과 동일 · 탭명 **「매장 개요」**·**「운영·배송 안내」**(발주·배송과 구분) · `LandingPage`/`LoginPage` **ownerAdminTheme** 통일 | User 2026-08-12 | 2026-08-12 |
+| AD-060 | **(구현) 상품 상세 블록 에디터** — 스마트스토어 「상품 상세정보」처럼 **한 작업 공간**에서 **글 블록·이미지 블록**을 원하는 순서로 넣고·빼고·**드래그로 순서 변경**. 셀러 케이스 전부 수용: **긴 상세컷 한 장** / **사진+글 번갈아** / **글 위주+가끔 이미지**. §54 `detail_description`+`product_detail_images` → **`product_detail_blocks` 테이블**로 통합(1회 마이그레이션) · `OwnerProductDetailEditor` → `OwnerProductBlockEditor` 교체(native HTML5 drag) · `ProductDetailModal` 블록 순서 렌더. **PG보다 먼저**(User 2026-08-12e). 상세 **§56** | User 2026-08-12e | 2026-08-12 |
 
 ---
 
@@ -474,7 +476,11 @@ npm run dev
 - [x] **HANDOFF AD-054~056 · §53 갭·§53.7 우선순위** — 다음 작업 순서 확정 (User 위임)
 - [x] **AD-054 배송완료·구매확정·7일 자동·손님 「내 주문」 (2026-08-07, 진입점 UI 08-08b 개정)** — migration `20260807*.sql` 3건 **원격 적용** (컬럼·RPC·`pg_cron` 스케줄) · `OwnerOrdersPanel` **「배송 완료」** 버튼 · `OrderHistoryPanel`(신규) + 매장 WebView **헤더 「내 주문」 버튼**(하단 4칸 액션 바와 분리, 매장 무관 전체 조회) · `CartDrawer`/`DisplayProductModal` 결제완료 화면에 7일 자동확정 고지 · **실기 테스트 대기**
 - [x] **§53.7 step 5 — 매장 정책·CS·반품지 + 배송비 (2026-08-11)** — push `a4ba6e0` · migration `store_policy_shipping` 원격 적용 · **실기 대기**
-- [x] **점주 매장 생명주기 UX + 삭제 RPC (2026-08-12, AD-058)** — migration `20260812_owner_delete_store.sql` **`unpublish_store`/`delete_owner_store` 원격 적용** · `stores.ts` · `HomePage`(카드 목록·스크롤·「매장 관리 열기」만) · `StoreEditPage`(매장 개요 OPEN/OFF/삭제 · `100vh` 레이아웃 · 상단바+사이드바 네비) · `LoginPage`→`/home` · `LandingPage`/`LoginPage` ownerAdminTheme · `ko.ts` 탭명 · **⬜ commit/push · ⬜ 실기**
+- [x] **점주 매장 생명주기 UX + 삭제 RPC (2026-08-12, AD-058)** — push `74a355b` · **⬜ 실기**
+- [x] **상품 상세 + 리뷰 MVP (2026-08-12, §54)** — migration `20260812b` **원격 ✅** · **⬜ commit/push · ⬜ 실기**
+- [x] **상품 상세 UX 1차 (2026-08-12d, §55 AD-059)** — **⬜ commit/push · ⬜ 실기**
+- [x] **상품 상세 블록 에디터 (2026-08-12f, §56 AD-060)** — migration `20260812c` **원격 ✅** · **⬜ commit/push · ⬜ 실기**
+- [x] **블록 추가 시 스크롤 튐 (2026-08-12g, ISS-035)** — `OwnerProductPanel.reload()` fix · **⬜ commit/push**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -595,10 +601,66 @@ popup_store/                          # Turborepo root
 | ISS-032 | ~~월드 상단(홈·채널/진열) 잡고 위아래 끌면 화면이 살짝 스크롤~~ | Resolved | `PlayWorldPage` body/overscroll lock · 헤더 `touchmove` 차단 · WebView `overScrollMode="never"`. **User 2026-07-31 실기 OK.** |
 | ISS-033 | ~~demo@owner가 GUCCI 점주인데 주문/에디터 안 됨~~ | Resolved | **DB:** GUCCI `owner_id` = demo owner ✅ · `profiles.store_id` = draft `하이` ❌. **앱:** `profiles.store_id`만 보던 점주 판별 → **`stores.owner_id`** (`userOwnsStore`). **DB:** profile → `popup_gucci_01` migration. |
 | ISS-034 | ~~Play 세로 WebView에서 장바구니 상품명·버튼 줄바꿈 깨짐~~ | Resolved | `CartDrawer` `play-cart-row` 2단 · `play-world.css` narrow rules |
+| ISS-035 | ~~블록 에디터에서 블록 추가·저장마다 스크롤이 맨 위로 튐~~ | Resolved | `OwnerProductPanel.reload()`가 매번 `setLoading(true)` → 상품 목록 DOM 통째 교체가 원인 · **이미 목록 로드됐으면 loading UI 생략** (2026-08-12g) |
 
 ---
 
 ## 7. Next Steps (Priority Order)
+
+### 🚀 다음 세션 착수 가이드 (2026-08-12g — **에이전트가 가장 먼저 읽을 것**)
+
+| | |
+|---|---|
+| **한 줄 요약** | **상세페이지(§54+§55+§56) + 리뷰 + 블록 에디터 + 스크롤 fix = 로컬 완료 · Supabase 원격 ✅ · Git 미커밋** → **User commit/push 요청 시 일괄 커밋** → **PG(§53.7 순서 6)** |
+| **Git 상태** | 원격 `main` HEAD **`9e83134`** (코드 push **`74a355b`** AD-058) · **§54~§56 전부 로컬만** — `git status`에 modified 11 + untracked 8 (mobile AGENTS/CLAUDE/LICENSE **제외**) |
+| **Supabase** | `cvrtobxkvpcpcxrcspdp` · migrations **`20260812b_product_detail_and_reviews`** + **`20260812c_product_detail_blocks`** **원격 적용 완료** |
+| **런칭 진행률 (대략)** | PG 연동 전 **~80%** · P1(대시보드 KPI·택배 API·상품 옵션 등) 포함 **전체 ~55–60%** |
+| **User 미확인 실기** | AD-055~058 + §54~§56 — **로컬 `npm run dev` + localhost:5173** 에서만 최신 UI (Vercel/Expo WebView **아직 없음**) |
+
+**다음 작업 우선순위 (에이전트 판단 — User에게 선택지 나열 금지):**
+
+| 순위 | 작업 | 조건 / 메모 |
+|---|---|---|
+| **A** | **commit + push** (§54+§55+§56+ISS-035 한 번에) | User가 「커밋」「푸시」 명시 요청 시 · 커밋 메시지는 §54 MVP + §55 UX + §56 블록 에디터 + 스크롤 fix 요약 · **`.env.local` / secrets 커밋 금지** |
+| **B** | **PG 실결제** (§53.7 순서 6) | User **PG 후보·계약 확정 후** · mock `CartDrawer`/`place_order` 흐름을 실 PG webhook으로 교체 · **User 결정 없이 착수 금지** |
+| **C** | **P1 편의** (상세 **이후**) | 점주 리뷰 답글 · 블록 에디터 고급 서식 · 템플릿/복사 · Storage orphan 정리(매장 삭제 시) · `/home` KPI 위젯 |
+
+**다음 에이전트가 코드 읽기 전에 볼 파일 (상세페이지 관련):**
+
+| 파일 | 역할 |
+|---|---|
+| `apps/web/src/components/OwnerProductBlockEditor.tsx` | 점주 블록 에디터 (+글/+사진 · 드래그 · 삭제) |
+| `apps/web/src/lib/productDetailBlocks.ts` | 블록 CRUD · Storage 업로드 · 순서 저장 |
+| `apps/web/src/components/ProductDetailModal.tsx` | 손님/미리보기 전체화면 시트 · 블록 렌더 · 리뷰 진입 |
+| `apps/web/src/components/OwnerProductPanel.tsx` | 상품 수정 폼 + 블록 에디터 인라인 · `reload()` 스크롤 fix |
+| `apps/web/src/lib/reviews.ts` + `ReviewFormModal.tsx` | 리뷰 RPC 래퍼 · 작성 모달 |
+| `supabase/migrations/20260812b_*.sql` · `20260812c_*.sql` | DB 스키마 (이미 원격 적용) |
+| `packages/shared/src/types.ts` | `ProductDetailBlock` · `ProductReview` |
+
+**미커밋 파일 목록 (2026-08-12g 기준):**
+
+- **수정:** `HANDOFF_POPUP_STORE.md` · `OwnerProductPanel.tsx` · `ShopPanel.tsx` · `DisplayProductModal.tsx` · `OrderHistoryPanel.tsx` · `StoreEditPage.tsx` · `lib/products.ts` · `i18n/ko.ts` · `packages/shared/src/types.ts` · `package.json` · `package-lock.json`
+- **신규:** `OwnerProductBlockEditor.tsx` · `ProductDetailModal.tsx` · `ReviewFormModal.tsx` · `lib/productDetail.ts` · `lib/productDetailBlocks.ts` · `lib/reviews.ts` · `supabase/migrations/20260812b_product_detail_and_reviews.sql` · `supabase/migrations/20260812c_product_detail_blocks.sql`
+- **삭제(로컬):** `OwnerProductDetailEditor.tsx` (블록 에디터로 대체)
+- **커밋 제외:** `apps/mobile/AGENTS.md` · `CLAUDE.md` · `LICENSE`
+
+#### 사용자가 지금 해야 할 것 (§54~§56 실기 — PC 웹)
+
+**아래 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+5) 브라우저 `http://localhost:5173` (Vercel URL에는 **아직 없음**)  
+6) **점주** — `demo@owner.com` / `demo` → 매장 **관리 열기** → **상품** 탭 → 상품 **수정** → 하단 **상세페이지**에서 **+ 글 블록 / + 사진 블록** · **드래그로 순서 변경** · **미리보기**  
+7) **손님** — 로그아웃 → `demo@shopper.com` / `demo` → 매장 입장 → **상세보기** → 블록 순서·리뷰 섹션 · (구매확정 주문 있으면) **리뷰 쓰기**  
+8) **이번에 볼 것** — 블록 추가해도 **스크롤이 맨 위로 안 튀는지** · 글·사진 **섞어서** 순서대로 보이는지  
+9) OK면 User에게 **「커밋 푸시해줘」** → Vercel 반영 후 앱 WebView에서도 확인 가능
+
+---
 
 ### ⏭ 다음 세션 1순위 — **§53.7 확정 순서 (스무스 진행)**
 
@@ -611,8 +673,12 @@ popup_store/                          # Turborepo root
 | **4** | ~~**발송 전 취소(손님)** + **클레임 v1**~~ ✅ 구현 (2026-08-11) · **실기 대기** |
 | **5** | ~~**매장 정책·CS·반품지 + 배송비 규칙**~~ ✅ 구현 (2026-08-11) · **실기 대기** |
 | **5b** | ~~**점주 매장 생명주기 UX** (AD-058)~~ ✅ push `74a355b` (2026-08-12) · **실기 대기** |
-| **6** | **PG 실결제** — ⬜ **← 다음** (User·계약 후) |
-| **근거** | User 2026-08-03 — 우선순위 **에이전트 확정** · **§53.7** |
+| **5c** | **상품 상세 + 리뷰** (§54) — ✅ MVP 구현 (2026-08-12) · Supabase ✅ · Git **커밋 전** |
+| **5d** | **상품 상세페이지 UX 1차** (§55 · AD-059-1~5) — ✅ 구현 (2026-08-12d) · 통합·미리보기·큰 화면·리뷰진입 · Git **커밋 전** · **실기 대기** |
+| **5e** | ~~**상품 상세 블록 에디터** (§56 · AD-060)~~ ✅ 구현 (2026-08-12f) + **스크롤 fix** (2026-08-12g) · Git **커밋 전** · **실기 대기** |
+| **6** | **PG 실결제** — ⬜ **← 코드상 다음 1순위** (User·PG 후보·계약 후) |
+| **6a** | **commit/push** — §54+§55+§56 일괄 | ⬜ User 명시 요청 시 · **PG/Vercel 반영 전 필수** |
+| **근거** | User 2026-08-12e — 스마트스토어식 **한글/워드처럼 글·이미지 자유 배치** 에디터 없으면 「상세 완성」 아님 → **AD-060으로 완성** (2026-08-12f) |
 
 ### 7.1 세션 인수인계 — **2026-08-07** (AD-054 구현)
 
@@ -672,6 +738,97 @@ popup_store/                          # Turborepo root
 | **실기** | PC `npm run dev` → `demo@owner.com`/`demo` → **매장 목록** 먼저 → GUCCI **매장 개요** OPEN/OFF · 테스트 매장 **삭제** (draft+주문 없을 때) → **운영·배송 안내** 탭 스크롤해도 상단·사이드바 네비 유지 |
 | **다음** | User **commit/push 요청 시** 일괄 커밋 → 실기 OK면 **§53.7 순서 6 PG** · User 질문 대기 중 |
 
+### 7.7 세션 인수인계 — **2026-08-12b** (§54 — 상품 상세페이지 + 리뷰(별점/사진) **구현**)
+
+| | |
+|---|---|
+| **Git** | **커밋/푸시 안 함** — 로컬 워킹 트리만 · 원격 `main` 마지막 `9e83134` · Vercel에는 **아직 반영 안 됨** |
+| **Supabase POPUP** | migration `product_detail_and_reviews` **원격 적용됨** — 로컬 `npm run dev`만 켜면 DB 기능은 동작 |
+| **핵심** | 점주 상품 카드 **「상세페이지 관리」** + 손님 **「상세보기」** + 「내 주문」**리뷰 쓰기**(구매확정 게이트) — **뼈대(MVP)는 연결됨** |
+| **User 피드백 (2026-08-12)** | 로컬에서 「상세페이지 관리」버튼 **보임** · 다만 **스마트스토어처럼 안 느껴짐** — 별도 버튼·textarea·모달 수준이라 **「기능 완성」이 아니라 1차 구현**으로 간주 · **상세페이지 UX를 PG보다 먼저** 마무리하자(§55) |
+| **UI/lib 신규 파일** | `lib/productDetail.ts`·`lib/reviews.ts`·`OwnerProductDetailEditor.tsx`·`ProductDetailModal.tsx`·`ReviewFormModal.tsx` · migration `20260812b_product_detail_and_reviews.sql` |
+| **실기 (로컬 PC)** | §0 **PC 3줄** → `http://localhost:5173` (**Vercel URL이면 UI 안 보임**) · Expo 앱 WebView는 기본 **Vercel**이라 로컬 UI 반영 안 됨 |
+| **다음** | **§55 AD-059** 상세페이지 UX 완성 → User 요청 시 **commit/push** → PG |
+
+### 7.8 세션 인수인계 — **2026-08-12c** (User — §54 MVP 확인 · §55 우선순위 확정)
+
+| | |
+|---|---|
+| **상태** | §54 코드 **로컬만** · Supabase **원격 적용** · **push/Vercel 미반영** |
+| **User 확인** | `npm run dev` + localhost에서 점주 **상품 탭 → 「상세페이지 관리」** 버튼 노출 OK |
+| **User 결정** | 스마트스토어식 **상세페이지를 먼저 “완성”**한 뒤 PG · 리뷰는 §54에 MVP 있으나 **상세 UX가 우선** |
+| **다음 에이전트** | **§55·AD-059** 읽고 착수 — 1) 상품 **수정 폼 안에 「상품 상세정보」 통합** 2) **미리보기** 3) 손님 **전용 상세 화면**(모달→페이지) 순 권장 |
+| **commit** | User 명시 요청 전까지 **push 금지**(기존 git 규칙) |
+
+### 7.9 세션 인수인계 — **2026-08-12d** (§55 AD-059-1~5 **1차 구현** — 통합·미리보기·큰화면)
+
+| | |
+|---|---|
+| **Git** | **커밋/푸시 안 함** — 로컬 워킹 트리만 · 원격 `main` 마지막 `9e83134` |
+| **Supabase** | 변경 없음 (§54 스키마 그대로 사용) |
+| **AD-059-1 통합** | 점주 상품 카드 **「수정」** 안에 상품 상세정보(설명+상세이미지, `OwnerProductDetailEditor`)를 **항상 인라인 표시**로 편입 · 카드 목록의 별도 **「상세페이지 관리」 버튼 제거** (`OwnerProductPanel.tsx`) |
+| **AD-059-2 미리보기** | 수정 영역 하단 **「👀 손님 화면으로 미리보기」** 버튼 → `ProductDetailModal`을 `previewMode`로 열어 **손님이 보는 것과 동일한 레이아웃**을 그대로 확인 (담기/리뷰쓰기 버튼은 미리보기에서 숨김 + 「미리보기」 배지 표시) |
+| **AD-059-3 전용 화면 (중요한 아키텍처 결정)** | 이 매장 화면은 **Phaser 월드+소켓 연결 위에 오버레이로 쌓이는 구조**라, `react-router`로 실제 페이지 이동을 하면 게임 캔버스·소켓이 끊김. 그래서 **URL 라우팅 대신 전체화면 시트**로 구현: 헤더 **뒤로가기(←)** + 스크롤 본문(대표이미지·상세설명·상세이미지·리뷰) + **하단 고정 구매 바**(수량·담기·장바구니). 데스크톱에서도 `maxWidth 720 / maxHeight 96vh`로 이전 모달보다 훨씬 크게 — "페이지"에 가까운 느낌 |
+| **AD-059-4 리뷰 진입 확장** | `ProductDetailModal` 안에서 로그인한 손님의 주문을 조회(`listMyOrders`+`getMyReviewKeys`)해 **구매확정/완료** 주문이면 리뷰 섹션 헤더에 **「리뷰 쓰기」** 버튼 노출 · 배송중/배송완료(미확정) 상태면 클릭 시 §54와 동일하게 **구매확정 confirm 후** 작성 진입 · 이미 리뷰를 남긴 경우 안내 문구만 표시. 「내 주문」에서의 기존 리뷰 진입(AD-054/§54)은 유지 — **두 진입점 공존** |
+| **AD-059-5 카피** | 점주 UI에 **「대표 이미지(목록·카드용 사진 1장)」** vs **「📄 상세페이지(설명+상세이미지, 저장 즉시 손님 화면 반영)」** 구분 문구 추가 (`ownerProducts.editImageLabel`/`detailSectionTitle`/`detailIntro`) |
+| **버그 수정(겸사)** | `StoreEditPage.handleUnpublish`가 `unpublishStore`(void 반환 RPC)의 반환값을 `setStore`에 넣던 **타입 에러** 수정 — 언퍼블리시 후 `loadStore()`로 재조회 |
+| **변경 파일** | `OwnerProductPanel.tsx`(통합+미리보기) · `ProductDetailModal.tsx`(전체 재작성 — 전용화면+리뷰진입) · `i18n/ko.ts`(카피) · `StoreEditPage.tsx`(버그 수정) |
+| **검증** | `npx tsc --noEmit` — 이번 변경 파일 **에러 0건** (기존 `OwnerDisplayPanel`/`OwnerOrdersPanel`/`lib/displayFixtures.ts`의 **무관한 pre-existing 에러만** 남음) · `npm run build` **성공** |
+| **실기 (로컬 PC)** | §0 PC 3줄 → `http://localhost:5173` → `demo@owner.com`/`demo` → 상품 탭 → 상품 **「수정」** → 하단 상세정보 편집 + **미리보기** 클릭 → 손님 계정으로 「상세보기」 눌러 전체화면 확인 + (구매확정된 주문 있으면) 리뷰 쓰기 |
+| **다음** | User 실기(1차) → **§56 AD-060 블록 에디터** → commit/push → PG |
+
+#### 사용자가 지금 해야 할 것 (§0 PC 웹 표준 안내)
+
+**아래 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+5) 브라우저에서 터미널에 나온 주소 (보통 `http://localhost:5173`)  
+6) **점주** — `demo@owner.com` / `demo` → 매장 **관리 열기** → 왼쪽 **상품** 탭 → 상품 **수정** → 아래쪽 **상세페이지** 영역(설명·이미지) · **손님 화면으로 미리보기**  
+7) **손님(같은 PC)** — 로그아웃 후 `demo@shopper.com` / `demo` → 매장 입장 → 쇼핑/상품에서 **상세보기** → 큰 화면·아래로 스크롤·하단 **장바구니 담기** · (구매확정 주문 있으면) **리뷰 쓰기**  
+8) **이번에 볼 것** — 「상세페이지 관리」**별도 버튼 없음** · 수정 안에 상세 편집 · 미리보기 · 손님 상세가 **작은 팝업이 아니라 큰 화면**  
+9) Vercel(`popup-cube-web.vercel.app`)에는 **아직 없음** — push 전 · **로컬만** 최신
+
+### 7.10 세션 인수인계 — **2026-08-12e** (User — 스마트스토어 **블록 에디터** 방향 **확정**)
+
+| | |
+|---|---|
+| **코드 변경** | **없음** — User와 **방향 합의·우선순위 재정렬**만 |
+| **User 핵심 (확정)** | 스마트스토어 셀러 상세페이지 만드는 방식 = **한글·워드·구글 문서처럼 한 공간**에서 글·이미지를 **원하는 위치에 넣고·순서 바꾸고·자유롭게 편집**. 케이스: ① **긴 상세컷 한 장**만 ② **사진 한 장씩 + 직접 타이핑** 번갈아 ③ **글 위주 + 가끔 이미지** 등 **여러 방식 혼재** → **전부 수용하려면 스마트스토어식 블록/WYSIWYG 에디터**로 가야 함 |
+| **AD-059-1~5 재평가** | 통합·미리보기·큰 화면·리뷰 진입은 **1차(껍데기)** · **진짜 「상세 완성」= AD-060 블록 에디터** · User 「그 흐름이 맞다」고 확인 |
+| **현재 구현의 한계** | `OwnerProductDetailEditor` = **긴 글 textarea 1개** + **이미지 목록(위/아래 화살표)** — 글과 이미지가 **한 덩어리 작업 공간이 아님** · 손님 화면도 `detail_description` 전체 → 이미지 스택 **순서 고정(글 먼저·이미지 나중)** |
+| **다음 1순위** | **§56 · AD-060** 블록 에디터 (PG **5e 후**) |
+| **다음 에이전트 착수 전** | §56 전체 · §55 갭 표 · `OwnerProductDetailEditor.tsx` · `ProductDetailModal.tsx` · §54 DB 스키마 · **마이그레이션 전략**(기존 데이터→블록 변환) 읽기 |
+| **commit** | §54+§55 코드 여전히 **로컬만** · User 명시 요청 전 **push 금지** |
+
+### 7.11 세션 인수인계 — **2026-08-12f** (§56 AD-060 — 상품 상세 **블록 에디터** 구현 완료)
+
+| | |
+|---|---|
+| **Git** | **커밋/푸시 안 함** — 로컬 워킹 트리만 · 원격 `main` 마지막 `9e83134` |
+| **Supabase POPUP** | migration `product_detail_blocks`(파일명 `20260812c_product_detail_blocks.sql`) **원격 적용** — `product_detail_blocks` 테이블(글/이미지 블록 + `sort_order`) + `product_detail_images`와 동일 RLS 패턴 + **기존 상품 데이터 1회 자동 변환**(`detail_description`→text 블록, `product_detail_images`→image 블록, 순서 유지). 변환 후 확인 쿼리: `text` 1건·`image` 1건(GUCCI 데모 상품) 정상 생성 |
+| **핵심** | `OwnerProductDetailEditor`(textarea 1개 + 이미지 목록, 분리 구조) → **`OwnerProductBlockEditor`로 완전 교체** — 글/사진 블록을 **한 캔버스**에 쌓고, **드래그(native HTML5 DnD)로 순서 자유 변경**, 블록별 삭제. `ProductDetailModal`도 `product.detail_description`+`listProductDetailImages` 대신 **`listProductDetailBlocks`로 블록 배열을 순서대로 렌더**(텍스트/이미지 혼재 가능) |
+| **레거시 처리** | `products.detail_description` 컬럼·`product_detail_images` 테이블·`lib/productDetail.ts`는 **삭제하지 않고 보존**(백업/롤백 안전망) — 더 이상 읽거나 쓰지 않음. `OwnerProductDetailEditor.tsx`는 완전히 대체돼 **삭제** |
+| **신규 파일** | `apps/web/src/lib/productDetailBlocks.ts`(블록 CRUD+순서저장) · `apps/web/src/components/OwnerProductBlockEditor.tsx` · `supabase/migrations/20260812c_product_detail_blocks.sql` |
+| **수정 파일** | `packages/shared/src/types.ts`(`ProductDetailBlock` 타입) · `ProductDetailModal.tsx`(블록 렌더) · `OwnerProductPanel.tsx`(에디터 컴포넌트 교체) · `i18n/ko.ts`(블록 에디터 문구 추가) |
+| **검증** | `npx tsc --noEmit` — 이번 변경 파일 **에러 0건**(기존 `OwnerDisplayPanel`/`OwnerOrdersPanel`/`lib/displayFixtures.ts`의 **무관한 pre-existing 에러만** 남음, §7.9와 동일) · `npm run build` **성공** |
+| **실기 (로컬 PC)** | §0 PC 3줄 → `http://localhost:5173` → `demo@owner.com`/`demo` → 상품 탭 → 상품 **「수정」** → 하단 상세페이지 영역에서 **「+ 글 블록 추가」/「+ 사진 블록 추가」** 로 블록 쌓기 → 블록을 **드래그**해서 순서 바꿔보기 → **미리보기**로 확인 → 손님 계정으로 「상세보기」 눌러 블록이 순서대로 보이는지 확인 |
+| **다음** | User 실기 확인 → OK면 **commit/push** → **§53.7 순서 6 PG 실결제** (상세페이지 UX는 이제 AD-059+AD-060으로 **완성**, 남은 건 P1 편의 기능뿐) |
+
+### 7.12 세션 인수인계 — **2026-08-12g** (ISS-035 스크롤 fix + **다음 세션 HANDOFF 정리**)
+
+| | |
+|---|---|
+| **Git** | **여전히 커밋/푸시 안 함** · 원격 `main` HEAD `9e83134` · 코드 push `74a355b` |
+| **User 실기** | 블록 에디터 — **「블록 추가할 때마다 스크롤 맨 위로」** → **ISS-035 수정 완료** · 재확인 대기 |
+| **ISS-035** | `OwnerProductPanel.reload()`가 블록 저장마다 `setLoading(true)` → 목록 DOM 소멸 → 스크롤 리셋 · **fix:** `products.length > 0`이면 loading UI 생략 |
+| **HANDOFF** | **§7.0 「다음 세션 착수 가이드」** 신설 — 미커밋 파일·다음 우선순위(A=commit/push, B=PG, C=P1) · §1·§5·§53.7 갱신 |
+| **다음 에이전트** | ① User **「커밋 푸시」** → §54~§56+ISS-035 일괄 push ② PG는 **User PG 후보 확정 후** (`CartDrawer` mock → 실결제) |
+
 ### 7.3 세션 인수인계 — **2026-08-10** (§53 P0 점주 주문 검색·필터 착수 — superseded by 7.2)
 
 | | |
@@ -693,7 +850,11 @@ popup_store/                          # Turborepo root
 | **4** | 발송 전 **손님 취소** + **클레임 v1** | ✅ push · ⬜ 실기 |
 | **5** | 매장 **정책·배송비** | ✅ push `a4ba6e0` · ⬜ **실기** |
 | **5b** | **점주 매장 생명주기 UX** (AD-058) | ✅ push `74a355b` · ⬜ **실기** |
-| 6 | PG 실결제 | ⬜ User 후보 미정 |
+| **5c** | **상품 상세 + 리뷰 MVP** (§54) | ✅ 로컬 · Supabase ✅ |
+| **5d** | **상품 상세 UX 1차** (§55 · AD-059-1~5) | ✅ 로컬 · Git 커밋 전 · **실기 대기** |
+| **5e** | **상품 상세 블록 에디터** (§56 · AD-060) + ISS-035 | ✅ 로컬 · Git 커밋 전 · **실기 대기** |
+| **6a** | **commit/push** §54~§56 | ⬜ User 요청 시 |
+| 6 | PG 실결제 | ⬜ **← 기능상 다음** (User PG 후보 미정) |
 | 7 | EAS **development** 빌드 (AD-051, 선택) | ⬜ |
 
 ### 사용자가 테스트할 것 (가챠 + 점주 주문 · §0 Expo · PC 웹)
@@ -780,6 +941,54 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-12g — 블록 추가할 때마다 스크롤이 맨 위로 튀는 버그 수정 (ISS-035) + HANDOFF 정리
+- **Author:** Cursor Agent (User 실기 중 발견)
+- **Git:** 커밋 전
+- **Supabase:** 변경 없음
+- **원인:** `OwnerProductBlockEditor` → `onSaved()` → `OwnerProductPanel.reload()` → **매번 `setLoading(true)`** → 상품 목록(편집 중인 카드 포함) DOM 통째 소멸·재생성 → 스크롤 리셋
+- **Changed:** `apps/web/src/components/OwnerProductPanel.tsx` — `reload()`가 **이미 상품 목록이 있으면 `setLoading(true)` 스킵**
+- **HANDOFF:** §7.0 다음 세션 착수 가이드 · §7.12 · §1 Phase · §5 · §53.7 · ISS-035
+- **검증:** `npm run build` 성공
+- **Notes:** User 재확인 후 **§54~§56+ISS-035 일괄 commit/push** → PG
+
+### 2026-08-12f — 상품 상세 **블록 에디터** 구현 완료 (§56 AD-060)
+- **Author:** Cursor Agent (User 요청 — 「시작해 모델 바꿨어」, Sonnet 5)
+- **Git:** 커밋 전 (다음 커밋 예정)
+- **Supabase:** migration `product_detail_blocks`(`20260812c_product_detail_blocks.sql`) 원격 적용 — `product_detail_blocks` 테이블 신규 + RLS(공개 매장 읽기·점주 본인 매장 CRUD) + **기존 `detail_description`/`product_detail_images` 데이터를 블록으로 1회 자동 변환**(재실행 안전)
+- **Changed:** `packages/shared/src/types.ts`(`ProductDetailBlock` 타입 추가) · `apps/web/src/lib/productDetailBlocks.ts`(신규 — 블록 CRUD·업로드·순서저장) · `apps/web/src/components/OwnerProductBlockEditor.tsx`(신규 — `OwnerProductDetailEditor` 대체) · `apps/web/src/components/ProductDetailModal.tsx`(블록 배열 순서 렌더로 교체) · `apps/web/src/components/OwnerProductPanel.tsx`(에디터 컴포넌트 교체) · `apps/web/src/i18n/ko.ts`(블록 에디터 문구)
+- **Deleted:** `apps/web/src/components/OwnerProductDetailEditor.tsx` (블록 에디터로 완전 대체)
+- **핵심:** 글 textarea 1개 + 이미지 목록(분리·순서 고정) 구조를 **글/사진 블록을 하나의 캔버스에서 자유 배치·드래그 재정렬**하는 구조로 교체 — 외부 라이브러리 없이 native HTML5 drag-and-drop으로 구현
+- **레거시 보존:** `products.detail_description`·`product_detail_images` 테이블·`lib/productDetail.ts`는 **삭제하지 않고 남김**(백업 안전망, 더 이상 사용 안 함)
+- **검증:** `npx tsc --noEmit` 관련 파일 에러 0 (pre-existing 무관 에러만 잔존) · `npm run build` 성공
+- **Notes:** **AD-060 완료로 상세페이지 UX(AD-059+AD-060) 전체 완성.** 실기 대기 중. User 확인 후 commit/push → PG(§53.7 순서 6)로 진행
+
+### 2026-08-12e — User 확정: 스마트스토어식 **블록 에디터**가 진짜 「상세 완성」(AD-060)
+- **Author:** User + Cursor Agent (방향 합의 · HANDOFF만 갱신)
+- **Git:** 변경 없음
+- **User 결정:** 상세페이지 = **한글/워드/구글 문서처럼** 글·이미지 **자유 배치·순서 변경** · 긴 상세컷만 / 사진+글 번갈아 / 글 위주 등 **모든 셀러 케이스** 수용하려면 **스마트스토어식 블록 에디터** 필수
+- **재평가:** AD-059-1~5 = **1차(껍데기)** 완료 · **AD-060 = 다음 1순위** · PG는 **5e 후**
+- **Notes:** 코드 작업 없음 · §56·AD-060·§7.10 추가
+
+### 2026-08-12d — 상품 상세페이지 UX 1차 (§55 AD-059-1~5)
+- **Author:** Cursor Agent (User 요청 — 「Sonnet 5로 할게 시작해」)
+- **Git:** 커밋 전 (다음 커밋 예정)
+- **Supabase:** 변경 없음 — §54 스키마(`product_detail_and_reviews`) 그대로 사용
+- **Changed:** `components/OwnerProductPanel.tsx`(수정 폼에 상세정보 인라인 통합 + 「상세페이지 관리」 버튼 제거 + 미리보기 버튼) · `components/ProductDetailModal.tsx`(전체 재작성 — 전체화면 시트, 리뷰 진입점, `previewMode`) · `i18n/ko.ts`(대표이미지 vs 상세페이지 카피) · `pages/StoreEditPage.tsx`(`unpublishStore` 반환형 버그 수정, 겸사)
+- **AD-059-1** 수정 폼 안에 상세정보(설명+이미지) 인라인 편입, 별도 버튼 제거
+- **AD-059-2** 「👀 손님 화면으로 미리보기」 → `ProductDetailModal previewMode`
+- **AD-059-3** URL 라우트 대신 **전체화면 오버레이 시트**로 구현 (Phaser 월드+소켓 유지 위해 의도적 결정 — §55.3 결정 로그 참고)
+- **AD-059-4** 상세페이지 리뷰 섹션에 자체 「리뷰 쓰기」 진입점 추가 (「내 주문」과 공존)
+- **AD-059-5** 대표이미지/상세페이지 구분 카피 추가
+- **검증:** `npx tsc --noEmit` 관련 파일 에러 0 (pre-existing 무관 에러만 잔존) · `npm run build` 성공
+- **Notes:** **1차(껍데기) 완료 — 블록 에디터(AD-060)는 §56.** 실기 대기. User 확인 후 commit/push.
+
+### 2026-08-12b — 상품 상세페이지 + 리뷰(별점/사진) (§54)
+- **Author:** Cursor Agent (User 요청 — 리뷰·상세페이지 기능 논의 후 구현 지시)
+- **Git:** 커밋 전 (다음 커밋 예정)
+- **Supabase:** migration `product_detail_and_reviews` 원격 적용 — `products.detail_description` · `product_detail_images`/`product_reviews`/`product_review_images` 신규 테이블 · RPC `create_product_review`(구매확정 서버 검증)·`get_product_reviews`·`get_my_review_keys`
+- **Changed:** `packages/shared/src/types.ts`(`Product.detail_description`·`ProductDetailImage`·`ProductReview`) · `apps/web/src/lib/products.ts`(`updateProductDetailDescription`) · `lib/productDetail.ts`(신규) · `lib/reviews.ts`(신규) · `components/OwnerProductDetailEditor.tsx`(신규) · `components/OwnerProductPanel.tsx`(「상세페이지 관리」버튼) · `components/ProductDetailModal.tsx`(신규) · `components/ReviewFormModal.tsx`(신규) · `ShopPanel.tsx`/`DisplayProductModal.tsx`(「상세보기」진입점) · `OrderHistoryPanel.tsx`(리뷰 쓰기 + 구매확정 유도 플로우) · `i18n/ko.ts`
+- **Notes:** **MVP — UX 미완(§55).** Git **커밋/푸시 전** · Supabase만 원격 적용. User 로컬에서 「상세페이지 관리」 확인 · **스마트스토어식 등록/상세 흐름은 AD-059에서 완성 예정.**
 
 ### 2026-08-12 — 점주 매장 생명주기 UX + 삭제 RPC (AD-058)
 - **Author:** Cursor Agent (User UX 피드백)
@@ -1662,6 +1871,27 @@ npx expo start --tunnel --port 8082 --clear
 **이미지 표시 방식(2026-07-13):** 상품 사진(등록 미리보기·점주 목록·손님 쇼핑 화면·장바구니 썸네일)은 `objectFit: 'contain'`(적응형 — 사진을 자르지 않고 비율 그대로 박스 안에 전부 보이게, 남는 공간은 여백) 사용. 처음엔 `objectFit: 'cover'`(꽉 채우기, 비율 안 맞으면 잘림)였다가 User 지적으로 변경 — 점주가 사진마다 특정 픽셀 크기로 편집해야 하는 부담 대신, 어떤 비율의 사진을 올려도 안 잘리게 하는 쪽을 선택함. **주의:** 매장 대표 이미지(`CreateStorePage`, `StoreEnterModal`, `HomePage` 카드)는 아직 `cover` 그대로 — 같은 논리를 적용할지는 별도 결정 필요(§7 참고).
 
 **장바구니(cart):** DB 테이블 없음(client-only, 이전과 동일) — `apps/web/src/context/CartContext.tsx`가 `localStorage`에 보관. **결제 자체(PG)는 여전히 mock**이지만, 결제가 확정되면(할인 적용 또는 가챠 뽑기 완료) **실제 `orders`/`order_items`에 저장됨**(2026-07-13, 아래).
+
+### 상품 상세페이지 · 리뷰 (§54 MVP + §55 AD-059 + §56 AD-060 **블록 에디터 완료**, 2026-08-12f)
+
+| 테이블 | 용도 | 핵심 컬럼 |
+|---|---|---|
+| `product_detail_blocks` | **§56 AD-060 — 상세페이지 본문(글/이미지 블록을 순서대로 이어붙임)**. 점주 블록 에디터·손님 상세 렌더 모두 **이 테이블만 사용** | `product_id` FK, `sort_order`, `block_type`(`text`\|`image`), `text_content`, `image_url` |
+| `products.detail_description` | **(레거시, §54)** 점주가 직접 쓰던 긴 설명 글 1통 — AD-060 마이그레이션으로 `product_detail_blocks`에 이전됨. **더 이상 읽거나 쓰지 않음**, 백업용으로만 보존 | TEXT, nullable |
+| `product_detail_images` | **(레거시, §54)** 상세 이미지 여러 장(위→아래) — AD-060 마이그레이션으로 `product_detail_blocks`에 이전됨. **더 이상 읽거나 쓰지 않음**, 백업용으로만 보존 | `product_id` FK, `image_url`, `sort_order` |
+| `product_reviews` | 리뷰 1건 — **구매확정(`purchase_confirmed`/`completed`)된 주문의 상품에만** 작성 가능 (`create_product_review` RPC가 서버에서 검증) | `product_id`, `order_id`, `user_id`, `rating`(1~5), `body`. **`UNIQUE(order_id, product_id)`** — 같은 주문·상품 중복 리뷰 불가 |
+| `product_review_images` | 리뷰 사진 (최대 5장) | `review_id` FK, `image_url`, `sort_order` |
+
+**RLS/RPC 패턴:** `product_detail_blocks`(현재 사용)와 `product_detail_images`(레거시)는 `display_fixtures`와 동일(공개 매장은 손님도 읽기, 점주는 본인 매장 전체 CRUD 직접 `.from()`). `product_reviews`/`product_review_images`는 **읽기는 공개**(`USING (true)`) 이지만 **쓰기는 오직 RPC**(`create_product_review`, SECURITY DEFINER)로만 — 테이블에 INSERT 권한 자체를 안 줘서 클라이언트가 직접 조작 불가. 조회용 RPC: `get_product_reviews(product_id)`(평점·글·사진 배열 포함) · `get_my_review_keys()`(내가 이미 리뷰 남긴 (주문,상품) 조합 — 「내 주문」에서 버튼을 "리뷰 완료"로 바꾸는 용도).
+
+**UI (§56 AD-060으로 갱신):**
+- 점주: `OwnerProductPanel` 상품 카드 → **「수정」** 누르면 이름·가격·대표이미지 폼 **바로 아래**에 상세정보 섹션(`OwnerProductBlockEditor`)이 **항상 인라인으로** 붙어 있음. **「+ 글 블록 추가」/「+ 사진 블록 추가」** 로 블록을 쌓고, 블록을 **드래그(native HTML5 DnD)해서 순서를 자유롭게 변경**, 블록별 삭제 가능 — 글과 사진을 원하는 순서로 섞을 수 있음(한 장짜리 긴 상세컷만 / 사진+글 번갈아 / 글 위주 등 모든 패턴 수용). 그 밑에 **「👀 손님 화면으로 미리보기」** 버튼으로 저장된 내용을 손님 화면과 동일하게 확인.
+- 손님: `ShopPanel`/`DisplayProductModal` 상품에 **「상세보기」** 버튼 → `ProductDetailModal`을 **전체화면 시트**로 오픈(헤더 뒤로가기 + 스크롤 본문 + 하단 고정 구매바) — 대표 이미지·가격·담기 + **블록 배열을 순서대로 렌더**(텍스트/이미지 혼재, 이미지는 lazy-load) + 리뷰 목록·평균 별점.
+- 리뷰 작성 진입점은 **두 곳** — ① 「내 주문」(`OrderHistoryPanel`, AD-054부터) ② **상세페이지 리뷰 섹션 자체**(`ProductDetailModal`, AD-059-4). 둘 다 주문 상태가 배송중~완료(`shipped`/`delivery_completed`/`purchase_confirmed`/`completed`) 구간이면 **「리뷰 쓰기」** 버튼 노출. **아직 구매확정 전**(`shipped`/`delivery_completed`)이면 클릭 시 "구매확정 후 작성 가능 — 지금 구매확정 할까요?" 확인 → 동의 시 `confirm_purchase` 실행 후 바로 리뷰 폼(`ReviewFormModal`) 오픈. 이미 리뷰를 남긴 상품은 버튼 대신 안내 문구/배지.
+
+**범위 밖(백로그 — P1, AD-060 이후):**
+- **드래그** 외 고급 서식(표·글꼴·색) · **긴 이미지 자동 분할** · **템플릿/다른 상품 복사** · **AI 상세 초안** · 점주 리뷰 답글
+- 매장 삭제 시 **Storage 파일(상세 이미지·리뷰 사진 포함) 정리 안 됨** — 기존 기술 부채(§26)에 통합, DB 행은 CASCADE로 지워지지만 Storage 객체는 orphan으로 남음.
 
 ### 주문·배송 — `orders` + 배송지 관리 (✅ 구현 완료, AD-030)
 
@@ -2607,7 +2837,11 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **3** | **주문 검색·필터·정렬** (점주 P0#7) — ✅ 구현 2026-08-11 · 실기 대기 | 주문 수 늘면 목록만으로 막힘 · Realtime(1) 다음이 자연스러움 |
 | **4** | **발송 전 취소(손님)** + **클레임 v1**(점주 탭 뼈대) + §52 재고·quota 복구 — ✅ 구현 2026-08-11 · 실기 대기 | 주문 내역(2) 있어야 손님 취소 UX 의미 있음 |
 | **5** | **매장 정책·CS·반품지** + **배송비 규칙** — ✅ 구현 2026-08-11 · 실기 대기 | PG·약관 직전 **신뢰·문구** 고정 |
-| **6** | **PG** (P0#1) | User·계약 후 · Mock → 승인/환불 연동 |
+| **5c** | **상품 상세 + 리뷰 MVP** (§54) — ✅ 구현 (2026-08-12) | 쇼핑 **설득력**(상세컷) — PG 전 **체감 품질** |
+| **5d** | **상품 상세 UX 1차** (§55 · AD-059-1~5) — ✅ (2026-08-12d) · Git 커밋 전 | 통합·미리보기·큰화면·리뷰진입 — **껍데기** |
+| **5e** | ~~**상품 상세 블록 에디터** (§56 · AD-060)~~ ✅ + **ISS-035 스크롤 fix** (2026-08-12g) · Git **커밋 전** · **실기 대기** |
+| **6a** | **commit/push** — §54+§55+§56 일괄 | ⬜ User 명시 요청 시 (**Vercel 반영 전 필수**) |
+| **6** | **PG 실결제** | ⬜ User·PG 후보·계약 후 (**상세 UX 완료 후 다음**) |
 | **7** | **P1** — 대시보드 · 엑셀 · 일괄발송 · 옵션 · 택배 API · 문의 등 | 운영 숙련·트래픽 보며 단계적 |
 
 **§7 Next Steps** = 위 **1→2→3…** 와 동일하게 유지·갱신.
@@ -2620,7 +2854,153 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 - **§53** = **외부 벤치마크 대비 “뭐가 더 필요한지” 백로그** — 착수 시 `## 7. Next Steps`·새 AD로 끌어올림.
 - **§53.7** = **실행 순서(확정)** — User 2026-08-03 에이전트 우선순위 위임.
 
-*§53 Last updated: 2026-08-12 (AD-058 점주 매장 생명주기 UX · §53.7 step 5 실기 대기)*
+*§53 Last updated: 2026-08-12g (AD-060+ISS-035 완료 · commit/push → PG · §7.0 착수 가이드)*
+
+---
+
+## 55. 상품 상세페이지 — 스마트스토어 벤치마크 · POP-UP 갭 · 1차 체크리스트 (AD-059)
+
+> **User 2026-08-12:** §54는 **동작하는 MVP**일 뿐, **스마트스토어처럼 “완성”된 상세 기능은 아님**. **PG보다 상세페이지 UX를 먼저** 마무리.
+> **User 2026-08-12e (확정):** AD-059-1~5는 **1차(껍데기)** · **진짜 완성 = §56 AD-060 블록 에디터** (한글/워드처럼 글·이미지 자유 배치).
+> **2026-08-12f — AD-060 구현 완료.** `OwnerProductBlockEditor`(드래그 재정렬 글/사진 블록) + `product_detail_blocks` 테이블 + 기존 데이터 마이그레이션 전부 적용. 상세페이지 UX는 이제 **완성 상태** — 다음은 PG.
+> **에이전트:** 착수 전 이 § + **§56** + §10 `상품 상세페이지 · 리뷰` + `OwnerProductBlockEditor`/`ProductDetailModal` 코드 읽기.
+
+### 55.1 네이버 스마트스토어 — 상품 상세 **메커니즘** (에이전트 공통 이해)
+
+한국 이커머스(스마트스토어·쿠팡·에이블리 등)에서 **「상품 상세페이지」**는 보통 아래 **3층**으로 나뉜다.
+
+| 층 | 스마트스토어에서 뭐냐 | 손님이 보는 것 |
+|---|---|---|
+| **① 목록/카드용** | **대표이미지** + **한줄 요약**(옵션명·짧은 설명) | 검색·카테고리·장바구니 담기 전 **썸네일 카드** |
+| **② 상세 본문** | **「상품 상세정보」** — 에디터 글 + **세로로 긴 상세컷 이미지**(여러 장 이어 붙임) | 상품 페이지 **중간~아래를 길게 스크롤**하는 구간 (소재·사이즈·착용컷·브랜드 스토리) |
+| **③ 구매 결정·신뢰** | **가격·옵션·배송·교환반품·리뷰·Q&A** | 같은 상세 URL 안에서 **탭/앵커**로 리뷰·문의 |
+
+**점주(스마트스토어센터) 등록 흐름:**
+
+1. **상품 등록/수정** 한 화면(또는 탭) 안에서 **기본정보**(이름·카테고리·대표이미지·가격)와 **상품 상세정보**를 **같은 작업 흐름**으로 다룸 — 상세만 따로 숨긴 메뉴가 아님.
+2. **상품 상세정보** 입력 방식 (셀러마다 섞어 씀):
+   - **A. 상세 이미지 업로드** — 디자이너가 만든 **한 장짜리 초장형 PNG/JPG** 또는 **여러 조각**을 순서대로 올림 (가장 흔함).
+   - **B. 스마트에디터** — 글·표·이미지 블록을 **WYSIWYG**로 작성.
+   - **C. HTML** — 고급 사용자 (POP-UP MVP 범위 밖).
+3. **미리보기** — 저장 전/후 **손님 화면과 비슷하게** 볼 수 있음 (등록 실수 방지).
+4. **손님 상세 URL** — **전용 페이지** (`/products/123` 류). 모달이 아니라 **링크 공유·뒤로가기·SEO** 가능.
+5. **리뷰** — **구매확정(또는 배송완료 N일)** 후 작성 · 상세페이지 하단 **리뷰 탭** + **마이페이지 구매내역** 양쪽 진입 · 별점·글·포토 · (점주) **답글**.
+
+**왜 상세컷이 길어도 되나:** 쇼핑몰은 상세 본문을 **세로 스크롤 한 줄**로 렌더링 (`width:100%`, `height:auto`). 이미지 높이 제한 없이 **브라우저가 lazy-load** — §54 DB/렌더 방식은 이와 **호환**.
+
+### 55.2 POP-UP vs 스마트스토어 — **갭 표** (2026-08-12e 갱신)
+
+| 항목 | 스마트스토어 | POP-UP 현재 (§54+§55) | 상태 / 다음 |
+|---|---|---|---|
+| 상세 편집 위치 | 등록/수정 **안의 「상품 상세정보」** | **「수정」 폼 안 인라인** | ✅ AD-059-1 |
+| **에디터 (핵심)** | **스마트에디터** — 글·이미지 **블록**을 한 공간에서 **자유 배치·순서 변경** | `OwnerProductBlockEditor` — **글/사진 블록**을 한 캔버스에서 추가·삭제·**드래그 재정렬** | ✅ **§56 AD-060 완료** |
+| 미리보기 | 있음 | **손님 화면 미리보기** | ✅ AD-059-2 |
+| 손님 UI | **전용 상세 페이지** | **전체화면 시트** (URL 라우트 X — §55.3 결정 로그) | ✅ AD-059-3 (1차) |
+| ① vs ② 분리 | 대표이미지 ≠ 상세컷 **명확** | 라벨·도움말 추가 | ✅ AD-059-5 |
+| 리뷰 진입 | 상세 + 마이페이지 | 상세 + **내 주문** | ✅ AD-059-4 |
+| 점주 리뷰 관리 | 답글·신고 | **없음** | P1 |
+| 블록 순서 | 드래그 | **드래그(native HTML5 DnD)로 글·이미지 블록 모두 재정렬** | ✅ AD-060 완료 |
+
+**§54에서 이미 맞게 한 것 (유지):** 긴 이미지 스택 렌더 · `create_product_review` **구매확정 서버 검증** · 주문당 1리뷰.
+
+### 55.3 AD-059 — **1차** 체크리스트 (2026-08-12d ✅ — **블록 에디터 전 단계**)
+
+| ID | 작업 | 완료 기준 (User가 「스마트스토어 같다」고 느낄 최소선) | 상태 |
+|---|---|---|---|
+| **AD-059-1** | **상품 수정 ↔ 상세정보 통합** | 「수정」 누르면 이름·가격·대표이미지 **아래에 「상품 상세정보」** 섹션(설명+상세이미지) · **「상세페이지 관리」 별도 버튼 제거** | ✅ `OwnerProductPanel.tsx` 수정 영역에 `OwnerProductDetailEditor` 인라인 편입 |
+| **AD-059-2** | **미리보기** | 점주가 저장 전 **손님 상세와 동일 레이아웃** 팝업/탭으로 확인 | ✅ 「👀 손님 화면으로 미리보기」 → `ProductDetailModal previewMode` |
+| **AD-059-3** | **손님 전용 상세 화면** | 「상세보기」→ **전체 화면 스크롤 페이지**(모달만이 아님) · 대표·가격·담기·상세본문·리뷰 **한 흐름** | ✅ **URL 라우트 대신 전체화면 시트**로 구현 (아래 결정 로그 참고) — 헤더(←)+스크롤 본문+하단 고정 구매바 |
+| **AD-059-4** | **리뷰 진입점 확장** | 상세 하단에서 **구매확정된 사용자**에게 「리뷰 쓰기」(미확정 시 §54와 동일 confirm) | ✅ `ProductDetailModal`이 `listMyOrders`+`getMyReviewKeys`로 자체 판단, 리뷰 섹션에 버튼 노출. 「내 주문」 진입점(AD-054)과 **공존** |
+| **AD-059-5** | **카피·도움말** | 「대표 이미지 = 썸네일」「상세 이미지 = 아래로 길게 이어지는 상세컷」 점주용 한 줄 안내 | ✅ `editImageLabel`/`descriptionLabel`/`detailSectionTitle`/`detailIntro` 문구 추가 |
+| P1 | 드래그 외 고급 서식 · 템플릿/복사 · AI · 점주 리뷰 답글 | §56 AD-060 **후** — AD-060 자체는 **완료**, 남은 건 P1뿐 | ⬜ |
+
+**DB 변경:** AD-059 — 없음. **AD-060** — `product_detail_blocks` 테이블 신규 (§56) — **적용 완료**.
+
+**User 2026-08-12e 한 줄:** AD-059 = **등록 흐름·손님 화면 뼈대** · **「스마트스토어 같다」= AD-060 블록 에디터** → **2026-08-12f에 AD-060 구현 완료**.
+
+**AD-059-3 구현 결정 로그 (중요 — 다음 에이전트 참고):** 스마트스토어처럼 `/products/:id` **URL 라우트**로 완전히 옮기는 대신, **전체화면 오버레이 시트**로 구현했다. 이유: `StorePage.tsx`는 **Phaser 게임 캔버스 + socket.io 연결**을 물고 있고, `ShopPanel`/`DisplayProductModal`/`ProductDetailModal`은 모두 그 위에 쌓이는 **오버레이 레이어**다. `react-router`로 실제 페이지 이동을 하면 컴포넌트가 언마운트되며 **게임/소켓 연결이 끊김** — 뒤로 돌아와도 재접속 애니메이션이 다시 도는 등 UX가 나빠진다. 대신 `ProductDetailModal`을 `maxWidth 720 / maxHeight 96vh` + 헤더(← 뒤로가기)+스크롤 본문+하단 고정 구매바 구조로 키워서 **"전용 페이지" 느낌**만 내고, 월드는 계속 배경에 살아있게 했다. 만약 나중에 **진짜 공유 가능한 URL**(카카오톡 공유 등)이 꼭 필요해지면, `/store/:storeId/product/:productId` 라우트를 추가하고 그 라우트에서 **StorePage를 그대로 마운트한 채 쿼리 파라미터로 모달을 열게** 하는 방식(라우트 자체는 안 바뀌고 모달 상태만 URL과 동기화)을 권장 — 소켓을 안 끊고 URL도 갖는 절충안.
+
+### 55.4 Git · 배포 · 로컬 (2026-08-12d 현재)
+
+| | 상태 |
+|---|---|
+| §54+§55+§56 코드 (AD-059-1~5, AD-060 전부 포함) | **로컬 워킹 트리** · **commit/push 안 함** |
+| Supabase `product_detail_and_reviews` | **원격 적용됨** |
+| Supabase `product_detail_blocks`(§56 AD-060) | **원격 적용됨** (2026-08-12f) — 기존 상품 데이터 블록으로 변환 완료 확인 |
+| Vercel / Expo WebView | **§54/§55/§56 UI 없음** (push 전) · 앱은 `EXPO_PUBLIC_WEB_ORIGIN` → Vercel |
+| 로컬 확인 | §0 PC 3줄 → **`http://localhost:5173`** (Vercel URL ≠ 로컬) |
+| 검증 | `npx tsc --noEmit`(관련 파일 에러 0, pre-existing 무관 에러만 남음) · `npm run build` 성공 (2026-08-12f) |
+
+### 55.5 관련 파일
+
+- 점주: `OwnerProductPanel.tsx` · `OwnerProductBlockEditor.tsx`(§56 AD-060 — `OwnerProductDetailEditor.tsx` 대체) · `lib/productDetailBlocks.ts`
+- 손님: `ProductDetailModal.tsx`(§55에서 전체 재작성, §56에서 블록 렌더로 갱신) · `ShopPanel.tsx` · `DisplayProductModal.tsx`
+- 리뷰: `ReviewFormModal.tsx` · `OrderHistoryPanel.tsx` · `lib/reviews.ts` · `lib/orders.ts`(`canFileClaim`/`listMyOrders`/`confirmPurchase` 재사용)
+- DB: `supabase/migrations/20260812b_product_detail_and_reviews.sql`
+
+*§55 Last updated: 2026-08-12f (AD-059 + AD-060 모두 완료 — 상세페이지 UX 완성)*
+
+---
+
+## 56. 상품 상세 **블록 에디터** — 스마트스토어 「상품 상세정보」 완성 (AD-060)
+
+> **User 2026-08-12e 확정:** 셀러마다 상세 만드는 방식이 다름 — **긴 상세컷 한 장** / **사진+글 번갈아** / **글 위주** … **전부 수용**하려면 스마트스토어처럼 **한 작업 공간(한글·워드·구글 문서 느낌)** 에서 **글·이미지를 원하는 순서로 넣고·빼고·바꾸는** 에디터가 필요. **PG보다 먼저.**
+
+### 56.1 스마트스토어에서 점주가 하는 일 (에이전트 공통 이해)
+
+**「상품 상세정보」= 상세페이지 본문 전체를 만드는 편집기.**
+
+- **한 화면(한 공간)** 안에서 작업 — 글 칸과 이미지가 **같은 흐름**
+- **+ 글 추가** / **+ 이미지 추가** 로 **블록**을 쌓음
+- 블록 **위·아래 이동**(드래그) · 중간에 **끼워 넣기** · 삭제
+- 손님 화면 = 블록을 **위에서 아래로** 그대로 렌더 (긴 이미지도 `width:100%` 세로 스크롤)
+
+**셀러 케이스 → 블록으로 표현:**
+
+| 셀러 패턴 | 블록 구성 예 |
+|---|---|
+| 긴 상세컷 **한 장** | `[image]` 1블록 (세로 초장형) |
+| 사진 + 글 **번갈아** | `[image]` → `[text]` → `[image]` → `[text]` … |
+| 글 **위주** + 가끔 사진 | `[text]` → `[text]` → `[image]` → `[text]` |
+| 나중에 중간 수정 | 블록 **사이에** 새 `[text]`/`[image]` 삽입 |
+
+### 56.2 POP-UP 현재 vs 목표
+
+| | 지금 (`OwnerProductDetailEditor`) | 목표 (AD-060) |
+|---|---|---|
+| 글 | `products.detail_description` **textarea 1통** | **`text` 블록** — 여러 개·순서 자유 |
+| 이미지 | `product_detail_images` **별도 목록** | **`image` 블록** — 글 사이 어디든 |
+| 순서 | **항상 글 전체 → 이미지들** | **블록 배열 순서** = 손님 화면 순서 |
+| UI | 두 영역 분리 | **한 편집 캔버스** (스마트에디터 lite) |
+
+### 56.3 AD-060 — 구현 체크리스트 (권장 순서)
+
+| ID | 작업 | 완료 기준 | 상태 |
+|---|---|---|---|
+| **AD-060-1** | **블록 데이터 모델** | `product_id` + `sort_order` + `type`(text\|image) + `content`(글 또는 image_url). **`product_detail_blocks` 테이블** — 기존 `detail_description`+`product_detail_images` **1회 마이그레이션 완료**(레거시 컬럼/테이블은 백업으로 보존, 앞으로 미사용) | ✅ |
+| **AD-060-2** | **점주 블록 에디터 UI** | `OwnerProductDetailEditor` → **`OwnerProductBlockEditor`로 교체** — 한 공간 · **+글 블록 / +사진 블록** · 블록 **드래그(HTML5 native DnD) 순서 변경** · 블록별 삭제 · (미리보기는 AD-059-2 **그대로 유지**, `previewMode`) | ✅ |
+| **AD-060-3** | **손님 렌더** | `ProductDetailModal` — `listProductDetailBlocks`로 블록 배열 **순서대로** text/image 렌더 (이미지는 `loading="lazy"` 유지, 빈 텍스트 블록은 렌더 skip) | ✅ |
+| **AD-060-4** | **기존 데이터 이전** | 이미 저장된 상품: `detail_description` → text 블록 1개(`sort_order=0`) + `product_detail_images` → image 블록들 **순서 유지** 변환 — **마이그레이션 SQL 내 `DO $$ ... $$` 블록으로 1회 실행, 이미 블록 있는 상품은 skip(재실행 안전)** | ✅ |
+| P1 | 표·글꼴·색 · 긴 이미지 분할 · 템플릿/복사 · AI 초안 | AD-060 **후** | ⬜ |
+
+### 56.4 실제 구현 메모 (2026-08-12f 완료)
+
+- **에디터 방식:** 외부 라이브러리(TipTap/Lexical/dnd-kit) **없이** HTML5 native `draggable` + `onDragStart/onDragOver/onDrop`으로 자체 구현 — 의존성 추가 없이 가벼운 v1 목표 달성
+- **DB:** `product_detail_blocks` 테이블(`id`/`product_id`/`sort_order`/`block_type`/`text_content`/`image_url`) + `product_detail_images`와 동일한 RLS 패턴(공개 매장 읽기, 점주 본인 매장 CRUD) · `supabase/migrations/20260812c_product_detail_blocks.sql`
+- **레거시 처리:** `products.detail_description`·`product_detail_images` 테이블·`lib/productDetail.ts`·`lib/products.ts`의 `updateProductDetailDescription`은 **삭제하지 않고 그대로 둠**(무해한 미사용 코드, 롤백 안전망). 새 에디터·손님 화면은 **오직 `product_detail_blocks`만** 읽고 씀
+- **Storage:** 이미지 블록 업로드 경로 `{userId}/product-detail/...` — 기존 `store-assets` 버킷 재사용
+- **제한:** 이미지 블록 5MB · 블록 총 40개(`MAX_DETAIL_BLOCKS`)
+- **AD-059 자산 재사용 확인:** `OwnerProductPanel.tsx`의 통합 위치·미리보기 버튼·`ProductDetailModal`의 전체화면 시트·리뷰 진입은 **그대로 유지**, 에디터 컴포넌트만 교체됨
+- **commit 상태:** §54+§55+§56 작업 모두 **로컬** · push 전 (User 명시 요청 대기)
+
+### 56.5 관련 파일
+
+- 신규: `OwnerProductBlockEditor.tsx` · `lib/productDetailBlocks.ts` · `supabase/migrations/20260812c_product_detail_blocks.sql`
+- 삭제: `OwnerProductDetailEditor.tsx` (블록 에디터로 완전 대체)
+- 수정: `ProductDetailModal.tsx`(블록 렌더) · `packages/shared/src/types.ts`(`ProductDetailBlock` 타입 추가) · `i18n/ko.ts`(블록 에디터 문구)
+- 유지(변경 없음): `OwnerProductPanel.tsx`(통합 위치·미리보기 버튼) · `ReviewFormModal` · 리뷰 RPC · `lib/productDetail.ts`·`lib/products.ts`(레거시, 미사용)
+
+*§56 Last updated: 2026-08-12g (AD-060 완료 · ISS-035 스크롤 fix · §7.0 착수 가이드)*
 
 ---
 
@@ -2662,6 +3042,9 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **진열 조형물** `(Display Fixture)` | 매장에 두는 **상품 올려두는 가구** — 테이블·옷걸이·선반. 손님은 앞에서 상호작용해 그 위 상품만 봄 (AD-033). |
 | **진열 슬롯** `(Display Slot)` | 조형물 위 **칸** (예: 테이블 3칸). 점주가 칸마다 상품을 넣고 순서를 바꿈. |
 | **전체 상품** | 매장 **카탈로그 전체** 목록 버튼. **장바구니와 다름** (예전 이름: 「지금 쇼핑하기」). |
+| **상품 상세정보** `(스마트스토어 용어)` | 쇼핑몰에서 **상품 페이지 본문** — 소재·사이즈·착용컷 등. 점주가 **한 공간**에서 글·이미지를 **순서대로** 쌓아 만듦. POP-UP **목표 = §56 AD-060** |
+| **블록 에디터** `(Block Editor)` | 상세페이지를 **글 블록·이미지 블록**으로 나눠 **순서 자유롭게** 편집하는 방식. 한글·워드처럼 **한 작업 공간**에서 배치·순서 변경. **AD-060** |
+| **WYSIWYG** `(위지윅)` | **보이는 대로 편집** — 손님 화면과 비슷하게 보면서 글·이미지를 배치하는 편집 방식. 스마트스토어 **스마트에디터**가 이 계열 |
 | **장바구니** | 담아 둔 상품·수량·결제 화면. HUD·헤더에 별도 버튼. |
 | **HUD 바** `(하단 조작 바)` | 월드 화면 **아래 알약 모양 버튼 줄**. 상호작용·채팅·장바구니·전체상품 **4칸 고정** (AD-047 · Sprint 4-3 · pptx 슬라이드 9 원칙 — 늘리지 않음). **내 주문**(AD-054)은 여기 넣지 않고 헤더 별도 버튼으로 분리(08-08b). |
 | **근접 알약** `(PlayProximityPill)` | 조형물 가까이 갔을 때 **짧은 가운데 알약** — 이름 + 「탭·상호작용」. 탭 = HUD 상호작용과 같음 (AD-049). |

@@ -11,6 +11,8 @@ import {
   OrderError,
 } from '../lib/orders';
 import { formatOrderRef } from '../lib/orderRef';
+import { getMyReviewKeys, reviewKey } from '../lib/reviews';
+import { ReviewFormModal } from './ReviewFormModal';
 import { t } from '../i18n';
 
 interface OrderHistoryPanelProps {
@@ -32,13 +34,20 @@ export function OrderHistoryPanel({ onClose, embedded = false }: OrderHistoryPan
   const [actionError, setActionError] = useState<string | null>(null);
   const [claimFormId, setClaimFormId] = useState<string | null>(null);
   const [claimDraft, setClaimDraft] = useState<Record<string, string>>({});
+  const [reviewKeys, setReviewKeys] = useState<Set<string>>(new Set());
+  const [reviewTarget, setReviewTarget] = useState<{
+    orderId: string;
+    productId: string;
+    productName: string;
+  } | null>(null);
 
   const reload = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
-      const data = await listMyOrders();
+      const [data, keys] = await Promise.all([listMyOrders(), getMyReviewKeys().catch(() => new Set<string>())]);
       setOrders(data);
+      setReviewKeys(keys);
     } catch {
       setError(true);
     } finally {
@@ -98,6 +107,28 @@ export function OrderHistoryPanel({ onClose, embedded = false }: OrderHistoryPan
     }
   }
 
+  async function handleWriteReviewClick(order: ShopperOrderView, productId: string, productName: string) {
+    if (order.status === 'purchase_confirmed' || order.status === 'completed') {
+      setReviewTarget({ orderId: order.id, productId, productName });
+      return;
+    }
+
+    // shipped / delivery_completed — 구매확정 없이는 리뷰를 못 남기니 먼저 물어봄
+    if (!window.confirm(t('review.needConfirmBody'))) return;
+
+    setActionId(order.id);
+    setActionError(null);
+    try {
+      await confirmPurchase(order.id);
+      await reload();
+      setReviewTarget({ orderId: order.id, productId, productName });
+    } catch (err) {
+      setActionError(err instanceof OrderError ? err.message : t('myOrders.confirmPurchaseError'));
+    } finally {
+      setActionId(null);
+    }
+  }
+
   const listBody = (
     <>
       {!embedded && (
@@ -140,11 +171,30 @@ export function OrderHistoryPanel({ onClose, embedded = false }: OrderHistoryPan
                 )}
 
                 <div style={styles.itemsRow}>{t('myOrders.itemsCount', { count: order.items.length })}</div>
-                {order.items.map((item) => (
-                  <div key={item.id} style={styles.itemLine}>
-                    {item.product_name} × {item.quantity}
-                  </div>
-                ))}
+                {order.items.map((item) => {
+                  const reviewEligible = canFileClaim(order.status);
+                  const alreadyReviewed = reviewKeys.has(reviewKey(order.id, item.product_id));
+                  return (
+                    <div key={item.id} style={styles.itemRow}>
+                      <span style={styles.itemLine}>
+                        {item.product_name} × {item.quantity}
+                      </span>
+                      {reviewEligible &&
+                        (alreadyReviewed ? (
+                          <span style={styles.reviewDoneBadge}>{t('myOrders.reviewDone')}</span>
+                        ) : (
+                          <button
+                            type="button"
+                            style={styles.reviewButton}
+                            disabled={actionId === order.id}
+                            onClick={() => void handleWriteReviewClick(order, item.product_id, item.product_name)}
+                          >
+                            {t('myOrders.writeReview')}
+                          </button>
+                        ))}
+                    </div>
+                  );
+                })}
 
                 {order.reward_type === 'gacha' && order.gacha_prize_name && (
                   <div style={styles.gachaBox}>
@@ -283,8 +333,26 @@ export function OrderHistoryPanel({ onClose, embedded = false }: OrderHistoryPan
     </>
   );
 
+  const reviewModal = reviewTarget && (
+    <ReviewFormModal
+      orderId={reviewTarget.orderId}
+      productId={reviewTarget.productId}
+      productName={reviewTarget.productName}
+      onClose={() => setReviewTarget(null)}
+      onSubmitted={() => {
+        setReviewTarget(null);
+        void reload();
+      }}
+    />
+  );
+
   if (embedded) {
-    return <div style={styles.embeddedRoot}>{listBody}</div>;
+    return (
+      <div style={styles.embeddedRoot}>
+        {listBody}
+        {reviewModal}
+      </div>
+    );
   }
 
   return (
@@ -292,6 +360,7 @@ export function OrderHistoryPanel({ onClose, embedded = false }: OrderHistoryPan
       <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
         {listBody}
       </div>
+      {reviewModal}
     </div>
   );
 }
@@ -349,7 +418,33 @@ const styles: Record<string, React.CSSProperties> = {
   },
   autoNote: { color: '#c9a962', fontSize: 11, margin: '0 0 8px' },
   itemsRow: { color: '#9db2df', fontSize: 12, marginBottom: 4 },
-  itemLine: { color: '#c9d4ee', fontSize: 12, marginBottom: 2 },
+  itemRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  itemLine: { color: '#c9d4ee', fontSize: 12 },
+  reviewButton: {
+    flexShrink: 0,
+    padding: '4px 10px',
+    borderRadius: 999,
+    border: '1px solid #c9a962',
+    background: 'transparent',
+    color: '#e9c46a',
+    fontSize: 11,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  reviewDoneBadge: {
+    flexShrink: 0,
+    fontSize: 11,
+    color: '#8ce0b0',
+    border: '1px solid #2f6b4a',
+    borderRadius: 999,
+    padding: '3px 9px',
+  },
   gachaBox: {
     marginTop: 8,
     padding: 8,

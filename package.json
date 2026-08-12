@@ -24,5 +24,8 @@
     "metro": "0.81.5",
     "metro-config": "0.81.5",
     "metro-resolver": "0.81.5"
+  },
+  "dependencies": {
+    "@popup-cube/mobile": "^0.1.0"
   }
 }
