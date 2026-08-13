@@ -260,7 +260,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`78e4bb2`** (§54-56 상품 상세·리뷰·블록 에디터 + ISS-035, 2026-08-12) · push ✅ |
+| **Git `main` HEAD** | **`0d31f82`** (§60 shop 버튼 정렬 · 헤더 safe-area · ISS-036, 2026-08-13) · push ✅ |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -625,7 +625,7 @@ popup_store/                          # Turborepo root
 | ISS-033 | ~~demo@owner가 GUCCI 점주인데 주문/에디터 안 됨~~ | Resolved | **DB:** GUCCI `owner_id` = demo owner ✅ · `profiles.store_id` = draft `하이` ❌. **앱:** `profiles.store_id`만 보던 점주 판별 → **`stores.owner_id`** (`userOwnsStore`). **DB:** profile → `popup_gucci_01` migration. |
 | ISS-034 | ~~Play 세로 WebView에서 장바구니 상품명·버튼 줄바꿈 깨짐~~ | Resolved | `CartDrawer` `play-cart-row` 2단 · `play-world.css` narrow rules |
 | ISS-035 | ~~블록 에디터에서 블록 추가·저장마다 스크롤이 맨 위로 튐~~ | Resolved | `OwnerProductPanel.reload()`가 매번 `setLoading(true)` → 상품 목록 DOM 통째 교체가 원인 · **이미 목록 로드됐으면 loading UI 생략** (2026-08-12g) |
-| ISS-036 | ~~shop WebView 상단 ←·🛒 버튼 잘림 · 담기/상품상세 버튼 너비 불일치~~ | Resolved | Android WebView `env(safe-area-inset-top)=0` → 앱 `?insetTop=` + CSS `--shop-inset-top` · 카드 버튼 `__action-btn` 100% 동일 스택 (2026-08-13) |
+| ISS-036 | ~~shop WebView 상단 ←·🛒 버튼 잘림 · 담기/상품상세 버튼 너비 불일치~~ | Resolved | `0d31f82`: 카드 `__action-btn` grid 1열 100% 동일 · 앱 `SafeAreaView(top)` · 웹 헤더 패딩 + WebView fallback inset · **User 실기 재확인 대기** |
 
 ---
 
@@ -635,11 +635,67 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§58 #1~2·#5(일부) 로컬 구현 완료** · 다음 = **#3 몰 허브 + #4 쇼핑 UX** · **실기 전 commit/push 또는 로컬 webOrigin** |
-| **Git 상태** | `main` **`fac4ccf`** push 완료 · Vercel 1~2분 후 `/store/:id/shop` 반영 |
-| **Supabase** | `cvrtobxkvpcpcxrcspdp` · migrations **`20260812b_product_detail_and_reviews`** + **`20260812c_product_detail_blocks`** **원격 적용 완료** |
-| **런칭 진행률 (대략)** | **기능( mock 결제 기준)** ~80% · P1·운영·앱 스토어 등 포함 **전체 ~55–60%** · **실결제 런칭** = P1 완료 + **사업자 + PG 가맹 + PG 연동(§53.7-7)** |
-| **User 미확인 실기** | AD-055~058 + §54~§56 — Vercel 반영 후 **실기 권장** |
+| **한 줄 요약** | **§58 #1~2·§60 4-A push 완료 (`0d31f82`)** · 다음 = **§58 #3 몰 허브** + **§60 4-B~ (쿠팡형 앱 shell·설정)** · **User shop 버튼·헤더 실기 재확인** |
+| **Git 상태** | `main` **`0d31f82`** push ✅ · Vercel 1~2분 후 반영 · 이전 `29a7e62`는 버튼 불일치(`footer-row`) — **지금 push로 해소** |
+| **Supabase** | `cvrtobxkvpcpcxrcspdp` · migrations **`20260812b`~`c`** 원격 적용 완료 |
+| **런칭 진행률 (대략)** | **기능(mock 결제)** ~80% · P1·앱스토어 포함 **전체 ~55–60%** · **실결제** = P1 + 사업자 + PG |
+| **User 미확인 실기** | **ISS-036** shop 담기/상세 정렬 · ←·🛒 safe-area · Expo **`--clear` 필수** |
+
+#### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
+
+| 경로 | 필요 서비스 | Socket.io `server/` |
+|---|---|---|
+| **손님 `/shop`** (v1 기본) | Vercel(웹) + Supabase(DB·Auth) | **❌ 안 씀** — 상품=Supabase REST · 장바구니=localStorage · 주문=`place_order` RPC |
+| **픽셀 월드 `/play`** (legacy) | + Railway Socket + Upstash Redis | **✅** 실시간 이동·채팅·채널 |
+
+→ 앱 WebView가 Vercel을 여는 것 = **하이브리드 쇼핑 화면**이지 게임 서버 접속이 **아님**. v1 런칭에 Socket 서버 **필수 아님** (월드 demo/dev만).
+
+**다음 작업 우선순위 (에이전트 판단 — User에게 선택지 나열 금지):**
+
+| 순위 | 작업 | 조건 / 메모 |
+|---|---|---|
+| **1** | ~~**§58 #1~2** — `/shop` + `StoreShopPage`~~ | ✅ push `fac4ccf`~`0d31f82` |
+| **2** | ~~**§60 4-A** — shop UX(담기·헤더·세로·라이트)~~ | ✅ push `0d31f82` · **User 실기 OK 대기** |
+| **3** | **§58 #3** — 홈 몰 허브 (카드·D-day·쇼핑하기) | **← 다음 1순위** |
+| **4** | **§60 4-B~4-D** — 쿠팡형 앱 shell · 설정·다크모드 · 장바구니 전체화면 | 4-B 일부(라이트) ✅ `29a7e62` |
+| **5** | **§58 #5~6** — popup 기간 · 미리보기 | layout 숨김 ✅ |
+| **6** | **§58 #8 P1** | PG 전 |
+| **7** | **PG** (§53.7-7) | 사업자 + 가맹 후 |
+
+> **점주센터 전체 리빌드 ❌** — §58: **80% 유지 · layout만 숨김 · P1만 추가**.
+
+**다음 에이전트가 shop UX 손볼 때 볼 파일:**
+
+| 파일 | 역할 |
+|---|---|
+| `apps/web/src/components/StoreShopCatalog.tsx` | 카드 grid · stepper · **담기/상세 버튼** |
+| `apps/web/src/pages/StoreShopPage.tsx` | 헤더 · sticky cart bar · `--shop-inset-top` |
+| `apps/web/src/styles/store-shop.css` | 라이트 토큰 · 2열 · **action-btn** |
+| `apps/mobile/app/store/[storeId].tsx` | WebView `/shop` · **SafeAreaView** · 세로 lock |
+
+**미커밋 (의도적 제외):** `apps/mobile/AGENTS.md` · `CLAUDE.md` · `LICENSE`
+
+#### 사용자가 지금 해야 할 것 (§60 4-A 실기 — **push `0d31f82` 반영 후**)
+
+> Vercel 1~2분 대기 후 테스트. **Expo `--clear` 재시작 필수** (앱 번들 캐시).
+
+**앱 + WebView (손님 플로우):**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+1) Expo Go **SDK 52** · `demo@shopper.com` / `demo`  
+2) **홈 → GUCCI → 쇼핑하기**  
+3) **확인:** ←·🛒 **잘리지 않음** · **담기**와 **상품 상세 보기** **같은 너비·높이** · 하단 sticky bar에 2행 카드 가림 최소  
+4) OK면 다음 = **§58 #3** 몰 허브
+
+**PC 웹 직접:** `https://popup-cube-web.vercel.app/store/popup_gucci_01/shop` (로그인 후)
+
+---
 
 #### 🚪 런칭 게이트 (AD-061 — User 2026-08-13 확정)
 
@@ -649,82 +705,22 @@ popup_store/                          # Turborepo root
 |---|---|---|
 | **1** | **사업자 등록** | 행정 처리 (수일~수주) |
 | **2** | **PG 후보 선정·가맹** (토스/포트원 등) | 가입비·심사 (수일~2주) |
-| **3** | **PG 연동 개발** — 결제창 · webhook · `pending_payment`→`paid` · 실패/취소 | **코드만** 보통 **1~2세션~2주** (mock 앞단 교체, HANDOFF §10) |
+| **3** | **PG 연동 개발** — 결제창 · webhook · `pending_payment`→`paid` · 실패/취소 | **코드만** 보통 **1~2세션~2주** |
 | **4** | 샌드박스·실결제 테스트 → **런칭** | |
-
-**왜 빠른가:** mock 설계상 PG는 `place_order` **앞에 결제 승인만 끼워 넣음** — DB·주문·점주 UI·가챠·배송 흐름 **재작성 불필요**.
 
 **PG 착수 조건 (전부 충족 전 금지):** ① User **사업자 등록 완료** ② **PG 후보·계약 확정** ③ (권장) P1·실기 대부분 OK.
 
-**다음 작업 우선순위 (에이전트 판단 — User에게 선택지 나열 금지):**
+---
 
-| 순위 | 작업 | 조건 / 메모 |
-|---|---|---|
-| **1** | ~~**§58 #1~2** — 진입 `/shop` + `StoreShopPage`~~ ✅ **로컬** (2026-08-13) · **push 전** |
-| **2** | **§58 #3~4 + §60** — 몰 허브 · shop UX · **쿠팡형 라이트·설정** | **← 다음 1순위** · 4-A 즉시(담기·헤더·세로) |
-| **3** | **§58 #5~6** — layout 숨김(✅ 로컬) · popup 기간 · 미리보기 | #5 i18n/랜딩 일부 남음 |
-| **4** | **§58 #7 실기** | push 또는 로컬 webOrigin |
-| **5** | **§58 #8 P1** | PG 전 |
-| **6** | **PG** (§53.7-7) | 사업자 + 가맹 후 |
+### 7.14 세션 인수인계 — **2026-08-13~14** (§60 shop UX · ISS-036 · push)
 
-> **점주센터 전체 리빌드 ❌** — §58 표: **80% 유지 · layout만 숨김 · P1만 추가**.
-
-**다음 에이전트가 코드 읽기 전에 볼 파일 (상세페이지 관련):**
-
-| 파일 | 역할 |
+| | |
 |---|---|
-| `apps/web/src/components/OwnerProductBlockEditor.tsx` | 점주 블록 에디터 (+글/+사진 · 드래그 · 삭제) |
-| `apps/web/src/lib/productDetailBlocks.ts` | 블록 CRUD · Storage 업로드 · 순서 저장 |
-| `apps/web/src/components/ProductDetailModal.tsx` | 손님/미리보기 전체화면 시트 · 블록 렌더 · 리뷰 진입 |
-| `apps/web/src/components/OwnerProductPanel.tsx` | 상품 수정 폼 + 블록 에디터 인라인 · `reload()` 스크롤 fix |
-| `apps/web/src/lib/reviews.ts` + `ReviewFormModal.tsx` | 리뷰 RPC 래퍼 · 작성 모달 |
-| `supabase/migrations/20260812b_*.sql` · `20260812c_*.sql` | DB 스키마 (이미 원격 적용) |
-| `packages/shared/src/types.ts` | `ProductDetailBlock` · `ProductReview` |
-
-**미커밋 파일 목록 (2026-08-12g 기준):**
-
-- **수정:** `HANDOFF_POPUP_STORE.md` · `OwnerProductPanel.tsx` · `ShopPanel.tsx` · `DisplayProductModal.tsx` · `OrderHistoryPanel.tsx` · `StoreEditPage.tsx` · `lib/products.ts` · `i18n/ko.ts` · `packages/shared/src/types.ts` · `package.json` · `package-lock.json`
-- **신규:** `OwnerProductBlockEditor.tsx` · `ProductDetailModal.tsx` · `ReviewFormModal.tsx` · `lib/productDetail.ts` · `lib/productDetailBlocks.ts` · `lib/reviews.ts` · `supabase/migrations/20260812b_product_detail_and_reviews.sql` · `supabase/migrations/20260812c_product_detail_blocks.sql`
-- **삭제(로컬):** `OwnerProductDetailEditor.tsx` (블록 에디터로 대체)
-- **커밋 제외:** `apps/mobile/AGENTS.md` · `CLAUDE.md` · `LICENSE`
-
-#### 사용자가 지금 해야 할 것 (§58 Phase 1-A/B 실기 — **쇼핑몰 경로**)
-
-> **주의:** 아직 **Git push 전**이면 Vercel(`popup-cube-web.vercel.app`)에는 **`/shop` 없음**. 아래 **PC 웹 로컬 + (앱 테스트 시) LAN webOrigin** 또는 **「커밋 푸시해줘」 후 1~2분** 대기.
-
-**PC 웹만 (손님 쇼핑 페이지 직접):**
-
-**아래 한 줄씩 복붙:**
-
-```
-cd C:\Users\qotjd\Downloads\Cursor\popup_store
-npm install --legacy-peer-deps
-npm run dev
-```
-
-5) 브라우저 `http://localhost:5173` → **일반 회원** `demo@shopper.com` / `demo`  
-6) 주소창에 직접: `http://localhost:5173/store/popup_gucci_01/shop` (또는 홈에서 매장 입장 — **앱 없이**는 홈→매장이 아직 월드일 수 있음)  
-7) **이번에 볼 것** — 상품 **2열 그리드** · **담기** · 하단 **장바구니 보기** · **mock 결제** · **상세보기**→블록·리뷰  
-8) **점주 PC** — `demo@owner.com` / `demo` → 매장 편집 → 사이드바에 **「매장 꾸미기」탭 없음** 확인
-
-**앱 + WebView (손님 플로우 전체):**
-
-**아래 한 줄씩 복붙:**
-
-```
-cd C:\Users\qotjd\Downloads\Cursor\popup_store
-npm install --legacy-peer-deps
-cd apps\mobile
-npx expo start --tunnel --port 8082 --clear
-```
-
-*(로컬 웹 연동: **별도 터미널**에서 위 PC `npm run dev` 실행 후 `apps/mobile/.env`에 `EXPO_PUBLIC_WEB_ORIGIN=http://<PC_LAN_IP>:5173` 설정 → Expo **`--clear` 재시작**. push 후에는 Vercel URL 그대로 OK.)*
-
-9) 폰 **Expo Go SDK 52** (Play 스토어 54+ ❌ → [SDK 52 APK](https://expo.dev/go?sdkVersion=52))  
-10) QR 스캔 → **일반 회원** `demo@shopper.com` / `demo`  
-11) **홈 → 매장 카드 → 쇼핑하기** → **쇼핑 화면**(픽셀 월드 ❌) · 가로 회전 ❌ · 세로 쇼핑몰  
-12) **이번에 볼 것** — 월드/D-pad **안 나옴** · 상품·장바구니·주문 mock · **← 목록** 누르면 앱 홈  
-13) OK면 User **「커밋 푸시해줘」** → Vercel 반영 후 `EXPO_PUBLIC_WEB_ORIGIN` 기본값으로 재확인
+| **User 피드백** | ① **담기 vs 상품 상세 보기** 너비·배열 불일치 ② ←·🛒 상단 잘림 ③ 라이트 테마(로그인·홈 등) **OK** ④ **쇼핑몰도 월드처럼 Socket 서버 필요?** → **아니오** (§7.0 표) |
+| **원인** | 버튼 fix가 **로컬만** 있고 Vercel **`29a7e62`**(`footer-row` 레이아웃) 그대로 → User 실기에 구 UI 노출 |
+| **Git** | push `main` **`0d31f82`** · `29a7e62..0d31f82` |
+| **Changed** | `StoreShopCatalog` action grid · `store-shop.css` · `StoreShopPage` inset fallback · `store/[storeId].tsx` **SafeAreaView** |
+| **다음 에이전트** | ① User **ISS-036 실기 OK** 확인 ② **§58 #3** 홈 몰 허브 ③ **§60 4-B~** (쿠팡형 shell·설정) · **PG 착수 금지** |
 
 ---
 
@@ -1020,10 +1016,21 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
-### 2026-08-13 — §60 shop 버튼 정렬 · WebView 헤더 safe-area (로컬 → push 대기)
-- **Author:** Cursor Agent (User 실기 피드백 — 담기/상세 크기·배열, ←·🛒 상단 잘림)
-- **Changed:** `StoreShopCatalog` 카드 액션 **grid 1열** · `__action-btn` 동일 100%·44px · `StoreShopPage` WebView fallback inset · `store/[storeId].tsx` **SafeAreaView(top)** · 하단 sticky 여백 120px
-- **Notes:** **Vercel `29a7e62`에는 미반영** — User가 본 버튼 불일치 = 구 `footer-row` 레이아웃 · push + Expo `--clear` 후 재확인 · ISS-036
+### 2026-08-13 — push `0d31f82` (§60 shop 버튼 정렬 · 헤더 safe-area · ISS-036)
+- **Author:** Cursor Agent (User 「푸쉬하고 인수인계」)
+- **Git:** push `main` **`0d31f82`** · `29a7e62..0d31f82`
+- **Changed:** `StoreShopCatalog` action grid · `store-shop.css` · `StoreShopPage` WebView inset fallback · `store/[storeId].tsx` SafeAreaView · HANDOFF §7.0·§7.14
+- **Notes:** Vercel 1~2분 · Expo **`--clear`** · **실기: 담기/상세 동일 너비 · ←·🛒 safe-area**
+
+### 2026-08-13 — §60 shop 버튼 정렬 · WebView 헤더 safe-area (로컬)
+- **Author:** Cursor Agent (User 실기 피드백)
+- **Changed:** (위와 동일 — push 전 로컬 작업)
+- **Notes:** superseded by push `0d31f82`
+
+### 2026-08-13 — push `29a7e62` (§60 손님 라이트 테마 통일)
+- **Author:** Cursor Agent
+- **Git:** push `main` **`29a7e62`**
+- **Notes:** shop 버튼 정렬은 **미포함** — `0d31f82`에서 해소
 
 ### 2026-08-13 — §60 손님 라이트 테마 통일 · 상품 상세 버튼 (로컬)
 - **Author:** Cursor Agent (User 실기 피드백)
@@ -3198,7 +3205,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 
 | 단계 | 내용 | 상태 |
 |---|---|---|
-| **v1-A** | 손님 **쇼핑몰 진입** (AD-062 구현) | 🟡 **로컬 #1~2 완료** · push·실기 대기 |
+| **v1-A** | 손님 **쇼핑몰 진입** (AD-062) | ✅ push `0d31f82` · **User ISS-036 실기 대기** |
 | **v1-B** | P1·실기 (§53.7-6) | ⬜ |
 | **v1-C** | 앱스토어 출시 + **PG 런칭 게이트** (§53.7-7) | ⬜ 사업자 후 |
 | **v2** | **이벤트·브랜드 콜라보 「팝업존」** — 영상/360/고품질 2D 등 **기술 선택** · legacy Phaser **재사용 또는 교체** | ⬜ 트래픽·입점 후 |
@@ -3215,6 +3222,17 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 
 **결론:** v2 그래픽이 바뀌어도 **「폐기해도 됐나?」→ 커머스는 NO, 월드 UI만 MAYBE.** 그래서 **지금 삭제 = 확실한 손실**, **freeze = 옵션 유지**.
 
+### 57.8 v1 인프라 (쇼핑몰 vs 월드)
+
+| | 쇼핑몰 `/shop` (v1) | 픽셀 월드 `/play` (legacy) |
+|---|---|---|
+| **호스팅** | Vercel | Vercel + **Socket 서버**(Railway 등) |
+| **데이터** | Supabase REST/RPC | + Upstash Redis (좌표·채널) |
+| **실시간** | 불필요 | Socket.io |
+| **v1 런칭 필수** | **✅** | **❌** (freeze) |
+
+상세 표 = **§7.0 「v1 쇼핑몰 인프라」**.
+
 ### 57.7 구현 체크리스트 (착수 시)
 
 - [x] env `VITE_WORLD_ENABLED` (web) · 앱에서 WebView `/play` **기본 skip** *(2026-08-13 로컬)*
@@ -3223,7 +3241,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 - [ ] HANDOFF §18 Demo Flow — **쇼핑몰 경로**로 갱신
 - [ ] **월드 코드 삭제 PR 금지** — freeze만
 
-*§57 Last updated: 2026-08-13 (AD-062)*
+*§57 Last updated: 2026-08-13 (v1-A push `0d31f82` · §7.0 인프라 표)*
 
 ---
 
@@ -3427,7 +3445,8 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 
 | 이슈 | 원인 | 조치 |
 |---|---|---|
-| **「담기」 세로 글자** | 가로·좁은 카드에서 `flex` + `font-size:11px` 줄바꿈 | `white-space:nowrap` · `min-width` · 카드 footer **세로 스택**(좁을 때) |
+| **담기 vs 상품 상세 보기 너비 불일치** | 구 `footer-row`(stepper+담기 가로) + 상세 full-width | **`0d31f82`**: grid 1열 `__action-btn` 100% 동일 |
+| **←·🛒 상단 잘림** | WebView safe-area 0 | **SafeAreaView(top)** + 헤더 padding + WebView fallback inset |
 | **목록·장바구니 버튼 작음** | 헤더 3열 압축 | **아이콘 버튼** 44px 터치 · 매장명 **2행 레이아웃**(버튼 아래 full-width) |
 | **매장명 위치 애매** | back·title·cart 한 줄 | **쿠팡형**: ← 뒤로 · 가운데/아래 **매장명** · 🛒 우측 |
 | **가로 모드** | `@media (min-width:640px)` 그리드 확장 | **쇼핑 WebView = 세로 고정** (`PORTRAIT_UP` on store screen) |
@@ -3445,14 +3464,14 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 
 | Phase | 내용 | 예상 |
 |---|---|---|
-| **4-A** | shop 헤더·담기·**세로 고정** · **라이트 CSS** (WebView) | ✅ 2026-08-13 |
-| **4-B** | 앱 shell 라이트 (`home`·`_layout`·`colors`) | 0.5세션 |
+| **4-A** | shop 헤더·담기·**세로 고정** · **라이트 CSS** · **버튼 정렬·safe-area** | ✅ push `0d31f82` · User 실기 대기 |
+| **4-B** | 앱 shell 라이트 (`home`·`_layout`·`colors`) | **일부 ✅** `29a7e62` · 하단탭·설정 잔여 |
 | **4-C** | **`/settings`** + 다크 모드 토글 → WebView 연동 | 1세션 |
 | **4-D** | 마이·장바구니 **쿠팡형** (네이티브 또는 WebView 리스킨) | 1~2세션 |
 
 **PG·월드 신규 ❌** · **100% 쿠팡 클론 ❌** — **패턴·톤·정보 구조**만 벤치.
 
-*§60 Last updated: 2026-08-13 (User Coupang benchmark · AD-065)*
+*§60 Last updated: 2026-08-13 (ISS-036 push `0d31f82` · §7.14)*
 
 ---
 
