@@ -183,7 +183,18 @@ export const ko = {
     hint: 'POP-UP CUBE 앱(Expo)을 설치한 뒤 「일반 회원 로그인」으로 입장해 주세요.',
     backLanding: '← 처음으로',
   },
+  notFound: {
+    body: '페이지를 찾을 수 없어요. 앱·웹 버전이 맞지 않으면 최신 배포를 기다리거나 다시 입장해 주세요.',
+  },
   /** 앱 WebView 플레이 월드 (Sprint 4 · /play/:storeId) */
+  storeShop: {
+    loading: '매장을 불러오는 중...',
+    subtitle: '온라인 팝업 · 실물 배송',
+    backHome: '← 목록',
+    notFound: '매장을 찾을 수 없어요.',
+    cartBar: '장바구니 보기 ({count}개)',
+    cartBarEmpty: '담은 상품이 없어요',
+  },
   play: {
     backHome: '← 홈',
     needLogin: '로그인이 필요해요. 앱에서 다시 입장해 주세요.',

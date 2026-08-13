@@ -11,6 +11,7 @@ import { DemoToast } from '../components/DemoToast';
 import { useOwnerOrderRealtime } from '../hooks/useOwnerOrderRealtime';
 import { isValidStoreCode, normalizeStoreCode } from '../lib/orderRef';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
+import { isWorldEnabled } from '../lib/featureFlags';
 import { t } from '../i18n';
 import type { StoreSummary } from '@popup-cube/shared';
 
@@ -52,6 +53,14 @@ export function StoreEditPage() {
   } = useOwnerOrderRealtime(ownershipChecked && ownsStore ? storeId : undefined, {
     suppressNewOrderToast: tab === 'orders',
   });
+
+  const worldEnabled = isWorldEnabled();
+
+  useEffect(() => {
+    if (!worldEnabled && tab === 'layout') {
+      setTab('overview');
+    }
+  }, [worldEnabled, tab]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -220,7 +229,7 @@ export function StoreEditPage() {
     { id: 'orders', label: t('ownerEdit.tabOrders'), badge: pendingAccept },
     { id: 'fulfillment', label: t('ownerEdit.tabFulfillment'), badge: awaitingShip },
     { id: 'policy', label: t('ownerEdit.tabPolicy') },
-    { id: 'layout', label: t('ownerEdit.tabLayout') },
+    ...(worldEnabled ? [{ id: 'layout' as const, label: t('ownerEdit.tabLayout') }] : []),
   ];
 
   const isDraft = store?.status === 'draft';
