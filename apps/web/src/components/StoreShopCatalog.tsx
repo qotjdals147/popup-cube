@@ -95,36 +95,34 @@ export function StoreShopCatalog({
                 <div className="store-shop-card__desc">{product.description}</div>
               )}
 
-              <div className="store-shop-card__footer">
-                <div className="store-shop-card__footer-row">
-                  <div className="store-shop-stepper">
-                    <button
-                      type="button"
-                      className="store-shop-stepper__btn"
-                      onClick={() => setQty(product.id, getQty(product.id) - 1)}
-                    >
-                      −
-                    </button>
-                    <span className="store-shop-stepper__value">{getQty(product.id)}</span>
-                    <button
-                      type="button"
-                      className="store-shop-stepper__btn"
-                      onClick={() => setQty(product.id, getQty(product.id) + 1)}
-                    >
-                      +
-                    </button>
-                  </div>
+              <div className="store-shop-card__actions">
+                <div className="store-shop-stepper store-shop-stepper--card">
                   <button
                     type="button"
-                    className="store-shop-card__add"
-                    onClick={() => handleAdd(product)}
+                    className="store-shop-stepper__btn"
+                    onClick={() => setQty(product.id, getQty(product.id) - 1)}
                   >
-                    {addedId === product.id ? t('shop.added') : t('shop.addToCart')}
+                    −
+                  </button>
+                  <span className="store-shop-stepper__value">{getQty(product.id)}</span>
+                  <button
+                    type="button"
+                    className="store-shop-stepper__btn"
+                    onClick={() => setQty(product.id, getQty(product.id) + 1)}
+                  >
+                    +
                   </button>
                 </div>
                 <button
                   type="button"
-                  className="store-shop-card__detail-btn"
+                  className="store-shop-card__action-btn store-shop-card__action-btn--add"
+                  onClick={() => handleAdd(product)}
+                >
+                  {addedId === product.id ? t('shop.added') : t('shop.addToCart')}
+                </button>
+                <button
+                  type="button"
+                  className="store-shop-card__action-btn store-shop-card__action-btn--detail"
                   onClick={() => setDetailProduct(product)}
                 >
                   {t('shop.viewDetail')}

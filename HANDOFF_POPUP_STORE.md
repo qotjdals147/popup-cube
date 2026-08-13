@@ -625,6 +625,7 @@ popup_store/                          # Turborepo root
 | ISS-033 | ~~demo@owner가 GUCCI 점주인데 주문/에디터 안 됨~~ | Resolved | **DB:** GUCCI `owner_id` = demo owner ✅ · `profiles.store_id` = draft `하이` ❌. **앱:** `profiles.store_id`만 보던 점주 판별 → **`stores.owner_id`** (`userOwnsStore`). **DB:** profile → `popup_gucci_01` migration. |
 | ISS-034 | ~~Play 세로 WebView에서 장바구니 상품명·버튼 줄바꿈 깨짐~~ | Resolved | `CartDrawer` `play-cart-row` 2단 · `play-world.css` narrow rules |
 | ISS-035 | ~~블록 에디터에서 블록 추가·저장마다 스크롤이 맨 위로 튐~~ | Resolved | `OwnerProductPanel.reload()`가 매번 `setLoading(true)` → 상품 목록 DOM 통째 교체가 원인 · **이미 목록 로드됐으면 loading UI 생략** (2026-08-12g) |
+| ISS-036 | ~~shop WebView 상단 ←·🛒 버튼 잘림 · 담기/상품상세 버튼 너비 불일치~~ | Resolved | Android WebView `env(safe-area-inset-top)=0` → 앱 `?insetTop=` + CSS `--shop-inset-top` · 카드 버튼 `__action-btn` 100% 동일 스택 (2026-08-13) |
 
 ---
 
@@ -1018,6 +1019,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-13 — §60 shop 버튼 정렬 · WebView 헤더 safe-area (로컬 → push 대기)
+- **Author:** Cursor Agent (User 실기 피드백 — 담기/상세 크기·배열, ←·🛒 상단 잘림)
+- **Changed:** `StoreShopCatalog` 카드 액션 **grid 1열** · `__action-btn` 동일 100%·44px · `StoreShopPage` WebView fallback inset · `store/[storeId].tsx` **SafeAreaView(top)** · 하단 sticky 여백 120px
+- **Notes:** **Vercel `29a7e62`에는 미반영** — User가 본 버튼 불일치 = 구 `footer-row` 레이아웃 · push + Expo `--clear` 후 재확인 · ISS-036
 
 ### 2026-08-13 — §60 손님 라이트 테마 통일 · 상품 상세 버튼 (로컬)
 - **Author:** Cursor Agent (User 실기 피드백)

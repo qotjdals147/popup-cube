@@ -11,6 +11,7 @@ import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import Constants from 'expo-constants';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/context/AuthContext';
 import { t } from '../../src/i18n/ko';
 import { getStoreSummary } from '../../src/lib/stores';
@@ -78,12 +79,13 @@ export default function StoreScreen() {
         return;
       }
       const origin = readWebOrigin();
+      const shopQuery = new URLSearchParams({ theme: 'light' });
       const hash = new URLSearchParams({
         access_token: data.session.access_token,
         refresh_token: data.session.refresh_token,
       }).toString();
       setShopUrl(
-        `${origin}/store/${encodeURIComponent(storeId)}/shop?theme=light#${hash}`
+        `${origin}/store/${encodeURIComponent(storeId)}/shop?${shopQuery.toString()}#${hash}`
       );
       setSessionReady(true);
     })();
@@ -154,7 +156,7 @@ export default function StoreScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar style="dark" />
       {role === 'owner' && (
         <View style={styles.ownerBar}>
@@ -185,7 +187,7 @@ export default function StoreScreen() {
         onHttpError={() => setWebError(t.store.shopError)}
         injectedJavaScript={blankCheckScript}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

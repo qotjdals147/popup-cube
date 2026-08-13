@@ -15,6 +15,7 @@
   --shop-card-bg: #ffffff;
   --shop-thumb-bg: #f2f4f6;
   --shop-stepper-bg: #f9fafb;
+  --shop-inset-top: 0px;
 
   min-height: 100dvh;
   background: var(--shop-bg);
@@ -22,6 +23,12 @@
   font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
   display: flex;
   flex-direction: column;
+}
+
+html:has(.store-shop-page),
+html:has(.store-shop-page) body {
+  margin: 0;
+  overflow-x: hidden;
 }
 
 .store-shop-page[data-theme='dark'] {
@@ -47,12 +54,15 @@
   padding: 24px;
 }
 
-/* 쿠팡형 2단 헤더: 1행 ← · 🛒  2행 매장명 full-width */
+/* 쿠팡형 2단 헤더 — WebView 상단 safe-area (앱 insetTop + env) */
 .store-shop-header {
   flex-shrink: 0;
   background: var(--shop-header-bg);
   border-bottom: 1px solid var(--shop-border);
-  padding: max(10px, env(safe-area-inset-top, 0)) 12px 12px;
+  padding: calc(var(--shop-inset-top, 0px) + max(16px, env(safe-area-inset-top, 0px))) 12px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .store-shop-header__toolbar {
@@ -134,7 +144,7 @@
 .store-shop-main {
   flex: 1;
   overflow-y: auto;
-  padding: 12px 12px calc(88px + env(safe-area-inset-bottom, 0));
+  padding: 12px 12px calc(120px + env(safe-area-inset-bottom, 0));
 }
 
 .store-shop-hint,
@@ -231,38 +241,48 @@
   display: none;
 }
 
-.store-shop-card__footer-row {
-  display: flex;
-  align-items: center;
+/* 카드 하단 — 수량 · 담기 · 상세 (동일 너비·높이) */
+.store-shop-card__actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   width: 100%;
-}
-
-.store-shop-card__detail-btn {
-  width: 100%;
-  margin-top: 4px;
-  padding: 10px 8px;
-  border: none;
-  border-radius: 8px;
-  background: var(--shop-primary);
-  color: var(--shop-primary-text);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.store-shop-grid--page .store-shop-card__footer {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
-}
-
-.store-shop-card__footer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   margin-top: auto;
   padding-top: 8px;
+  box-sizing: border-box;
+}
+
+.store-shop-stepper--card {
+  justify-self: center;
+}
+
+.store-shop-card__action-btn {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.25;
+  cursor: pointer;
+  box-sizing: border-box;
+  text-align: center;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.store-shop-card__action-btn--add {
+  background: var(--shop-accent);
+  color: #fff;
+}
+
+.store-shop-card__action-btn--detail {
+  background: var(--shop-primary);
+  color: var(--shop-primary-text);
 }
 
 .store-shop-stepper {
@@ -291,21 +311,6 @@
   color: var(--shop-text);
   font-size: 14px;
   font-weight: 600;
-}
-
-.store-shop-card__add {
-  width: 100%;
-  min-height: 40px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: none;
-  background: var(--shop-accent);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .store-shop-sticky-bar {
