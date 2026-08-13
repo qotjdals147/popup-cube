@@ -30,9 +30,7 @@ export default function RootLayout() {
             options={{
               title: '매장',
               headerShown: false,
-              statusBarHidden: true,
-              statusBarTranslucent: true,
-              navigationBarColor: '#00000000',
+              statusBarStyle: 'dark',
             }}
           />
         </Stack>

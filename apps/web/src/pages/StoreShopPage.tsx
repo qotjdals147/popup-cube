@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -13,6 +13,13 @@ declare global {
   interface Window {
     ReactNativeWebView?: { postMessage: (message: string) => void };
   }
+}
+
+type ShopTheme = 'light' | 'dark';
+
+function readThemeFromSearch(): ShopTheme {
+  const raw = new URLSearchParams(window.location.search).get('theme');
+  return raw === 'dark' ? 'dark' : 'light';
 }
 
 async function bootstrapSessionFromHash(): Promise<void> {
@@ -36,14 +43,14 @@ function postToApp(type: string) {
 }
 
 /**
- * v1 손님 쇼핑몰 — 모바일 WebView `/store/:storeId/shop` (AD-062 · §58).
- * 픽셀 월드 없이 상품 그리드 · 장바구니 · mock 결제.
+ * v1 손님 쇼핑몰 — 모바일 WebView `/store/:storeId/shop` (AD-062 · §58 · §60).
  */
 export function StoreShopPage() {
   const { storeId } = useParams();
   const { userId, loading: authLoading } = useAuth();
   const { totalQuantity } = useCart();
 
+  const theme = useMemo(() => readThemeFromSearch(), []);
   const [bootstrapping, setBootstrapping] = useState(true);
   const [storeName, setStoreName] = useState<string | null>(null);
   const [storeError, setStoreError] = useState(false);
@@ -88,9 +95,11 @@ export function StoreShopPage() {
     setCartOpen(true);
   }
 
+  const pageClass = 'store-shop-page';
+
   if (bootstrapping || authLoading) {
     return (
-      <div className="store-shop-page">
+      <div className={pageClass} data-theme={theme}>
         <p className="store-shop-status">{t('storeShop.loading')}</p>
       </div>
     );
@@ -98,7 +107,7 @@ export function StoreShopPage() {
 
   if (!userId) {
     return (
-      <div className="store-shop-page">
+      <div className={pageClass} data-theme={theme}>
         <p className="store-shop-status">{t('play.needLogin')}</p>
         <button type="button" className="store-shop-back" style={{ margin: '0 auto 24px' }} onClick={goHome}>
           {t('storeShop.backHome')}
@@ -109,7 +118,7 @@ export function StoreShopPage() {
 
   if (!storeId || storeError) {
     return (
-      <div className="store-shop-page">
+      <div className={pageClass} data-theme={theme}>
         <p className="store-shop-status">{t('storeShop.notFound')}</p>
         <button type="button" className="store-shop-back" style={{ margin: '0 auto 24px' }} onClick={goHome}>
           {t('storeShop.backHome')}
@@ -119,18 +128,33 @@ export function StoreShopPage() {
   }
 
   return (
-    <div className="store-shop-page">
+    <div className={pageClass} data-theme={theme}>
       <header className="store-shop-header">
-        <button type="button" className="store-shop-back" onClick={goHome}>
-          {t('storeShop.backHome')}
-        </button>
-        <div className="store-shop-header-text">
+        <div className="store-shop-header__toolbar">
+          <button
+            type="button"
+            className="store-shop-icon-btn"
+            onClick={goHome}
+            aria-label={t('storeShop.backHomeLabel')}
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            className="store-shop-icon-btn store-shop-icon-btn--cart"
+            onClick={openCart}
+            aria-label={t('storeShop.cartLabel')}
+          >
+            🛒
+            {totalQuantity > 0 && (
+              <span className="store-shop-icon-btn__badge">{totalQuantity > 99 ? '99+' : totalQuantity}</span>
+            )}
+          </button>
+        </div>
+        <div className="store-shop-header__title-block">
           <h1 className="store-shop-title">{storeName ?? t('storeShop.loading')}</h1>
           <p className="store-shop-subtitle">{t('storeShop.subtitle')}</p>
         </div>
-        <button type="button" className="store-shop-header-cart" onClick={openCart}>
-          🛒 {totalQuantity > 0 ? totalQuantity : ''}
-        </button>
       </header>
 
       <main className="store-shop-main">

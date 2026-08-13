@@ -190,7 +190,9 @@ export const ko = {
   storeShop: {
     loading: '매장을 불러오는 중...',
     subtitle: '온라인 팝업 · 실물 배송',
-    backHome: '← 목록',
+    backHome: '← 매장 목록',
+    backHomeLabel: '매장 목록으로',
+    cartLabel: '장바구니',
     notFound: '매장을 찾을 수 없어요.',
     cartBar: '장바구니 보기 ({count}개)',
     cartBarEmpty: '담은 상품이 없어요',

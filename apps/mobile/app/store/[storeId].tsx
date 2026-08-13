@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import Constants from 'expo-constants';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../../src/context/AuthContext';
 import { t } from '../../src/i18n/ko';
@@ -46,6 +47,14 @@ export default function StoreScreen() {
     }
   }, [authLoading, userId, router]);
 
+  /** 쇼핑 WebView — 세로 고정 (§60 가로 레이아웃 깨짐 방지) */
+  useEffect(() => {
+    void ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+    return () => {
+      void ScreenOrientation.unlockAsync();
+    };
+  }, []);
+
   useEffect(() => {
     if (!storeId) return;
     setLoadingMeta(true);
@@ -73,7 +82,9 @@ export default function StoreScreen() {
         access_token: data.session.access_token,
         refresh_token: data.session.refresh_token,
       }).toString();
-      setShopUrl(`${origin}/store/${encodeURIComponent(storeId)}/shop#${hash}`);
+      setShopUrl(
+        `${origin}/store/${encodeURIComponent(storeId)}/shop?theme=light#${hash}`
+      );
       setSessionReady(true);
     })();
 
@@ -122,7 +133,7 @@ export default function StoreScreen() {
   if (authLoading || loadingMeta || !sessionReady) {
     return (
       <View style={styles.centered}>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <ActivityIndicator color={colors.accent} size="large" />
         <Text style={styles.loadingText}>{t.store.loadingShop}</Text>
       </View>
@@ -132,7 +143,7 @@ export default function StoreScreen() {
   if (!shopUrl || webError) {
     return (
       <View style={styles.centered}>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <Text style={styles.storeName}>{headerTitle}</Text>
         <Text style={styles.error}>{webError ?? t.store.shopError}</Text>
         <Pressable style={styles.button} onPress={() => router.replace('/home')}>
@@ -144,7 +155,7 @@ export default function StoreScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       {role === 'owner' && (
         <View style={styles.ownerBar}>
           <Text style={styles.ownerBarText}>{t.store.ownerHint}</Text>
@@ -179,18 +190,18 @@ export default function StoreScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
+  container: { flex: 1, backgroundColor: '#f4f5f7' },
   centered: {
     flex: 1,
-    backgroundColor: colors.bg,
+    backgroundColor: '#f4f5f7',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
   },
-  webview: { flex: 1, backgroundColor: colors.bg },
+  webview: { flex: 1, backgroundColor: '#f4f5f7' },
   webviewLoading: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.bg,
+    backgroundColor: '#f4f5f7',
     alignItems: 'center',
     justifyContent: 'center',
   },
