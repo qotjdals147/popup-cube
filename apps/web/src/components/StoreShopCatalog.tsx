@@ -91,42 +91,43 @@ export function StoreShopCatalog({
             <div className="store-shop-card__body">
               <div className="store-shop-card__name">{product.name}</div>
               <div className="store-shop-card__price">{formatPrice(product.price)}</div>
-              {product.description && (
+              {product.description && variant === 'overlay' && (
                 <div className="store-shop-card__desc">{product.description}</div>
               )}
 
-              <button
-                type="button"
-                className="store-shop-card__detail-link"
-                onClick={() => setDetailProduct(product)}
-              >
-                {t('shop.viewDetail')}
-              </button>
-
               <div className="store-shop-card__footer">
-                <div className="store-shop-stepper">
+                <div className="store-shop-card__footer-row">
+                  <div className="store-shop-stepper">
+                    <button
+                      type="button"
+                      className="store-shop-stepper__btn"
+                      onClick={() => setQty(product.id, getQty(product.id) - 1)}
+                    >
+                      −
+                    </button>
+                    <span className="store-shop-stepper__value">{getQty(product.id)}</span>
+                    <button
+                      type="button"
+                      className="store-shop-stepper__btn"
+                      onClick={() => setQty(product.id, getQty(product.id) + 1)}
+                    >
+                      +
+                    </button>
+                  </div>
                   <button
                     type="button"
-                    className="store-shop-stepper__btn"
-                    onClick={() => setQty(product.id, getQty(product.id) - 1)}
+                    className="store-shop-card__add"
+                    onClick={() => handleAdd(product)}
                   >
-                    −
-                  </button>
-                  <span className="store-shop-stepper__value">{getQty(product.id)}</span>
-                  <button
-                    type="button"
-                    className="store-shop-stepper__btn"
-                    onClick={() => setQty(product.id, getQty(product.id) + 1)}
-                  >
-                    +
+                    {addedId === product.id ? t('shop.added') : t('shop.addToCart')}
                   </button>
                 </div>
                 <button
                   type="button"
-                  className="store-shop-card__add"
-                  onClick={() => handleAdd(product)}
+                  className="store-shop-card__detail-btn"
+                  onClick={() => setDetailProduct(product)}
                 >
-                  {addedId === product.id ? t('shop.added') : t('shop.addToCart')}
+                  {t('shop.viewDetail')}
                 </button>
               </div>
             </div>
@@ -138,6 +139,7 @@ export function StoreShopCatalog({
         <ProductDetailModal
           product={detailProduct}
           storeId={storeId}
+          appearance={variant === 'page' ? 'light' : 'dark'}
           onClose={() => setDetailProduct(null)}
           onOpenCart={() => {
             setDetailProduct(null);

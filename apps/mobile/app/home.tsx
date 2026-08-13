@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 6,
   },
-  openBadgeText: { color: colors.text, fontSize: 10, fontWeight: '700' },
+  openBadgeText: { color: '#ffffff', fontSize: 10, fontWeight: '700' },
   storeName: {
     color: colors.text,
     fontSize: 14,

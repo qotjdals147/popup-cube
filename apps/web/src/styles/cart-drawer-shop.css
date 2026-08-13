@@ -1,0 +1,67 @@
+/* CartDrawer — shop/WebView 라이트 (AD-065) */
+.cart-drawer--light .cart-drawer-overlay {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.cart-drawer--light .cart-drawer-panel {
+  background: #ffffff;
+  color: #191f28;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+}
+
+.cart-drawer--light .cart-drawer-header {
+  border-bottom-color: #e5e8eb;
+}
+
+.cart-drawer--light .cart-drawer-title,
+.cart-drawer--light .cart-drawer-item-name,
+.cart-drawer--light .cart-drawer-total-label {
+  color: #191f28;
+}
+
+.cart-drawer--light .cart-drawer-close,
+.cart-drawer--light .cart-drawer-muted {
+  color: #8b95a1;
+}
+
+.cart-drawer--light .cart-drawer-item {
+  background: #f9fafb;
+  border-color: #e5e8eb;
+}
+
+.cart-drawer--light .cart-drawer-item-price {
+  color: #f04452;
+}
+
+.cart-drawer--light .cart-drawer-qty-btn {
+  background: #ffffff;
+  border-color: #e5e8eb;
+  color: #191f28;
+}
+
+.cart-drawer--light .cart-drawer-primary-btn {
+  background: #3182f6;
+  color: #ffffff;
+}
+
+.cart-drawer--light .cart-drawer-secondary-btn {
+  background: #ffffff;
+  color: #4e5968;
+  border-color: #e5e8eb;
+}
+
+.cart-drawer--light .cart-drawer-address-option {
+  background: #f9fafb;
+  border-color: #e5e8eb;
+}
+
+.cart-drawer--light .cart-drawer-address-option--selected {
+  border-color: #3182f6;
+  background: #eef4ff;
+}
+
+.cart-drawer--light .cart-drawer-reward-btn {
+  background: #f9fafb;
+  border-color: #e5e8eb;
+  color: #191f28;
+}

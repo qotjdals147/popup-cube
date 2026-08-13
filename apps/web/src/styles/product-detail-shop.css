@@ -1,0 +1,95 @@
+/* ProductDetailModal — shop/WebView 라이트 (AD-065) */
+.product-detail--light .product-detail-overlay {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.product-detail--light .product-detail-panel {
+  background: #ffffff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.product-detail--light .product-detail-header {
+  border-bottom-color: #e5e8eb;
+}
+
+.product-detail--light .product-detail-back {
+  color: #191f28;
+}
+
+.product-detail--light .product-detail-title {
+  color: #191f28;
+}
+
+.product-detail--light .product-detail-price {
+  color: #191f28;
+}
+
+.product-detail--light .product-detail-short-desc,
+.product-detail--light .product-detail-hint {
+  color: #8b95a1;
+}
+
+.product-detail--light .product-detail-section-title {
+  color: #191f28;
+}
+
+.product-detail--light .product-detail-desc-line {
+  color: #4e5968;
+}
+
+.product-detail--light .product-detail-review-card {
+  background: #f9fafb;
+  border-color: #e5e8eb;
+}
+
+.product-detail--light .product-detail-review-nickname {
+  color: #191f28;
+}
+
+.product-detail--light .product-detail-review-body {
+  color: #4e5968;
+}
+
+.product-detail--light .product-detail-buy-bar {
+  background: #ffffff;
+  border-top-color: #e5e8eb;
+}
+
+.product-detail--light .product-detail-stepper {
+  border-color: #e5e8eb;
+  background: #f9fafb;
+}
+
+.product-detail--light .product-detail-stepper-btn {
+  background: transparent;
+  color: #191f28;
+}
+
+.product-detail--light .product-detail-stepper-value {
+  color: #191f28;
+}
+
+.product-detail--light .product-detail-add-btn {
+  background: #3182f6;
+  color: #ffffff;
+}
+
+.product-detail--light .product-detail-cart-link {
+  color: #3182f6;
+  border-color: #e5e8eb;
+  background: #ffffff;
+}
+
+.product-detail--light .product-detail-write-review {
+  background: #ffffff;
+  color: #3182f6;
+  border: 1px solid #3182f6;
+}
+
+.product-detail--light .product-detail-main-thumb-wrap {
+  background: #f2f4f6;
+}
+
+.product-detail--light .product-detail-stars-dim {
+  color: #d1d6db !important;
+}

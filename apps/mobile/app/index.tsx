@@ -60,6 +60,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 32,
     alignItems: 'center',
+    width: '100%',
+    maxWidth: 400,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   title: {
     color: colors.text,
@@ -89,7 +93,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  primaryButtonText: { color: colors.text, fontSize: 16, fontWeight: '600' },
+  primaryButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: '600' },
   secondaryButton: {
     width: '100%',
     backgroundColor: colors.bgElevated,

@@ -175,7 +175,12 @@ export function StoreShopPage() {
       </div>
 
       {cartOpen && (
-        <CartDrawer storeId={storeId} userId={userId} onClose={() => setCartOpen(false)} />
+        <CartDrawer
+          storeId={storeId}
+          userId={userId}
+          appearance="light"
+          onClose={() => setCartOpen(false)}
+        />
       )}
     </div>
   );

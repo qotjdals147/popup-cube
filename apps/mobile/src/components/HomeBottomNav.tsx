@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
-    backgroundColor: colors.bgElevated,
+    backgroundColor: colors.bgCard,
     paddingBottom: 4,
   },
   item: {
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   },
   itemActive: {
     borderTopWidth: 2,
-    borderTopColor: colors.accent,
+    borderTopColor: colors.primary,
     marginTop: -StyleSheet.hairlineWidth,
   },
   label: {
@@ -55,6 +55,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   labelActive: {
-    color: colors.accent,
+    color: colors.primary,
   },
 });

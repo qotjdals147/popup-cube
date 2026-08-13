@@ -13,11 +13,14 @@ import {
   type AddressFormValues,
 } from './AddressFormFields';
 import { t } from '../i18n';
+import '../styles/cart-drawer-shop.css';
 
 interface CartDrawerProps {
   storeId: string;
   userId: string | null;
   onClose: () => void;
+  /** AD-065 — shop WebView 라이트 */
+  appearance?: 'light' | 'dark';
 }
 
 type Phase = 'cart' | 'address' | 'reward' | 'discountResult' | 'gachaRolling' | 'gachaResult';
@@ -35,7 +38,9 @@ function orderErrorMessage(err: unknown): string {
  * 할인/가챠 혜택 선택(AD-028) 순서로 진행되고, 마지막에 `place_order` 서버 함수로
  * 실제 `orders`/`order_items`에 저장됨(§10) — 가격은 서버가 다시 계산해서 조작을 막음.
  */
-export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
+export function CartDrawer({ storeId, userId, onClose, appearance = 'dark' }: CartDrawerProps) {
+  const light = appearance === 'light';
+  const rootClass = light ? 'cart-drawer--light' : undefined;
   const { items, totalPrice, incrementQuantity, decrementQuantity, removeItem, clearCart } = useCart();
   const [phase, setPhase] = useState<Phase>('cart');
 
@@ -158,11 +163,12 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
   const gachaIsRealProduct = !!gachaResult?.product_id;
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div className="play-cart-drawer" style={styles.panel} onClick={(e) => e.stopPropagation()}>
-        <div style={styles.header}>
-          <h3 style={styles.title}>{t('cart.title')}</h3>
-          <button style={styles.closeButton} onClick={onClose}>
+    <div className={rootClass}>
+    <div className="cart-drawer-overlay" style={styles.overlay} onClick={onClose}>
+      <div className="cart-drawer-panel play-cart-drawer" style={styles.panel} onClick={(e) => e.stopPropagation()}>
+        <div className="cart-drawer-header" style={styles.header}>
+          <h3 className="cart-drawer-title" style={styles.title}>{t('cart.title')}</h3>
+          <button className="cart-drawer-close" style={styles.closeButton} onClick={onClose}>
             ✕
           </button>
         </div>
@@ -186,6 +192,7 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
                       ...styles.addressOption,
                       ...(selectedAddressId === address.id ? styles.addressOptionSelected : {}),
                     }}
+                    className={`cart-drawer-address-option${selectedAddressId === address.id ? ' cart-drawer-address-option--selected' : ''}`}
                   >
                     <input
                       type="radio"
@@ -246,7 +253,7 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
             <p style={styles.rewardHint}>{t('cart.rewardHint')}</p>
             {rewardError && <p style={styles.error}>{rewardError}</p>}
             <div style={styles.rewardChoiceRow}>
-              <button style={styles.rewardChoiceButton} onClick={handleChooseDiscount}>
+              <button className="cart-drawer-reward-btn" style={styles.rewardChoiceButton} onClick={handleChooseDiscount}>
                 💸 {t('cart.chooseDiscount')}
               </button>
               <button style={styles.rewardChoiceButton} onClick={handleChooseGacha}>
@@ -305,7 +312,7 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
             <>
               <div style={styles.list}>
                 {items.map((item) => (
-                  <div key={item.productId} className="play-cart-row" style={styles.row}>
+                  <div key={item.productId} className="play-cart-row cart-drawer-item" style={styles.row}>
                     <div style={styles.thumbWrap}>
                       {item.imageUrl ? (
                         <img src={item.imageUrl} alt={item.name} style={styles.thumb} />
@@ -314,17 +321,17 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
                       )}
                     </div>
                     <div className="play-cart-row-main">
-                      <div className="play-cart-row-name" style={styles.name}>
+                      <div className="play-cart-row-name cart-drawer-item-name" style={styles.name}>
                         {item.name}
                       </div>
-                      <div style={styles.price}>{formatPrice(item.price)}</div>
+                      <div className="cart-drawer-item-price" style={styles.price}>{formatPrice(item.price)}</div>
                       <div className="play-cart-row-actions">
                         <div style={styles.stepper}>
-                          <button style={styles.stepperButton} onClick={() => decrementQuantity(item.productId)}>
+                          <button className="cart-drawer-qty-btn" style={styles.stepperButton} onClick={() => decrementQuantity(item.productId)}>
                             −
                           </button>
                           <span style={styles.stepperValue}>{item.quantity}</span>
-                          <button style={styles.stepperButton} onClick={() => incrementQuantity(item.productId)}>
+                          <button className="cart-drawer-qty-btn" style={styles.stepperButton} onClick={() => incrementQuantity(item.productId)}>
                             +
                           </button>
                         </div>
@@ -354,13 +361,14 @@ export function CartDrawer({ storeId, userId, onClose }: CartDrawerProps) {
                   <strong style={styles.totalValue}>{formatPrice(estimatedPayTotal)}</strong>
                 </div>
                 <p style={styles.shippingNote}>{t('cart.shippingEstimateNote')}</p>
-                <button style={styles.checkoutButton} onClick={handleMockCheckout}>
+                <button className="cart-drawer-primary-btn" style={styles.checkoutButton} onClick={handleMockCheckout}>
                   {t('cart.checkout')}
                 </button>
               </div>
             </>
           ))}
       </div>
+    </div>
     </div>
   );
 }

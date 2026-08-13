@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { AddressManagementPanel } from '../components/AddressManagementPanel';
 import { OrderHistoryPanel } from '../components/OrderHistoryPanel';
@@ -34,11 +34,17 @@ function postToApp(type: string) {
 
 type AccountTab = 'orders' | 'addresses';
 
+function readThemeFromSearch(): 'light' | 'dark' {
+  const raw = new URLSearchParams(window.location.search).get('theme');
+  return raw === 'dark' ? 'dark' : 'light';
+}
+
 /** 모바일 앱 WebView — 손님 「내 정보」(구매 내역 · 배송지) AD-030 · AD-054 */
 export function ShopperAccountPage() {
   const { userId, nickname, email, loading: authLoading } = useAuth();
   const [bootstrapping, setBootstrapping] = useState(true);
   const [tab, setTab] = useState<AccountTab>('orders');
+  const theme = useMemo(() => readThemeFromSearch(), []);
 
   useEffect(() => {
     let active = true;
@@ -61,7 +67,7 @@ export function ShopperAccountPage() {
 
   if (bootstrapping || authLoading) {
     return (
-      <div className="shopper-account-page">
+      <div className="shopper-account-page" data-theme={theme}>
         <p className="shopper-account-status">{t('shopperAccount.loading')}</p>
       </div>
     );
@@ -69,7 +75,7 @@ export function ShopperAccountPage() {
 
   if (!userId) {
     return (
-      <div className="shopper-account-page">
+      <div className="shopper-account-page" data-theme={theme}>
         <p className="shopper-account-status">{t('play.needLogin')}</p>
         <button type="button" className="shopper-account-back" onClick={goHome}>
           {t('play.backHome')}
@@ -79,7 +85,7 @@ export function ShopperAccountPage() {
   }
 
   return (
-    <div className="shopper-account-page">
+    <div className="shopper-account-page" data-theme={theme}>
       <header className="shopper-account-header">
         <button type="button" className="shopper-account-back" onClick={goHome}>
           {t('play.backHome')}

@@ -1019,6 +1019,16 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-08-13 — §60 손님 라이트 테마 통일 · 상품 상세 버튼 (로컬)
+- **Author:** Cursor Agent (User 실기 피드백)
+- **Changed:** `shopperTheme.ts` · mobile `colors` 라이트 · landing/login/home/modal/nav · `ProductDetailModal`/`CartDrawer`/`shopper-account` 라이트 · 카드 **담기 아래 파란 「상품 상세 보기」** · `/app/me?theme=light`
+- **Notes:** 쿠팡형 **전체 UI/UX(§60 Phase 4-B~)** 는 **미착수** — 마이·장바구니 전체화면·하단탭·설정 다크모드 등
+
+### 2026-08-13 — push `422b22d` (§60 4-A shop 라이트 UX)
+- **Author:** Cursor Agent (User 「푸쉬해줘」)
+- **Git:** push `main` **`422b22d`** · `fac4ccf..422b22d`
+- **Notes:** Vercel 1~2분 후 반영 · Expo **`--clear` 재시작** 필수
+
 ### 2026-08-13 — §60 Phase 4-A shop UX · 라이트 테마 · §0 UI/UX 규칙
 - **Author:** Cursor Agent (User 「규칙 추가하고 작업시작」)
 - **Changed:** HANDOFF §0 UI/UX 가시성·편의성 · `store-shop.css` 라이트 기본 · `StoreShopPage` 2단 헤더 · 담기 세로깨짐·2열 고정 · `store/[storeId]` 세로 lock · `?theme=light`

@@ -7,6 +7,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { ReviewFormModal } from './ReviewFormModal';
 import { t } from '../i18n';
+import '../styles/product-detail-shop.css';
 
 interface ProductDetailModalProps {
   product: Product;
@@ -15,6 +16,8 @@ interface ProductDetailModalProps {
   onOpenCart: () => void;
   /** AD-059-2 — 점주가 「미리보기」로 열 때 true. 장바구니·리뷰 작성 등 손님 전용 동작은 숨김. */
   previewMode?: boolean;
+  /** AD-065 — shop WebView 라이트 */
+  appearance?: 'light' | 'dark';
 }
 
 interface ReviewableOrder {
@@ -31,11 +34,13 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
-function Stars({ rating }: { rating: number }) {
+function Stars({ rating, light = false }: { rating: number; light?: boolean }) {
   return (
     <span style={{ color: '#e9c46a', fontSize: 13, letterSpacing: 1 }}>
       {'★'.repeat(rating)}
-      <span style={{ color: '#3a4a70' }}>{'★'.repeat(5 - rating)}</span>
+      <span className={light ? 'product-detail-stars-dim' : undefined} style={{ color: light ? undefined : '#3a4a70' }}>
+        {'★'.repeat(5 - rating)}
+      </span>
     </span>
   );
 }
@@ -55,7 +60,10 @@ export function ProductDetailModal({
   onClose,
   onOpenCart,
   previewMode = false,
+  appearance = 'dark',
 }: ProductDetailModalProps) {
+  const light = appearance === 'light';
+  const rootClass = light ? 'product-detail--light' : undefined;
   const { addToCart } = useCart();
   const { userId } = useAuth();
   const [detailBlocks, setDetailBlocks] = useState<ProductDetailBlock[]>([]);
@@ -156,19 +164,20 @@ export function ProductDetailModal({
   }
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
-        <div style={styles.header}>
-          <button type="button" style={styles.backButton} onClick={onClose} aria-label={t('productDetail.close')}>
+    <div className={rootClass}>
+    <div className="product-detail-overlay" style={styles.overlay} onClick={onClose}>
+      <div className="product-detail-panel" style={styles.panel} onClick={(e) => e.stopPropagation()}>
+        <div className="product-detail-header" style={styles.header}>
+          <button type="button" className="product-detail-back" style={styles.backButton} onClick={onClose} aria-label={t('productDetail.close')}>
             ←
           </button>
-          <h3 style={styles.title}>{product.name}</h3>
+          <h3 className="product-detail-title" style={styles.title}>{product.name}</h3>
           {previewMode && <span style={styles.previewBadge}>{t('productDetail.previewBadge')}</span>}
         </div>
 
         <div style={styles.scrollArea}>
           <div style={styles.topSection}>
-            <div style={styles.mainThumbWrap}>
+            <div className="product-detail-main-thumb-wrap" style={styles.mainThumbWrap}>
               {product.image_url ? (
                 <img src={product.image_url} alt={product.name} style={styles.mainThumb} />
               ) : (
@@ -176,11 +185,11 @@ export function ProductDetailModal({
               )}
             </div>
             <div style={styles.topInfo}>
-              <div style={styles.price}>{formatPrice(product.price)}</div>
-              {product.description && <p style={styles.shortDesc}>{product.description}</p>}
+              <div className="product-detail-price" style={styles.price}>{formatPrice(product.price)}</div>
+              {product.description && <p className="product-detail-short-desc" style={styles.shortDesc}>{product.description}</p>}
               {avgRating !== null && (
                 <div style={styles.ratingSummaryInline}>
-                  <Stars rating={Math.round(avgRating)} />
+                  <Stars rating={Math.round(avgRating)} light={light} />
                   <span style={styles.ratingSummaryText}>
                     {t('productDetail.avgRating', { rating: String(avgRating) })} ·{' '}
                     {t('productDetail.reviewsCount', { count: reviews.length })}
@@ -191,13 +200,13 @@ export function ProductDetailModal({
           </div>
 
           {loading ? (
-            <p style={styles.hint}>{t('productDetail.loading')}</p>
+            <p className="product-detail-hint" style={styles.hint}>{t('productDetail.loading')}</p>
           ) : (
             <>
               <section style={styles.section}>
-                <h4 style={styles.sectionTitle}>{t('productDetail.descTitle')}</h4>
+                <h4 className="product-detail-section-title" style={styles.sectionTitle}>{t('productDetail.descTitle')}</h4>
                 {detailBlocks.length === 0 ? (
-                  <p style={styles.hint}>{t('productDetail.noDetail')}</p>
+                  <p className="product-detail-hint" style={styles.hint}>{t('productDetail.noDetail')}</p>
                 ) : (
                   <div style={styles.blockStack}>
                     {detailBlocks.map((block) =>
@@ -208,7 +217,7 @@ export function ProductDetailModal({
                       ) : block.text_content && block.text_content.trim() ? (
                         <div key={block.id} style={styles.detailDescBody}>
                           {block.text_content.split('\n').map((line, i) => (
-                            <p key={i} style={styles.detailDescLine}>
+                            <p key={i} className="product-detail-desc-line" style={styles.detailDescLine}>
                               {line || '\u00A0'}
                             </p>
                           ))}
@@ -221,13 +230,14 @@ export function ProductDetailModal({
 
               <section style={styles.section}>
                 <div style={styles.reviewsSectionHeader}>
-                  <h4 style={styles.sectionTitle}>
+                  <h4 className="product-detail-section-title" style={styles.sectionTitle}>
                     {t('productDetail.reviewsTitle')}
                     {reviews.length > 0 ? ` (${reviews.length})` : ''}
                   </h4>
                   {reviewableOrder && (
                     <button
                       type="button"
+                      className="product-detail-write-review"
                       style={styles.writeReviewButton}
                       disabled={confirmingForReview}
                       onClick={() => void handleWriteReviewClick()}
@@ -244,13 +254,13 @@ export function ProductDetailModal({
                 ) : (
                   <div style={styles.reviewList}>
                     {reviews.map((r) => (
-                      <div key={r.review_id} style={styles.reviewCard}>
+                      <div key={r.review_id} className="product-detail-review-card" style={styles.reviewCard}>
                         <div style={styles.reviewHeader}>
-                          <Stars rating={r.rating} />
-                          <span style={styles.reviewNickname}>{r.reviewer_nickname ?? '익명'}</span>
+                          <Stars rating={r.rating} light={light} />
+                          <span className="product-detail-review-nickname" style={styles.reviewNickname}>{r.reviewer_nickname ?? '익명'}</span>
                           <span style={styles.reviewDate}>{formatDate(r.created_at)}</span>
                         </div>
-                        <p style={styles.reviewBody}>{r.body}</p>
+                        <p className="product-detail-review-body" style={styles.reviewBody}>{r.body}</p>
                         {r.image_urls.length > 0 && (
                           <div style={styles.reviewPhotoRow}>
                             {r.image_urls.map((url) => (
@@ -268,20 +278,20 @@ export function ProductDetailModal({
         </div>
 
         {!previewMode && (
-          <div style={styles.buyBar}>
-            <div style={styles.stepper}>
-              <button style={styles.stepperButton} onClick={() => setQty((q) => Math.max(1, q - 1))}>
+          <div className="product-detail-buy-bar" style={styles.buyBar}>
+            <div className="product-detail-stepper" style={styles.stepper}>
+              <button className="product-detail-stepper-btn" style={styles.stepperButton} onClick={() => setQty((q) => Math.max(1, q - 1))}>
                 −
               </button>
-              <span style={styles.stepperValue}>{qty}</span>
-              <button style={styles.stepperButton} onClick={() => setQty((q) => q + 1)}>
+              <span className="product-detail-stepper-value" style={styles.stepperValue}>{qty}</span>
+              <button className="product-detail-stepper-btn" style={styles.stepperButton} onClick={() => setQty((q) => q + 1)}>
                 +
               </button>
             </div>
-            <button type="button" style={styles.addButton} onClick={handleAdd}>
+            <button type="button" className="product-detail-add-btn" style={styles.addButton} onClick={handleAdd}>
               {added ? t('productDetail.added') : t('productDetail.addToCart')}
             </button>
-            <button type="button" style={styles.cartLink} onClick={onOpenCart}>
+            <button type="button" className="product-detail-cart-link" style={styles.cartLink} onClick={onOpenCart}>
               {t('shop.cart')}
             </button>
           </div>
@@ -301,6 +311,7 @@ export function ProductDetailModal({
           }}
         />
       )}
+    </div>
     </div>
   );
 }

@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
   },
-  enterButtonText: { color: colors.text, fontSize: 16, fontWeight: '600' },
+  enterButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: '600' },
   closeButton: {
     marginTop: 10,
     marginHorizontal: 20,

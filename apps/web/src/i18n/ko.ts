@@ -288,7 +288,7 @@ export const ko = {
     empty: '아직 등록된 상품이 없어요.',
     addToCart: '담기',
     added: '담았어요 ✅',
-    viewDetail: '상세보기',
+    viewDetail: '상품 상세 보기',
   },
   display: {
     title: '진열 상품',
@@ -296,7 +296,7 @@ export const ko = {
     errorLoad: '진열 상품을 불러오지 못했어요.',
     empty: '이 진열 구역에 등록된 상품이 없어요.',
     addToCart: '장바구니 담기',
-    viewDetail: '상세보기',
+    viewDetail: '상품 상세 보기',
     buyNow: '바로 구매',
     buyNowPaying: '결제 처리 중… (데모)',
     buyNowSuccessTitle: '구매가 완료됐어요! 🎉',

@@ -52,7 +52,7 @@ export default function MeScreen() {
         access_token: data.session.access_token,
         refresh_token: data.session.refresh_token,
       }).toString();
-      setAccountUrl(`${origin}/app/me#${hash}`);
+      setAccountUrl(`${origin}/app/me?theme=light#${hash}`);
       setSessionReady(true);
     })();
 

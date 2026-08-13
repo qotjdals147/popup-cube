@@ -228,14 +228,27 @@
 }
 
 .store-shop-card__detail-link {
-  align-self: flex-start;
-  background: transparent;
+  display: none;
+}
+
+.store-shop-card__footer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.store-shop-card__detail-btn {
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px 8px;
   border: none;
-  color: var(--shop-primary);
-  font-size: 12px;
-  text-decoration: underline;
+  border-radius: 8px;
+  background: var(--shop-primary);
+  color: var(--shop-primary-text);
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0;
 }
 
 .store-shop-grid--page .store-shop-card__footer {

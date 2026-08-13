@@ -170,7 +170,7 @@ export default function LoginScreen() {
           onPress={mode === 'login' ? handleLogin : handleSignup}
         >
           {submitting || authLoading ? (
-            <ActivityIndicator color={colors.text} />
+            <ActivityIndicator color={colors.primary} />
           ) : (
             <Text style={styles.submitText}>
               {mode === 'login' ? t.login.submit : t.signup.submit}
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   submitDisabled: { opacity: 0.7 },
-  submitText: { color: colors.text, fontSize: 16, fontWeight: '600' },
+  submitText: { color: colors.primaryText, fontSize: 16, fontWeight: '600' },
   toggle: {
     color: colors.textMuted,
     textAlign: 'center',
