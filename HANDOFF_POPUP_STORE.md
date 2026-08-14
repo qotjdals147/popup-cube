@@ -185,6 +185,7 @@
    - 그 다음 **SDK 52** · **데모 계정** · **클릭 순서** · **이번에 볼 것**
    - PC 점주만 → **PC 웹 3줄** · 앱 WebView까지 → **Expo 4줄** (+ 필요 시 PC 3줄)
    - Vercel만 → `https://popup-cube-web.vercel.app` + push 1~2분
+9. **앱 실기 = push 먼저 (User 2026-08-14 — 필수)** — `apps/mobile` **또는** 앱 WebView가 여는 `apps/web` (`/shop` · `/app/me` 등) 작업이 끝나면 **User에게 Expo 테스트 안내하기 전에** `main` **push** (Vercel 1~2분). **「푸쉬해줘?」 묻지 말고 바로 push.** User는 push 없으면 앱에서 변경이 안 보인다고 느낌. push 후 Changelog·§7.15 갱신.
 
 #### 표준 Expo 4줄 (앱 · 손님 WebView — **§7·Changelog와 동일**)
 
@@ -275,7 +276,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`0d31f82`** (§60 shop 버튼 정렬 · 헤더 safe-area · ISS-036, 2026-08-13) · push ✅ |
+| **Git `main` HEAD** | **`826e5f6`** push ✅ · **4-B shell 로컬 미 push** |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -640,7 +641,7 @@ popup_store/                          # Turborepo root
 | ISS-033 | ~~demo@owner가 GUCCI 점주인데 주문/에디터 안 됨~~ | Resolved | **DB:** GUCCI `owner_id` = demo owner ✅ · `profiles.store_id` = draft `하이` ❌. **앱:** `profiles.store_id`만 보던 점주 판별 → **`stores.owner_id`** (`userOwnsStore`). **DB:** profile → `popup_gucci_01` migration. |
 | ISS-034 | ~~Play 세로 WebView에서 장바구니 상품명·버튼 줄바꿈 깨짐~~ | Resolved | `CartDrawer` `play-cart-row` 2단 · `play-world.css` narrow rules |
 | ISS-035 | ~~블록 에디터에서 블록 추가·저장마다 스크롤이 맨 위로 튐~~ | Resolved | `OwnerProductPanel.reload()`가 매번 `setLoading(true)` → 상품 목록 DOM 통째 교체가 원인 · **이미 목록 로드됐으면 loading UI 생략** (2026-08-12g) |
-| ISS-036 | ~~shop WebView 상단 ←·🛒 버튼 잘림 · 담기/상품상세 버튼 너비 불일치~~ | Resolved | `0d31f82`: 카드 `__action-btn` grid 1열 100% 동일 · 앱 `SafeAreaView(top)` · 웹 헤더 패딩 + WebView fallback inset · **User 실기 재확인 대기** |
+| ISS-036 | ~~shop WebView 상단 ←·🛒 · 담기/상세 너비~~ | Resolved | `0d31f82` · User **2026-08-14 OK** |
 
 ---
 
@@ -650,11 +651,11 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§58 #1~2·§60 4-A push 완료 (`0d31f82`)** · 다음 = **§58 #3 몰 허브** + **§60 4-B~ (쿠팡형 앱 shell·설정)** · **User shop 버튼·헤더 실기 재확인** |
-| **Git 상태** | `main` **`0d31f82`** push ✅ · Vercel 1~2분 후 반영 · 이전 `29a7e62`는 버튼 불일치(`footer-row`) — **지금 push로 해소** |
+| **한 줄 요약** | **§60 4-A·/app/me·구매내역 카드 push `826e5f6`** · **4-B 쿠팡 shell 착수(로컬)** · User **추가 요청 예정** · 다음 = **4-B push 실기** → **4-C 설정·다크** → **§58 #3 몰 허브** |
+| **Git 상태** | `main` **`826e5f6`** push ✅ · **4-B** (`ShopperBottomNav`·`cart`·`settings`) **로컬 미 push** |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · migrations **`20260812b`~`c`** 원격 적용 완료 |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~80% · P1·앱스토어 포함 **전체 ~55–60%** · **실결제** = P1 + 사업자 + PG |
-| **User 미확인 실기** | **ISS-036** shop 담기/상세 정렬 · ←·🛒 safe-area · Expo **`--clear` 필수** |
+| **User 실기 (2026-08-14)** | **§60 4-A shop** OK · **`/app/me` 라이트** OK · **구매내역 카드 가시성** OK · **나머지 화면** = 추가 요청 대기 |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -670,12 +671,15 @@ popup_store/                          # Turborepo root
 | 순위 | 작업 | 조건 / 메모 |
 |---|---|---|
 | **1** | ~~**§58 #1~2** — `/shop` + `StoreShopPage`~~ | ✅ push `fac4ccf`~`0d31f82` |
-| **2** | ~~**§60 4-A** — shop UX(담기·헤더·세로·라이트)~~ | ✅ push `0d31f82` · **User 실기 OK 대기** |
-| **3** | **§58 #3** — 홈 몰 허브 (카드·D-day·쇼핑하기) | **← 다음 1순위** |
-| **4** | **§60 4-B~4-D** — 쿠팡형 앱 shell · 설정·다크모드 · 장바구니 전체화면 | 4-B 일부(라이트) ✅ `29a7e62` |
-| **5** | **§58 #5~6** — popup 기간 · 미리보기 | layout 숨김 ✅ |
-| **6** | **§58 #8 P1** | PG 전 |
-| **7** | **PG** (§53.7-7) | 사업자 + 가맹 후 |
+| **2** | ~~**§60 4-A** — shop UX(담기·헤더·세로·라이트)~~ | ✅ User 실기 OK |
+| **3** | ~~**§60 `/app/me`** — 라이트 · 구매내역 카드~~ | ✅ push `826e5f6` · User OK |
+| **4** | **§60 4-B** — 쿠팡형 앱 shell (4탭·홈 헤더·설정 shell) | **← 진행 중 (로컬)** |
+| **5** | **§60 4-C** — 다크 모드 토글 · WebView 연동 | 4-B 후 |
+| **6** | **§58 #3** — 홈 몰 허브 (카드·D-day·쇼핑하기) | 4-B/C 후 |
+| **7** | **§60 4-D** — 장바구니 전체화면 · 주문 썸네일 | 1~2세션 |
+| **8** | **§58 #5~6** — popup 기간 · 미리보기 | layout 숨김 ✅ |
+| **9** | **§58 #8 P1** | PG 전 |
+| **10** | **PG** (§53.7-7) | 사업자 + 가맹 후 |
 
 > **점주센터 전체 리빌드 ❌** — §58: **80% 유지 · layout만 숨김 · P1만 추가**.
 
@@ -722,6 +726,29 @@ npx expo start --tunnel --port 8082 --clear
 | **4** | 샌드박스·실결제 테스트 → **런칭** | |
 
 **PG 착수 조건 (전부 충족 전 금지):** ① User **사업자 등록 완료** ② **PG 후보·계약 확정** ③ (권장) P1·실기 대부분 OK.
+
+---
+
+### 7.15 세션 인수인계 — **2026-08-14** (§60 `/app/me` · 구매내역 카드 · 4-B 착수)
+
+| | |
+|---|---|
+| **User 실기** | ① shop **4-A OK** ② **`/app/me` 라이트** OK (탭 색·글자·카드) ③ **구매내역 카드 가시성** OK (`826e5f6`) ④ **나머지 화면** = User가 **추가 요청 예정** (에이전트가 먼저 손대지 말 것) |
+| **Git (push됨)** | `fab1669` `/app/me` 라이트 · `826e5f6` `ShopperOrderCardLight` (점주 탭형 카드 위계) |
+| **Git (로컬 · 미 push)** | **§60 4-B v2** — 쿠팡형 **마이 허브** · ⚙️→**내정보관리** · 3탭 · WebView embed |
+| **다음 에이전트** | ① **4-B push** → User Expo `--clear` 실기 ② User **추가 요청** 반영 ③ **4-C** 다크모드 ④ **§58 #3** 몰 허브 · **PG 금지** |
+| **4-B 실기 확인** | 하단 **홈·장바구니·마이·설정** 4탭 · 홈 **브랜드+검색바** · 설정 **로그아웃** · 장바구니 **empty + 매장별 안내** |
+
+**4-B 손볼 파일:**
+
+| 파일 | 역할 |
+|---|---|
+| `apps/mobile/src/components/ShopperBottomNav.tsx` | 쿠팡형 4탭 · safe-area |
+| `apps/mobile/app/home.tsx` | 홈 헤더 · 매장 그리드 |
+| `apps/mobile/app/cart.tsx` | 장바구니 shell (4-D 전 placeholder) |
+| `apps/mobile/app/settings.tsx` | 설정 shell · 4-C 다크모드 슬롯 |
+| `apps/mobile/app/me.tsx` | WebView `/app/me?theme=light` |
+| `apps/web/src/components/ShopperOrderCardLight.tsx` | 구매내역 카드 (썸네일 = **4-D**) |
 
 ---
 
@@ -1029,10 +1056,20 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-08-14 — §60 4-B 쿠팡형 「마이」 허브 · ⚙️ 내정보관리
+- **Author:** Cursor Agent (User — 쿠팡 구조: 마이 허브 + 톱니바퀴 설정)
+- **Changed:** `me/index` 네이티브 허브(프로필·⚙️·퀵4·주문 미리보기) · `settings`=내정보관리 · 하단탭 **3개**(홈·마이·장바구니) · WebView `?embed=panel&tab=` · `me/orders`·`me/addresses`
+- **Notes:** push 후 Expo `--clear` · Vercel 1~2분 · §0 **앱 실기=push 먼저** 규칙 추가
+
+### 2026-08-14 — §60 4-B 쿠팡형 앱 shell (4탭 · 설정 · 장바구니 placeholder)
+- **Author:** Cursor Agent (User — HANDOFF 후 4-B 착수)
+- **Changed:** `ShopperBottomNav` (홈·장바구니·마이·설정) · `cart.tsx` · `settings.tsx` · 홈 Coupang형 헤더 · `_layout` statusBar dark · 로그아웃→설정
+- **Notes:** **로컬 · push 대기** · Expo `--clear` · 4-C=다크모드 · 4-D=전체 장바구니·주문 썸네일
+
 ### 2026-08-14 — 구매 내역 카드 가시성 (§60 · 점주 탭 패턴)
 - **Author:** Cursor Agent (User — 주문 카드 주루룩 나열 개선)
 - **Changed:** `ShopperOrderCardLight` — 상단 **주문번호+상태뱃지+금액** · 상품 **inset 섹션** · 배송 **타임라인 칩** · **액션 바** · `orderStatusBadgeStyle` 재사용
-- **Notes:** 썸네일은 **§60 4-D** · 로컬/Vercel 후 **내 정보 → 구매 내역** 확인
+- **Notes:** push `826e5f6` · 썸네일 = **§60 4-D**
 
 ### 2026-08-14 — `/app/me` 라이트 테마 · 구매내역/배송지 패널 (§60)
 - **Author:** Cursor Agent (User 실기 — 내 정보 다크·흰 글자 안 보임 · 탭 색 · 카드 테두리)
@@ -3506,14 +3543,12 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 
 | Phase | 내용 | 예상 |
 |---|---|---|
-| **4-A** | shop 헤더·담기·**세로 고정** · **라이트 CSS** · **버튼 정렬·safe-area** | ✅ push `0d31f82` · User 실기 대기 |
-| **4-B** | 앱 shell 라이트 (`home`·`_layout`·`colors`) | **일부 ✅** `29a7e62` · 하단탭·설정 잔여 |
-| **4-C** | **`/settings`** + 다크 모드 토글 → WebView 연동 | 1세션 |
-| **4-D** | 마이·장바구니 **쿠팡형** (네이티브 또는 WebView 리스킨) | 1~2세션 |
+| **4-A** | shop 헤더·담기·**세로 고정** · **라이트 CSS** · **버튼 정렬·safe-area** | ✅ User OK |
+| **4-B** | 앱 shell — **4탭** · 홈 헤더 · **설정 shell** | **진행 중 (로컬)** · push 후 실기 |
+| **4-C** | **`/settings`** + 다크 모드 토글 → WebView 연동 | 4-B 후 |
+| **4-D** | 마이·장바구니 **쿠팡형** · **주문 썸네일** join | 1~2세션 |
 
-**PG·월드 신규 ❌** · **100% 쿠팡 클론 ❌** — **패턴·톤·정보 구조**만 벤치.
-
-*§60 Last updated: 2026-08-13 (ISS-036 push `0d31f82` · §7.14)*
+*§60 Last updated: 2026-08-14 (push `826e5f6` · §7.15 · 4-B 로컬)*
 
 ---
 

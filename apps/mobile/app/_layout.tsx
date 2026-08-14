@@ -14,17 +14,19 @@ export default function RootLayout() {
         */}
         <Stack
           screenOptions={{
-            headerStyle: { backgroundColor: colors.bg },
+            headerStyle: { backgroundColor: colors.bgCard },
             headerTintColor: colors.text,
             headerTitleStyle: { fontWeight: '600' },
             contentStyle: { backgroundColor: colors.bg },
-            statusBarStyle: 'light',
+            statusBarStyle: 'dark',
           }}
         >
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="login" options={{ title: '로그인' }} />
           <Stack.Screen name="home" options={{ title: 'POP-UP CUBE', headerShown: false }} />
-          <Stack.Screen name="me" options={{ title: '내 정보', headerShown: false }} />
+          <Stack.Screen name="cart" options={{ headerShown: false }} />
+          <Stack.Screen name="me" options={{ headerShown: false }} />
+          <Stack.Screen name="settings" options={{ headerShown: false, presentation: 'card' }} />
           <Stack.Screen
             name="store/[storeId]"
             options={{

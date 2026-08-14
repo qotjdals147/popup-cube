@@ -40,12 +40,24 @@ function readThemeFromSearch(): 'light' | 'dark' {
   return raw === 'dark' ? 'dark' : 'light';
 }
 
+function readTabFromSearch(): AccountTab {
+  const raw = new URLSearchParams(window.location.search).get('tab');
+  return raw === 'addresses' ? 'addresses' : 'orders';
+}
+
+function readEmbedFromSearch(): 'panel' | 'page' | null {
+  const raw = new URLSearchParams(window.location.search).get('embed');
+  if (raw === 'panel' || raw === 'page') return raw;
+  return null;
+}
+
 /** 모바일 앱 WebView — 손님 「내 정보」(구매 내역 · 배송지) AD-030 · AD-054 */
 export function ShopperAccountPage() {
   const { userId, nickname, email, loading: authLoading } = useAuth();
   const [bootstrapping, setBootstrapping] = useState(true);
-  const [tab, setTab] = useState<AccountTab>('orders');
+  const [tab, setTab] = useState<AccountTab>(() => readTabFromSearch());
   const theme = useMemo(() => readThemeFromSearch(), []);
+  const embed = useMemo(() => readEmbedFromSearch(), []);
 
   useEffect(() => {
     let active = true;
@@ -86,6 +98,18 @@ export function ShopperAccountPage() {
   }
 
   const inApp = typeof window !== 'undefined' && !!window.ReactNativeWebView;
+  const embedPanel = embed === 'panel';
+
+  if (embedPanel) {
+    return (
+      <div className="shopper-account-page shopper-account-page--embed-panel" data-theme={theme}>
+        <main className="shopper-account-main">
+          {tab === 'orders' && <OrderHistoryPanel embedded appearance="light" />}
+          {tab === 'addresses' && <AddressManagementPanel appearance="light" />}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="shopper-account-page" data-theme={theme}>

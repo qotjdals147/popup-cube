@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { StoreSummary } from '../src/types/domain';
 import { StoreEnterModal } from '../src/components/StoreEnterModal';
-import { HomeBottomNav } from '../src/components/HomeBottomNav';
+import { ShopperBottomNav } from '../src/components/ShopperBottomNav';
 import { useAuth } from '../src/context/AuthContext';
 import { t } from '../src/i18n/ko';
 import { listPublishedStores } from '../src/lib/stores';
@@ -23,7 +23,7 @@ import { useRestoreSystemChromeOnFocus } from '../src/hooks/useWorldImmersiveChr
 /** m03 — 동네 필터는 Sprint 이후; 지금은 매장 목록 + 검색 */
 export default function HomeScreen() {
   const router = useRouter();
-  const { userId, loading: authLoading, initError, signOut } = useAuth();
+  const { userId, loading: authLoading, initError } = useAuth();
   useRestoreSystemChromeOnFocus();
 
   const [search, setSearch] = useState('');
@@ -62,11 +62,6 @@ export default function HomeScreen() {
     };
   }, [search]);
 
-  async function handleLogout() {
-    await signOut();
-    router.replace('/');
-  }
-
   function handleEnterStore(storeId: string) {
     setSelectedStore(null);
     router.push(`/store/${storeId}`);
@@ -97,17 +92,21 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.flex}>
         <View style={styles.header}>
+          <Text style={styles.brandTitle}>{t.home.title}</Text>
           <Text style={styles.tagline}>{t.home.tagline}</Text>
-          <TextInput
-            style={styles.search}
-            value={search}
-            onChangeText={setSearch}
-            placeholder={t.home.search}
-            placeholderTextColor={colors.textMuted}
-          />
-          <Pressable onPress={handleLogout}>
-            <Text style={styles.logout}>{t.home.logout}</Text>
-          </Pressable>
+          <View style={styles.searchWrap}>
+            <Text style={styles.searchIcon} accessibilityElementsHidden>
+              🔍
+            </Text>
+            <TextInput
+              style={styles.search}
+              value={search}
+              onChangeText={setSearch}
+              placeholder={t.home.searchPlaceholder}
+              placeholderTextColor={colors.textMuted}
+              returnKeyType="search"
+            />
+          </View>
         </View>
 
         {loading && (
@@ -163,7 +162,7 @@ export default function HomeScreen() {
           />
         )}
       </View>
-      <HomeBottomNav active="home" />
+      <ShopperBottomNav active="home" />
     </SafeAreaView>
   );
 }
@@ -171,23 +170,29 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   flex: { flex: 1 },
-  header: { paddingHorizontal: 16, paddingBottom: 8 },
-  tagline: { color: colors.textSoft, fontSize: 14, marginBottom: 10 },
-  search: {
-    backgroundColor: colors.bgCard,
+  header: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 12, backgroundColor: colors.bgCard },
+  brandTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.text,
+    letterSpacing: -0.3,
+  },
+  tagline: { color: colors.textSoft, fontSize: 13, marginTop: 4, marginBottom: 12 },
+  searchWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.bg,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: colors.border,
-    color: colors.text,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontSize: 15,
+    paddingHorizontal: 12,
   },
-  logout: {
-    color: colors.textMuted,
-    fontSize: 13,
-    marginTop: 10,
-    textAlign: 'right',
+  searchIcon: { fontSize: 16, marginRight: 8 },
+  search: {
+    flex: 1,
+    color: colors.text,
+    paddingVertical: 11,
+    fontSize: 15,
   },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
   loadingText: { color: colors.textMuted, fontSize: 14 },
@@ -226,9 +231,9 @@ const styles = StyleSheet.create({
     minHeight: 40,
   },
   enterLink: {
-    color: colors.accent,
+    color: colors.primary,
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
     padding: 10,
   },
 });

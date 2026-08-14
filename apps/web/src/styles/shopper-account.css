@@ -147,3 +147,18 @@
   padding: 16px 14px max(20px, env(safe-area-inset-bottom, 0));
   -webkit-overflow-scrolling: touch;
 }
+
+/* 마이 허브 WebView 미리보기 — 헤더·탭 숨김 */
+.shopper-account-page--embed-panel {
+  min-height: 0;
+  background: transparent;
+}
+
+.shopper-account-page--embed-panel .shopper-account-main {
+  padding: 10px 10px 8px;
+  overflow-y: auto;
+}
+
+.shopper-account-page--embed-panel .oh-title {
+  display: none;
+}
