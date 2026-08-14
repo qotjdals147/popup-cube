@@ -1,8 +1,7 @@
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AccountWebViewScreen } from '../../src/components/AccountWebViewScreen';
 import { ShopperBottomNav } from '../../src/components/ShopperBottomNav';
 import { useAuth } from '../../src/context/AuthContext';
 import { t } from '../../src/i18n/ko';
@@ -16,7 +15,7 @@ const QUICK_ACTIONS = [
   { id: 'recent', icon: '👁', labelKey: 'recent' as const, enabled: false },
 ];
 
-/** §60 4-B — 쿠팡형 「마이」 허브 (프로필 · 퀵아이콘 · 주문 미리보기 · ⚙️→내정보관리) */
+/** §60 4-B — 쿠팡형 「마이」 허브 (네이티브 · WebView는 주문/배송지 화면에서만) */
 export default function MeHubScreen() {
   const router = useRouter();
   const { userId, email, nickname, loading: authLoading } = useAuth();
@@ -28,7 +27,15 @@ export default function MeHubScreen() {
     }
   }, [authLoading, userId, router]);
 
-  if (authLoading || !userId) {
+  if (authLoading) {
+    return (
+      <View style={styles.loadingWrap}>
+        <ActivityIndicator color={colors.primary} size="large" />
+      </View>
+    );
+  }
+
+  if (!userId) {
     return null;
   }
 
@@ -50,7 +57,7 @@ export default function MeHubScreen() {
           <Pressable
             style={styles.gearBtn}
             accessibilityLabel={t.me.openSettings}
-            onPress={() => router.push('/settings')}
+            onPress={() => router.push('/settings' as Href)}
           >
             <Text style={styles.gearIcon}>⚙️</Text>
           </Pressable>
@@ -64,7 +71,7 @@ export default function MeHubScreen() {
               disabled={!action.enabled}
               onPress={() => {
                 if (action.enabled && action.href) {
-                  router.push(action.href);
+                  router.push(action.href as Href);
                 }
               }}
             >
@@ -80,13 +87,19 @@ export default function MeHubScreen() {
         <View style={styles.ordersSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t.me.ordersSectionTitle}</Text>
-            <Pressable onPress={() => router.push('/me/orders')} hitSlop={8}>
+            <Pressable onPress={() => router.push('/me/orders' as Href)} hitSlop={8}>
               <Text style={styles.sectionLink}>{t.me.viewAll}</Text>
             </Pressable>
           </View>
-          <View style={styles.previewCard}>
-            <AccountWebViewScreen tab="orders" embed="panel" />
-          </View>
+
+          <Pressable style={styles.ordersTeaser} onPress={() => router.push('/me/orders' as Href)}>
+            <Text style={styles.ordersTeaserIcon}>📦</Text>
+            <Text style={styles.ordersTeaserTitle}>{t.me.ordersTeaserTitle}</Text>
+            <Text style={styles.ordersTeaserBody}>{t.me.ordersTeaserBody}</Text>
+            <View style={styles.ordersTeaserBtn}>
+              <Text style={styles.ordersTeaserBtnText}>{t.me.ordersTeaserBtn}</Text>
+            </View>
+          </Pressable>
         </View>
       </ScrollView>
 
@@ -97,6 +110,7 @@ export default function MeHubScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
+  loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 8 },
   profileRow: {
@@ -160,13 +174,29 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
-  sectionLink: { fontSize: 13, fontWeight: '600', color: colors.textMuted },
-  previewCard: {
-    height: 320,
+  sectionLink: { fontSize: 13, fontWeight: '600', color: colors.primary },
+  ordersTeaser: {
+    backgroundColor: colors.bgCard,
     borderRadius: 12,
-    overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.bgCard,
+    padding: 20,
+    alignItems: 'center',
   },
+  ordersTeaserIcon: { fontSize: 36, marginBottom: 8 },
+  ordersTeaserTitle: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: 6 },
+  ordersTeaserBody: {
+    fontSize: 13,
+    color: colors.textSoft,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 14,
+  },
+  ordersTeaserBtn: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+  ordersTeaserBtnText: { color: colors.primaryText, fontSize: 14, fontWeight: '700' },
 });

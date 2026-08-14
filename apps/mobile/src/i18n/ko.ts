@@ -81,6 +81,9 @@ export const t = {
     openSettings: '내정보관리',
     ordersSectionTitle: '주문 내역',
     viewAll: '전체 보기 ›',
+    ordersTeaserTitle: '구매 · 배송 조회',
+    ordersTeaserBody: '주문 상태 확인, 구매확정, 문의하기는 주문내역에서 할 수 있어요.',
+    ordersTeaserBtn: '주문내역 열기',
     comingSoon: '준비중',
     quick: {
       orders: '주문내역',

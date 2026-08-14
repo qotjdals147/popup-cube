@@ -185,7 +185,10 @@
    - 그 다음 **SDK 52** · **데모 계정** · **클릭 순서** · **이번에 볼 것**
    - PC 점주만 → **PC 웹 3줄** · 앱 WebView까지 → **Expo 4줄** (+ 필요 시 PC 3줄)
    - Vercel만 → `https://popup-cube-web.vercel.app` + push 1~2분
-9. **앱 실기 = push 먼저 (User 2026-08-14 — 필수)** — `apps/mobile` **또는** 앱 WebView가 여는 `apps/web` (`/shop` · `/app/me` 등) 작업이 끝나면 **User에게 Expo 테스트 안내하기 전에** `main` **push** (Vercel 1~2분). **「푸쉬해줘?」 묻지 말고 바로 push.** User는 push 없으면 앱에서 변경이 안 보인다고 느낌. push 후 Changelog·§7.15 갱신.
+9. **앱 실기 = push + Metro 재시작 (User 2026-08-14 — 필수)**
+   - **WebView 내용** (`/shop` · `/app/me` 등 `apps/web`) → **`main` push** → Vercel 1~2분 · **「푸쉬해줘?」 묻지 말고 push**
+   - **네이티브 UI** (`apps/mobile` — 하단탭 · 마이 허브 · ⚙️) → push와 **무관** · PC에서 Expo **완전 종료(Ctrl+C)** 후 **`npx expo start --tunnel --port 8082 --clear`** 필수 · 예전 JS 캐시면 **매장/내 정보 2탭** 그대로 보임
+   - **적용 확인:** 하단 **홈·마이·장바구니 3탭** · 마이 **⚙️** · **주문내역/배송지** 퀵아이콘 — 이게 안 보이면 `--clear` 재시작
 
 #### 표준 Expo 4줄 (앱 · 손님 WebView — **§7·Changelog와 동일**)
 
