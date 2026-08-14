@@ -417,16 +417,18 @@ export function CartView({
                         <p className="cart-drawer-item-name">{item.name}</p>
                         <p className="cart-drawer-item-unit">{formatPrice(item.price)}</p>
                         <div className="cart-drawer-item-actions">
-                          <div className="cart-drawer-stepper">
-                            <button type="button" className="cart-drawer-qty-btn" onClick={() => decrementQuantity(item.productId)}>
-                              −
-                            </button>
-                            <span className="cart-drawer-qty-value">{item.quantity}</span>
-                            <button type="button" className="cart-drawer-qty-btn" onClick={() => incrementQuantity(item.productId)}>
-                              +
-                            </button>
+                          <div className="cart-drawer-item-row">
+                            <div className="cart-drawer-stepper">
+                              <button type="button" className="cart-drawer-qty-btn" onClick={() => decrementQuantity(item.productId)}>
+                                −
+                              </button>
+                              <span className="cart-drawer-qty-value">{item.quantity}</span>
+                              <button type="button" className="cart-drawer-qty-btn" onClick={() => incrementQuantity(item.productId)}>
+                                +
+                              </button>
+                            </div>
+                            <span className="cart-drawer-line-total">{formatPrice(item.price * item.quantity)}</span>
                           </div>
-                          <span className="cart-drawer-line-total">{formatPrice(item.price * item.quantity)}</span>
                           <button type="button" className="cart-drawer-remove-btn" onClick={() => removeItem(item.productId)}>
                             {t('cart.removeItem')}
                           </button>

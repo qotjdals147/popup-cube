@@ -1127,6 +1127,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-08-14 — 장바구니 삭제 버튼 레이아웃 통일 (User)
+- **Author:** Cursor Agent
+- **Changed:** `CartView` item actions — **2줄 고정** (수량|금액 · 삭제 우측) · `flex-wrap` 제거
+- **Notes:** push 후 Vercel · §0 퀄리티
+
 ### 2026-08-14 — §0 쇼핑몰 퀄리티 · 상세 🛒 제거 · 홈 CTA (User)
 - **Author:** Cursor Agent
 - **Changed:** §0 **「구리면 안 됨」** 절 · `ProductDetailModal` 상세 **장바구니 버튼 제거** · 수량 가운데 · `home.tsx` **쇼핑하기 primary 버튼** · §7.19
