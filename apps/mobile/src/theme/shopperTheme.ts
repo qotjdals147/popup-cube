@@ -40,4 +40,4 @@ export const shopperDark = {
   overlay: 'rgba(0,0,0,0.65)',
 } as const;
 
-export type ShopperThemeColors = typeof shopperLight;
+export type ShopperThemeColors = typeof shopperLight | typeof shopperDark;

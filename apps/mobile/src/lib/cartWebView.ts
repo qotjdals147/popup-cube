@@ -11,12 +11,12 @@ function readWebOrigin(): string {
 }
 
 /** WebView `/app/cart` URL (세션 hash 포함) */
-export async function buildCartWebViewUrl(): Promise<string | null> {
+export async function buildCartWebViewUrl(theme: 'light' | 'dark' = 'light'): Promise<string | null> {
   const { data, error } = await getSupabase().auth.getSession();
   if (error || !data.session) return null;
 
   const origin = readWebOrigin();
-  const query = new URLSearchParams({ theme: 'light' }).toString();
+  const query = new URLSearchParams({ theme }).toString();
   const hash = new URLSearchParams({
     access_token: data.session.access_token,
     refresh_token: data.session.refresh_token,

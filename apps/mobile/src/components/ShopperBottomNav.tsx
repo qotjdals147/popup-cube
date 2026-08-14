@@ -1,9 +1,10 @@
 import { useRouter, type Href } from 'expo-router';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCartCount } from '../context/CartCountContext';
+import { useTheme } from '../context/ThemeContext';
 import { t } from '../i18n/ko';
-import { colors } from '../theme/colors';
 
 export type ShopperTab = 'home' | 'me' | 'cart';
 
@@ -18,6 +19,71 @@ export function ShopperBottomNav({ active }: { active: ShopperTab }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { count: cartCount } = useCartCount();
+  const { colors } = useTheme();
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        bar: {
+          flexDirection: 'row',
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: colors.border,
+          backgroundColor: colors.bgCard,
+          paddingTop: 6,
+        },
+        item: {
+          flex: 1,
+          alignItems: 'center',
+          paddingVertical: 4,
+          minHeight: 52,
+          position: 'relative',
+        },
+        activeIndicator: {
+          position: 'absolute',
+          top: 0,
+          left: '20%',
+          right: '20%',
+          height: 2,
+          backgroundColor: colors.primary,
+          borderRadius: 1,
+        },
+        icon: {
+          fontSize: 20,
+          lineHeight: 24,
+        },
+        iconWrap: {
+          position: 'relative',
+          marginBottom: 2,
+        },
+        badge: {
+          position: 'absolute',
+          top: -4,
+          right: -10,
+          minWidth: 16,
+          height: 16,
+          paddingHorizontal: 4,
+          borderRadius: 8,
+          backgroundColor: colors.price,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        badgeText: {
+          color: '#fff',
+          fontSize: 10,
+          fontWeight: '700',
+          lineHeight: 12,
+        },
+        label: {
+          color: colors.textMuted,
+          fontSize: 11,
+          fontWeight: '600',
+        },
+        labelActive: {
+          color: colors.primary,
+        },
+      }),
+    [colors],
+  );
 
   return (
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 6) }]}>
@@ -49,63 +115,3 @@ export function ShopperBottomNav({ active }: { active: ShopperTab }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  bar: {
-    flexDirection: 'row',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    backgroundColor: colors.bgCard,
-    paddingTop: 6,
-  },
-  item: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 4,
-    minHeight: 52,
-    position: 'relative',
-  },
-  activeIndicator: {
-    position: 'absolute',
-    top: 0,
-    left: '20%',
-    right: '20%',
-    height: 2,
-    backgroundColor: colors.primary,
-    borderRadius: 1,
-  },
-  icon: {
-    fontSize: 20,
-    lineHeight: 24,
-  },
-  iconWrap: {
-    position: 'relative',
-    marginBottom: 2,
-  },
-  badge: {
-    position: 'absolute',
-    top: -4,
-    right: -10,
-    minWidth: 16,
-    height: 16,
-    paddingHorizontal: 4,
-    borderRadius: 8,
-    backgroundColor: '#e94560',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '700',
-    lineHeight: 12,
-  },
-  label: {
-    color: colors.textMuted,
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  labelActive: {
-    color: colors.primary,
-  },
-});

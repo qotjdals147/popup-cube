@@ -2,7 +2,7 @@ import type { StorePolicy, StoreSummary } from '@popup-cube/shared';
 import { supabase } from './supabase';
 import { mapStorePolicyRow, STORE_POLICY_SELECT } from './storePolicy';
 
-const STORE_SUMMARY_SELECT = `id, name, store_code, description, thumbnail_url, status, ${STORE_POLICY_SELECT}`;
+const STORE_SUMMARY_SELECT = `id, name, store_code, description, thumbnail_url, status, popup_ends_at, ${STORE_POLICY_SELECT}`;
 
 function mapStoreSummary(row: Record<string, unknown>): StoreSummary {
   return {
@@ -12,6 +12,7 @@ function mapStoreSummary(row: Record<string, unknown>): StoreSummary {
     description: (row.description as string | null) ?? null,
     thumbnail_url: (row.thumbnail_url as string | null) ?? null,
     status: row.status as StoreSummary['status'],
+    popup_ends_at: (row.popup_ends_at as string | null) ?? null,
     ...mapStorePolicyRow(row),
   };
 }
@@ -105,6 +106,22 @@ export async function updateStorePolicy(storeId: string, policy: StorePolicy): P
       shipping_fee_amount: Math.max(0, Math.round(policy.shipping_fee_amount)),
       shipping_free_threshold: Math.max(0, Math.round(policy.shipping_free_threshold)),
     })
+    .eq('id', storeId)
+    .select(STORE_SUMMARY_SELECT)
+    .single();
+
+  if (error) throw error;
+  return mapStoreSummary(data as Record<string, unknown>);
+}
+
+/** §58 #6 — 팝업 종료일 (null = 기간 뱃지 없음) */
+export async function updateStorePopupEndsAt(
+  storeId: string,
+  popupEndsAt: string | null,
+): Promise<StoreSummary> {
+  const { data, error } = await supabase
+    .from('stores')
+    .update({ popup_ends_at: popupEndsAt })
     .eq('id', storeId)
     .select(STORE_SUMMARY_SELECT)
     .single();

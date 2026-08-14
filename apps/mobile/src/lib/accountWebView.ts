@@ -17,13 +17,14 @@ function readWebOrigin(): string {
 export async function buildAccountWebViewUrl(
   tab: AccountWebTab,
   embed: AccountWebEmbed = 'page',
+  theme: 'light' | 'dark' = 'light',
 ): Promise<string | null> {
   const { data, error } = await getSupabase().auth.getSession();
   if (error || !data.session) return null;
 
   const origin = readWebOrigin();
   const query = new URLSearchParams({
-    theme: 'light',
+    theme,
     tab,
     embed,
   }).toString();

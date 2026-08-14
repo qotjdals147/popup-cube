@@ -1,16 +1,17 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import { ShopperBottomNav } from '../components/ShopperBottomNav';
 import { useCartCount } from '../context/CartCountContext';
+import { useTheme } from '../context/ThemeContext';
 import { buildCartWebViewUrl, CART_COUNT_INJECT_SCRIPT } from '../lib/cartWebView';
 import { t } from '../i18n/ko';
-import { colors } from '../theme/colors';
 
 export function CartWebViewScreen() {
   const router = useRouter();
   const { handleWebViewMessage } = useCartCount();
+  const { colors, mode } = useTheme();
   const [ready, setReady] = useState(false);
   const [cartUrl, setCartUrl] = useState<string | null>(null);
   const [webError, setWebError] = useState<string | null>(null);
@@ -20,7 +21,7 @@ export function CartWebViewScreen() {
     setReady(false);
     setWebError(null);
 
-    buildCartWebViewUrl()
+    buildCartWebViewUrl(mode)
       .then((url) => {
         if (!active) return;
         if (!url) {
@@ -40,7 +41,39 @@ export function CartWebViewScreen() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [mode]);
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: { flex: 1, backgroundColor: colors.bg },
+        centered: {
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 24,
+          backgroundColor: colors.bg,
+        },
+        webview: { flex: 1, backgroundColor: colors.bg },
+        webviewLoading: {
+          ...StyleSheet.absoluteFillObject,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.bg,
+        },
+        loadingText: { color: colors.textMuted, marginTop: 12, fontSize: 14 },
+        error: { color: colors.textMuted, fontSize: 15, textAlign: 'center', lineHeight: 22 },
+        button: {
+          marginTop: 24,
+          backgroundColor: colors.primary,
+          paddingHorizontal: 24,
+          paddingVertical: 14,
+          borderRadius: 10,
+        },
+        buttonText: { color: colors.primaryText, fontSize: 16, fontWeight: '600' },
+      }),
+    [colors],
+  );
 
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
@@ -101,31 +134,3 @@ export function CartWebViewScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-    backgroundColor: colors.bg,
-  },
-  webview: { flex: 1, backgroundColor: colors.bg },
-  webviewLoading: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.bg,
-  },
-  loadingText: { color: colors.textMuted, marginTop: 12, fontSize: 14 },
-  error: { color: colors.textMuted, fontSize: 15, textAlign: 'center', lineHeight: 22 },
-  button: {
-    marginTop: 24,
-    backgroundColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 10,
-  },
-  buttonText: { color: colors.primaryText, fontSize: 16, fontWeight: '600' },
-});

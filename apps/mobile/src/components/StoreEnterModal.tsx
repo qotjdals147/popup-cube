@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   Image,
   Modal,
@@ -7,9 +8,9 @@ import {
   View,
 } from 'react-native';
 import type { StoreSummary } from '../types/domain';
+import { useTheme } from '../context/ThemeContext';
 import { t } from '../i18n/ko';
 import { getPopupPeriodBadge } from '../lib/popupPeriod';
-import { colors } from '../theme/colors';
 
 interface StoreEnterModalProps {
   store: StoreSummary;
@@ -19,11 +20,97 @@ interface StoreEnterModalProps {
 }
 
 export function StoreEnterModal({ store, visible, onEnter, onClose }: StoreEnterModalProps) {
+  const { colors, isDark } = useTheme();
   const period = getPopupPeriodBadge(store.popup_ends_at, {
     ended: t.home.periodEnded,
     today: t.home.periodToday,
     dDay: (n) => t.home.periodDDay(n),
   });
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        overlay: {
+          flex: 1,
+          backgroundColor: colors.overlay,
+          justifyContent: 'center',
+          padding: 20,
+        },
+        card: {
+          backgroundColor: colors.bgCard,
+          borderRadius: 16,
+          overflow: 'hidden',
+          paddingBottom: 16,
+        },
+        thumbnailWrap: {
+          height: 200,
+          backgroundColor: colors.bgElevated,
+        },
+        thumbnail: { width: '100%', height: '100%' },
+        thumbnailFallback: {
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        fallbackLetter: { color: colors.text, fontSize: 48, fontWeight: '700' },
+        name: {
+          color: colors.text,
+          fontSize: 22,
+          fontWeight: '700',
+          marginTop: 16,
+          paddingHorizontal: 20,
+        },
+        periodPill: {
+          alignSelf: 'flex-start',
+          marginTop: 8,
+          marginHorizontal: 20,
+          paddingHorizontal: 10,
+          paddingVertical: 4,
+          borderRadius: 999,
+        },
+        periodPillNormal: {
+          backgroundColor: isDark ? colors.bgElevated : '#eef4ff',
+        },
+        periodPillUrgent: {
+          backgroundColor: isDark ? '#4a2030' : '#ffe3e3',
+        },
+        periodPillText: {
+          fontSize: 12,
+          fontWeight: '700',
+          color: colors.text,
+        },
+        commerceNote: {
+          color: colors.textSoft,
+          fontSize: 13,
+          marginTop: 8,
+          paddingHorizontal: 20,
+        },
+        description: {
+          color: colors.textMuted,
+          fontSize: 14,
+          lineHeight: 20,
+          marginTop: 8,
+          paddingHorizontal: 20,
+        },
+        enterButton: {
+          marginTop: 20,
+          marginHorizontal: 20,
+          backgroundColor: colors.primary,
+          borderRadius: 10,
+          paddingVertical: 14,
+          alignItems: 'center',
+        },
+        enterButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: '600' },
+        closeButton: {
+          marginTop: 10,
+          marginHorizontal: 20,
+          paddingVertical: 10,
+          alignItems: 'center',
+        },
+        closeButtonText: { color: colors.textMuted, fontSize: 14 },
+      }),
+    [colors, isDark],
+  );
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -59,84 +146,3 @@ export function StoreEnterModal({ store, visible, onEnter, onClose }: StoreEnter
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.65)',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  card: {
-    backgroundColor: colors.bgCard,
-    borderRadius: 16,
-    overflow: 'hidden',
-    paddingBottom: 16,
-  },
-  thumbnailWrap: {
-    height: 200,
-    backgroundColor: colors.bgElevated,
-  },
-  thumbnail: { width: '100%', height: '100%' },
-  thumbnailFallback: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  fallbackLetter: { color: colors.text, fontSize: 48, fontWeight: '700' },
-  name: {
-    color: colors.text,
-    fontSize: 22,
-    fontWeight: '700',
-    marginTop: 16,
-    paddingHorizontal: 20,
-  },
-  periodPill: {
-    alignSelf: 'flex-start',
-    marginTop: 8,
-    marginHorizontal: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  periodPillNormal: {
-    backgroundColor: '#eef4ff',
-  },
-  periodPillUrgent: {
-    backgroundColor: '#ffe3e3',
-  },
-  periodPillText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  commerceNote: {
-    color: colors.textSoft,
-    fontSize: 13,
-    marginTop: 8,
-    paddingHorizontal: 20,
-  },
-  description: {
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 8,
-    paddingHorizontal: 20,
-  },
-  enterButton: {
-    marginTop: 20,
-    marginHorizontal: 20,
-    backgroundColor: colors.accent,
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  enterButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: '600' },
-  closeButton: {
-    marginTop: 10,
-    marginHorizontal: 20,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  closeButtonText: { color: colors.textMuted, fontSize: 14 },
-});

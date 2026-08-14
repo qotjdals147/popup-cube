@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { AddressManagementPanel } from '../components/AddressManagementPanel';
 import { OrderHistoryPanel } from '../components/OrderHistoryPanel';
 import { supabase } from '../lib/supabase';
+import { useShopperThemeMode } from '../lib/shopperThemeMode';
 import { t } from '../i18n';
 import '../styles/shopper-account.css';
 import '../styles/shopper-account-panels.css';
@@ -35,11 +36,6 @@ function postToApp(type: string) {
 
 type AccountTab = 'orders' | 'addresses';
 
-function readThemeFromSearch(): 'light' | 'dark' {
-  const raw = new URLSearchParams(window.location.search).get('theme');
-  return raw === 'dark' ? 'dark' : 'light';
-}
-
 function readTabFromSearch(): AccountTab {
   const raw = new URLSearchParams(window.location.search).get('tab');
   return raw === 'addresses' ? 'addresses' : 'orders';
@@ -56,7 +52,7 @@ export function ShopperAccountPage() {
   const { userId, nickname, email, loading: authLoading } = useAuth();
   const [bootstrapping, setBootstrapping] = useState(true);
   const [tab, setTab] = useState<AccountTab>(() => readTabFromSearch());
-  const theme = useMemo(() => readThemeFromSearch(), []);
+  const theme = useShopperThemeMode();
   const embed = useMemo(() => readEmbedFromSearch(), []);
 
   useEffect(() => {

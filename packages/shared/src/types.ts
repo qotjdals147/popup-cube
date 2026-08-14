@@ -82,6 +82,8 @@ export interface StoreSummary extends StorePolicy {
   description: string | null;
   thumbnail_url: string | null;
   status: StoreStatus;
+  /** §58 — 팝업 종료 시각 (null = 기간 뱃지 없음) */
+  popup_ends_at: string | null;
 }
 
 /**

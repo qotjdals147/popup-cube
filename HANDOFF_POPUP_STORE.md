@@ -673,11 +673,11 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§58 #3 홈 몰 허브** (D-day·설명·카드) · 다음 **§60 4-C** 다크 · **PG 금지** |
-| **Git 상태** | `main` **`c71dabd`** · §58 #3 push 대기 |
-| **Supabase** | `cvrtobxkvpcpcxrcspdp` · migrations **`20260812b`~`c`** 원격 적용 완료 |
-| **런칭 진행률 (대략)** | **기능(mock 결제)** ~80% · P1·앱스토어 포함 **전체 ~55–60%** · **실결제** = P1 + 사업자 + PG |
-| **User 실기 (2026-08-14)** | 장바구니·퀄리티 OK · **§58 #3** 홈 카드 실기 대기 |
+| **한 줄 요약** | **§58 #6** 팝업 종료일 · **§60 4-C** 다크 · GUCCI D-day 데모 · 다음 **§60 4-D** · **PG 금지** |
+| **Git 상태** | 로컬 — GUCCI DB · owner popup_ends_at · ThemeContext · push 대기 |
+| **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** (데모 D-day) |
+| **런칭 진행률 (대략)** | **기능(mock 결제)** ~82% · P1·앱스토어 포함 **전체 ~58%** · **실결제** = P1 + 사업자 + PG |
+| **User 실기 (2026-08-14)** | §58 #3 홈 카드 OK · **4-C 다크** · **점주 종료일** 실기 대기 |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -697,11 +697,11 @@ popup_store/                          # Turborepo root
 | **3** | ~~**§60 `/app/me`** — 라이트 · 구매내역 카드~~ | ✅ push `826e5f6` · User OK |
 | **4** | ~~**§60 4-B** — 쿠팡형 앱 shell~~ | ✅ User 실기 |
 | **4b** | ~~**§60 손님 라이트·장바구니 통일**~~ | ✅ push `1ecadb9` |
-| **4c** | ~~**§0 쇼핑몰 퀄리티**~~ · ~~**§58 #3 홈 몰 허브**~~ | ✅ D-day · 설명 · `StoreMallCard` |
-| **5** | **§60 4-C** — 다크 모드 토글 · WebView 연동 | 다음 |
-| **6** | **§58 #3** — 홈 몰 허브 (카드·D-day·쇼핑하기) | 4-B/C 후 |
-| **7** | **§60 4-D** — 장바구니 전체화면 · 주문 썸네일 | 1~2세션 |
-| **8** | **§58 #5~6** — popup 기간 · 미리보기 | layout 숨김 ✅ |
+| **4c** | ~~**§0 쇼핑몰 퀄리티**~~ · ~~**§58 #3 홈 몰 허브**~~ | ✅ User 실기 OK |
+| **5** | ~~**§58 #6** — 점주 `popup_ends_at` 편집 · 손님 미리보기~~ | ✅ StoreEdit 개요 |
+| **6** | ~~**§60 4-C** — 다크 모드 · WebView `?theme=`~~ | ✅ ThemeContext · settings |
+| **7** | **§60 4-D** — 장바구니 쿠팡형 · 주문 썸네일 | 다음 |
+| **8** | **§58 #5** — 종료 팝업 구매 차단(선택) | PG 전 |
 | **9** | **§58 #8 P1** | PG 전 |
 | **10** | **PG** (§53.7-7) | 사업자 + 가맹 후 |
 
@@ -750,6 +750,15 @@ npx expo start --tunnel --port 8082 --clear
 **PG 착수 조건 (전부 충족 전 금지):** ① User **사업자 등록 완료** ② **PG 후보·계약 확정** ③ (권장) P1·실기 대부분 OK.
 
 ---
+
+### 7.21 세션 인수인계 — **2026-08-14** (§58 #6 · §60 4-C · GUCCI D-day)
+
+| | |
+|---|---|
+| **User** | 「2→3→1 순」— GUCCI 마감일 · 점주 종료일 UI · 다크모드 |
+| **조치** | GUCCI `popup_ends_at` +21일 · `StoreEditPage` 종료일 date · `/shop` 미리보기 · `ThemeContext` · settings Switch · WebView `?theme=` |
+| **파일** | `StoreEditPage` · `stores.ts`(web) · `ThemeContext` · `settings.tsx` · `shopperThemeMode.ts` · `StoreShopPage` · `ShopperCartPage` |
+| **다음** | **§60 4-D** · User 실기 (다크·GUCCI D-day·점주 종료일) |
 
 ### 7.20 세션 인수인계 — **2026-08-14** (§58 #3 홈 몰 허브)
 
@@ -1137,6 +1146,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-14 — §58 #6 · §60 4-C · GUCCI D-day (User 2→3→1)
+- **Author:** Cursor Agent
+- **Changed:** GUCCI `popup_ends_at` +21일 · 점주 개요 **팝업 종료일** · 손님 `/shop` 미리보기 · `ThemeContext` · settings 다크 토글 · WebView `?theme=` · cart/account/shop 다크 CSS
+- **Notes:** DB=즉시 · 코드=push + Vercel 1~2분 · 네이티브=Expo `--clear` · 홈 GUCCI **D-21** 확인
 
 ### 2026-08-14 — §58 #3 홈 몰 허브 (User)
 - **Author:** Cursor Agent

@@ -8,19 +8,13 @@ import { StoreShopCatalog } from '../components/StoreShopCatalog';
 import { getStoreSummary } from '../lib/stores';
 import { supabase } from '../lib/supabase';
 import { t } from '../i18n';
+import { useShopperThemeMode } from '../lib/shopperThemeMode';
 import '../styles/store-shop.css';
 
 declare global {
   interface Window {
     ReactNativeWebView?: { postMessage: (message: string) => void };
   }
-}
-
-type ShopTheme = 'light' | 'dark';
-
-function readThemeFromSearch(): ShopTheme {
-  const raw = new URLSearchParams(window.location.search).get('theme');
-  return raw === 'dark' ? 'dark' : 'light';
 }
 
 function readInsetTopFromSearch(): number {
@@ -60,7 +54,7 @@ export function StoreShopPage() {
   const { userId, loading: authLoading } = useAuth();
   const { totalQuantity } = useCart();
 
-  const theme = useMemo(() => readThemeFromSearch(), []);
+  const theme = useShopperThemeMode();
   const insetTop = useMemo(() => readInsetTopFromSearch(), []);
   const pageStyle = useMemo(
     () => ({ '--shop-inset-top': `${insetTop}px` }) as CSSProperties,
@@ -183,7 +177,7 @@ export function StoreShopPage() {
         <CartDrawer
           storeId={storeId}
           userId={userId}
-          appearance="light"
+          appearance={theme}
           onClose={() => setCartOpen(false)}
         />
       )}

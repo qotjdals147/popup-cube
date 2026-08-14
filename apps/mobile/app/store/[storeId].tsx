@@ -14,11 +14,11 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/context/AuthContext';
 import { useCartCount } from '../../src/context/CartCountContext';
+import { useTheme } from '../../src/context/ThemeContext';
 import { CART_COUNT_INJECT_SCRIPT } from '../../src/lib/cartWebView';
 import { t } from '../../src/i18n/ko';
 import { getStoreSummary } from '../../src/lib/stores';
 import { getSupabase } from '../../src/lib/supabase';
-import { colors } from '../../src/theme/colors';
 import type { StoreSummary } from '../../src/types/domain';
 
 function readWebOrigin(): string {
@@ -39,6 +39,7 @@ export default function StoreScreen() {
   const { storeId } = useLocalSearchParams<{ storeId: string }>();
   const { userId, loading: authLoading, role } = useAuth();
   const { handleWebViewMessage } = useCartCount();
+  const { colors, mode, isDark } = useTheme();
   const [store, setStore] = useState<StoreSummary | null>(null);
   const [loadingMeta, setLoadingMeta] = useState(true);
   const [sessionReady, setSessionReady] = useState(false);
@@ -82,7 +83,7 @@ export default function StoreScreen() {
         return;
       }
       const origin = readWebOrigin();
-      const shopQuery = new URLSearchParams({ theme: 'light' });
+      const shopQuery = new URLSearchParams({ theme: mode });
       const hash = new URLSearchParams({
         access_token: data.session.access_token,
         refresh_token: data.session.refresh_token,
@@ -96,7 +97,7 @@ export default function StoreScreen() {
     return () => {
       active = false;
     };
-  }, [storeId, userId]);
+  }, [storeId, userId, mode]);
 
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
@@ -136,11 +137,58 @@ export default function StoreScreen() {
     [store?.name, storeId]
   );
 
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: { flex: 1, backgroundColor: colors.bg },
+        centered: {
+          flex: 1,
+          backgroundColor: colors.bg,
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 24,
+        },
+        webview: { flex: 1, backgroundColor: colors.bg },
+        webviewLoading: {
+          ...StyleSheet.absoluteFillObject,
+          backgroundColor: colors.bg,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        loadingText: { color: colors.textMuted, marginTop: 12, fontSize: 14 },
+        storeName: {
+          color: colors.text,
+          fontSize: 22,
+          fontWeight: '700',
+          textAlign: 'center',
+          marginBottom: 12,
+        },
+        error: { color: colors.textMuted, fontSize: 15, textAlign: 'center', lineHeight: 22 },
+        button: {
+          marginTop: 28,
+          backgroundColor: colors.primary,
+          paddingHorizontal: 24,
+          paddingVertical: 14,
+          borderRadius: 10,
+        },
+        buttonText: { color: colors.primaryText, fontSize: 16, fontWeight: '600' },
+        ownerBar: {
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          backgroundColor: isDark ? colors.bgElevated : '#1e293b',
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: colors.border,
+        },
+        ownerBarText: { color: colors.textSoft, fontSize: 12, textAlign: 'center' },
+      }),
+    [colors, isDark],
+  );
+
   if (authLoading || loadingMeta || !sessionReady) {
     return (
       <View style={styles.centered}>
-        <StatusBar style="dark" />
-        <ActivityIndicator color={colors.accent} size="large" />
+        <StatusBar style={isDark ? 'light' : 'dark'} />
+        <ActivityIndicator color={colors.primary} size="large" />
         <Text style={styles.loadingText}>{t.store.loadingShop}</Text>
       </View>
     );
@@ -149,7 +197,7 @@ export default function StoreScreen() {
   if (!shopUrl || webError) {
     return (
       <View style={styles.centered}>
-        <StatusBar style="dark" />
+        <StatusBar style={isDark ? 'light' : 'dark'} />
         <Text style={styles.storeName}>{headerTitle}</Text>
         <Text style={styles.error}>{webError ?? t.store.shopError}</Text>
         <Pressable style={styles.button} onPress={() => router.replace('/home')}>
@@ -161,7 +209,7 @@ export default function StoreScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar style="dark" />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       {role === 'owner' && (
         <View style={styles.ownerBar}>
           <Text style={styles.ownerBarText}>{t.store.ownerHint}</Text>
@@ -183,7 +231,7 @@ export default function StoreScreen() {
         startInLoadingState
         renderLoading={() => (
           <View style={styles.webviewLoading}>
-            <ActivityIndicator color={colors.accent} size="large" />
+            <ActivityIndicator color={colors.primary} size="large" />
             <Text style={styles.loadingText}>{t.store.loadingShop}</Text>
           </View>
         )}
@@ -194,46 +242,3 @@ export default function StoreScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f4f5f7' },
-  centered: {
-    flex: 1,
-    backgroundColor: '#f4f5f7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  webview: { flex: 1, backgroundColor: '#f4f5f7' },
-  webviewLoading: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#f4f5f7',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingText: { color: colors.textMuted, marginTop: 12, fontSize: 14 },
-  storeName: {
-    color: colors.text,
-    fontSize: 22,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  error: { color: colors.textMuted, fontSize: 15, textAlign: 'center', lineHeight: 22 },
-  button: {
-    marginTop: 28,
-    backgroundColor: colors.accent,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 10,
-  },
-  buttonText: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  ownerBar: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: '#1e293b',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#334155',
-  },
-  ownerBarText: { color: colors.textSoft, fontSize: 12, textAlign: 'center' },
-});

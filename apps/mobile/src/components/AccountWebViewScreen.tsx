@@ -1,10 +1,10 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import { buildAccountWebViewUrl, type AccountWebEmbed, type AccountWebTab } from '../lib/accountWebView';
+import { useTheme } from '../context/ThemeContext';
 import { t } from '../i18n/ko';
-import { colors } from '../theme/colors';
 
 interface AccountWebViewScreenProps {
   tab: AccountWebTab;
@@ -13,6 +13,7 @@ interface AccountWebViewScreenProps {
 
 export function AccountWebViewScreen({ tab, embed = 'page' }: AccountWebViewScreenProps) {
   const router = useRouter();
+  const { colors, mode } = useTheme();
   const [ready, setReady] = useState(false);
   const [accountUrl, setAccountUrl] = useState<string | null>(null);
   const [webError, setWebError] = useState<string | null>(null);
@@ -22,7 +23,7 @@ export function AccountWebViewScreen({ tab, embed = 'page' }: AccountWebViewScre
     setReady(false);
     setWebError(null);
 
-    buildAccountWebViewUrl(tab, embed)
+    buildAccountWebViewUrl(tab, embed, mode)
       .then((url) => {
         if (!active) return;
         if (!url) {
@@ -42,7 +43,38 @@ export function AccountWebViewScreen({ tab, embed = 'page' }: AccountWebViewScre
     return () => {
       active = false;
     };
-  }, [tab, embed]);
+  }, [tab, embed, mode]);
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        centered: {
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 24,
+          backgroundColor: colors.bg,
+        },
+        webview: { flex: 1, backgroundColor: colors.bg },
+        webviewLoading: {
+          ...StyleSheet.absoluteFillObject,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.bg,
+        },
+        loadingText: { color: colors.textMuted, marginTop: 12, fontSize: 14 },
+        error: { color: colors.textMuted, fontSize: 15, textAlign: 'center', lineHeight: 22 },
+        button: {
+          marginTop: 24,
+          backgroundColor: colors.primary,
+          paddingHorizontal: 24,
+          paddingVertical: 14,
+          borderRadius: 10,
+        },
+        buttonText: { color: colors.primaryText, fontSize: 16, fontWeight: '600' },
+      }),
+    [colors],
+  );
 
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
@@ -97,30 +129,3 @@ export function AccountWebViewScreen({ tab, embed = 'page' }: AccountWebViewScre
     />
   );
 }
-
-const styles = StyleSheet.create({
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-    backgroundColor: colors.bg,
-  },
-  webview: { flex: 1, backgroundColor: colors.bg },
-  webviewLoading: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.bg,
-  },
-  loadingText: { color: colors.textMuted, marginTop: 12, fontSize: 14 },
-  error: { color: colors.textMuted, fontSize: 15, textAlign: 'center', lineHeight: 22 },
-  button: {
-    marginTop: 24,
-    backgroundColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 10,
-  },
-  buttonText: { color: colors.primaryText, fontSize: 16, fontWeight: '600' },
-});

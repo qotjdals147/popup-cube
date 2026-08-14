@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getMyStore, publishStore, updateStoreCode, userOwnsStore, countActiveOrdersForStoreDelete, deleteOwnerStore, unpublishStore, StoreDeleteError } from '../lib/stores';
+import { getMyStore, publishStore, updateStoreCode, updateStorePopupEndsAt, userOwnsStore, countActiveOrdersForStoreDelete, deleteOwnerStore, unpublishStore, StoreDeleteError } from '../lib/stores';
+import { dateInputToPopupEndsAt, popupEndsAtToDateInput } from '../lib/popupPeriod';
 import { DEMO_STORE_ID } from '@popup-cube/shared';
 import { OwnerProductPanel } from '../components/OwnerProductPanel';
 import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
@@ -41,6 +42,10 @@ export function StoreEditPage() {
   const [savingStoreCode, setSavingStoreCode] = useState(false);
   const [storeCodeMsg, setStoreCodeMsg] = useState<string | null>(null);
   const [storeCodeErr, setStoreCodeErr] = useState(false);
+  const [popupEndsDraft, setPopupEndsDraft] = useState('');
+  const [savingPopupEnds, setSavingPopupEnds] = useState(false);
+  const [popupEndsMsg, setPopupEndsMsg] = useState<string | null>(null);
+  const [popupEndsErr, setPopupEndsErr] = useState(false);
   const [ownershipChecked, setOwnershipChecked] = useState(false);
   const [ownsStore, setOwnsStore] = useState(false);
 
@@ -99,6 +104,7 @@ export function StoreEditPage() {
       const data = await getMyStore(storeId);
       setStore(data);
       setStoreCodeDraft(data?.store_code ?? '');
+      setPopupEndsDraft(popupEndsAtToDateInput(data?.popup_ends_at ?? null));
       if (data) {
         try {
           const count = await countActiveOrdersForStoreDelete(storeId);
@@ -146,6 +152,25 @@ export function StoreEditPage() {
       setStoreCodeMsg(t('ownerEdit.storeCodeSaveError'));
     } finally {
       setSavingStoreCode(false);
+    }
+  }
+
+  async function handleSavePopupEnds() {
+    if (!storeId || !store) return;
+    setSavingPopupEnds(true);
+    setPopupEndsMsg(null);
+    setPopupEndsErr(false);
+    try {
+      const iso = popupEndsDraft.trim() ? dateInputToPopupEndsAt(popupEndsDraft) : null;
+      const updated = await updateStorePopupEndsAt(storeId, iso);
+      setStore(updated);
+      setPopupEndsDraft(popupEndsAtToDateInput(updated.popup_ends_at));
+      setPopupEndsMsg(t('ownerEdit.popupEndsSaved'));
+    } catch {
+      setPopupEndsErr(true);
+      setPopupEndsMsg(t('ownerEdit.popupEndsSaveError'));
+    } finally {
+      setSavingPopupEnds(false);
     }
   }
 
@@ -348,6 +373,52 @@ export function StoreEditPage() {
                     )}
                     {storeCodeMsg && (
                       <p style={storeCodeErr ? styles.error : styles.success}>{storeCodeMsg}</p>
+                    )}
+                  </div>
+                  <div style={styles.storeCodeBox}>
+                    <div style={styles.metaLabel}>{t('ownerEdit.popupEndsLabel')}</div>
+                    <p style={styles.storeCodeHint}>{t('ownerEdit.popupEndsHint')}</p>
+                    <div style={styles.storeCodeRow}>
+                      <input
+                        type="date"
+                        style={styles.popupEndsInput}
+                        value={popupEndsDraft}
+                        onChange={(e) => setPopupEndsDraft(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        style={styles.storeCodeSaveBtn}
+                        disabled={
+                          savingPopupEnds ||
+                          popupEndsDraft === popupEndsAtToDateInput(store.popup_ends_at)
+                        }
+                        onClick={() => void handleSavePopupEnds()}
+                      >
+                        {savingPopupEnds ? t('ownerEdit.popupEndsSaving') : t('ownerEdit.popupEndsSave')}
+                      </button>
+                      {popupEndsDraft && (
+                        <button
+                          type="button"
+                          style={styles.secondaryGhostBtn}
+                          disabled={savingPopupEnds}
+                          onClick={() => setPopupEndsDraft('')}
+                        >
+                          {t('ownerEdit.popupEndsClear')}
+                        </button>
+                      )}
+                    </div>
+                    {popupEndsMsg && (
+                      <p style={popupEndsErr ? styles.error : styles.success}>{popupEndsMsg}</p>
+                    )}
+                    {!isDraft && storeId && (
+                      <a
+                        href={`/store/${encodeURIComponent(storeId)}/shop`}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={styles.shopPreviewLink}
+                      >
+                        {t('ownerEdit.shopPreviewLink')}
+                      </a>
                     )}
                   </div>
                   <p style={styles.note}>{isDraft ? t('ownerEdit.draftNote') : t('ownerEdit.publishedNote')}</p>
@@ -707,6 +778,34 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   storeCodePreview: { color: oc.orderRef, fontSize: 12, marginTop: 10, fontWeight: 600 },
+  popupEndsInput: {
+    flex: '1 1 160px',
+    minWidth: 160,
+    padding: '10px 12px',
+    borderRadius: 8,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.text,
+    fontSize: fs.base,
+  },
+  secondaryGhostBtn: {
+    padding: '10px 14px',
+    borderRadius: 8,
+    border: `1px solid ${oc.borderStrong}`,
+    background: 'transparent',
+    color: oc.textSecondary,
+    fontSize: fs.sm,
+    fontWeight: 500,
+    cursor: 'pointer',
+  },
+  shopPreviewLink: {
+    display: 'inline-block',
+    marginTop: 12,
+    color: oc.primary,
+    fontSize: fs.sm,
+    fontWeight: 600,
+    textDecoration: 'none',
+  },
   note: { color: oc.textMuted, fontSize: 13, marginTop: 16, lineHeight: 1.5 },
   lifecycleHint: { color: oc.textMuted, fontSize: fs.xs, marginTop: 10, lineHeight: 1.45 },
   lifecycleHintWarn: { color: oc.warningText, fontSize: fs.xs, marginTop: 10, lineHeight: 1.45 },

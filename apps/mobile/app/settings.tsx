@@ -1,10 +1,10 @@
 import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo } from 'react';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../src/context/AuthContext';
+import { useTheme } from '../src/context/ThemeContext';
 import { t } from '../src/i18n/ko';
-import { colors } from '../src/theme/colors';
 import { useRestoreSystemChromeOnFocus } from '../src/hooks/useWorldImmersiveChrome';
 
 function maskEmail(email: string): string {
@@ -14,11 +14,137 @@ function maskEmail(email: string): string {
   return `${visible}${'*'.repeat(Math.max(2, local.length - visible.length))}@${domain}`;
 }
 
-/** §60 4-B — 쿠팡형 「내정보관리」(⚙️에서 진입 · 하단탭 없음) */
+/** §60 4-C — 쿠팡형 「내정보관리」(⚙️ · 다크 모드) */
 export default function SettingsScreen() {
   const router = useRouter();
   const { userId, email, nickname, loading: authLoading, signOut } = useAuth();
+  const { colors, isDark, setMode } = useTheme();
   useRestoreSystemChromeOnFocus();
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        safe: { flex: 1, backgroundColor: colors.bg },
+        header: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 8,
+          paddingVertical: 10,
+          backgroundColor: colors.bgCard,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: colors.border,
+        },
+        backBtn: {
+          width: 44,
+          height: 44,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        backIcon: { fontSize: 32, color: colors.text, lineHeight: 34, marginTop: -2 },
+        headerTitle: {
+          flex: 1,
+          textAlign: 'center',
+          fontSize: 17,
+          fontWeight: '700',
+          color: colors.text,
+        },
+        headerSpacer: { width: 44 },
+        scroll: { flex: 1 },
+        scrollContent: { padding: 16, paddingBottom: 32 },
+        profileRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 14,
+          paddingVertical: 8,
+          marginBottom: 8,
+        },
+        avatar: {
+          width: 52,
+          height: 52,
+          borderRadius: 26,
+          backgroundColor: isDark ? colors.bgElevated : '#eef4ff',
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        avatarText: { fontSize: 22, fontWeight: '700', color: colors.primary },
+        profileName: { fontSize: 18, fontWeight: '700', color: colors.text },
+        sectionHeading: {
+          fontSize: 13,
+          fontWeight: '700',
+          color: colors.textSoft,
+          marginTop: 16,
+          marginBottom: 8,
+          marginLeft: 4,
+        },
+        addressHint: {
+          fontSize: 12,
+          color: colors.textMuted,
+          marginTop: 4,
+          marginBottom: 4,
+          marginHorizontal: 4,
+          lineHeight: 18,
+        },
+        card: {
+          backgroundColor: colors.bgCard,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: colors.border,
+          overflow: 'hidden',
+        },
+        fieldRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 16,
+          paddingVertical: 14,
+          gap: 12,
+        },
+        fieldLabel: { fontSize: 14, color: colors.textMuted, flexShrink: 0 },
+        fieldValue: { fontSize: 14, color: colors.text, fontWeight: '500', flex: 1, textAlign: 'right' },
+        divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
+        dividerInset: {
+          height: StyleSheet.hairlineWidth,
+          backgroundColor: colors.border,
+          marginLeft: 48,
+        },
+        menuRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 16,
+          paddingVertical: 10,
+          minHeight: 48,
+        },
+        menuRowDisabled: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 16,
+          paddingVertical: 14,
+          minHeight: 48,
+          opacity: 0.72,
+        },
+        menuIcon: { fontSize: 18, width: 28, textAlign: 'center', marginRight: 4 },
+        menuLabelFlex: { flex: 1, fontSize: 15, color: colors.text, fontWeight: '500' },
+        menuBadge: {
+          fontSize: 11,
+          color: colors.textMuted,
+          backgroundColor: colors.bg,
+          paddingHorizontal: 8,
+          paddingVertical: 3,
+          borderRadius: 999,
+        },
+        logoutBtn: {
+          marginTop: 24,
+          backgroundColor: colors.bgCard,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: colors.border,
+          paddingVertical: 14,
+          alignItems: 'center',
+        },
+        logoutText: { fontSize: 15, fontWeight: '600', color: colors.danger },
+      }),
+    [colors, isDark],
+  );
 
   useEffect(() => {
     if (!authLoading && !userId) {
@@ -78,10 +204,16 @@ export default function SettingsScreen() {
             <Text style={styles.menuBadge}>{t.settings.comingSoon}</Text>
           </View>
           <View style={styles.dividerInset} />
-          <View style={styles.menuRowDisabled}>
+          <View style={styles.menuRow}>
             <Text style={styles.menuIcon}>🌙</Text>
             <Text style={styles.menuLabelFlex}>{t.settings.menuDarkMode}</Text>
-            <Text style={styles.menuBadge}>{t.settings.comingSoon4C}</Text>
+            <Switch
+              value={isDark}
+              onValueChange={(value) => void setMode(value ? 'dark' : 'light')}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor="#ffffff"
+              accessibilityLabel={t.settings.menuDarkMode}
+            />
           </View>
         </View>
 
@@ -92,127 +224,3 @@ export default function SettingsScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 10,
-    backgroundColor: colors.bgCard,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  backBtn: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  backIcon: { fontSize: 32, color: colors.text, lineHeight: 34, marginTop: -2 },
-  headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 17,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  headerSpacer: { width: 44 },
-  scroll: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 32 },
-  profileRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    paddingVertical: 8,
-    marginBottom: 8,
-  },
-  avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#eef4ff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: { fontSize: 22, fontWeight: '700', color: colors.primary },
-  profileName: { fontSize: 18, fontWeight: '700', color: colors.text },
-  sectionHeading: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.textSoft,
-    marginTop: 16,
-    marginBottom: 8,
-    marginLeft: 4,
-  },
-  addressHint: {
-    fontSize: 12,
-    color: colors.textMuted,
-    marginTop: 4,
-    marginBottom: 4,
-    marginHorizontal: 4,
-    lineHeight: 18,
-  },
-  card: {
-    backgroundColor: colors.bgCard,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
-  },
-  fieldRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 12,
-  },
-  fieldLabel: { fontSize: 14, color: colors.textMuted, flexShrink: 0 },
-  fieldValue: { fontSize: 14, color: colors.text, fontWeight: '500', flex: 1, textAlign: 'right' },
-  divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
-  dividerInset: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
-    marginLeft: 48,
-  },
-  menuRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    minHeight: 48,
-  },
-  menuRowDisabled: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    minHeight: 48,
-    opacity: 0.9,
-  },
-  menuIcon: { fontSize: 18, width: 28, textAlign: 'center', marginRight: 4 },
-  menuLabel: { fontSize: 15, color: colors.text, fontWeight: '500' },
-  menuLabelFlex: { flex: 1, fontSize: 15, color: colors.textMuted },
-  menuChevron: { fontSize: 20, color: colors.textMuted, fontWeight: '300' },
-  menuBadge: {
-    fontSize: 11,
-    color: colors.textMuted,
-    backgroundColor: colors.bg,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 999,
-  },
-  logoutBtn: {
-    marginTop: 24,
-    backgroundColor: colors.bgCard,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  logoutText: { fontSize: 15, fontWeight: '600', color: colors.danger },
-});

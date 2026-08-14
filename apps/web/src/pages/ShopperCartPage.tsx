@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { CartView } from '../components/CartView';
 import { postToApp } from '../lib/appBridge';
+import { useShopperThemeMode } from '../lib/shopperThemeMode';
 import { t } from '../i18n';
 import '../styles/shopper-cart-page.css';
 
@@ -37,6 +38,7 @@ function readInsetTopFromSearch(): number {
 export function ShopperCartPage() {
   const { userId, loading: authLoading } = useAuth();
   const { totalQuantity } = useCart();
+  const theme = useShopperThemeMode();
   const [bootstrapping, setBootstrapping] = useState(true);
   const insetTop = readInsetTopFromSearch();
 
@@ -63,7 +65,7 @@ export function ShopperCartPage() {
 
   if (bootstrapping || authLoading) {
     return (
-      <div className="shopper-cart-page">
+      <div className="shopper-cart-page" data-theme={theme}>
         <p className="shopper-cart-page__status">{t('storeShop.loading')}</p>
       </div>
     );
@@ -71,7 +73,7 @@ export function ShopperCartPage() {
 
   if (!userId) {
     return (
-      <div className="shopper-cart-page">
+      <div className="shopper-cart-page" data-theme={theme}>
         <p className="shopper-cart-page__status">{t('play.needLogin')}</p>
         <button type="button" className="shopper-cart-page__back" onClick={goHome}>
           {t('storeShop.backHome')}
@@ -81,7 +83,7 @@ export function ShopperCartPage() {
   }
 
   return (
-    <div className="shopper-cart-page">
+    <div className="shopper-cart-page" data-theme={theme}>
       <header className="shopper-cart-page__header">
         <button type="button" className="shopper-cart-page__back-btn" onClick={goHome} aria-label={t('storeShop.backHomeLabel')}>
           ←
@@ -90,7 +92,7 @@ export function ShopperCartPage() {
         {totalQuantity > 0 && <span className="shopper-cart-page__count">{totalQuantity}</span>}
       </header>
       <main className="shopper-cart-page__main">
-        <CartView userId={userId} layout="page" appearance="light" />
+        <CartView userId={userId} layout="page" appearance={theme} />
       </main>
     </div>
   );
