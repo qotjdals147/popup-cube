@@ -279,7 +279,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`04445e1`** push ✅ (§60.6 마이 IA · 배송지 중복 제거) |
+| **Git `main` HEAD** | push 후 갱신 (§60.7 주문내역·리뷰) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -732,6 +732,16 @@ npx expo start --tunnel --port 8082 --clear
 
 ---
 
+### 7.17 세션 인수인계 — **2026-08-14** (주문내역 상세 · 리뷰 조건)
+
+| | |
+|---|---|
+| **User 요청** | ① 배송완료 타임스탬프 ② 결제 상세 ③ 주문별 배송지 ④ 상품상세 리뷰 버튼 — 구매자만 |
+| **Git** | push 후 HEAD 갱신 · Vercel 1~2분 · Expo `--clear` (WebView) |
+| **확인** | 주문내역 **배송지·결제 상세·배송완료 칩** · 상품상세 **미구매=리뷰 버튼 없음** · 구매+미확정=confirm 후 리뷰 |
+
+---
+
 ### 7.16 세션 인수인계 — **2026-08-14** (§60 마이 IA · 배송지 중복)
 
 | | |
@@ -1069,6 +1079,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-14 — §60.7 주문내역 상세 · 리뷰 구매자만 (User)
+- **Author:** Cursor Agent
+- **Changed:** `ShopperOrderCardLight` — 배송지·결제 상세·단가×수량·배송완료 타임라인 · `ProductDetailModal` — 매장 구매 이력만 리뷰 · §60.7 · §7.17
+- **Notes:** `delivery_completed_at` = 점주 「배송 완료」 시각 · push + Vercel
 
 ### 2026-08-14 — §60 마이 IA · 배송지 중복 제거 (User)
 - **Author:** Cursor Agent (User — 주문/배송/설정 겹침)
@@ -3572,7 +3587,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **4-C** | **`/settings`** + 다크 모드 토글 → WebView 연동 | 4-B 후 |
 | **4-D** | 마이·장바구니 **쿠팡형** · **주문 썸네일** join | 1~2세션 |
 
-*§60 Last updated: 2026-08-14 (§60.6 마이 IA · 배송지 중복 제거)*
+*§60 Last updated: 2026-08-14 (§60.7 주문내역·리뷰)*
 
 ### 60.6 마이 · 주문 · 배송지 진입 (IA — User 2026-08-14)
 
@@ -3589,6 +3604,17 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 - 앱 WebView (`ReactNativeWebView`) = **`singlePanel`** — URL `tab` 하나만 · **탭 바 숨김**
 - 네이티브 Stack 헤더 = 화면 제목 (**주문내역** / **배송지 관리**) · WebView 내부 `oh-title`·`addr-section-title` **숨김**
 - ⚙️ 설정에 배송지 CRUD **넣지 말 것** — 안내 한 줄: 「배송지는 마이 › 배송지」
+
+### 60.7 주문내역 카드 · 리뷰 노출 (User 2026-08-14)
+
+| 요청 | 조치 | 파일 |
+|---|---|---|
+| **배송완료 시각** | `delivery_completed_at` 타임라인 칩 (점주 `complete_delivery`와 동일) · `orderHasDeliveryTimeline()` | `ShopperOrderCardLight` · `orders.ts` |
+| **결제 상세** | 상품별 **단가×수량** · **결제 상세** (상품합·할인·배송비·총액) | `ShopperOrderCardLight` · `shopper-account-panels.css` |
+| **배송지 표시** | 카드마다 **수령인·연락처·주소** (이미 RPC에 있음) | `ShopperOrderCardLight` |
+| **리뷰 쓰기 버튼** | **무조건 노출 ❌** — **이 매장에서 해당 상품 구매 + 배송중 이후**(`canFileClaim`)만 · **미구매자=버튼 없음** | `ProductDetailModal` · `store_id` 필터 |
+| **구매확정 전 리뷰** | 버튼 누르면 **구매확정 confirm** → 실패 시 에러 문구 (상세·주문내역 동일) | `ProductDetailModal` · §54 |
+| **서버 최종 게이트** | `create_product_review` — `purchase_confirmed` \| `completed` 만 | migration `20260812b` |
 
 ---
 

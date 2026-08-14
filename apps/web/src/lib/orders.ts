@@ -1,4 +1,4 @@
-import type { CartItem, OwnerOrderView, OrderStatus, RewardType, ShopperOrderView } from '@popup-cube/shared';
+import type { CartItem, Order, OwnerOrderView, OrderStatus, RewardType, ShopperOrderView } from '@popup-cube/shared';
 
 import { supabase } from './supabase';
 import { formatOrderRef } from './orderRef';
@@ -459,17 +459,46 @@ export function isCancellableByShopper(status: OrderStatus): boolean {
 
 /** §53 P0#8 — 손님이 지금 문의(클레임)를 남길 수 있는 상태인지 (배송중~구매확정) */
 export function canFileClaim(status: OrderStatus): boolean {
-
   return (
     status === 'shipped' ||
     status === 'delivery_completed' ||
     status === 'purchase_confirmed' ||
     status === 'completed'
   );
-
 }
 
+/** §54 — 리뷰 버튼 노출 (구매·배송 완료 후 · 미구매자/결제만=버튼 없음) */
+export function canShowReviewButton(status: OrderStatus): boolean {
+  return canFileClaim(status);
+}
 
+/** 주문 라인 단가×수량 합 (할인 전) */
+export function sumOrderItemsSubtotal(items: { unit_price: number; quantity: number }[]): number {
+  return items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
+}
+
+/** 가챠/할인 혜택으로 깎인 금액 (없으면 0) */
+export function orderDiscountAmount(
+  order: Pick<Order, 'reward_type' | 'discount_percent' | 'subtotal_amount'> & {
+    items: { unit_price: number; quantity: number }[];
+  },
+): number {
+  if (order.reward_type !== 'discount' || !order.discount_percent) return 0;
+  const before = sumOrderItemsSubtotal(order.items);
+  const after = order.subtotal_amount ?? before;
+  return Math.max(0, before - after);
+}
+
+/** 배송·확정 타임라인 칩을 보여줄지 (타임스탬프 또는 배송 이후 상태) */
+export function orderHasDeliveryTimeline(order: Pick<Order, 'status' | 'shipped_at' | 'delivery_completed_at' | 'purchase_confirmed_at'>): boolean {
+  if (order.shipped_at || order.delivery_completed_at || order.purchase_confirmed_at) return true;
+  return (
+    order.status === 'shipped' ||
+    order.status === 'delivery_completed' ||
+    order.status === 'purchase_confirmed' ||
+    order.status === 'completed'
+  );
+}
 
 export interface StoreOrderCounts {
 

@@ -363,6 +363,9 @@ export const ko = {
     loading: '불러오는 중...',
     writeReview: '리뷰 쓰기',
     alreadyReviewedNote: '이미 리뷰를 남겼어요. 소중한 후기 감사해요!',
+    reviewPurchaserHint: '구매하신 상품이에요. 배송 후 리뷰를 남길 수 있어요.',
+    reviewNeedConfirmHint: '구매확정 후 리뷰 등록이 가능해요. 버튼을 누르면 안내가 나와요.',
+    reviewConfirmError: '구매확정에 실패했어요. 주문내역에서 다시 시도해 주세요.',
   },
   /** §54 — 리뷰 작성 (구매확정 게이트) */
   review: {
@@ -578,6 +581,11 @@ export const ko = {
     cancelledNote: '❌ 취소된 주문이에요.',
     writeReview: '리뷰 쓰기',
     reviewDone: '리뷰 작성 완료',
+    shippingTo: '배송지',
+    priceDetailTitle: '결제 상세',
+    lineItemUnit: '{price}원 × {qty}',
+    discountLine: '할인 ({percent}%)',
+    timelineTitle: '배송 · 확정 일정',
   },
   /** 앱 WebView `/app/me` — 손님 내 정보 (m10) */
   shopperAccount: {

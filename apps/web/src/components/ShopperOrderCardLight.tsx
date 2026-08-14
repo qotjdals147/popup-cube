@@ -2,7 +2,11 @@ import type { ShopperOrderView } from '@popup-cube/shared';
 import {
   canConfirmPurchase,
   canFileClaim,
+  canShowReviewButton,
   isCancellableByShopper,
+  orderDiscountAmount,
+  orderHasDeliveryTimeline,
+  sumOrderItemsSubtotal,
 } from '../lib/orders';
 import { formatOrderRef } from '../lib/orderRef';
 import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
@@ -23,7 +27,7 @@ interface ShopperOrderCardLightProps {
   onClaimDraftChange: (orderId: string, text: string) => void;
 }
 
-/** `/app/me` 구매 내역 — 점주 발주·배송 탭과 동일한 카드 위계 (§60, 썸네일은 4-D) */
+/** `/app/me` 구매 내역 — 배송지·결제 상세·배송 타임라인 (§60 · AD-054) */
 export function ShopperOrderCardLight({
   order,
   reviewKeys,
@@ -37,11 +41,11 @@ export function ShopperOrderCardLight({
   onOpenClaimForm,
   onClaimDraftChange,
 }: ShopperOrderCardLightProps) {
-  const reviewEligible = canFileClaim(order.status);
-  const showTimeline =
-    order.status === 'shipped' ||
-    order.status === 'delivery_completed' ||
-    order.status === 'purchase_confirmed';
+  const reviewEligible = canShowReviewButton(order.status);
+  const showTimeline = orderHasDeliveryTimeline(order);
+  const itemsSubtotal = sumOrderItemsSubtotal(order.items);
+  const discountAmount = orderDiscountAmount(order);
+  const hasShippingAddress = Boolean(order.shipping_recipient_name && order.shipping_address_line1);
 
   const hasActions =
     canConfirmPurchase(order.status) ||
@@ -70,31 +74,45 @@ export function ShopperOrderCardLight({
           </div>
         </div>
         <div className="oh-amount-block">
-          {(order.shipping_fee ?? 0) > 0 && (
-            <div className="oh-amount-line">
-              <span>{t('myOrders.productSubtotal')}</span>
-              <span>{formatPrice(order.subtotal_amount ?? order.total_amount)}</span>
-            </div>
-          )}
-          {(order.shipping_fee ?? 0) > 0 && (
-            <div className="oh-amount-line">
-              <span>{t('myOrders.shippingFee')}</span>
-              <span>{formatPrice(order.shipping_fee ?? 0)}</span>
-            </div>
-          )}
+          <span className="oh-total-label">{t('myOrders.orderTotal')}</span>
           <strong className="oh-total">{formatPrice(order.total_amount)}</strong>
         </div>
       </header>
+
+      {hasShippingAddress && (
+        <section className="oh-shipping-section" aria-label={t('myOrders.shippingTo')}>
+          <div className="oh-section-label">{t('myOrders.shippingTo')}</div>
+          <div className="oh-shipping-block">
+            <p className="oh-shipping-name">
+              {order.shipping_recipient_name}
+              {order.shipping_phone ? ` · ${order.shipping_phone}` : ''}
+            </p>
+            <p className="oh-shipping-address">
+              ({order.shipping_postal_code}) {order.shipping_address_line1}
+              {order.shipping_address_line2 ? ` ${order.shipping_address_line2}` : ''}
+            </p>
+          </div>
+        </section>
+      )}
 
       <section className="oh-items-section" aria-label={t('myOrders.itemsCount', { count: order.items.length })}>
         <div className="oh-section-label">{t('myOrders.itemsCount', { count: order.items.length })}</div>
         <ul className="oh-item-list">
           {order.items.map((item) => {
             const alreadyReviewed = reviewKeys.has(reviewKey(order.id, item.product_id));
+            const lineTotal = item.unit_price * item.quantity;
             return (
               <li key={item.id} className="oh-item-row">
-                <span className="oh-item-name">{item.product_name}</span>
-                <span className="oh-item-qty">× {item.quantity}</span>
+                <div className="oh-item-main">
+                  <span className="oh-item-name">{item.product_name}</span>
+                  <span className="oh-item-unit">
+                    {t('myOrders.lineItemUnit', {
+                      price: item.unit_price.toLocaleString('ko-KR'),
+                      qty: item.quantity,
+                    })}
+                  </span>
+                </div>
+                <span className="oh-item-line-total">{formatPrice(lineTotal)}</span>
                 {reviewEligible &&
                   (alreadyReviewed ? (
                     <span className="oh-review-done">{t('myOrders.reviewDone')}</span>
@@ -130,10 +148,36 @@ export function ShopperOrderCardLight({
         )}
       </section>
 
+      <section className="oh-price-detail" aria-label={t('myOrders.priceDetailTitle')}>
+        <div className="oh-section-label">{t('myOrders.priceDetailTitle')}</div>
+        <dl className="oh-price-lines">
+          <div className="oh-price-row">
+            <dt>{t('myOrders.productSubtotal')}</dt>
+            <dd>{formatPrice(itemsSubtotal)}</dd>
+          </div>
+          {discountAmount > 0 && order.discount_percent != null && (
+            <div className="oh-price-row oh-price-row--discount">
+              <dt>{t('myOrders.discountLine', { percent: order.discount_percent })}</dt>
+              <dd>−{formatPrice(discountAmount)}</dd>
+            </div>
+          )}
+          <div className="oh-price-row">
+            <dt>{t('myOrders.shippingFee')}</dt>
+            <dd>
+              {(order.shipping_fee ?? 0) > 0 ? formatPrice(order.shipping_fee ?? 0) : t('myOrders.shippingFree')}
+            </dd>
+          </div>
+          <div className="oh-price-row oh-price-row--total">
+            <dt>{t('myOrders.orderTotal')}</dt>
+            <dd>{formatPrice(order.total_amount)}</dd>
+          </div>
+        </dl>
+      </section>
+
       {order.status === 'cancelled' && <p className="oh-cancelled-note">{t('myOrders.cancelledNote')}</p>}
 
       {showTimeline && (
-        <div className="oh-timeline-row">
+        <div className="oh-timeline-row" aria-label={t('myOrders.timelineTitle')}>
           {order.shipped_at && (
             <span className="oh-timeline-chip">
               {t('ownerOrders.shippedAt')} {formatDate(order.shipped_at)}

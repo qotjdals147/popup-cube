@@ -118,6 +118,91 @@
   flex-shrink: 0;
 }
 
+.shopper-account-main .oh-total-label {
+  font-size: 11px;
+  color: var(--acct-muted);
+  font-weight: 600;
+}
+
+.shopper-account-main .oh-shipping-section {
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f8f9fa;
+  border: 1.5px solid #e5e8eb;
+}
+
+.shopper-account-main .oh-shipping-block {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--acct-text);
+}
+
+.shopper-account-main .oh-shipping-name {
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.shopper-account-main .oh-shipping-address {
+  margin: 0;
+  color: var(--acct-text-secondary, #4e5968);
+  word-break: keep-all;
+}
+
+.shopper-account-main .oh-price-detail {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--acct-surface);
+  border: 1.5px solid var(--acct-border);
+}
+
+.shopper-account-main .oh-price-lines {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shopper-account-main .oh-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--acct-text-secondary, #4e5968);
+}
+
+.shopper-account-main .oh-price-row dt {
+  margin: 0;
+  font-weight: 500;
+}
+
+.shopper-account-main .oh-price-row dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--acct-text);
+}
+
+.shopper-account-main .oh-price-row--discount dd {
+  color: #e03131;
+}
+
+.shopper-account-main .oh-price-row--total {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--acct-border);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--acct-text);
+}
+
+.shopper-account-main .oh-price-row--total dd {
+  font-size: 15px;
+  color: #3182f6;
+}
+
 .shopper-account-main .oh-items-section {
   padding: 12px 14px;
   border-radius: 10px;
@@ -151,6 +236,25 @@
   gap: 8px;
   font-size: 13px;
   color: var(--acct-text);
+}
+
+.shopper-account-main .oh-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.shopper-account-main .oh-item-unit {
+  font-size: 11px;
+  color: var(--acct-muted);
+}
+
+.shopper-account-main .oh-item-line-total {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--acct-text);
+  white-space: nowrap;
 }
 
 .shopper-account-main .oh-item-name {

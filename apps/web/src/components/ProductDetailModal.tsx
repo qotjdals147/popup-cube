@@ -80,23 +80,24 @@ export function ProductDetailModal({
   const [reviewableOrder, setReviewableOrder] = useState<ReviewableOrder | null>(null);
   const [alreadyReviewedByMe, setAlreadyReviewedByMe] = useState(false);
   const [confirmingForReview, setConfirmingForReview] = useState(false);
+  const [reviewConfirmError, setReviewConfirmError] = useState<string | null>(null);
   const [reviewTarget, setReviewTarget] = useState<{ orderId: string; productId: string; productName: string } | null>(
     null
   );
 
-  function reloadReviews() {
-    return getProductReviews(product.id)
-      .then((list) => setReviews(list))
-      .catch(() => undefined);
-  }
-
   async function loadReviewEligibility() {
-    if (previewMode || !userId) return;
+    if (previewMode || !userId) {
+      setReviewableOrder(null);
+      setAlreadyReviewedByMe(false);
+      return;
+    }
     try {
       const [orders, keys] = await Promise.all([listMyOrders(), getMyReviewKeys()]);
       let eligible: ReviewableOrder | null = null;
+      let eligibleAt = '';
       let reviewedAny = false;
       for (const order of orders) {
+        if (order.store_id !== storeId) continue;
         const item = order.items.find((it) => it.product_id === product.id);
         if (!item) continue;
         const key = reviewKey(order.id, product.id);
@@ -104,20 +105,23 @@ export function ProductDetailModal({
           reviewedAny = true;
           continue;
         }
-        if (!eligible && canFileClaim(order.status)) {
+        if (canFileClaim(order.status) && (!eligible || order.created_at > eligibleAt)) {
           eligible = { orderId: order.id, status: order.status };
+          eligibleAt = order.created_at;
         }
       }
       setReviewableOrder(eligible);
       setAlreadyReviewedByMe(reviewedAny);
     } catch {
-      /* 리뷰 작성 가능 여부 확인 실패 시 버튼만 숨김 — 상세페이지 자체는 계속 보여줌 */
+      setReviewableOrder(null);
+      setAlreadyReviewedByMe(false);
     }
   }
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
+    setReviewConfirmError(null);
     Promise.all([listProductDetailBlocks(product.id), getProductReviews(product.id)])
       .then(([blocks, reviewList]) => {
         if (!mounted) return;
@@ -134,8 +138,7 @@ export function ProductDetailModal({
     return () => {
       mounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product.id]);
+  }, [product.id, userId, previewMode, storeId]);
 
   const avgRating =
     reviews.length > 0 ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length) * 10) / 10 : null;
@@ -146,27 +149,39 @@ export function ProductDetailModal({
     window.setTimeout(() => setAdded(false), 1200);
   }
 
+  function reloadReviews() {
+    return getProductReviews(product.id)
+      .then((list) => setReviews(list))
+      .catch(() => undefined);
+  }
+
   async function handleWriteReviewClick() {
     if (!reviewableOrder) return;
+    setReviewConfirmError(null);
 
     if (reviewableOrder.status === 'purchase_confirmed' || reviewableOrder.status === 'completed') {
       setReviewTarget({ orderId: reviewableOrder.orderId, productId: product.id, productName: product.name });
       return;
     }
 
-    // shipped / delivery_completed — 구매확정 없이는 리뷰를 못 남기니 먼저 물어봄 (§54와 동일 규칙)
     if (!window.confirm(t('review.needConfirmBody'))) return;
 
     setConfirmingForReview(true);
     try {
       await confirmPurchase(reviewableOrder.orderId);
+      setReviewableOrder({ orderId: reviewableOrder.orderId, status: 'purchase_confirmed' });
       setReviewTarget({ orderId: reviewableOrder.orderId, productId: product.id, productName: product.name });
     } catch {
-      /* 구매확정 실패 시 조용히 무시 — 「내 주문」에서 다시 시도 가능 */
+      setReviewConfirmError(t('productDetail.reviewConfirmError'));
     } finally {
       setConfirmingForReview(false);
     }
   }
+
+  const reviewNeedsConfirm =
+    reviewableOrder &&
+    reviewableOrder.status !== 'purchase_confirmed' &&
+    reviewableOrder.status !== 'completed';
 
   return (
     <div className={rootClass}>
@@ -240,17 +255,29 @@ export function ProductDetailModal({
                     {reviews.length > 0 ? ` (${reviews.length})` : ''}
                   </h4>
                   {reviewableOrder && (
-                    <button
-                      type="button"
-                      className="product-detail-write-review"
-                      style={styleFor(light, S.writeReviewLayout, S.writeReviewDark)}
-                      disabled={confirmingForReview}
-                      onClick={() => void handleWriteReviewClick()}
-                    >
-                      {t('productDetail.writeReview')}
-                    </button>
+                    <div style={S.reviewWriteCol}>
+                      <button
+                        type="button"
+                        className="product-detail-write-review"
+                        style={styleFor(light, S.writeReviewLayout, S.writeReviewDark)}
+                        disabled={confirmingForReview}
+                        onClick={() => void handleWriteReviewClick()}
+                      >
+                        {t('productDetail.writeReview')}
+                      </button>
+                      <p className="product-detail-review-hint" style={styleFor(light, S.reviewHintLayout, S.reviewHintDark)}>
+                        {reviewNeedsConfirm
+                          ? t('productDetail.reviewNeedConfirmHint')
+                          : t('productDetail.reviewPurchaserHint')}
+                      </p>
+                    </div>
                   )}
                 </div>
+                {reviewConfirmError && (
+                  <p className="product-detail-review-error" style={styleFor(light, S.reviewErrorLayout, S.reviewErrorDark)}>
+                    {reviewConfirmError}
+                  </p>
+                )}
                 {!reviewableOrder && alreadyReviewedByMe && (
                   <p className="product-detail-reviewed-note" style={styleFor(light, S.reviewedNoteLayout, S.reviewedNoteDark)}>{t('productDetail.alreadyReviewedNote')}</p>
                 )}
@@ -412,6 +439,11 @@ const S = {
     marginBottom: 10,
   },
   writeReviewDark: { border: '1px solid #c9a962', background: 'transparent', color: '#e9c46a' },
+  reviewWriteCol: { display: 'flex', flexDirection: 'column' as const, alignItems: 'flex-end', gap: 4, maxWidth: 160 },
+  reviewHintLayout: { fontSize: 10, lineHeight: 1.4, margin: 0, textAlign: 'right' as const },
+  reviewHintDark: { color: '#7c8db5' },
+  reviewErrorLayout: { fontSize: 11.5, margin: '0 0 8px', color: '#e03131' },
+  reviewErrorDark: { color: '#ff8787' },
   reviewedNoteLayout: { fontSize: 11.5, margin: '0 0 10px' },
   reviewedNoteDark: { color: '#8ce0b0' },
   blockStack: { display: 'flex', flexDirection: 'column' as const, gap: 14 },
