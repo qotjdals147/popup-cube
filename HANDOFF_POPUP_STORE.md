@@ -279,7 +279,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`3428e48`** push ✅ (§60 4-B 쿠팡형 마이 허브 · 3탭) |
+| **Git `main` HEAD** | **`d60d415`** push ✅ (§60.6 마이 IA · 배송지 중복 제거) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -732,6 +732,17 @@ npx expo start --tunnel --port 8082 --clear
 
 ---
 
+### 7.16 세션 인수인계 — **2026-08-14** (§60 마이 IA · 배송지 중복)
+
+| | |
+|---|---|
+| **User 지적** | 배송지 관리가 **마이·주문내역·⚙️** 세 군데 중복 |
+| **조치** | 주문/배송 **화면 분리** (`embed=panel`) · WebView **inApp=singlePanel** · 설정 **배송지 메뉴 제거** · §60.6 IA |
+| **실기** | Expo `--clear` (네이티브 헤더) + push (WebView 탭 숨김) |
+| **확인** | ① **주문내역** = 주문 카드만 ② **배송지** = 주소 CRUD만 ③ **⚙️** = 회원정보만 + 배송지 안내 문구 |
+
+---
+
 ### 7.15 세션 인수인계 — **2026-08-14** (§60 `/app/me` · 구매내역 카드 · 4-B 착수)
 
 | | |
@@ -740,7 +751,7 @@ npx expo start --tunnel --port 8082 --clear
 | **Git (push됨)** | `fab1669` `/app/me` 라이트 · `826e5f6` `ShopperOrderCardLight` (점주 탭형 카드 위계) |
 | **Git (push됨)** | **`3428e48`** — 4-B 쿠팡형 **마이 허브** · ⚙️→**내정보관리** · 3탭 · WebView embed |
 | **다음 에이전트** | ① **4-B push** → User Expo `--clear` 실기 ② User **추가 요청** 반영 ③ **4-C** 다크모드 ④ **§58 #3** 몰 허브 · **PG 금지** |
-| **4-B 실기 확인** | 하단 **홈·장바구니·마이·설정** 4탭 · 홈 **브랜드+검색바** · 설정 **로그아웃** · 장바구니 **empty + 매장별 안내** |
+| **4-B 실기 확인** | 하단 **홈·마이·장바구니** 3탭 · 마이 **⚙️** · 주문/배송 **각각 단일 화면** (§60.6) |
 
 **4-B 손볼 파일:**
 
@@ -1058,6 +1069,16 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-14 — §60 마이 IA · 배송지 중복 제거 (User)
+- **Author:** Cursor Agent (User — 주문/배송/설정 겹침)
+- **Changed:** `me/orders`·`me/addresses` → `embed=panel` · `ShopperAccountPage` **inApp=singlePanel** · 설정 **주소록 메뉴 제거** · CSS embed 제목 숨김 · **§60.6** · §7.16
+- **Notes:** push + Vercel · Expo `--clear` · 주문내역에 **배송지 탭 없음** · ⚙️에 **배송지 CRUD 없음**
+
+### 2026-08-14 — §60 4-B 마이 허브 네이티브 전용 · Expo 캐시 안내
+- **Author:** Cursor Agent
+- **Changed:** `me/index` WebView 미리보기 제거 · HANDOFF §0 push vs Metro `--clear` 구분
+- **Notes:** push `b629911`
 
 ### 2026-08-14 — §60 4-B 쿠팡형 「마이」 허브 · ⚙️ 내정보관리
 - **Author:** Cursor Agent (User — 쿠팡 구조: 마이 허브 + 톱니바퀴 설정)
@@ -3547,11 +3568,27 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | Phase | 내용 | 예상 |
 |---|---|---|
 | **4-A** | shop 헤더·담기·**세로 고정** · **라이트 CSS** · **버튼 정렬·safe-area** | ✅ User OK |
-| **4-B** | 앱 shell — **4탭** · 홈 헤더 · **설정 shell** | **진행 중 (로컬)** · push 후 실기 |
+| **4-B** | 앱 shell — **3탭** · 마이 허브 · ⚙️ 설정 | ✅ push · User 실기 · **IA 정리** (배송지 중복 제거) |
 | **4-C** | **`/settings`** + 다크 모드 토글 → WebView 연동 | 4-B 후 |
 | **4-D** | 마이·장바구니 **쿠팡형** · **주문 썸네일** join | 1~2세션 |
 
-*§60 Last updated: 2026-08-14 (push `826e5f6` · §7.15 · 4-B 로컬)*
+*§60 Last updated: 2026-08-14 (§60.6 마이 IA · 배송지 중복 제거)*
+
+### 60.6 마이 · 주문 · 배송지 진입 (IA — User 2026-08-14)
+
+> **문제:** 배송지 관리가 **마이 › 배송지**, **주문내역 WebView 탭**, **⚙️ 주소록** 세 곳에 겹침 → 같은 화면 반복.
+
+| 기능 | 유일/주 진입 | 화면 | WebView |
+|---|---|---|---|
+| **주문내역** | 마이 › **주문내역** 아이콘 · **주문내역 열기** | `app/me/orders.tsx` | `?tab=orders&embed=panel` · **구매내역만** |
+| **배송지** | 마이 › **배송지** 아이콘 | `app/me/addresses.tsx` | `?tab=addresses&embed=panel` · **배송지만** |
+| **내정보관리** | 마이 › **⚙️** | `app/settings.tsx` 네이티브 | 회원정보 · 알림(준비) · 다크(4-C) · 로그아웃 · **배송지 메뉴 ❌** |
+| **브라우저 전체** | (PC·직접 URL) | `/app/me` | `embed=page` · **구매내역/배송지 탭** 유지 |
+
+**규칙 (에이전트):**
+- 앱 WebView (`ReactNativeWebView`) = **`singlePanel`** — URL `tab` 하나만 · **탭 바 숨김**
+- 네이티브 Stack 헤더 = 화면 제목 (**주문내역** / **배송지 관리**) · WebView 내부 `oh-title`·`addr-section-title` **숨김**
+- ⚙️ 설정에 배송지 CRUD **넣지 말 것** — 안내 한 줄: 「배송지는 마이 › 배송지」
 
 ---
 

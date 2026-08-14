@@ -98,9 +98,10 @@ export function ShopperAccountPage() {
   }
 
   const inApp = typeof window !== 'undefined' && !!window.ReactNativeWebView;
-  const embedPanel = embed === 'panel';
+  /** 앱 WebView = 화면당 한 기능만 (주문 OR 배송지). 탭 UI는 브라우저 `/app/me` 전용 */
+  const singlePanel = embed === 'panel' || inApp;
 
-  if (embedPanel) {
+  if (singlePanel) {
     return (
       <div className="shopper-account-page shopper-account-page--embed-panel" data-theme={theme}>
         <main className="shopper-account-main">

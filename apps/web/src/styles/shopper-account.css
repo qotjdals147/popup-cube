@@ -159,6 +159,11 @@
   overflow-y: auto;
 }
 
-.shopper-account-page--embed-panel .oh-title {
+.shopper-account-page--embed-panel .oh-title,
+.shopper-account-page--embed-panel .addr-section-title {
   display: none;
+}
+
+.shopper-account-page--embed-panel .addr-section-header {
+  justify-content: flex-end;
 }

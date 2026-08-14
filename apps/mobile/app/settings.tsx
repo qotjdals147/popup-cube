@@ -68,13 +68,7 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        <Text style={styles.sectionHeading}>{t.settings.sectionShipping}</Text>
-        <View style={styles.card}>
-          <Pressable style={styles.menuRow} onPress={() => router.push('/me/addresses')}>
-            <Text style={styles.menuLabel}>{t.settings.menuAddressBook}</Text>
-            <Text style={styles.menuChevron}>›</Text>
-          </Pressable>
-        </View>
+        <Text style={styles.addressHint}>{t.settings.addressHint}</Text>
 
         <Text style={styles.sectionHeading}>{t.settings.sectionPreferences}</Text>
         <View style={styles.card}>
@@ -151,6 +145,14 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
     marginLeft: 4,
+  },
+  addressHint: {
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 4,
+    marginBottom: 4,
+    marginHorizontal: 4,
+    lineHeight: 18,
   },
   card: {
     backgroundColor: colors.bgCard,

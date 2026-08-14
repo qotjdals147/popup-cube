@@ -1,6 +1,6 @@
 import { AccountWebViewScreen } from '../../src/components/AccountWebViewScreen';
 
-/** 퀵메뉴 — 배송지 (WebView 탭 고정) */
+/** 마이 > 배송지 — 배송지 관리만 (주문 탭 없음 · §60 4-B IA) */
 export default function MeAddressesScreen() {
-  return <AccountWebViewScreen tab="addresses" embed="page" />;
+  return <AccountWebViewScreen tab="addresses" embed="panel" />;
 }
