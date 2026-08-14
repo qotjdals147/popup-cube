@@ -9,6 +9,7 @@ export const ko = {
     loggingIn: '로그인 중...',
     logout: '로그아웃',
     guest: '게스트',
+    close: '닫기',
     email: '이메일',
     password: '비밀번호',
     myPage: '🙋 마이페이지',
@@ -347,6 +348,11 @@ export const ko = {
     addressSaveError: '배송지를 저장하지 못했어요. 다시 시도해 주세요.',
     orderSaveError: '주문을 저장하지 못했어요. 다시 시도해 주세요.',
     insufficientStock: '재고가 부족해요. 수량을 줄이거나 나중에 다시 시도해 주세요.',
+    storeCheckoutBadge: '이 매장 결제',
+    perStoreCheckoutNote: '결제는 매장별로 진행돼요. 아래 금액은 「{store}」 상품만 포함합니다.',
+    otherStoresRemain: '다른 매장 상품 {count}건은 결제 후에도 장바구니에 남아 있어요.',
+    emptyThisStore: '이 매장에 담긴 상품이 없어요.',
+    removeItem: '삭제',
   },
   /** §54 — 상품 상세페이지 (긴 이미지 + 직접 쓴 설명 + 리뷰) */
   productDetail: {

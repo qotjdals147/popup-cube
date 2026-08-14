@@ -1080,6 +1080,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-08-14 — §60 CartDrawer 라이트 · 매장별 장바구니 (User)
+- **Author:** Cursor Agent
+- **Changed:** `CartDrawer` CSS 전면 라이트 · 매장별 섹션·결제 안내 · `clearStoreItems` · UI 정리
+- **Notes:** v1 결제=**매장별 1건** (`place_order` per store) · A+B 한 번에 PG ❌ (PG 후 검토)
+
 ### 2026-08-14 — §60 리뷰 모달·상품상세 장바구니 버튼 라이트 (User)
 - **Author:** Cursor Agent
 - **Changed:** `ReviewFormModal` → `review-form.css` 라이트 · `ProductDetailModal` **🛒 장바구니** 아웃라인 버튼
@@ -3622,6 +3627,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **서버 최종 게이트** | `create_product_review` — `purchase_confirmed` \| `completed` 만 | migration `20260812b` |
 | **리뷰 작성 모달** | `ReviewFormModal` + `review-form.css` **라이트** (기본) · `appearance` prop | shop·/app/me |
 | **상품상세 하단** | **장바구니** = 아웃라인 버튼(🛒 · primary `#3182f6`) · 담기 = accent `#e94560` | `product-detail-shop.css` |
+| **CartDrawer** | **라이트 CSS 전면** (`cart-drawer-shop.css`) · **매장별 그룹** · 결제=해당 매장만 · `clearStoreItems` | v1 mock · PG 전 매장 일괄결제 ❌ |
 
 ---
 

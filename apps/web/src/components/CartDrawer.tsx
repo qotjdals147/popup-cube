@@ -19,7 +19,7 @@ interface CartDrawerProps {
   storeId: string;
   userId: string | null;
   onClose: () => void;
-  /** AD-065 — shop WebView 라이트 */
+  /** AD-065 — shop WebView 라이트 (기본) */
   appearance?: 'light' | 'dark';
 }
 
@@ -32,16 +32,17 @@ function orderErrorMessage(err: unknown): string {
   return t('cart.rewardError');
 }
 
+function formatPrice(price: number): string {
+  return `${price.toLocaleString('ko-KR')}원`;
+}
+
 /**
- * 쉬운 설명: 장바구니 담긴 상품을 보고 수량을 +/- 조절하는 창.
- * "결제하기"는 아직 진짜 결제(PG)가 없는 mock 결제. 결제 흐름은 배송지 선택(AD-030) →
- * 할인/가챠 혜택 선택(AD-028) 순서로 진행되고, 마지막에 `place_order` 서버 함수로
- * 실제 `orders`/`order_items`에 저장됨(§10) — 가격은 서버가 다시 계산해서 조작을 막음.
+ * 장바구니 — mock 결제 · 매장별 `place_order` (§10 · §60).
+ * v1: 결제는 **매장마다 따로** · 장바구니 UI에는 **매장별 구분** 표시.
  */
-export function CartDrawer({ storeId, userId, onClose, appearance = 'dark' }: CartDrawerProps) {
-  const light = appearance === 'light';
-  const rootClass = light ? 'cart-drawer--light' : undefined;
-  const { items, totalPrice, incrementQuantity, decrementQuantity, removeItem, clearCart } = useCart();
+export function CartDrawer({ storeId, userId, onClose, appearance = 'light' }: CartDrawerProps) {
+  const rootClass = appearance === 'light' ? 'cart-drawer--light' : 'cart-drawer--dark';
+  const { items, incrementQuantity, decrementQuantity, removeItem, clearStoreItems } = useCart();
   const [phase, setPhase] = useState<Phase>('cart');
 
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
@@ -57,6 +58,33 @@ export function CartDrawer({ storeId, userId, onClose, appearance = 'dark' }: Ca
   const [gachaResult, setGachaResult] = useState<GachaRollResult | null>(null);
   const [rewardError, setRewardError] = useState<string | null>(null);
   const [storeInfo, setStoreInfo] = useState<StoreSummary | null>(null);
+  const [storeNames, setStoreNames] = useState<Record<string, string>>({});
+
+  const checkoutItems = useMemo(() => items.filter((item) => item.storeId === storeId), [items, storeId]);
+  const checkoutSubtotal = useMemo(
+    () => checkoutItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    [checkoutItems],
+  );
+  const otherStoreItemCount = useMemo(
+    () => items.filter((item) => item.storeId !== storeId).reduce((sum, item) => sum + item.quantity, 0),
+    [items, storeId],
+  );
+
+  const storeGroups = useMemo(() => {
+    const map = new Map<string, typeof items>();
+    for (const item of items) {
+      const group = map.get(item.storeId) ?? [];
+      group.push(item);
+      map.set(item.storeId, group);
+    }
+    return [...map.entries()]
+      .sort(([a], [b]) => {
+        if (a === storeId) return -1;
+        if (b === storeId) return 1;
+        return 0;
+      })
+      .map(([groupStoreId, groupItems]) => ({ storeId: groupStoreId, items: groupItems }));
+  }, [items, storeId]);
 
   useEffect(() => {
     void getStoreSummary(storeId)
@@ -64,14 +92,37 @@ export function CartDrawer({ storeId, userId, onClose, appearance = 'dark' }: Ca
       .catch(() => setStoreInfo(null));
   }, [storeId]);
 
+  useEffect(() => {
+    const ids = [...new Set(items.map((item) => item.storeId))];
+    if (ids.length === 0) {
+      setStoreNames({});
+      return;
+    }
+    let active = true;
+    Promise.all(
+      ids.map((id) =>
+        getStoreSummary(id)
+          .then((s) => [id, s.name] as const)
+          .catch(() => [id, id] as const),
+      ),
+    ).then((entries) => {
+      if (active) setStoreNames(Object.fromEntries(entries));
+    });
+    return () => {
+      active = false;
+    };
+  }, [items]);
+
   const estimatedShipping = useMemo(() => {
     if (!storeInfo) return 0;
-    return calcShippingFee(storeInfo, totalPrice);
-  }, [storeInfo, totalPrice]);
+    return calcShippingFee(storeInfo, checkoutSubtotal);
+  }, [storeInfo, checkoutSubtotal]);
 
-  const estimatedPayTotal = totalPrice + estimatedShipping;
+  const estimatedPayTotal = checkoutSubtotal + estimatedShipping;
+  const currentStoreName = storeInfo?.name ?? storeNames[storeId] ?? storeId;
 
   function handleMockCheckout() {
+    if (checkoutItems.length === 0) return;
     setPhase('address');
     setAddressError(null);
     setAddressLoading(true);
@@ -122,7 +173,7 @@ export function CartDrawer({ storeId, userId, onClose, appearance = 'dark' }: Ca
     try {
       const promo = await getActivePromotion(storeId);
       const percent = promo?.discount_percent ?? 0;
-      const result = await placeOrder(storeId, selectedAddressId, items, 'discount', percent);
+      const result = await placeOrder(storeId, selectedAddressId, checkoutItems, 'discount', percent);
       setDiscountPercent(percent);
       setFinalTotal(result.totalAmount);
       setPhase('discountResult');
@@ -135,7 +186,7 @@ export function CartDrawer({ storeId, userId, onClose, appearance = 'dark' }: Ca
     setRewardError(null);
     setPhase('gachaRolling');
     try {
-      const orderResult = await placeOrder(storeId, selectedAddressId, items, 'gacha', null);
+      const orderResult = await placeOrder(storeId, selectedAddressId, checkoutItems, 'gacha', null);
       const result = await rollGacha(storeId, orderResult.orderId);
       setGachaResult(result);
       setPhase('gachaResult');
@@ -146,7 +197,7 @@ export function CartDrawer({ storeId, userId, onClose, appearance = 'dark' }: Ca
   }
 
   function handleFinish() {
-    clearCart();
+    clearStoreItems(storeId);
     setPhase('cart');
     setDiscountPercent(null);
     setFinalTotal(null);
@@ -157,431 +208,234 @@ export function CartDrawer({ storeId, userId, onClose, appearance = 'dark' }: Ca
   }
 
   const discountAmount =
-    discountPercent && finalTotal !== null ? Math.max(0, totalPrice - finalTotal) : 0;
+    discountPercent && finalTotal !== null ? Math.max(0, checkoutSubtotal - finalTotal) : 0;
   const gachaLabel = gachaResult?.product_name ?? gachaResult?.exclusive_name ?? '';
   const gachaImage = gachaResult?.product_image_url ?? gachaResult?.exclusive_image_url ?? null;
   const gachaIsRealProduct = !!gachaResult?.product_id;
+  const addressAppearance = appearance === 'light' ? 'light' : 'dark';
 
   return (
     <div className={rootClass}>
-    <div className="cart-drawer-overlay" style={styles.overlay} onClick={onClose}>
-      <div className="cart-drawer-panel play-cart-drawer" style={styles.panel} onClick={(e) => e.stopPropagation()}>
-        <div className="cart-drawer-header" style={styles.header}>
-          <h3 className="cart-drawer-title" style={styles.title}>{t('cart.title')}</h3>
-          <button className="cart-drawer-close" style={styles.closeButton} onClick={onClose}>
-            ✕
-          </button>
-        </div>
-
-        {phase === 'address' && (
-          <div style={styles.addressStep}>
-            <p style={styles.rewardTitle}>{t('cart.addressStepTitle')}</p>
-            {addressLoading && <p style={styles.hint}>{t('cart.addressLoading')}</p>}
-            {addressError && <p style={styles.error}>{addressError}</p>}
-
-            {!addressLoading && addresses.length === 0 && !addAddressOpen && (
-              <p style={styles.hint}>{t('cart.addressEmpty')}</p>
-            )}
-
-            {!addressLoading && addresses.length > 0 && (
-              <div style={styles.addressList}>
-                {addresses.map((address) => (
-                  <label
-                    key={address.id}
-                    style={{
-                      ...styles.addressOption,
-                      ...(selectedAddressId === address.id ? styles.addressOptionSelected : {}),
-                    }}
-                    className={`cart-drawer-address-option${selectedAddressId === address.id ? ' cart-drawer-address-option--selected' : ''}`}
-                  >
-                    <input
-                      type="radio"
-                      name="shippingAddress"
-                      checked={selectedAddressId === address.id}
-                      onChange={() => setSelectedAddressId(address.id)}
-                      style={styles.radio}
-                    />
-                    <div>
-                      <div style={styles.addressLabelRow}>
-                        <strong>{address.label}</strong>
-                        {address.is_default && <span style={styles.defaultBadge}>{t('mypage.defaultBadge')}</span>}
-                      </div>
-                      <div style={styles.addressText}>
-                        {address.recipient_name} · {address.phone}
-                      </div>
-                      <div style={styles.addressText}>
-                        ({address.postal_code}) {address.address_line1} {address.address_line2 ?? ''}
-                      </div>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            )}
-
-            {!addAddressOpen ? (
-              <button style={styles.addAddressButton} onClick={() => setAddAddressOpen(true)}>
-                {t('cart.addNewAddress')}
-              </button>
-            ) : (
-              <div style={styles.addAddressForm}>
-                <AddressFormFields values={addressForm} onChange={setAddressForm} />
-                <div style={styles.addAddressActions}>
-                  {addresses.length > 0 && (
-                    <button style={styles.rewardChoiceButtonSmall} onClick={() => setAddAddressOpen(false)}>
-                      {t('mypage.cancel')}
-                    </button>
-                  )}
-                  <button style={styles.checkoutButton} onClick={handleSaveNewAddress} disabled={savingAddress}>
-                    {savingAddress ? t('mypage.saving') : t('mypage.save')}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {!addAddressOpen && (
-              <button style={{ ...styles.checkoutButton, marginTop: 14 }} onClick={handleContinueToReward}>
-                {t('cart.addressContinue')}
-              </button>
-            )}
-          </div>
-        )}
-
-        {phase === 'reward' && (
-          <div style={styles.rewardStep}>
-            <div style={styles.rewardIcon}>🎁</div>
-            <p style={styles.rewardTitle}>{t('cart.rewardTitle')}</p>
-            <p style={styles.rewardHint}>{t('cart.rewardHint')}</p>
-            {rewardError && <p style={styles.error}>{rewardError}</p>}
-            <div style={styles.rewardChoiceRow}>
-              <button className="cart-drawer-reward-btn" style={styles.rewardChoiceButton} onClick={handleChooseDiscount}>
-                💸 {t('cart.chooseDiscount')}
-              </button>
-              <button style={styles.rewardChoiceButton} onClick={handleChooseGacha}>
-                🎰 {t('cart.chooseGacha')}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {phase === 'gachaRolling' && (
-          <div style={styles.orderComplete}>
-            <div style={styles.orderCompleteIcon}>🎰</div>
-            <p style={styles.orderCompleteText}>{t('cart.gachaRolling')}</p>
-          </div>
-        )}
-
-        {phase === 'discountResult' && (
-          <div style={styles.orderComplete}>
-            <div style={styles.orderCompleteIcon}>💸</div>
-            <p style={styles.orderCompleteText}>{t('cart.discountAppliedTitle', { percent: discountPercent ?? 0 })}</p>
-            <p style={styles.orderCompleteHint}>
-              {t('cart.discountAppliedHint', { amount: formatPrice(discountAmount) })}
-            </p>
-            <p style={styles.autoConfirmNote}>{t('cart.purchaseConfirmAutoRule')}</p>
-            <button style={styles.checkoutButton} onClick={handleFinish}>
-              {t('cart.confirm')}
+      <div className="cart-drawer-overlay" onClick={onClose}>
+        <div className="cart-drawer-panel" onClick={(e) => e.stopPropagation()}>
+          <div className="cart-drawer-header">
+            <h3 className="cart-drawer-title">{t('cart.title')}</h3>
+            <button type="button" className="cart-drawer-close" onClick={onClose} aria-label={t('common.close')}>
+              ✕
             </button>
           </div>
-        )}
 
-        {phase === 'gachaResult' && gachaResult && (
-          <div style={styles.orderComplete}>
-            <div style={styles.gachaResultThumbWrap}>
-              {gachaImage ? (
-                <img src={gachaImage} alt={gachaLabel} style={styles.gachaResultThumb} />
+          {phase === 'address' && (
+            <div className="cart-drawer-step">
+              <p className="cart-drawer-step-title">{t('cart.addressStepTitle')}</p>
+              {addressLoading && <p className="cart-drawer-hint">{t('cart.addressLoading')}</p>}
+              {addressError && <p className="cart-drawer-error">{addressError}</p>}
+
+              {!addressLoading && addresses.length === 0 && !addAddressOpen && (
+                <p className="cart-drawer-hint">{t('cart.addressEmpty')}</p>
+              )}
+
+              {!addressLoading && addresses.length > 0 && (
+                <div className="cart-drawer-address-list">
+                  {addresses.map((address) => (
+                    <label
+                      key={address.id}
+                      className={`cart-drawer-address-option${selectedAddressId === address.id ? ' cart-drawer-address-option--selected' : ''}`}
+                    >
+                      <input
+                        type="radio"
+                        name="shippingAddress"
+                        checked={selectedAddressId === address.id}
+                        onChange={() => setSelectedAddressId(address.id)}
+                      />
+                      <div>
+                        <div>
+                          <strong>{address.label}</strong>
+                          {address.is_default && ` · ${t('mypage.defaultBadge')}`}
+                        </div>
+                        <div>
+                          {address.recipient_name} · {address.phone}
+                        </div>
+                        <div>
+                          ({address.postal_code}) {address.address_line1} {address.address_line2 ?? ''}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              {!addAddressOpen ? (
+                <button type="button" className="cart-drawer-add-address-btn" onClick={() => setAddAddressOpen(true)}>
+                  {t('cart.addNewAddress')}
+                </button>
               ) : (
-                <div style={styles.orderCompleteIcon}>🎉</div>
+                <div className="cart-drawer-add-address-form">
+                  <AddressFormFields values={addressForm} onChange={setAddressForm} appearance={addressAppearance} />
+                  <div className="cart-drawer-form-actions">
+                    {addresses.length > 0 && (
+                      <button type="button" className="cart-drawer-secondary-btn" onClick={() => setAddAddressOpen(false)}>
+                        {t('mypage.cancel')}
+                      </button>
+                    )}
+                    <button type="button" className="cart-drawer-primary-btn" onClick={() => void handleSaveNewAddress()} disabled={savingAddress}>
+                      {savingAddress ? t('mypage.saving') : t('mypage.save')}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {!addAddressOpen && (
+                <button type="button" className="cart-drawer-primary-btn" style={{ marginTop: 14 }} onClick={handleContinueToReward}>
+                  {t('cart.addressContinue')}
+                </button>
               )}
             </div>
-            <p style={styles.orderCompleteText}>{t('cart.gachaWonTitle')}</p>
-            <p style={styles.gachaWonName}>{gachaLabel}</p>
-            <span style={styles.gachaBadge}>
-              {gachaIsRealProduct ? t('cart.gachaBadgeProduct') : t('cart.gachaBadgeExclusive')}
-            </span>
-            <p style={styles.autoConfirmNote}>{t('cart.purchaseConfirmAutoRule')}</p>
-            <button style={{ ...styles.checkoutButton, marginTop: 16 }} onClick={handleFinish}>
-              {t('cart.confirm')}
-            </button>
-          </div>
-        )}
+          )}
 
-        {phase === 'cart' &&
-          (items.length === 0 ? (
-            <p style={styles.hint}>{t('cart.empty')}</p>
-          ) : (
-            <>
-              <div style={styles.list}>
-                {items.map((item) => (
-                  <div key={item.productId} className="play-cart-row cart-drawer-item" style={styles.row}>
-                    <div style={styles.thumbWrap}>
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.name} style={styles.thumb} />
-                      ) : (
-                        <div style={styles.thumbPlaceholder}>🛍️</div>
-                      )}
-                    </div>
-                    <div className="play-cart-row-main">
-                      <div className="play-cart-row-name cart-drawer-item-name" style={styles.name}>
-                        {item.name}
-                      </div>
-                      <div className="cart-drawer-item-price" style={styles.price}>{formatPrice(item.price)}</div>
-                      <div className="play-cart-row-actions">
-                        <div style={styles.stepper}>
-                          <button className="cart-drawer-qty-btn" style={styles.stepperButton} onClick={() => decrementQuantity(item.productId)}>
-                            −
-                          </button>
-                          <span style={styles.stepperValue}>{item.quantity}</span>
-                          <button className="cart-drawer-qty-btn" style={styles.stepperButton} onClick={() => incrementQuantity(item.productId)}>
-                            +
-                          </button>
-                        </div>
-                        <div className="play-cart-line-total" style={styles.lineTotal}>
-                          {formatPrice(item.price * item.quantity)}
-                        </div>
-                        <button style={styles.removeButton} onClick={() => removeItem(item.productId)}>
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div style={styles.footer}>
-                <div style={styles.totalRow}>
-                  <span>{t('cart.total')}</span>
-                  <strong>{formatPrice(totalPrice)}</strong>
-                </div>
-                <div style={styles.totalRow}>
-                  <span>{t('cart.shippingFee')}</span>
-                  <strong>{estimatedShipping === 0 ? t('cart.shippingFree') : formatPrice(estimatedShipping)}</strong>
-                </div>
-                <div style={{ ...styles.totalRow, ...styles.payTotalRow }}>
-                  <span>{t('cart.payTotal')}</span>
-                  <strong style={styles.totalValue}>{formatPrice(estimatedPayTotal)}</strong>
-                </div>
-                <p style={styles.shippingNote}>{t('cart.shippingEstimateNote')}</p>
-                <button className="cart-drawer-primary-btn" style={styles.checkoutButton} onClick={handleMockCheckout}>
-                  {t('cart.checkout')}
+          {phase === 'reward' && (
+            <div className="cart-drawer-step cart-drawer-complete">
+              <div className="cart-drawer-complete-icon">🎁</div>
+              <p className="cart-drawer-step-title">{t('cart.rewardTitle')}</p>
+              <p className="cart-drawer-step-hint">{t('cart.rewardHint')}</p>
+              {rewardError && <p className="cart-drawer-error">{rewardError}</p>}
+              <div className="cart-drawer-reward-row">
+                <button type="button" className="cart-drawer-reward-btn" onClick={() => void handleChooseDiscount()}>
+                  💸 {t('cart.chooseDiscount')}
+                </button>
+                <button type="button" className="cart-drawer-reward-btn" onClick={() => void handleChooseGacha()}>
+                  🎰 {t('cart.chooseGacha')}
                 </button>
               </div>
-            </>
-          ))}
+            </div>
+          )}
+
+          {phase === 'gachaRolling' && (
+            <div className="cart-drawer-complete">
+              <div className="cart-drawer-complete-icon">🎰</div>
+              <p className="cart-drawer-complete-text">{t('cart.gachaRolling')}</p>
+            </div>
+          )}
+
+          {phase === 'discountResult' && (
+            <div className="cart-drawer-complete">
+              <div className="cart-drawer-complete-icon">💸</div>
+              <p className="cart-drawer-complete-text">{t('cart.discountAppliedTitle', { percent: discountPercent ?? 0 })}</p>
+              <p className="cart-drawer-step-hint">{t('cart.discountAppliedHint', { amount: formatPrice(discountAmount) })}</p>
+              <p className="cart-drawer-step-hint">{t('cart.purchaseConfirmAutoRule')}</p>
+              <button type="button" className="cart-drawer-primary-btn" onClick={handleFinish}>
+                {t('cart.confirm')}
+              </button>
+            </div>
+          )}
+
+          {phase === 'gachaResult' && gachaResult && (
+            <div className="cart-drawer-complete">
+              <div className="cart-drawer-complete-icon">
+                {gachaImage ? <img src={gachaImage} alt={gachaLabel} style={{ width: 96, height: 96, objectFit: 'contain' }} /> : '🎉'}
+              </div>
+              <p className="cart-drawer-complete-text">{t('cart.gachaWonTitle')}</p>
+              <p className="cart-drawer-complete-text" style={{ color: '#e94560' }}>
+                {gachaLabel}
+              </p>
+              <span className="cart-drawer-store-badge">
+                {gachaIsRealProduct ? t('cart.gachaBadgeProduct') : t('cart.gachaBadgeExclusive')}
+              </span>
+              <p className="cart-drawer-step-hint">{t('cart.purchaseConfirmAutoRule')}</p>
+              <button type="button" className="cart-drawer-primary-btn" style={{ marginTop: 16 }} onClick={handleFinish}>
+                {t('cart.confirm')}
+              </button>
+            </div>
+          )}
+
+          {phase === 'cart' &&
+            (items.length === 0 ? (
+              <p className="cart-drawer-hint">{t('cart.empty')}</p>
+            ) : (
+              <>
+                {checkoutItems.length > 0 && (
+                  <p className="cart-drawer-per-store-note">
+                    {t('cart.perStoreCheckoutNote', { store: currentStoreName })}
+                  </p>
+                )}
+
+                {storeGroups.map((group) => (
+                  <section
+                    key={group.storeId}
+                    className={`cart-drawer-store-group${group.storeId === storeId ? ' cart-drawer-store-group--current' : ''}`}
+                  >
+                    <div className="cart-drawer-store-header">
+                      <h4 className="cart-drawer-store-name">🏪 {storeNames[group.storeId] ?? group.storeId}</h4>
+                      {group.storeId === storeId && (
+                        <span className="cart-drawer-store-badge">{t('cart.storeCheckoutBadge')}</span>
+                      )}
+                    </div>
+                    <div className="cart-drawer-item-list">
+                      {group.items.map((item) => (
+                        <article key={item.productId} className="cart-drawer-item">
+                          <div className="cart-drawer-item-thumb">
+                            {item.imageUrl ? (
+                              <img src={item.imageUrl} alt={item.name} />
+                            ) : (
+                              <span className="cart-drawer-item-thumb-placeholder">🛍️</span>
+                            )}
+                          </div>
+                          <div className="cart-drawer-item-body">
+                            <p className="cart-drawer-item-name">{item.name}</p>
+                            <p className="cart-drawer-item-unit">{formatPrice(item.price)}</p>
+                            <div className="cart-drawer-item-actions">
+                              <div className="cart-drawer-stepper">
+                                <button type="button" className="cart-drawer-qty-btn" onClick={() => decrementQuantity(item.productId)}>
+                                  −
+                                </button>
+                                <span className="cart-drawer-qty-value">{item.quantity}</span>
+                                <button type="button" className="cart-drawer-qty-btn" onClick={() => incrementQuantity(item.productId)}>
+                                  +
+                                </button>
+                              </div>
+                              <span className="cart-drawer-line-total">{formatPrice(item.price * item.quantity)}</span>
+                              <button type="button" className="cart-drawer-remove-btn" onClick={() => removeItem(item.productId)}>
+                                {t('cart.removeItem')}
+                              </button>
+                            </div>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+
+                {checkoutItems.length === 0 ? (
+                  <p className="cart-drawer-hint">{t('cart.emptyThisStore')}</p>
+                ) : (
+                  <div className="cart-drawer-footer">
+                    {otherStoreItemCount > 0 && (
+                      <p className="cart-drawer-other-stores">
+                        {t('cart.otherStoresRemain', { count: otherStoreItemCount })}
+                      </p>
+                    )}
+                    <div className="cart-drawer-total-row">
+                      <span>{t('cart.total')}</span>
+                      <strong>{formatPrice(checkoutSubtotal)}</strong>
+                    </div>
+                    <div className="cart-drawer-total-row">
+                      <span>{t('cart.shippingFee')}</span>
+                      <strong>{estimatedShipping === 0 ? t('cart.shippingFree') : formatPrice(estimatedShipping)}</strong>
+                    </div>
+                    <div className="cart-drawer-total-row cart-drawer-total-row--pay">
+                      <span>{t('cart.payTotal')}</span>
+                      <strong>{formatPrice(estimatedPayTotal)}</strong>
+                    </div>
+                    <p className="cart-drawer-shipping-note">{t('cart.shippingEstimateNote')}</p>
+                    <button type="button" className="cart-drawer-primary-btn" onClick={handleMockCheckout}>
+                      {t('cart.checkout')}
+                    </button>
+                  </div>
+                )}
+              </>
+            ))}
+        </div>
       </div>
-    </div>
     </div>
   );
 }
-
-function formatPrice(price: number): string {
-  return `${price.toLocaleString('ko-KR')}원`;
-}
-
-const styles: Record<string, React.CSSProperties> = {
-  overlay: {
-    position: 'fixed',
-    inset: 0,
-    background: 'rgba(0,0,0,0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 60,
-    padding: 16,
-  },
-  panel: {
-    background: '#16213e',
-    borderRadius: 14,
-    width: '100%',
-    maxWidth: 480,
-    maxHeight: '85vh',
-    overflowY: 'auto',
-    padding: 20,
-    boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
-  },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  title: { color: '#fff', fontSize: 17, margin: 0 },
-  closeButton: {
-    background: 'transparent',
-    border: 'none',
-    color: '#a0a0c0',
-    fontSize: 16,
-    cursor: 'pointer',
-  },
-  hint: { color: '#a0a0c0', fontSize: 13, textAlign: 'center', padding: '30px 0' },
-  error: { color: '#ff6b6b', fontSize: 12, margin: '0 0 10px' },
-  list: { display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 },
-  row: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: 10,
-    background: '#0f3460',
-    borderRadius: 10,
-    padding: 10,
-  },
-  thumbWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    overflow: 'hidden',
-    background: '#0d1730',
-    flexShrink: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  // 사진을 잘라내지 않고 비율 그대로 박스 안에 전부 보이게 표시 (여백은 생길 수 있음).
-  thumb: { width: '100%', height: '100%', objectFit: 'contain' },
-  thumbPlaceholder: { fontSize: 16, opacity: 0.4 },
-  name: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: 600,
-    lineHeight: 1.35,
-    wordBreak: 'break-word',
-    overflowWrap: 'anywhere',
-  },
-  price: { color: '#a0a0c0', fontSize: 12 },
-  stepper: {
-    display: 'flex',
-    alignItems: 'center',
-    border: '1px solid #2c4270',
-    borderRadius: 8,
-    overflow: 'hidden',
-    flexShrink: 0,
-  },
-  stepperButton: {
-    width: 24,
-    height: 24,
-    border: 'none',
-    background: '#0d1730',
-    color: '#fff',
-    fontSize: 13,
-    cursor: 'pointer',
-  },
-  stepperValue: { width: 26, textAlign: 'center', color: '#fff', fontSize: 12 },
-  lineTotal: {
-    textAlign: 'right',
-    color: '#e94560',
-    fontSize: 13,
-    fontWeight: 600,
-    flexShrink: 0,
-  },
-  removeButton: {
-    background: 'transparent',
-    border: 'none',
-    color: '#6f85b5',
-    fontSize: 13,
-    cursor: 'pointer',
-    flexShrink: 0,
-  },
-  footer: { borderTop: '1px solid #2c4270', paddingTop: 14 },
-  totalRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    color: '#fff',
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  payTotalRow: { marginBottom: 4, fontWeight: 600 },
-  shippingNote: { color: '#8ca4d8', fontSize: 12, lineHeight: 1.45, margin: '0 0 12px' },
-  totalValue: { color: '#e94560', fontSize: 17 },
-  checkoutButton: {
-    width: '100%',
-    padding: '13px',
-    borderRadius: 10,
-    border: 'none',
-    background: '#e94560',
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-  orderComplete: { textAlign: 'center', padding: '24px 0' },
-  orderCompleteIcon: { fontSize: 40, marginBottom: 10 },
-  orderCompleteText: { color: '#fff', fontSize: 15, fontWeight: 600, margin: 0 },
-  orderCompleteHint: { color: '#a0a0c0', fontSize: 12, marginTop: 6, marginBottom: 18 },
-  autoConfirmNote: { color: '#7c8db5', fontSize: 11, lineHeight: 1.5, margin: '0 0 14px' },
-  rewardStep: { textAlign: 'center', padding: '10px 0 6px' },
-  rewardIcon: { fontSize: 40, marginBottom: 8 },
-  rewardTitle: { color: '#fff', fontSize: 15, fontWeight: 600, margin: 0 },
-  rewardHint: { color: '#a0a0c0', fontSize: 12, marginTop: 6, marginBottom: 16 },
-  rewardChoiceRow: { display: 'flex', gap: 10 },
-  rewardChoiceButton: {
-    flex: 1,
-    padding: '16px 10px',
-    borderRadius: 10,
-    border: '1px solid #2c4270',
-    background: '#0f3460',
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-  rewardChoiceButtonSmall: {
-    padding: '9px 16px',
-    borderRadius: 8,
-    border: '1px solid #2c4270',
-    background: 'transparent',
-    color: '#a0a0c0',
-    fontSize: 13,
-    cursor: 'pointer',
-  },
-  gachaResultThumbWrap: {
-    width: 96,
-    height: 96,
-    margin: '0 auto 10px',
-    borderRadius: 12,
-    overflow: 'hidden',
-    background: '#0d1730',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  gachaResultThumb: { width: '100%', height: '100%', objectFit: 'contain' },
-  gachaWonName: { color: '#e94560', fontSize: 16, fontWeight: 700, margin: '4px 0 10px' },
-  gachaBadge: {
-    display: 'inline-block',
-    fontSize: 11,
-    color: '#d8e4ff',
-    border: '1px solid #4062a0',
-    borderRadius: 999,
-    padding: '3px 10px',
-  },
-  addressStep: { padding: '4px 0' },
-  addressList: { display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 },
-  addressOption: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: 10,
-    padding: 10,
-    borderRadius: 10,
-    border: '1px solid #2c4270',
-    background: '#0f3460',
-    cursor: 'pointer',
-    textAlign: 'left',
-  },
-  addressOptionSelected: { border: '1px solid #e94560', background: '#2a1424' },
-  radio: { marginTop: 3 },
-  addressLabelRow: { display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontSize: 13, marginBottom: 2 },
-  addressText: { color: '#a0a0c0', fontSize: 12 },
-  defaultBadge: {
-    fontSize: 10,
-    color: '#d8e4ff',
-    border: '1px solid #4062a0',
-    borderRadius: 999,
-    padding: '1px 7px',
-  },
-  addAddressButton: {
-    width: '100%',
-    padding: '10px',
-    borderRadius: 10,
-    border: '1px dashed #4062a0',
-    background: '#13284d',
-    color: '#d8e6ff',
-    fontSize: 13,
-    cursor: 'pointer',
-    marginBottom: 4,
-  },
-  addAddressForm: { marginTop: 10, padding: 10, borderRadius: 10, background: '#0d1730' },
-  addAddressActions: { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 10 },
-};
