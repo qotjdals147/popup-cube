@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import type { StoreSummary } from '../types/domain';
 import { t } from '../i18n/ko';
+import { getPopupPeriodBadge } from '../lib/popupPeriod';
 import { colors } from '../theme/colors';
 
 interface StoreEnterModalProps {
@@ -18,6 +19,12 @@ interface StoreEnterModalProps {
 }
 
 export function StoreEnterModal({ store, visible, onEnter, onClose }: StoreEnterModalProps) {
+  const period = getPopupPeriodBadge(store.popup_ends_at, {
+    ended: t.home.periodEnded,
+    today: t.home.periodToday,
+    dDay: (n) => t.home.periodDDay(n),
+  });
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
@@ -32,6 +39,11 @@ export function StoreEnterModal({ store, visible, onEnter, onClose }: StoreEnter
             )}
           </View>
           <Text style={styles.name}>{store.name}</Text>
+          {period.tone !== 'none' && (
+            <View style={[styles.periodPill, period.tone === 'urgent' || period.tone === 'today' ? styles.periodPillUrgent : styles.periodPillNormal]}>
+              <Text style={styles.periodPillText}>{period.label}</Text>
+            </View>
+          )}
           <Text style={styles.commerceNote}>{t.enterModal.commerceNote}</Text>
           <Text style={styles.description}>
             {store.description || t.enterModal.noDescription}
@@ -78,6 +90,25 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: 16,
     paddingHorizontal: 20,
+  },
+  periodPill: {
+    alignSelf: 'flex-start',
+    marginTop: 8,
+    marginHorizontal: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  periodPillNormal: {
+    backgroundColor: '#eef4ff',
+  },
+  periodPillUrgent: {
+    backgroundColor: '#ffe3e3',
+  },
+  periodPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.text,
   },
   commerceNote: {
     color: colors.textSoft,

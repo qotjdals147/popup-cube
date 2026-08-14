@@ -4,7 +4,7 @@ import { getSupabase } from './supabase';
 export async function listPublishedStores(search?: string): Promise<StoreSummary[]> {
   let query = getSupabase()
     .from('stores')
-    .select('id, name, description, thumbnail_url, status')
+    .select('id, name, description, thumbnail_url, status, popup_ends_at')
     .eq('is_active', true)
     .eq('status', 'published')
     .order('name', { ascending: true });
@@ -22,7 +22,7 @@ export async function listPublishedStores(search?: string): Promise<StoreSummary
 export async function getStoreSummary(storeId: string): Promise<StoreSummary | null> {
   const { data, error } = await getSupabase()
     .from('stores')
-    .select('id, name, description, thumbnail_url, status')
+    .select('id, name, description, thumbnail_url, status, popup_ends_at')
     .eq('id', storeId)
     .maybeSingle();
 

@@ -1,10 +1,8 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  Image,
-  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -13,14 +11,16 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { StoreSummary } from '../src/types/domain';
 import { StoreEnterModal } from '../src/components/StoreEnterModal';
+import { StoreMallCard } from '../src/components/StoreMallCard';
 import { ShopperBottomNav } from '../src/components/ShopperBottomNav';
 import { useAuth } from '../src/context/AuthContext';
 import { t } from '../src/i18n/ko';
+import { sortStoresByPopupEnd } from '../src/lib/popupPeriod';
 import { listPublishedStores } from '../src/lib/stores';
 import { colors } from '../src/theme/colors';
 import { useRestoreSystemChromeOnFocus } from '../src/hooks/useWorldImmersiveChrome';
 
-/** m03 — 동네 필터는 Sprint 이후; 지금은 매장 목록 + 검색 */
+/** §58 #3 — 몰(홈) 허브: 검색 · D-day · 설명 · 쇼핑하기 CTA */
 export default function HomeScreen() {
   const router = useRouter();
   const { userId, loading: authLoading, initError } = useAuth();
@@ -31,6 +31,8 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [selectedStore, setSelectedStore] = useState<StoreSummary | null>(null);
+
+  const sortedStores = useMemo(() => sortStoresByPopupEnd(stores), [stores]);
 
   useEffect(() => {
     if (!authLoading && !userId) {
@@ -122,42 +124,20 @@ export default function HomeScreen() {
           <Text style={styles.empty}>{t.home.empty}</Text>
         )}
 
-        {!loading && !error && stores.length > 0 && (
+        {!loading && !error && sortedStores.length > 0 && (
           <FlatList
-            data={stores}
+            data={sortedStores}
             keyExtractor={(item) => item.id}
             numColumns={2}
             columnWrapperStyle={styles.row}
             contentContainerStyle={styles.list}
             style={styles.flex}
             renderItem={({ item }) => (
-              <View style={styles.card}>
-                <Pressable style={styles.cardPreview} onPress={() => setSelectedStore(item)}>
-                  <View style={styles.thumbWrap}>
-                    {item.thumbnail_url ? (
-                      <Image source={{ uri: item.thumbnail_url }} style={styles.thumb} />
-                    ) : (
-                      <View style={styles.thumbFallback}>
-                        <Text style={styles.thumbLetter}>{item.name.charAt(0)}</Text>
-                      </View>
-                    )}
-                    <View style={styles.openBadge}>
-                      <Text style={styles.openBadgeText}>OPEN</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.storeName} numberOfLines={2}>
-                    {item.name}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  style={({ pressed }) => [styles.enterButton, pressed && styles.enterButtonPressed]}
-                  onPress={() => handleEnterStore(item.id)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${item.name} ${t.home.enter}`}
-                >
-                  <Text style={styles.enterButtonText}>{t.home.enter}</Text>
-                </Pressable>
-              </View>
+              <StoreMallCard
+                store={item}
+                onPreview={() => setSelectedStore(item)}
+                onEnter={() => handleEnterStore(item.id)}
+              />
             )}
           />
         )}
@@ -207,59 +187,6 @@ const styles = StyleSheet.create({
   loadingText: { color: colors.textMuted, fontSize: 14 },
   error: { color: '#fca5a5', textAlign: 'center', padding: 20 },
   empty: { color: colors.textMuted, textAlign: 'center', padding: 32, fontSize: 15 },
-  list: { padding: 12 },
+  list: { padding: 12, paddingBottom: 4 },
   row: { gap: 12, marginBottom: 12 },
-  card: {
-    flex: 1,
-    backgroundColor: colors.bgCard,
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  thumbWrap: { height: 120, backgroundColor: colors.bgElevated },
-  thumb: { width: '100%', height: '100%' },
-  thumbFallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  thumbLetter: { color: colors.text, fontSize: 36, fontWeight: '700' },
-  openBadge: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    backgroundColor: colors.openBadge,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  openBadgeText: { color: '#ffffff', fontSize: 10, fontWeight: '700' },
-  storeName: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '600',
-    paddingHorizontal: 10,
-    paddingTop: 10,
-    paddingBottom: 8,
-    minHeight: 36,
-  },
-  cardPreview: {
-    flex: 1,
-  },
-  enterButton: {
-    marginHorizontal: 10,
-    marginBottom: 10,
-    marginTop: 2,
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-  },
-  enterButtonPressed: {
-    opacity: 0.88,
-  },
-  enterButtonText: {
-    color: colors.primaryText,
-    fontSize: 14,
-    fontWeight: '700',
-  },
 });

@@ -673,11 +673,11 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§60 장바구니 통일** push `1ecadb9` · **§0 쇼핑몰 퀄리티** · 상세·홈 CTA · 다음 **4-C** · **§58 #3** |
-| **Git 상태** | `main` **`1ecadb9`** push ✅ · 로컬 UX 추가분 push 대기 |
+| **한 줄 요약** | **§58 #3 홈 몰 허브** (D-day·설명·카드) · 다음 **§60 4-C** 다크 · **PG 금지** |
+| **Git 상태** | `main` **`c71dabd`** · §58 #3 push 대기 |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · migrations **`20260812b`~`c`** 원격 적용 완료 |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~80% · P1·앱스토어 포함 **전체 ~55–60%** · **실결제** = P1 + 사업자 + PG |
-| **User 실기 (2026-08-14)** | 장바구니 통일 OK · **구린 UX = 즉시 수정(§0)** · **실기 = §0 Expo 4줄 전체** |
+| **User 실기 (2026-08-14)** | 장바구니·퀄리티 OK · **§58 #3** 홈 카드 실기 대기 |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -697,8 +697,8 @@ popup_store/                          # Turborepo root
 | **3** | ~~**§60 `/app/me`** — 라이트 · 구매내역 카드~~ | ✅ push `826e5f6` · User OK |
 | **4** | ~~**§60 4-B** — 쿠팡형 앱 shell~~ | ✅ User 실기 |
 | **4b** | ~~**§60 손님 라이트·장바구니 통일**~~ | ✅ push `1ecadb9` |
-| **4c** | **§0 쇼핑몰 퀄리티** — 구린 UX 즉시 수정 | 진행 중 (상세·홈 CTA) |
-| **5** | **§60 4-C** — 다크 모드 토글 · WebView 연동 | 4-B 후 |
+| **4c** | ~~**§0 쇼핑몰 퀄리티**~~ · ~~**§58 #3 홈 몰 허브**~~ | ✅ D-day · 설명 · `StoreMallCard` |
+| **5** | **§60 4-C** — 다크 모드 토글 · WebView 연동 | 다음 |
 | **6** | **§58 #3** — 홈 몰 허브 (카드·D-day·쇼핑하기) | 4-B/C 후 |
 | **7** | **§60 4-D** — 장바구니 전체화면 · 주문 썸네일 | 1~2세션 |
 | **8** | **§58 #5~6** — popup 기간 · 미리보기 | layout 숨김 ✅ |
@@ -748,6 +748,17 @@ npx expo start --tunnel --port 8082 --clear
 | **4** | 샌드박스·실결제 테스트 → **런칭** | |
 
 **PG 착수 조건 (전부 충족 전 금지):** ① User **사업자 등록 완료** ② **PG 후보·계약 확정** ③ (권장) P1·실기 대부분 OK.
+
+---
+
+### 7.20 세션 인수인계 — **2026-08-14** (§58 #3 홈 몰 허브)
+
+| | |
+|---|---|
+| **User** | 「작업 시작하자」→ §58 #3 착수 |
+| **조치** | `StoreMallCard` · `popupPeriod.ts` · D-day(`popup_ends_at`) · 설명 2줄 · 마감 임박 정렬 · 종료 매장 CTA 비활성 · 입장 모달 D-day |
+| **파일** | `home.tsx` · `StoreMallCard.tsx` · `popupPeriod.ts` · `stores.ts` · `domain.ts` · `StoreEnterModal.tsx` |
+| **다음** | **§60 4-C** 다크모드 · User 실기 |
 
 ---
 
@@ -1126,6 +1137,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-14 — §58 #3 홈 몰 허브 (User)
+- **Author:** Cursor Agent
+- **Changed:** `StoreMallCard` · D-day(`popup_ends_at`) · 매장 설명 · 마감 임박 정렬 · §7.20
+- **Notes:** 네이티브 홈=Expo `--clear` · `popup_ends_at` null이면 D-day 뱃지 없음
 
 ### 2026-08-14 — 장바구니 삭제 버튼 레이아웃 통일 (User)
 - **Author:** Cursor Agent

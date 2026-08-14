@@ -10,4 +10,6 @@ export interface StoreSummary {
   description: string | null;
   thumbnail_url: string | null;
   status: StoreStatus;
+  /** 팝업 종료일 (ISO) — §58 #3 D-day 뱃지 */
+  popup_ends_at: string | null;
 }
