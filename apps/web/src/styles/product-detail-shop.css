@@ -84,6 +84,13 @@
   gap: 8px;
 }
 
+.product-detail--light .product-detail-buy-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .product-detail--light .product-detail-stepper {
   border: 1px solid #e5e8eb;
   background: #f9fafb;
@@ -103,13 +110,16 @@
 .product-detail--light .product-detail-add-btn {
   background: #e94560;
   color: #ffffff;
-  min-height: 44px;
+  min-height: 48px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .product-detail--light .product-detail-cart-btn {
   border: 1.5px solid #3182f6;
   background: #ffffff;
   color: #3182f6;
+  flex-shrink: 0;
 }
 
 .product-detail--light .product-detail-cart-btn:active {

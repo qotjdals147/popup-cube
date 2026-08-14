@@ -311,20 +311,28 @@ export function ProductDetailModal({
 
         {!previewMode && (
           <div className="product-detail-buy-bar" style={styleFor(light, S.buyBarLayout, S.buyBarDark)}>
-            <div className="product-detail-stepper" style={styleFor(light, S.stepperLayout, S.stepperDark)}>
-              <button type="button" className="product-detail-stepper-btn" style={styleFor(light, S.stepperBtnLayout, S.stepperBtnDark)} onClick={() => setQty((q) => Math.max(1, q - 1))}>
-                −
-              </button>
-              <span className="product-detail-stepper-value" style={styleFor(light, S.stepperValueLayout, S.stepperValueDark)}>{qty}</span>
-              <button type="button" className="product-detail-stepper-btn" style={styleFor(light, S.stepperBtnLayout, S.stepperBtnDark)} onClick={() => setQty((q) => q + 1)}>
-                +
+            <div className="product-detail-buy-actions">
+              <div className="product-detail-stepper" style={styleFor(light, S.stepperLayout, S.stepperDark)}>
+                <button type="button" className="product-detail-stepper-btn" style={styleFor(light, S.stepperBtnLayout, S.stepperBtnDark)} onClick={() => setQty((q) => Math.max(1, q - 1))}>
+                  −
+                </button>
+                <span className="product-detail-stepper-value" style={styleFor(light, S.stepperValueLayout, S.stepperValueDark)}>{qty}</span>
+                <button type="button" className="product-detail-stepper-btn" style={styleFor(light, S.stepperBtnLayout, S.stepperBtnDark)} onClick={() => setQty((q) => q + 1)}>
+                  +
+                </button>
+              </div>
+              <button
+                type="button"
+                className="product-detail-cart-btn"
+                style={styleFor(light, S.cartBtnLayout, S.cartBtnDark)}
+                aria-label={t('shop.cart')}
+                onClick={onOpenCart}
+              >
+                🛒
               </button>
             </div>
             <button type="button" className="product-detail-add-btn" style={styleFor(light, S.addBtnLayout, S.addBtnDark)} onClick={handleAdd}>
               {added ? t('productDetail.added') : t('productDetail.addToCart')}
-            </button>
-            <button type="button" className="product-detail-cart-btn" style={styleFor(light, S.cartBtnLayout, S.cartBtnDark)} onClick={onOpenCart}>
-              🛒 {t('shop.cart')}
             </button>
           </div>
         )}
@@ -467,8 +475,8 @@ const S = {
   buyBarLayout: {
     flexShrink: 0,
     display: 'flex',
-    alignItems: 'center',
-    gap: 10,
+    flexDirection: 'column' as const,
+    gap: 8,
     padding: '12px 16px',
   },
   buyBarDark: { borderTop: '1px solid #2c4270', background: '#131c37' },
@@ -479,28 +487,27 @@ const S = {
   stepperValueLayout: { width: 36, textAlign: 'center' as const, fontSize: 14, fontWeight: 600, lineHeight: '32px' },
   stepperValueDark: { color: '#fff' },
   addBtnLayout: {
-    flex: 1,
-    padding: '10px 14px',
+    width: '100%',
+    padding: '12px 14px',
     borderRadius: 8,
     border: 'none',
-    fontSize: 13,
-    fontWeight: 600,
+    fontSize: 15,
+    fontWeight: 700,
     cursor: 'pointer',
+    whiteSpace: 'nowrap' as const,
   },
   addBtnDark: { background: '#e94560', color: '#fff' },
   cartBtnLayout: {
     flexShrink: 0,
-    minHeight: 44,
-    padding: '10px 12px',
+    width: 44,
+    height: 44,
+    padding: 0,
     borderRadius: 8,
-    fontSize: 13,
-    fontWeight: 600,
+    fontSize: 20,
     cursor: 'pointer',
-    whiteSpace: 'nowrap' as const,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
   },
   cartBtnDark: { border: '1px solid #4062a0', background: 'transparent', color: '#8ca4d8' },
 };
