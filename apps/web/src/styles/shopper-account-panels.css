@@ -35,78 +35,199 @@
 .shopper-account-main .addr-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
-/* 주문 · 배송지 카드 — 흰 배경 · 명확한 테두리 */
-.shopper-account-main .oh-card,
-.shopper-account-main .addr-card {
+/* 주문 카드 — 점주 발주·배송 탭과 동일 위계 */
+.shopper-account-main .oh-card {
   background: var(--acct-surface);
-  border: 1px solid var(--acct-border);
+  border: 2px solid #d1d6db;
   border-radius: 12px;
-  padding: 14px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
-.shopper-account-main .oh-card-header,
-.shopper-account-main .addr-card-header {
+.shopper-account-main .oh-card-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--acct-border);
 }
 
-.shopper-account-main .oh-card-header-left {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.shopper-account-main .oh-card-top-main {
+  flex: 1;
   min-width: 0;
 }
 
-.shopper-account-main .oh-store-name,
-.shopper-account-main .addr-card-label {
+.shopper-account-main .oh-card-ref-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.shopper-account-main .oh-order-ref {
+  color: #b45309;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.shopper-account-main .oh-chip-auto {
+  font-size: 11px;
+  color: #e67700;
+  background: #fff9db;
+  border: 1px solid #ffe066;
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.shopper-account-main .oh-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--acct-text-secondary, #4e5968);
+  font-size: 13px;
+}
+
+.shopper-account-main .oh-store-name {
   color: var(--acct-text);
   font-size: 14px;
   font-weight: 700;
 }
 
-.shopper-account-main .oh-order-ref {
-  color: #b45309;
+.shopper-account-main .oh-meta-sep {
+  color: var(--acct-muted);
+}
+
+.shopper-account-main .oh-date-inline {
+  color: var(--acct-muted);
   font-size: 12px;
+}
+
+.shopper-account-main .oh-amount-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.shopper-account-main .oh-items-section {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f2f4f6;
+  border: 1.5px solid #d1d6db;
+  margin-bottom: 4px;
+}
+
+.shopper-account-main .oh-section-label {
+  color: var(--acct-muted);
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
 }
 
-.shopper-account-main .oh-status-badge,
-.shopper-account-main .addr-default-badge {
-  font-size: 11px;
-  color: var(--acct-text-secondary, #4e5968);
-  border: 1px solid var(--acct-border);
-  border-radius: 999px;
-  padding: 2px 8px;
-  background: var(--acct-bg);
-  white-space: nowrap;
-}
-
-.shopper-account-main .oh-auto-note {
-  color: #b45309;
-  font-size: 11px;
-  margin: 0 0 8px;
-}
-
-.shopper-account-main .oh-item-line,
-.shopper-account-main .addr-card-line {
-  color: var(--acct-text-secondary, #4e5968);
-  font-size: 12px;
-  line-height: 1.5;
+.shopper-account-main .oh-item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .shopper-account-main .oh-item-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
   gap: 8px;
-  margin-bottom: 4px;
+  font-size: 13px;
+  color: var(--acct-text);
+}
+
+.shopper-account-main .oh-item-name {
+  min-width: 0;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.shopper-account-main .oh-item-qty {
+  color: var(--acct-text-secondary, #4e5968);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.shopper-account-main .oh-timeline-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.shopper-account-main .oh-timeline-chip {
+  font-size: 11px;
+  color: var(--acct-text-secondary, #4e5968);
+  background: #f2f4f6;
+  border: 1px solid var(--acct-border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  line-height: 1.4;
+}
+
+.shopper-account-main .oh-timeline-chip--success {
+  color: #087f5b;
+  background: #ebfbee;
+  border-color: #b2f2bb;
+}
+
+.shopper-account-main .oh-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--acct-border);
+}
+
+.shopper-account-main .oh-action-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.shopper-account-main .oh-claim-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.shopper-account-main .oh-gacha-prize-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.shopper-account-main .oh-gacha-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.shopper-account-main .oh-gacha-emoji {
+  font-size: 24px;
 }
 
 .shopper-account-main .oh-review-btn {
@@ -158,10 +279,40 @@
   line-height: 1.6;
 }
 
+.shopper-account-main .addr-card-label {
+  color: var(--acct-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.shopper-account-main .addr-default-badge {
+  font-size: 11px;
+  color: var(--acct-text-secondary, #4e5968);
+  border: 1px solid var(--acct-border);
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: var(--acct-bg);
+  white-space: nowrap;
+}
+
+.shopper-account-main .addr-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.shopper-account-main .addr-card-line {
+  color: var(--acct-text-secondary, #4e5968);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .shopper-account-main .oh-cancelled-note {
   color: #e03131;
   font-size: 12px;
-  margin: 0 0 8px;
+  margin: 10px 0 0;
 }
 
 .shopper-account-main .oh-actions {
@@ -169,7 +320,8 @@
 }
 
 .shopper-account-main .oh-btn-primary {
-  padding: 8px 12px;
+  padding: 10px 14px;
+  min-height: 44px;
   border-radius: 8px;
   border: none;
   background: #3182f6;
@@ -180,7 +332,8 @@
 }
 
 .shopper-account-main .oh-btn-secondary {
-  padding: 8px 12px;
+  padding: 10px 14px;
+  min-height: 44px;
   border-radius: 8px;
   border: 1px solid #3182f6;
   background: #fff;
@@ -191,7 +344,8 @@
 }
 
 .shopper-account-main .oh-btn-danger {
-  padding: 8px 12px;
+  padding: 10px 14px;
+  min-height: 44px;
   border-radius: 8px;
   border: 1px solid #e94560;
   background: #fff;
@@ -249,25 +403,11 @@
   box-sizing: border-box;
 }
 
-.shopper-account-main .oh-footer-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--acct-border);
-  gap: 12px;
-}
-
-.shopper-account-main .oh-date {
-  color: var(--acct-muted);
-  font-size: 11px;
-}
-
 .shopper-account-main .oh-total {
   color: #e94560;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .shopper-account-main .oh-amount-line {
@@ -275,6 +415,16 @@
   gap: 10px;
   color: var(--acct-muted);
   font-size: 12px;
+  justify-content: flex-end;
+}
+
+/* 배송지 카드 — 흰 배경 · 명확한 테두리 */
+.shopper-account-main .addr-card {
+  background: var(--acct-surface);
+  border: 2px solid #d1d6db;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .shopper-account-main .addr-section-header {

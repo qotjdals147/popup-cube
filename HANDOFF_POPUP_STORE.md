@@ -1029,6 +1029,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-08-14 — 구매 내역 카드 가시성 (§60 · 점주 탭 패턴)
+- **Author:** Cursor Agent (User — 주문 카드 주루룩 나열 개선)
+- **Changed:** `ShopperOrderCardLight` — 상단 **주문번호+상태뱃지+금액** · 상품 **inset 섹션** · 배송 **타임라인 칩** · **액션 바** · `orderStatusBadgeStyle` 재사용
+- **Notes:** 썸네일은 **§60 4-D** · 로컬/Vercel 후 **내 정보 → 구매 내역** 확인
+
 ### 2026-08-14 — `/app/me` 라이트 테마 · 구매내역/배송지 패널 (§60)
 - **Author:** Cursor Agent (User 실기 — 내 정보 다크·흰 글자 안 보임 · 탭 색 · 카드 테두리)
 - **Changed:** `OrderHistoryPanel`/`AddressManagementPanel` `appearance="light"` · `shopper-account-panels.css` · 탭 **구매내역=accent `#e94560`** · **배송지=primary `#3182f6`** · 앱 WebView에서 **←홈 숨김** · §0 **버튼 색 일관성** 규칙

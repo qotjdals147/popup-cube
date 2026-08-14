@@ -13,6 +13,7 @@ import {
 import { formatOrderRef } from '../lib/orderRef';
 import { getMyReviewKeys, reviewKey } from '../lib/reviews';
 import { ReviewFormModal } from './ReviewFormModal';
+import { ShopperOrderCardLight } from './ShopperOrderCardLight';
 import { t } from '../i18n';
 
 interface OrderHistoryPanelProps {
@@ -175,41 +176,56 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
 
       {!loading && !error && orders.length > 0 && (
         <div className={isLight ? 'oh-list' : undefined} style={isLight ? undefined : styles.list}>
-          {orders.map((order) => (
-              <div key={order.id} className={isLight ? 'oh-card' : undefined} style={isLight ? undefined : styles.card}>
-                <div className={isLight ? 'oh-card-header' : undefined} style={isLight ? undefined : styles.cardHeader}>
-                  <div className={isLight ? 'oh-card-header-left' : undefined} style={isLight ? undefined : styles.cardHeaderLeft}>
-                    <span className={isLight ? 'oh-store-name' : undefined} style={isLight ? undefined : styles.storeName}>{order.store_name ?? '-'}</span>
+          {orders.map((order) =>
+            isLight ? (
+              <ShopperOrderCardLight
+                key={order.id}
+                order={order}
+                reviewKeys={reviewKeys}
+                actionId={actionId}
+                claimFormId={claimFormId}
+                claimDraft={claimDraft}
+                onWriteReview={(o, pid, pname) => void handleWriteReviewClick(o, pid, pname)}
+                onConfirmPurchase={(id) => void handleConfirmPurchase(id)}
+                onCancelOrder={(id) => void handleCancelOrder(id)}
+                onSubmitClaim={(id) => void handleSubmitClaim(id)}
+                onOpenClaimForm={setClaimFormId}
+                onClaimDraftChange={(id, text) => setClaimDraft((prev) => ({ ...prev, [id]: text }))}
+              />
+            ) : (
+              <div key={order.id} style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <div style={styles.cardHeaderLeft}>
+                    <span style={styles.storeName}>{order.store_name ?? '-'}</span>
                     {order.store_code && (
-                      <span className={isLight ? 'oh-order-ref' : undefined} style={isLight ? undefined : styles.orderRef}>
+                      <span style={styles.orderRef}>
                         {t('myOrders.orderRef')}: {formatOrderRef(order.store_code, order.order_number)}
                       </span>
                     )}
                   </div>
-                  <span className={isLight ? 'oh-status-badge' : undefined} style={isLight ? undefined : styles.statusBadge}>{t(`ownerOrders.status.${order.status}`)}</span>
+                  <span style={styles.statusBadge}>{t(`ownerOrders.status.${order.status}`)}</span>
                 </div>
 
                 {order.status === 'purchase_confirmed' && order.purchase_confirm_auto && (
-                  <p className={isLight ? 'oh-auto-note' : undefined} style={isLight ? undefined : styles.autoNote}>{t('ownerOrders.purchaseConfirmedAutoBadge')}</p>
+                  <p style={styles.autoNote}>{t('ownerOrders.purchaseConfirmedAutoBadge')}</p>
                 )}
 
-                <div style={isLight ? undefined : styles.itemsRow}>{t('myOrders.itemsCount', { count: order.items.length })}</div>
+                <div style={styles.itemsRow}>{t('myOrders.itemsCount', { count: order.items.length })}</div>
                 {order.items.map((item) => {
                   const reviewEligible = canFileClaim(order.status);
                   const alreadyReviewed = reviewKeys.has(reviewKey(order.id, item.product_id));
                   return (
-                    <div key={item.id} className={isLight ? 'oh-item-row' : undefined} style={isLight ? undefined : styles.itemRow}>
-                      <span className={isLight ? 'oh-item-line' : undefined} style={isLight ? undefined : styles.itemLine}>
+                    <div key={item.id} style={styles.itemRow}>
+                      <span style={styles.itemLine}>
                         {item.product_name} × {item.quantity}
                       </span>
                       {reviewEligible &&
                         (alreadyReviewed ? (
-                          <span className={isLight ? 'oh-review-done' : undefined} style={isLight ? undefined : styles.reviewDoneBadge}>{t('myOrders.reviewDone')}</span>
+                          <span style={styles.reviewDoneBadge}>{t('myOrders.reviewDone')}</span>
                         ) : (
                           <button
                             type="button"
-                            className={isLight ? 'oh-review-btn' : undefined}
-                            style={isLight ? undefined : styles.reviewButton}
+                            style={styles.reviewButton}
                             disabled={actionId === order.id}
                             onClick={() => void handleWriteReviewClick(order, item.product_id, item.product_name)}
                           >
@@ -221,29 +237,25 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
                 })}
 
                 {order.reward_type === 'gacha' && order.gacha_prize_name && (
-                  <div className={isLight ? 'oh-gacha-box' : undefined} style={isLight ? undefined : styles.gachaBox}>
-                    <div className={isLight ? 'oh-gacha-label' : undefined} style={isLight ? undefined : styles.gachaLabel}>{t('myOrders.gachaOnOrder')}</div>
-                    <div style={isLight ? undefined : styles.gachaPrizeRow}>
+                  <div style={styles.gachaBox}>
+                    <div style={styles.gachaLabel}>{t('myOrders.gachaOnOrder')}</div>
+                    <div style={styles.gachaPrizeRow}>
                       {order.gacha_prize_image_url ? (
                         <img src={order.gacha_prize_image_url} alt="" style={styles.gachaThumb} />
                       ) : (
                         <span style={styles.gachaEmoji}>🎁</span>
                       )}
-                      <span className={isLight ? 'oh-gacha-prize-name' : undefined} style={isLight ? undefined : styles.gachaPrizeName}>{order.gacha_prize_name}</span>
+                      <span style={styles.gachaPrizeName}>{order.gacha_prize_name}</span>
                     </div>
                   </div>
                 )}
 
-                {order.status === 'cancelled' && (
-                  <p className={isLight ? 'oh-cancelled-note' : undefined} style={isLight ? undefined : styles.cancelledNote}>
-                    {t('myOrders.cancelledNote')}
-                  </p>
-                )}
+                {order.status === 'cancelled' && <p style={styles.cancelledNote}>{t('myOrders.cancelledNote')}</p>}
 
                 {(order.status === 'shipped' ||
                   order.status === 'delivery_completed' ||
                   order.status === 'purchase_confirmed') && (
-                  <div className={isLight ? 'oh-shipped-note' : undefined} style={isLight ? undefined : styles.shippedNote}>
+                  <div style={styles.shippedNote}>
                     {order.shipped_at && (
                       <>
                         {t('ownerOrders.shippedAt')} {formatDate(order.shipped_at)}
@@ -266,28 +278,24 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
                 )}
 
                 {canConfirmPurchase(order.status) && (
-                  <div className={isLight ? 'oh-actions' : undefined} style={isLight ? undefined : styles.actions}>
+                  <div style={styles.actions}>
                     <button
                       type="button"
-                      className={isLight ? 'oh-btn-primary' : undefined}
-                      style={isLight ? undefined : styles.primaryBtn}
+                      style={styles.primaryBtn}
                       disabled={actionId === order.id}
                       onClick={() => void handleConfirmPurchase(order.id)}
                     >
                       {t('myOrders.confirmPurchase')}
                     </button>
-                    <p className={isLight ? 'oh-auto-hint' : undefined} style={isLight ? undefined : styles.autoConfirmHint}>
-                      {t('cart.purchaseConfirmAutoRule')}
-                    </p>
+                    <p style={styles.autoConfirmHint}>{t('cart.purchaseConfirmAutoRule')}</p>
                   </div>
                 )}
 
                 {isCancellableByShopper(order.status) && (
-                  <div className={isLight ? 'oh-actions' : undefined} style={isLight ? undefined : styles.actions}>
+                  <div style={styles.actions}>
                     <button
                       type="button"
-                      className={isLight ? 'oh-btn-danger' : undefined}
-                      style={isLight ? undefined : styles.dangerBtn}
+                      style={styles.dangerBtn}
                       disabled={actionId === order.id}
                       onClick={() => void handleCancelOrder(order.id)}
                     >
@@ -297,27 +305,26 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
                 )}
 
                 {order.claim_status !== 'none' && (
-                  <div className={isLight ? 'oh-claim-box' : undefined} style={isLight ? undefined : styles.claimBox}>
-                    <div className={isLight ? 'oh-claim-label' : undefined} style={isLight ? undefined : styles.claimLabel}>{t('myOrders.claimMessageLabel')}</div>
-                    <p className={isLight ? 'oh-claim-text' : undefined} style={isLight ? undefined : styles.claimText}>{order.claim_message}</p>
+                  <div style={styles.claimBox}>
+                    <div style={styles.claimLabel}>{t('myOrders.claimMessageLabel')}</div>
+                    <p style={styles.claimText}>{order.claim_message}</p>
                     {order.claim_status === 'open' ? (
-                      <p className={isLight ? 'oh-claim-open-note' : undefined} style={isLight ? undefined : styles.claimOpenNote}>{t('myOrders.claimOpenNote')}</p>
+                      <p style={styles.claimOpenNote}>{t('myOrders.claimOpenNote')}</p>
                     ) : (
                       <>
-                        <div className={isLight ? 'oh-claim-label' : undefined} style={isLight ? undefined : styles.claimLabel}>{t('myOrders.claimReplyLabel')}</div>
-                        <p className={isLight ? 'oh-claim-text' : undefined} style={isLight ? undefined : styles.claimText}>{order.claim_reply}</p>
+                        <div style={styles.claimLabel}>{t('myOrders.claimReplyLabel')}</div>
+                        <p style={styles.claimText}>{order.claim_reply}</p>
                       </>
                     )}
                   </div>
                 )}
 
                 {canFileClaim(order.status) && order.claim_status !== 'open' && (
-                  <div className={isLight ? 'oh-actions' : undefined} style={isLight ? undefined : styles.actions}>
+                  <div style={styles.actions}>
                     {claimFormId === order.id ? (
-                      <div style={isLight ? undefined : styles.claimFormRow}>
+                      <div style={styles.claimFormRow}>
                         <textarea
-                          className={isLight ? 'oh-claim-textarea' : undefined}
-                          style={isLight ? undefined : styles.claimTextarea}
+                          style={styles.claimTextarea}
                           value={claimDraft[order.id] ?? ''}
                           onChange={(e) =>
                             setClaimDraft((prev) => ({ ...prev, [order.id]: e.target.value }))
@@ -326,8 +333,7 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
                         />
                         <button
                           type="button"
-                          className={isLight ? 'oh-btn-primary' : undefined}
-                          style={isLight ? undefined : styles.primaryBtn}
+                          style={styles.primaryBtn}
                           disabled={actionId === order.id}
                           onClick={() => void handleSubmitClaim(order.id)}
                         >
@@ -335,38 +341,34 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
                         </button>
                       </div>
                     ) : (
-                      <button
-                        type="button"
-                        className={isLight ? 'oh-btn-secondary' : undefined}
-                        style={isLight ? undefined : styles.secondaryBtn}
-                        onClick={() => setClaimFormId(order.id)}
-                      >
+                      <button type="button" style={styles.secondaryBtn} onClick={() => setClaimFormId(order.id)}>
                         {order.claim_status === 'resolved' ? t('myOrders.claimAgain') : t('myOrders.claimButton')}
                       </button>
                     )}
                   </div>
                 )}
 
-                <div className={isLight ? 'oh-footer-row' : undefined} style={isLight ? undefined : styles.footerRow}>
-                  <span className={isLight ? 'oh-date' : undefined} style={isLight ? undefined : styles.date}>{formatDate(order.created_at)}</span>
-                  <div style={isLight ? undefined : styles.amountBlock}>
+                <div style={styles.footerRow}>
+                  <span style={styles.date}>{formatDate(order.created_at)}</span>
+                  <div style={styles.amountBlock}>
                     {(order.shipping_fee ?? 0) > 0 && (
-                      <div className={isLight ? 'oh-amount-line' : undefined} style={isLight ? undefined : styles.amountLine}>
+                      <div style={styles.amountLine}>
                         <span>{t('myOrders.productSubtotal')}</span>
                         <span>{formatPrice(order.subtotal_amount ?? order.total_amount)}</span>
                       </div>
                     )}
                     {(order.shipping_fee ?? 0) > 0 && (
-                      <div className={isLight ? 'oh-amount-line' : undefined} style={isLight ? undefined : styles.amountLine}>
+                      <div style={styles.amountLine}>
                         <span>{t('myOrders.shippingFee')}</span>
                         <span>{formatPrice(order.shipping_fee ?? 0)}</span>
                       </div>
                     )}
-                    <strong className={isLight ? 'oh-total' : undefined} style={isLight ? undefined : styles.total}>{formatPrice(order.total_amount)}</strong>
+                    <strong style={styles.total}>{formatPrice(order.total_amount)}</strong>
                   </div>
                 </div>
               </div>
-            ))}
+            ),
+          )}
         </div>
       )}
     </>
