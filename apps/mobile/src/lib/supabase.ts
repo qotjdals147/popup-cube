@@ -60,5 +60,13 @@ export function formatSupabaseAuthError(message: string): string {
   if (/invalid login credentials/i.test(message)) {
     return '이메일 또는 비밀번호가 올바르지 않습니다.';
   }
+  if (/jwt issued at future|issued at future|clock skew/i.test(message)) {
+    return '기기 시간이 서버와 맞지 않아요. 설정 → 날짜·시간 → 「자동 설정」 켠 뒤 앱을 완전히 종료하고 다시 로그인해 주세요.';
+  }
   return message;
+}
+
+/** JWT 시계 오류 — 에뮬레이터·기기 시간이 틀릴 때 profiles REST가 거부함 */
+export function isJwtClockSkewError(message: string): boolean {
+  return /jwt issued at future|issued at future|clock skew/i.test(message);
 }

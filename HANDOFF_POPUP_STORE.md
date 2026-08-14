@@ -14,7 +14,7 @@
 
 - **사용자가 지시했든, 에이전트가 스스로 다음 작업을 이어가든 — 새 작업(요청/할 일)을 시작할 때마다** 이 `## 0. Handoff Protocol`을 다시 읽고 따른다.
 - 같은 세션 안에서 이미 한 번 읽었어도, 다음 작업으로 넘어갈 때 **다시** §0을 확인한다 `(대화가 길어지며 규칙을 놓치는 것을 방지)`.
-- 특히 아래는 매번 재확인: **브리핑 형식(§0 하단)**, **모델 추천(§24)**, **HANDOFF 실시간 갱신(§0 아래 섹션)**, **한국어 대화 규칙**, **UI/UX 가시성·편의성(§0)**, **실기 확인 방법 = §0 「한 줄씩 복붙」 형식(생략 금지)**.
+- 특히 아래는 매번 재확인: **브리핑 형식(§0 하단)**, **모델 추천(§24)**, **HANDOFF 실시간 갱신**, **한국어 대화 규칙**, **UI/UX**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · 생략 금지).
 - 규칙을 지키지 못했다고 사용자가 지적하면, 즉시 인정하고 그 지점부터 규칙대로 다시 수행한다.
 
 ### 세션 시작 시
@@ -144,6 +144,21 @@
 
 **예외 (브리핑 생략 가능):** HANDOFF만 업데이트, 순수 질문 답변, 사용자가 "브리핑 없이 바로 해"라고 명시한 경우
 
+### Windows에서 명령 실행 (cmd · PowerShell — User·에이전트 필독)
+
+**User는 개발자가 아님.** 「터미널」「PowerShell」만 말하고 **어디에 무엇을 붙여넣는지**를 빼먹지 않는다.
+
+| | |
+|---|---|
+| **어디에** | **명령 프롬pt(cmd)** 또는 **PowerShell** — **둘 다 OK** (Cursor 하단 **Terminal** 탭도 OK) |
+| **여는 법 (cmd)** | 키보드 **`Win`** → **`cmd`** 입력 → **Enter** → 검은 창 |
+| **여는 법 (PowerShell)** | **`Win`** → **`powershell`** 입력 → **Enter** → 파란 창 |
+| **실행 법** | 아래 명령을 **한 줄씩** 복사 → 창에 붙여넣기 → **Enter** · **한 번에 여러 줄 통째로 붙여넣지 말 것** |
+| **첫 줄** | 항상 `cd C:\Users\qotjd\Downloads\Cursor\popup_store` 로 **프로젝트 폴더로 이동**부터 |
+| **쓰지 말 것** | `cd apps/mobile && npm run dev` (Linux/`&&` 한 줄) · `/Users/...` · `popup_store`만 cd (드라이브 `C:` 없으면 실패) |
+
+**막히면:** `node --version` → 숫자 안 나오면 [Node.js LTS](https://nodejs.org) 설치 후 **cmd 창을 닫았다가 다시** 연다.
+
 ### Expo Go 실기 테스트 안내 규칙 (필수 — 2026-07-30)
 
 **User는 개발자가 아님.** 앱·모바일 관련 작업이 끝나면 (또는 User가 「테스트 어떻게 해?」라고 물으면) **매번** 아래를 **쉬운 말 + 복붙 가능한 명령**으로 설명해 준다.  
@@ -154,7 +169,7 @@
    - Play 스토어 Expo Go = 보통 **최신**(현재 **54** 등) → QR 찍으면 *Project is incompatible* (우리 52 vs Go 54).  
    - **SDK 57** = 실기기 크래시 이력 (ISS-025) — 쓰지 말 것.  
    - 해결: Play 스토어 Expo Go **삭제** → **SDK 52 APK** 설치 → QR 다시.
-2. **명령은 PowerShell 기준** · 워크스페이스 절대 경로부터 (`cd C:\Users\qotjd\Downloads\Cursor\popup_store\...`)
+2. **명령은 Windows cmd·PowerShell 공통** — **한 줄씩 Enter** · 워크스페이스 절대 경로부터 (`cd C:\Users\qotjd\Downloads\Cursor\popup_store`)
 3. **Tunnel 기본** — 폰과 PC가 다른 네트워크일 수 있음 → `npx expo start --tunnel --port 8082 --clear`
 4. **데모 계정**을 함께 적는다: `demo@shopper.com` / `demo` (손님) · `demo@owner.com` / `demo` (점주·월드 입장만, 관리는 PC)
 5. **Sprint 4-1+ 월드 테스트**면 추가로 안내:
@@ -162,18 +177,18 @@
    - Vercel `VITE_SOCKET_SERVER_URL` = **Railway** URL (localhost면 월드 오프라인 안내만 보임)
    - **가로 회전:** 매장(WebView) 화면에서만 `expo-screen-orientation` 적용 — **홈·로그인은 세로**일 수 있음. 폰 **설정 → 디스플레이 → 자동 회전** 켜기. Expo Go에서 config만 바꿔도 안 돌아가면 **`--clear` 재시작** 후 **GUCCI 입장한 뒤** 가로 테스트.
 6. 테스트 플로우를 **클릭 순서**로: 랜딩 → 일반 회원 로그인 → 홈 → 매장 카드 → 입장 → 월드(WebView)
-7. 깨지면 **짧은 체크리스트**만: SDK 52인지 / `--clear` 재시작했는지 / `npm install --legacy-peer-deps` / Vercel·소켓
-8. **확인 방법 설명 형식 (User 2026-07-31 — 생략 금지):**
-   - User에게 「어떻게 확인해?」「테스트 방법」을 줄 때 **`--clear` 재시작`만 말하고 끝내지 말 것.**
-   - **반드시** 제목 **`아래 한 줄씩 복붙:`** (또는 동일 의미) 아래에 **PowerShell 명령 4줄 전체**를 **한 줄씩** 코드 블록으로 넣는다 *(경로·`npm install`·`apps\mobile`·`expo start` 생략 불가)*.
-   - 그 다음에 **폰 Expo Go SDK 52** · **데모 계정** · **앱 안 클릭 순서** · **이번에 볼 것(기대 결과)** 를 이어서 적는다.
-   - **PC 점주 웹만** 바뀐 경우 → **PC 웹 3줄 블록**(위 「PC 웹 로컬」) **필수** · 앱 WebView까지면 **Expo 4줄 + PC 3줄**.
-   - 웹(Vercel)만 배포됐고 User가 **로컬 없이** Vercel만 볼 때 → `https://popup-cube-web.vercel.app` + push 후 1~2분 · 그래도 **로컬 dev 권장** 문구 한 줄.
-   - 표준 전체 문구는 아래 「User에게 붙여 줄 표준 안내문」과 **동일한 명령 4줄**을 유지한다.
+7. 깨지면 **짧은 체크리스트**만: SDK 52인지 / `--clear` 재시작했는지 / `npm install --legacy-peer-deps` / Vercel·소켓 / **`JWT issued at future`** → 폰·에뮬레이터 **날짜·시간 자동 설정** 후 재로그인
+8. **확인 방법 설명 형식 (User — 생략 금지):**
+   - **`--clear`만** 말하고 끝내지 말 것.
+   - **반드시** (1) **Win → cmd → Enter** 한 줄 (2) **`아래 한 줄씩 복붙:`** (3) **Expo 4줄** 또는 **PC 웹 3줄** 코드 블록
+   - 그 다음 **SDK 52** · **데모 계정** · **클릭 순서** · **이번에 볼 것**
+   - PC 점주만 → **PC 웹 3줄** · 앱 WebView까지 → **Expo 4줄** (+ 필요 시 PC 3줄)
+   - Vercel만 → `https://popup-cube-web.vercel.app` + push 1~2분
 
-#### 표준 PC 명령 (에이전트 — 확인 방법 설명 시 항상 이 4줄 전체)
+#### 표준 Expo 4줄 (앱 · 손님 WebView — **§7·Changelog와 동일**)
 
-**아래 한 줄씩 복붙:**
+1) **Win → `cmd` → Enter** (PowerShell도 OK)  
+2) **아래 한 줄씩 복붙** — 각 줄 붙여넣은 뒤 **Enter**:
 
 ```
 cd C:\Users\qotjd\Downloads\Cursor\popup_store
@@ -182,7 +197,7 @@ cd apps\mobile
 npx expo start --tunnel --port 8082 --clear
 ```
 
-*(위 4줄은 「User에게 붙여 줄 표준 안내문」 2) PC 와 동일 — 한 줄이라도 빼지 말 것.)*
+3) QR → 폰 **Expo Go SDK 52** · `demo@shopper.com` / `demo`
 
 ### PC 웹(점주·스토어 관리) 로컬 테스트 안내 규칙 (필수 — 2026-08-03)
 
@@ -192,12 +207,13 @@ Vercel만 고치고 로컬에서 먼저 보려면 아래 **PC 3줄**을 쓴다. 
 #### 에이전트가 반드시 지킬 것
 1. **브라우저 주소** — `npm run dev` 후 보통 **`http://localhost:5173`** (터미널에 나온 Local URL 그대로)
 2. **점주 계정** — `demo@owner.com` / `demo` → 홈 → 매장 **편집** (`/store/.../edit`)
-3. **확인 방법 형식** — 제목 **`아래 한 줄씩 복붙:`** 아래 **PowerShell 3줄 전체** (생략 금지)
-4. **앱만** 손님 테스트면 §0 Expo 4줄 · **PC만** 점주 테스트면 PC 3줄 · **둘 다**면 **두 블록 모두**
+3. **확인 방법 형식** — **Win → cmd** + **`아래 한 줄씩 복붙:`** + **3줄 전체** (§0 「표준 PC 웹 3줄」과 동일)
+4. **앱만** → §0 **Expo 4줄** · **PC만** → **PC 웹 3줄** · **둘 다** → **두 블록 모두**
 
-#### 표준 PC 웹 로컬 명령 (점주 UI 확인)
+#### 표준 PC 웹 3줄 (점주 UI — **§0과 동일**)
 
-**아래 한 줄씩 복붙:**
+1) **Win → `cmd` → Enter**  
+2) **아래 한 줄씩 복붙:**
 
 ```
 cd C:\Users\qotjd\Downloads\Cursor\popup_store
@@ -205,43 +221,41 @@ npm install --legacy-peer-deps
 npm run dev
 ```
 
-5) 브라우저에서 터미널에 나온 주소 (보통 `http://localhost:5173`) → **스토어 관리자 로그인** → `demo@owner.com` / `demo`  
-6) **이번에 볼 것** — 이번 작업 범위(예: 상품 수정·주문 수락)를 클릭 순서로  
-7) Vercel 반영은 **Git push 후 1~2분** · 로컬과 Vercel이 다르면 **로컬 `npm run dev`가 최신 코드**
+3) 브라우저 → 터미널 주소 (보통 `http://localhost:5173`) → `demo@owner.com` / `demo`
 
 #### User에게 붙여 줄 표준 안내문 (복사용)
 
 ```
 【Expo Go 테스트 — POP-UP CUBE】
 
-1) 폰에 Expo Go **SDK 52** 설치 (Play 스토어 버전은 보통 54+라 **안 맞음**)
-   - Play 스토어 Expo Go **삭제**
-   - SDK 52 APK 설치:
-     https://expo.dev/go?sdkVersion=52
-     (Android device → Manual / APK)
-   - 직접 APK 예:
-     https://github.com/expo/expo-go-releases/releases/download/Expo-Go-2.32.20/Expo-Go-2.32.20.apk
-   - 또는 PC: cd apps\mobile → npx expo-go url android 52
+0) PC에서 명령 창 열기
+   Win 키 → cmd 입력 → Enter (검은 창)
+   ※ PowerShell도 OK · Cursor Terminal 탭도 OK
+   ※ 명령은 한 줄씩 붙여넣고 Enter (여러 줄 한꺼번에 X)
 
-2) PC (PowerShell)
+1) 폰에 Expo Go SDK 52 (Play 스토어 54+는 안 맞음)
+   - Play 스토어 Expo Go 삭제
+   - https://expo.dev/go?sdkVersion=52 → Android → Manual/APK
+   - APK 예: https://github.com/expo/expo-go-releases/releases/download/Expo-Go-2.32.20/Expo-Go-2.32.20.apk
+
+2) PC — 아래 한 줄씩 복붙 (cmd 창에):
+
    cd C:\Users\qotjd\Downloads\Cursor\popup_store
    npm install --legacy-peer-deps
    cd apps\mobile
    npx expo start --tunnel --port 8082 --clear
 
-3) 폰 **SDK 52** Expo Go로 QR 스캔
+3) 폰 SDK 52 Expo Go로 QR 스캔
 
 4) 로그인
-   - 손님: demo@shopper.com / demo
-   - 점주(월드만): demo@owner.com / demo
+   손님: demo@shopper.com / demo
+   점주(월드만): demo@owner.com / demo
 
-5) 홈 → 매장 카드 → **쇼핑하기** → **쇼핑 화면**(WebView `/store/.../shop`) — v1 기본 · 픽셀 월드는 dev/스폰서용 legacy
-   - (구 Sprint 4) 월드 `/play` 테스트: `VITE_WORLD_ENABLED=true` + 직접 URL · Railway 소켓
+5) 홈 → 매장 → 쇼핑하기 → 쇼핑 화면 (WebView /shop)
 
-※ "Project is incompatible … Expo Go SDK 54 / project SDK 52"
-   → Play 스토어 Go 삭제 후 SDK 52 APK 설치 (위 1번)
-※ SDK 57 Expo Go + 이 프로젝트 = 거의 항상 팅김
-※ 빨간 화면(모듈 없음) → 루트에서 npm install --legacy-peer-deps 후 --clear 재시작
+※ Project is incompatible (SDK 54 vs 52) → Play Go 삭제 → SDK 52 APK
+※ 빨간 화면 → 위 2) npm install 후 --clear 재시작
+※ JWT issued at future → 폰 설정 날짜·시간 자동 → 앱 재로그인
 ```
 
 #### HANDOFF / 대화에서의 위치
@@ -675,11 +689,12 @@ popup_store/                          # Turborepo root
 
 **미커밋 (의도적 제외):** `apps/mobile/AGENTS.md` · `CLAUDE.md` · `LICENSE`
 
-#### 사용자가 지금 해야 할 것 (§60 4-A 실기 — **push `0d31f82` 반영 후**)
+#### 사용자가 지금 해야 할 것 (§60 4-A 실기 — **§0 표준 Expo 4줄**)
 
-> Vercel 1~2분 대기 후 테스트. **Expo `--clear` 재시작 필수** (앱 번들 캐시).
+> Vercel push 후 1~2분 · **Expo `--clear` 필수**
 
-**앱 + WebView (손님 플로우):**
+1) **Win → `cmd` → Enter**  
+2) **§0 「표준 Expo 4줄」** — 한 줄씩 복붙 (아래와 동일):
 
 ```
 cd C:\Users\qotjd\Downloads\Cursor\popup_store
@@ -688,12 +703,9 @@ cd apps\mobile
 npx expo start --tunnel --port 8082 --clear
 ```
 
-1) Expo Go **SDK 52** · `demo@shopper.com` / `demo`  
-2) **홈 → GUCCI → 쇼핑하기**  
-3) **확인:** ←·🛒 **잘리지 않음** · **담기**와 **상품 상세 보기** **같은 너비·높이** · 하단 sticky bar에 2행 카드 가림 최소  
-4) OK면 다음 = **§58 #3** 몰 허브
-
-**PC 웹 직접:** `https://popup-cube-web.vercel.app/store/popup_gucci_01/shop` (로그인 후)
+3) Expo Go **SDK 52** · `demo@shopper.com` / `demo`  
+4) **홈 → GUCCI → 쇼핑하기** · 담기/상세 버튼 · ←·🛒 확인  
+5) Vercel 웹: `https://popup-cube-web.vercel.app/store/popup_gucci_01/shop`
 
 ---
 
@@ -1015,6 +1027,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-14 — §0 Windows cmd 실기 안내 정리
+- **Author:** Cursor Agent (User 「cmd 안내 제대로」)
+- **Changed:** §0 **cmd/PowerShell 여는 법** · **한 줄씩 Enter** · 표준 Expo 4줄·PC 웹 3줄 · §7·§14 동기화 · JWT 시계 오류 체크리스트
+- **Notes:** 에이전트·User 모두 **§0 표준 블록**만 복붙 — `&&`·Linux 경로 금지
 
 ### 2026-08-13 — push `0d31f82` (§60 shop 버튼 정렬 · 헤더 safe-area · ISS-036)
 - **Author:** Cursor Agent (User 「푸쉬하고 인수인계」)
@@ -2369,28 +2386,37 @@ gacha_rolls            (누가 언제 뭘 뽑았는지 기록)
 
 ## 14. Local Development Commands
 
-```bash
-# 0. 사전 준비: Node.js 18+ 설치 확인
-node --version
+> **User·실기 테스트:** §0 **「Windows에서 명령 실행」** · **표준 Expo 4줄** · **표준 PC 웹 3줄** — **cmd에 한 줄씩 Enter**.
 
-# 1. server/.env 에 SUPABASE_SERVICE_ROLE_KEY 채우기 (§7, §9)
-# 2. Redis 실행 (택1)
-docker run -p 6379:6379 redis
-# 또는 server/.env의 REDIS_URL을 Upstash 주소로 교체
+### Windows (cmd · PowerShell — User 기본)
 
-# 3. 루트에서 전체 설치 (workspaces 한 번에)
-npm install
+**Expo (앱):**
 
-# 4. 서버 + 웹 동시 실행 (Turborepo)
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+**PC 웹 (점주 localhost):**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
 npm run dev
-# 개별 실행도 가능:
-#   cd server && npm run dev        (포트 3000)
-#   cd apps/web && npm run dev      (포트 5173)
+```
 
-# 5. 확인
-# 웹: http://localhost:5173  (랜딩 → 쇼핑하기/매장 관리)
-# 소켓 테스트: server/examples/socket-test-client.html 브라우저로 열기
-# API: curl http://localhost:3000/api/stores/popup_gucci_01
+브라우저: `http://localhost:5173` · 점주 `demo@owner.com` / `demo`
+
+### 개발자 참고 (서버·소켓·월드 legacy)
+
+```text
+node --version
+npm install --legacy-peer-deps
+npm run dev
+rem 웹: http://localhost:5173
+rem 소켓(월드만): server/.env + cd server 후 npm run dev (포트 3000)
 ```
 
 ---

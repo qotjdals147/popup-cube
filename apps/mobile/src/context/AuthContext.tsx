@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { UserRole } from '../types/domain';
-import { getSupabase, isSupabaseConfigured, formatSupabaseAuthError } from '../lib/supabase';
+import { getSupabase, isSupabaseConfigured, formatSupabaseAuthError, isJwtClockSkewError } from '../lib/supabase';
 
 interface AuthState {
   userId: string | null;
@@ -63,6 +63,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error('[auth] profile load failed:', error.message);
+        if (isJwtClockSkewError(error.message)) {
+          await getSupabase().auth.signOut();
+          setState({
+            userId: null,
+            email: null,
+            role: null,
+            storeId: null,
+            nickname: null,
+            loading: false,
+            initError: formatSupabaseAuthError(error.message),
+          });
+          return;
+        }
         setState({
           userId,
           email,
