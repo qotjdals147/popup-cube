@@ -548,6 +548,7 @@ export function DisplayProductModal({
         <ProductDetailModal
           product={detailProduct}
           storeId={storeId}
+          appearance="dark"
           onClose={() => setDetailProduct(null)}
           onOpenCart={() => {
             setDetailProduct(null);

@@ -1028,6 +1028,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-08-14 — ProductDetailModal 라이트 테마 · stepper 숫자 (§60)
+- **Author:** Cursor Agent (User 실기 — 상세 다크·수량 숫자 안 보임)
+- **Changed:** `ProductDetailModal` inline dark가 CSS 덮어씀 → `styleFor` layout/light 분리 · `product-detail-shop.css` 보강 · default `appearance=light` · 월드 `DisplayProductModal`만 dark
+- **Notes:** Vercel push + Expo `--clear` · shop 「상품 상세 보기」에서 확인
+
 ### 2026-08-14 — §0 Windows cmd 실기 안내 정리
 - **Author:** Cursor Agent (User 「cmd 안내 제대로」)
 - **Changed:** §0 **cmd/PowerShell 여는 법** · **한 줄씩 Enter** · 표준 Expo 4줄·PC 웹 3줄 · §7·§14 동기화 · JWT 시계 오류 체크리스트

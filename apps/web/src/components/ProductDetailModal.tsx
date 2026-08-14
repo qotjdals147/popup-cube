@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import type { OrderStatus, Product, ProductDetailBlock, ProductReview } from '@popup-cube/shared';
 import { listProductDetailBlocks } from '../lib/productDetailBlocks';
 import { getMyReviewKeys, getProductReviews, reviewKey } from '../lib/reviews';
@@ -18,6 +18,11 @@ interface ProductDetailModalProps {
   previewMode?: boolean;
   /** AD-065 — shop WebView 라이트 */
   appearance?: 'light' | 'dark';
+}
+
+/** layout = 항상 적용 · dark = 다크일 때만 추가(색·테두리) */
+function styleFor(light: boolean, layout: CSSProperties, dark: CSSProperties = {}): CSSProperties {
+  return light ? layout : { ...layout, ...dark };
 }
 
 interface ReviewableOrder {
@@ -60,7 +65,7 @@ export function ProductDetailModal({
   onClose,
   onOpenCart,
   previewMode = false,
-  appearance = 'dark',
+  appearance = 'light',
 }: ProductDetailModalProps) {
   const light = appearance === 'light';
   const rootClass = light ? 'product-detail--light' : undefined;
@@ -165,32 +170,32 @@ export function ProductDetailModal({
 
   return (
     <div className={rootClass}>
-    <div className="product-detail-overlay" style={styles.overlay} onClick={onClose}>
-      <div className="product-detail-panel" style={styles.panel} onClick={(e) => e.stopPropagation()}>
-        <div className="product-detail-header" style={styles.header}>
-          <button type="button" className="product-detail-back" style={styles.backButton} onClick={onClose} aria-label={t('productDetail.close')}>
+    <div className="product-detail-overlay" style={styleFor(light, S.overlayLayout, S.overlayDark)} onClick={onClose}>
+      <div className="product-detail-panel" style={styleFor(light, S.panelLayout, S.panelDark)} onClick={(e) => e.stopPropagation()}>
+        <div className="product-detail-header" style={styleFor(light, S.headerLayout, S.headerDark)}>
+          <button type="button" className="product-detail-back" style={styleFor(light, S.backLayout, S.backDark)} onClick={onClose} aria-label={t('productDetail.close')}>
             ←
           </button>
-          <h3 className="product-detail-title" style={styles.title}>{product.name}</h3>
-          {previewMode && <span style={styles.previewBadge}>{t('productDetail.previewBadge')}</span>}
+          <h3 className="product-detail-title" style={styleFor(light, S.titleLayout, S.titleDark)}>{product.name}</h3>
+          {previewMode && <span style={S.previewBadge}>{t('productDetail.previewBadge')}</span>}
         </div>
 
-        <div style={styles.scrollArea}>
-          <div style={styles.topSection}>
-            <div className="product-detail-main-thumb-wrap" style={styles.mainThumbWrap}>
+        <div style={S.scrollArea}>
+          <div style={S.topSection}>
+            <div className="product-detail-main-thumb-wrap" style={styleFor(light, S.thumbWrapLayout, S.thumbWrapDark)}>
               {product.image_url ? (
-                <img src={product.image_url} alt={product.name} style={styles.mainThumb} />
+                <img src={product.image_url} alt={product.name} style={S.mainThumb} />
               ) : (
-                <div style={styles.mainThumbPlaceholder}>🛍️</div>
+                <div style={S.mainThumbPlaceholder}>🛍️</div>
               )}
             </div>
-            <div style={styles.topInfo}>
-              <div className="product-detail-price" style={styles.price}>{formatPrice(product.price)}</div>
-              {product.description && <p className="product-detail-short-desc" style={styles.shortDesc}>{product.description}</p>}
+            <div style={S.topInfo}>
+              <div className="product-detail-price" style={styleFor(light, S.priceLayout, S.priceDark)}>{formatPrice(product.price)}</div>
+              {product.description && <p className="product-detail-short-desc" style={styleFor(light, S.shortDescLayout, S.shortDescDark)}>{product.description}</p>}
               {avgRating !== null && (
-                <div style={styles.ratingSummaryInline}>
+                <div style={S.ratingSummaryInline}>
                   <Stars rating={Math.round(avgRating)} light={light} />
-                  <span style={styles.ratingSummaryText}>
+                  <span className="product-detail-rating-text" style={styleFor(light, S.ratingTextLayout, S.ratingTextDark)}>
                     {t('productDetail.avgRating', { rating: String(avgRating) })} ·{' '}
                     {t('productDetail.reviewsCount', { count: reviews.length })}
                   </span>
@@ -200,24 +205,24 @@ export function ProductDetailModal({
           </div>
 
           {loading ? (
-            <p className="product-detail-hint" style={styles.hint}>{t('productDetail.loading')}</p>
+            <p className="product-detail-hint" style={styleFor(light, S.hintLayout, S.hintDark)}>{t('productDetail.loading')}</p>
           ) : (
             <>
-              <section style={styles.section}>
-                <h4 className="product-detail-section-title" style={styles.sectionTitle}>{t('productDetail.descTitle')}</h4>
+              <section className="product-detail-section" style={styleFor(light, S.sectionLayout, S.sectionDark)}>
+                <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>{t('productDetail.descTitle')}</h4>
                 {detailBlocks.length === 0 ? (
-                  <p className="product-detail-hint" style={styles.hint}>{t('productDetail.noDetail')}</p>
+                  <p className="product-detail-hint" style={styleFor(light, S.hintLayout, S.hintDark)}>{t('productDetail.noDetail')}</p>
                 ) : (
-                  <div style={styles.blockStack}>
+                  <div style={S.blockStack}>
                     {detailBlocks.map((block) =>
                       block.block_type === 'image' ? (
                         block.image_url && (
-                          <img key={block.id} src={block.image_url} alt="" loading="lazy" style={styles.detailImage} />
+                          <img key={block.id} src={block.image_url} alt="" loading="lazy" style={S.detailImage} />
                         )
                       ) : block.text_content && block.text_content.trim() ? (
-                        <div key={block.id} style={styles.detailDescBody}>
+                        <div key={block.id} className="product-detail-desc-body" style={styleFor(light, S.descBodyLayout, S.descBodyDark)}>
                           {block.text_content.split('\n').map((line, i) => (
-                            <p key={i} className="product-detail-desc-line" style={styles.detailDescLine}>
+                            <p key={i} className="product-detail-desc-line" style={S.descLineLayout}>
                               {line || '\u00A0'}
                             </p>
                           ))}
@@ -228,9 +233,9 @@ export function ProductDetailModal({
                 )}
               </section>
 
-              <section style={styles.section}>
-                <div style={styles.reviewsSectionHeader}>
-                  <h4 className="product-detail-section-title" style={styles.sectionTitle}>
+              <section className="product-detail-section" style={styleFor(light, S.sectionLayout, S.sectionDark)}>
+                <div style={S.reviewsSectionHeader}>
+                  <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>
                     {t('productDetail.reviewsTitle')}
                     {reviews.length > 0 ? ` (${reviews.length})` : ''}
                   </h4>
@@ -238,7 +243,7 @@ export function ProductDetailModal({
                     <button
                       type="button"
                       className="product-detail-write-review"
-                      style={styles.writeReviewButton}
+                      style={styleFor(light, S.writeReviewLayout, S.writeReviewDark)}
                       disabled={confirmingForReview}
                       onClick={() => void handleWriteReviewClick()}
                     >
@@ -247,24 +252,24 @@ export function ProductDetailModal({
                   )}
                 </div>
                 {!reviewableOrder && alreadyReviewedByMe && (
-                  <p style={styles.reviewedNote}>{t('productDetail.alreadyReviewedNote')}</p>
+                  <p className="product-detail-reviewed-note" style={styleFor(light, S.reviewedNoteLayout, S.reviewedNoteDark)}>{t('productDetail.alreadyReviewedNote')}</p>
                 )}
                 {reviews.length === 0 ? (
-                  <p style={styles.hint}>{t('productDetail.reviewsEmpty')}</p>
+                  <p className="product-detail-hint" style={styleFor(light, S.hintLayout, S.hintDark)}>{t('productDetail.reviewsEmpty')}</p>
                 ) : (
-                  <div style={styles.reviewList}>
+                  <div style={S.reviewList}>
                     {reviews.map((r) => (
-                      <div key={r.review_id} className="product-detail-review-card" style={styles.reviewCard}>
-                        <div style={styles.reviewHeader}>
+                      <div key={r.review_id} className="product-detail-review-card" style={styleFor(light, S.reviewCardLayout, S.reviewCardDark)}>
+                        <div style={S.reviewHeader}>
                           <Stars rating={r.rating} light={light} />
-                          <span className="product-detail-review-nickname" style={styles.reviewNickname}>{r.reviewer_nickname ?? '익명'}</span>
-                          <span style={styles.reviewDate}>{formatDate(r.created_at)}</span>
+                          <span className="product-detail-review-nickname" style={styleFor(light, S.reviewNickLayout, S.reviewNickDark)}>{r.reviewer_nickname ?? '익명'}</span>
+                          <span className="product-detail-review-date" style={styleFor(light, S.reviewDateLayout, S.reviewDateDark)}>{formatDate(r.created_at)}</span>
                         </div>
-                        <p className="product-detail-review-body" style={styles.reviewBody}>{r.body}</p>
+                        <p className="product-detail-review-body" style={styleFor(light, S.reviewBodyLayout, S.reviewBodyDark)}>{r.body}</p>
                         {r.image_urls.length > 0 && (
-                          <div style={styles.reviewPhotoRow}>
+                          <div style={S.reviewPhotoRow}>
                             {r.image_urls.map((url) => (
-                              <img key={url} src={url} alt="" style={styles.reviewPhoto} />
+                              <img key={url} src={url} alt="" style={S.reviewPhoto} />
                             ))}
                           </div>
                         )}
@@ -278,20 +283,20 @@ export function ProductDetailModal({
         </div>
 
         {!previewMode && (
-          <div className="product-detail-buy-bar" style={styles.buyBar}>
-            <div className="product-detail-stepper" style={styles.stepper}>
-              <button className="product-detail-stepper-btn" style={styles.stepperButton} onClick={() => setQty((q) => Math.max(1, q - 1))}>
+          <div className="product-detail-buy-bar" style={styleFor(light, S.buyBarLayout, S.buyBarDark)}>
+            <div className="product-detail-stepper" style={styleFor(light, S.stepperLayout, S.stepperDark)}>
+              <button type="button" className="product-detail-stepper-btn" style={styleFor(light, S.stepperBtnLayout, S.stepperBtnDark)} onClick={() => setQty((q) => Math.max(1, q - 1))}>
                 −
               </button>
-              <span className="product-detail-stepper-value" style={styles.stepperValue}>{qty}</span>
-              <button className="product-detail-stepper-btn" style={styles.stepperButton} onClick={() => setQty((q) => q + 1)}>
+              <span className="product-detail-stepper-value" style={styleFor(light, S.stepperValueLayout, S.stepperValueDark)}>{qty}</span>
+              <button type="button" className="product-detail-stepper-btn" style={styleFor(light, S.stepperBtnLayout, S.stepperBtnDark)} onClick={() => setQty((q) => q + 1)}>
                 +
               </button>
             </div>
-            <button type="button" className="product-detail-add-btn" style={styles.addButton} onClick={handleAdd}>
+            <button type="button" className="product-detail-add-btn" style={styleFor(light, S.addBtnLayout, S.addBtnDark)} onClick={handleAdd}>
               {added ? t('productDetail.added') : t('productDetail.addToCart')}
             </button>
-            <button type="button" className="product-detail-cart-link" style={styles.cartLink} onClick={onOpenCart}>
+            <button type="button" className="product-detail-cart-link" style={styleFor(light, S.cartLinkLayout, S.cartLinkDark)} onClick={onOpenCart}>
               {t('shop.cart')}
             </button>
           </div>
@@ -316,47 +321,48 @@ export function ProductDetailModal({
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
-  overlay: {
-    position: 'fixed',
+const S = {
+  overlayLayout: {
+    position: 'fixed' as const,
     inset: 0,
-    background: 'rgba(0,0,0,0.55)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 65,
     padding: 12,
   },
-  panel: {
-    background: '#16213e',
+  overlayDark: { background: 'rgba(0,0,0,0.55)' },
+  panelLayout: {
     borderRadius: 16,
     width: '100%',
     maxWidth: 720,
     height: '100%',
     maxHeight: '96vh',
-    boxShadow: '0 16px 40px rgba(0,0,0,0.55)',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     overflow: 'hidden',
   },
-  header: {
+  panelDark: { background: '#16213e', boxShadow: '0 16px 40px rgba(0,0,0,0.55)' },
+  headerLayout: {
     display: 'flex',
     alignItems: 'center',
     gap: 12,
     padding: '14px 16px',
-    borderBottom: '1px solid #2c4270',
     flexShrink: 0,
   },
-  backButton: {
-    background: 'transparent',
-    border: 'none',
-    color: '#d8e4ff',
-    fontSize: 20,
-    cursor: 'pointer',
-    padding: 0,
-    lineHeight: 1,
+  headerDark: { borderBottom: '1px solid #2c4270' },
+  backLayout: { background: 'transparent', border: 'none', fontSize: 20, cursor: 'pointer', padding: 0, lineHeight: 1 },
+  backDark: { color: '#d8e4ff' },
+  titleLayout: {
+    fontSize: 16,
+    margin: 0,
+    flex: 1,
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap' as const,
   },
-  title: { color: '#fff', fontSize: 16, margin: 0, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  titleDark: { color: '#fff' },
   previewBadge: {
     fontSize: 11,
     fontWeight: 600,
@@ -366,92 +372,96 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '3px 10px',
     flexShrink: 0,
   },
-  scrollArea: { flex: 1, overflowY: 'auto', padding: 20 },
+  scrollArea: { flex: 1, overflowY: 'auto' as const, padding: 20 },
   topSection: { display: 'flex', gap: 14 },
-  mainThumbWrap: {
+  thumbWrapLayout: {
     width: 130,
     height: 130,
     flexShrink: 0,
     borderRadius: 10,
     overflow: 'hidden',
-    background: '#0d1730',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  mainThumb: { width: '100%', height: '100%', objectFit: 'contain' },
+  thumbWrapDark: { background: '#0d1730' },
+  mainThumb: { width: '100%', height: '100%', objectFit: 'contain' as const },
   mainThumbPlaceholder: { fontSize: 40, opacity: 0.4 },
-  topInfo: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 },
-  price: { color: '#e94560', fontSize: 18, fontWeight: 700 },
-  shortDesc: { color: '#c9d4ee', fontSize: 12.5, lineHeight: 1.5, margin: 0 },
+  topInfo: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' as const, gap: 6 },
+  priceLayout: { fontSize: 18, fontWeight: 700 },
+  priceDark: { color: '#e94560' },
+  shortDescLayout: { fontSize: 12.5, lineHeight: 1.5, margin: 0 },
+  shortDescDark: { color: '#c9d4ee' },
   ratingSummaryInline: { display: 'flex', alignItems: 'center', gap: 8 },
-  ratingSummaryText: { color: '#a0a0c0', fontSize: 11.5 },
-  hint: { color: '#a0a0c0', fontSize: 13, textAlign: 'center', padding: '16px 0' },
-  section: { marginTop: 22, borderTop: '1px solid #2c4270', paddingTop: 16 },
-  sectionTitle: { color: '#fff', fontSize: 14, fontWeight: 700, margin: '0 0 10px' },
+  ratingTextLayout: { fontSize: 11.5 },
+  ratingTextDark: { color: '#a0a0c0' },
+  hintLayout: { fontSize: 13, textAlign: 'center' as const, padding: '16px 0' },
+  hintDark: { color: '#a0a0c0' },
+  sectionLayout: { marginTop: 22, paddingTop: 16 },
+  sectionDark: { borderTop: '1px solid #2c4270' },
+  sectionTitleLayout: { fontSize: 14, fontWeight: 700, margin: '0 0 10px' },
+  sectionTitleDark: { color: '#fff' },
   reviewsSectionHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 },
-  writeReviewButton: {
+  writeReviewLayout: {
     flexShrink: 0,
     padding: '5px 12px',
     borderRadius: 999,
-    border: '1px solid #c9a962',
-    background: 'transparent',
-    color: '#e9c46a',
     fontSize: 12,
     fontWeight: 600,
     cursor: 'pointer',
     marginBottom: 10,
   },
-  reviewedNote: { color: '#8ce0b0', fontSize: 11.5, margin: '0 0 10px' },
-  blockStack: { display: 'flex', flexDirection: 'column', gap: 14 },
-  detailDescBody: { color: '#c9d4ee', fontSize: 13, lineHeight: 1.7 },
-  detailDescLine: { margin: '0 0 6px' },
+  writeReviewDark: { border: '1px solid #c9a962', background: 'transparent', color: '#e9c46a' },
+  reviewedNoteLayout: { fontSize: 11.5, margin: '0 0 10px' },
+  reviewedNoteDark: { color: '#8ce0b0' },
+  blockStack: { display: 'flex', flexDirection: 'column' as const, gap: 14 },
+  descBodyLayout: { fontSize: 13, lineHeight: 1.7 },
+  descBodyDark: { color: '#c9d4ee' },
+  descLineLayout: { margin: '0 0 6px' },
   detailImage: { width: '100%', height: 'auto', display: 'block', borderRadius: 6 },
-  reviewList: { display: 'flex', flexDirection: 'column', gap: 12 },
-  reviewCard: { background: '#0f3460', borderRadius: 10, padding: 12, border: '1px solid #2c4270' },
-  reviewHeader: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' },
-  reviewNickname: { color: '#d8e4ff', fontSize: 12, fontWeight: 600 },
-  reviewDate: { color: '#7c8db5', fontSize: 11, marginLeft: 'auto' },
-  reviewBody: { color: '#c9d4ee', fontSize: 12.5, lineHeight: 1.6, margin: '0 0 8px', whiteSpace: 'pre-wrap' },
-  reviewPhotoRow: { display: 'flex', flexWrap: 'wrap', gap: 6 },
-  reviewPhoto: { width: 64, height: 64, borderRadius: 8, objectFit: 'cover' },
-  buyBar: {
+  reviewList: { display: 'flex', flexDirection: 'column' as const, gap: 12 },
+  reviewCardLayout: { borderRadius: 10, padding: 12 },
+  reviewCardDark: { background: '#0f3460', border: '1px solid #2c4270' },
+  reviewHeader: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' as const },
+  reviewNickLayout: { fontSize: 12, fontWeight: 600 },
+  reviewNickDark: { color: '#d8e4ff' },
+  reviewDateLayout: { fontSize: 11, marginLeft: 'auto' },
+  reviewDateDark: { color: '#7c8db5' },
+  reviewBodyLayout: { fontSize: 12.5, lineHeight: 1.6, margin: '0 0 8px', whiteSpace: 'pre-wrap' as const },
+  reviewBodyDark: { color: '#c9d4ee' },
+  reviewPhotoRow: { display: 'flex', flexWrap: 'wrap' as const, gap: 6 },
+  reviewPhoto: { width: 64, height: 64, borderRadius: 8, objectFit: 'cover' as const },
+  buyBarLayout: {
     flexShrink: 0,
     display: 'flex',
     alignItems: 'center',
     gap: 10,
     padding: '12px 16px',
-    borderTop: '1px solid #2c4270',
-    background: '#131c37',
   },
-  stepper: {
-    display: 'flex',
-    alignItems: 'center',
-    border: '1px solid #2c4270',
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  stepperButton: { width: 30, height: 30, border: 'none', background: '#0d1730', color: '#fff', fontSize: 15, cursor: 'pointer' },
-  stepperValue: { width: 34, textAlign: 'center', color: '#fff', fontSize: 13 },
-  addButton: {
+  buyBarDark: { borderTop: '1px solid #2c4270', background: '#131c37' },
+  stepperLayout: { display: 'flex', alignItems: 'center', borderRadius: 8, overflow: 'hidden' },
+  stepperDark: { border: '1px solid #2c4270' },
+  stepperBtnLayout: { width: 32, height: 32, border: 'none', fontSize: 15, cursor: 'pointer' },
+  stepperBtnDark: { background: '#0d1730', color: '#fff' },
+  stepperValueLayout: { width: 36, textAlign: 'center' as const, fontSize: 14, fontWeight: 600, lineHeight: '32px' },
+  stepperValueDark: { color: '#fff' },
+  addBtnLayout: {
     flex: 1,
     padding: '10px 14px',
     borderRadius: 8,
     border: 'none',
-    background: '#e94560',
-    color: '#fff',
     fontSize: 13,
     fontWeight: 600,
     cursor: 'pointer',
   },
-  cartLink: {
-    background: 'transparent',
+  addBtnDark: { background: '#e94560', color: '#fff' },
+  cartLinkLayout: {
     border: 'none',
-    color: '#8ca4d8',
     fontSize: 12,
     textDecoration: 'underline',
     cursor: 'pointer',
     padding: 0,
     flexShrink: 0,
   },
+  cartLinkDark: { background: 'transparent', color: '#8ca4d8' },
 };
