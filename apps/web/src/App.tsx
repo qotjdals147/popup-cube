@@ -12,6 +12,7 @@ import { PlayWorldPage } from './pages/PlayWorldPage';
 import { StoreShopPage } from './pages/StoreShopPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ShopperAccountPage } from './pages/ShopperAccountPage';
+import { ShopperCartPage } from './pages/ShopperCartPage';
 import { AppOnlyPage } from './pages/AppOnlyPage';
 
 function AppRoutes() {
@@ -29,6 +30,8 @@ function AppRoutes() {
       <Route path="/store/:storeId/shop" element={<StoreShopPage />} />
       {/* 모바일 앱 WebView — 손님 내 정보 (구매 내역 · 배송지) */}
       <Route path="/app/me" element={<ShopperAccountPage />} />
+      {/* 모바일 앱 WebView — 손님 장바구니 (§60 4-D) */}
+      <Route path="/app/cart" element={<ShopperCartPage />} />
       <Route path="/mypage" element={<Navigate to="/app-only" replace />} />
       <Route path="/store/:storeId" element={<StorePage />} />
       <Route path="*" element={<NotFoundPage />} />

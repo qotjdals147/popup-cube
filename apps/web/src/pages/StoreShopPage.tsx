@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { CartDrawer } from '../components/CartDrawer';
+import { CartIconButton } from '../components/CartIconButton';
 import { StoreShopCatalog } from '../components/StoreShopCatalog';
 import { getStoreSummary } from '../lib/stores';
 import { supabase } from '../lib/supabase';
@@ -153,17 +154,7 @@ export function StoreShopPage() {
           >
             ←
           </button>
-          <button
-            type="button"
-            className="store-shop-icon-btn store-shop-icon-btn--cart"
-            onClick={openCart}
-            aria-label={t('storeShop.cartLabel')}
-          >
-            🛒
-            {totalQuantity > 0 && (
-              <span className="store-shop-icon-btn__badge">{totalQuantity > 99 ? '99+' : totalQuantity}</span>
-            )}
-          </button>
+          <CartIconButton count={totalQuantity} onClick={openCart} className="store-shop-icon-btn store-shop-icon-btn--cart" />
         </div>
         <div className="store-shop-header__title-block">
           <h1 className="store-shop-title">{storeName ?? t('storeShop.loading')}</h1>

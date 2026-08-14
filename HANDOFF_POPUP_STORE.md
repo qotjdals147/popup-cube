@@ -14,7 +14,7 @@
 
 - **사용자가 지시했든, 에이전트가 스스로 다음 작업을 이어가든 — 새 작업(요청/할 일)을 시작할 때마다** 이 `## 0. Handoff Protocol`을 다시 읽고 따른다.
 - 같은 세션 안에서 이미 한 번 읽었어도, 다음 작업으로 넘어갈 때 **다시** §0을 확인한다 `(대화가 길어지며 규칙을 놓치는 것을 방지)`.
-- 특히 아래는 매번 재확인: **브리핑 형식(§0 하단)**, **모델 추천(§24)**, **HANDOFF 실시간 갱신**, **한국어 대화 규칙**, **UI/UX**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · 생략 금지).
+- 특히 아래는 매번 재확인: **브리핑 형식(§0 하단)**, **모델 추천(§24)**, **HANDOFF 실시간 갱신**, **한국어 대화 규칙**, **UI/UX**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · **축약·「--clear 후 매장→」식 금지**).
 - 규칙을 지키지 못했다고 사용자가 지적하면, 즉시 인정하고 그 지점부터 규칙대로 다시 수행한다.
 
 ### 세션 시작 시
@@ -179,12 +179,14 @@
    - **가로 회전:** 매장(WebView) 화면에서만 `expo-screen-orientation` 적용 — **홈·로그인은 세로**일 수 있음. 폰 **설정 → 디스플레이 → 자동 회전** 켜기. Expo Go에서 config만 바꿔도 안 돌아가면 **`--clear` 재시작** 후 **GUCCI 입장한 뒤** 가로 테스트.
 6. 테스트 플로우를 **클릭 순서**로: 랜딩 → 일반 회원 로그인 → 홈 → 매장 카드 → 입장 → 월드(WebView)
 7. 깨지면 **짧은 체크리스트**만: SDK 52인지 / `--clear` 재시작했는지 / `npm install --legacy-peer-deps` / Vercel·소켓 / **`JWT issued at future`** → 폰·에뮬레이터 **날짜·시간 자동 설정** 후 재로그인
-8. **확인 방법 설명 형식 (User — 생략 금지):**
+8. **확인 방법 설명 형식 (User — 생략·축약 금지, 2026-08-14 재강조):**
    - **`--clear`만** 말하고 끝내지 말 것.
    - **반드시** (1) **Win → cmd → Enter** 한 줄 (2) **`아래 한 줄씩 복붙:`** (3) **Expo 4줄** 또는 **PC 웹 3줄** 코드 블록
    - 그 다음 **SDK 52** · **데모 계정** · **클릭 순서** · **이번에 볼 것**
    - PC 점주만 → **PC 웹 3줄** · 앱 WebView까지 → **Expo 4줄** (+ 필요 시 PC 3줄)
    - Vercel만 → `https://popup-cube-web.vercel.app` + push 1~2분
+   - **❌ 금지 (User 반복 지적):** 「Expo `--clear` 후 매장 → …」 「`--clear` 재시작 후 장바구니 확인」 등 **명령 블록 없이** 테스트만 설명 · 「Vercel 1~2분 + `--clear`」 한 줄로 **§0 4줄 생략**
+   - **✅ 올바른 예:** §0 **「표준 Expo 4줄」코드 블록 전체** → SDK 52 → `demo@shopper.com` → **표준 안내문 5) 클릭 순서** → **이번에 볼 것**
 9. **앱 실기 = push + Metro 재시작 (User 2026-08-14 — 필수)**
    - **WebView 내용** (`/shop` · `/app/me` 등 `apps/web`) → **`main` push** → Vercel 1~2분 · **「푸쉬해줘?」 묻지 말고 push**
    - **네이티브 UI** (`apps/mobile` — 하단탭 · 마이 허브 · ⚙️) → push와 **무관** · PC에서 Expo **완전 종료(Ctrl+C)** 후 **`npx expo start --tunnel --port 8082 --clear`** 필수 · 예전 JS 캐시면 **매장/내 정보 2탭** 그대로 보임
@@ -256,7 +258,7 @@ npm run dev
    손님: demo@shopper.com / demo
    점주(월드만): demo@owner.com / demo
 
-5) 홈 → 매장 → 쇼핑하기 → 쇼핑 화면 (WebView /shop)
+5) 홈 → 매장 → **쇼핑하기** → 쇼핑 화면 (`/shop`) → 상품 **담기** → **장바구니 보기** (흰 배경·매장별 구분 확인)
 
 ※ Project is incompatible (SDK 54 vs 52) → Play Go 삭제 → SDK 52 APK
 ※ 빨간 화면 → 위 2) npm install 후 --clear 재시작
@@ -279,7 +281,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`661d81a`** push ✅ (§60.7 주문내역·리뷰) |
+| **Git `main` HEAD** | **`d01fead`** push ✅ (§60 CartDrawer 라이트 · 매장별 장바구니) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -654,11 +656,11 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§60 4-A·/app/me·구매내역 카드 push `826e5f6`** · **4-B 쿠팡 shell 착수(로컬)** · User **추가 요청 예정** · 다음 = **4-B push 실기** → **4-C 설정·다크** → **§58 #3 몰 허브** |
-| **Git 상태** | `main` **`3428e48`** push ✅ · Vercel 1~2분 후 WebView 반영 |
+| **한 줄 요약** | **§60 손님 라이트** (shop·마이·CartDrawer·리뷰) push `d01fead` · User 피드백 수신 · 다음 **4-C** · **§58 #3** · **PG 금지** |
+| **Git 상태** | `main` **`d01fead`** push ✅ |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · migrations **`20260812b`~`c`** 원격 적용 완료 |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~80% · P1·앱스토어 포함 **전체 ~55–60%** · **실결제** = P1 + 사업자 + PG |
-| **User 실기 (2026-08-14)** | **§60 4-A shop** OK · **`/app/me` 라이트** OK · **구매내역 카드 가시성** OK · **나머지 화면** = 추가 요청 대기 |
+| **User 실기 (2026-08-14)** | §60 라이트 push됨 · **실기 안내 = §0 「표준 Expo 4줄」전체** (축약 금지 — §7.18) |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -676,7 +678,8 @@ popup_store/                          # Turborepo root
 | **1** | ~~**§58 #1~2** — `/shop` + `StoreShopPage`~~ | ✅ push `fac4ccf`~`0d31f82` |
 | **2** | ~~**§60 4-A** — shop UX(담기·헤더·세로·라이트)~~ | ✅ User 실기 OK |
 | **3** | ~~**§60 `/app/me`** — 라이트 · 구매내역 카드~~ | ✅ push `826e5f6` · User OK |
-| **4** | **§60 4-B** — 쿠팡형 앱 shell (마이 허브 · ⚙️ · 3탭) | ✅ push `3428e48` · User 실기 |
+| **4** | ~~**§60 4-B** — 쿠팡형 앱 shell~~ | ✅ User 실기 |
+| **4b** | ~~**§60 손님 라이트 잔여** — CartDrawer · ReviewForm · 상세 하단~~ | ✅ push `d01fead` |
 | **5** | **§60 4-C** — 다크 모드 토글 · WebView 연동 | 4-B 후 |
 | **6** | **§58 #3** — 홈 몰 허브 (카드·D-day·쇼핑하기) | 4-B/C 후 |
 | **7** | **§60 4-D** — 장바구니 전체화면 · 주문 썸네일 | 1~2세션 |
@@ -697,9 +700,7 @@ popup_store/                          # Turborepo root
 
 **미커밋 (의도적 제외):** `apps/mobile/AGENTS.md` · `CLAUDE.md` · `LICENSE`
 
-#### 사용자가 지금 해야 할 것 (§60 4-A 실기 — **§0 표준 Expo 4줄**)
-
-> Vercel push 후 1~2분 · **Expo `--clear` 필수**
+#### 사용자가 지금 해야 할 것 (실기 — **§0 표준 Expo 4줄 전체**, 축약 금지)
 
 1) **Win → `cmd` → Enter**  
 2) **§0 「표준 Expo 4줄」** — 한 줄씩 복붙 (아래와 동일):
@@ -732,13 +733,27 @@ npx expo start --tunnel --port 8082 --clear
 
 ---
 
+### 7.18 세션 인수인계 — **2026-08-14** (§60 CartDrawer · 라이트 잔여 · §0 실기 규칙)
+
+| | |
+|---|---|
+| **User 요청** | ① **CartDrawer** 옛 다크 테마 → 라이트 ② 매장별 장바구니 구분·결제 ③ 상세 **장바구니 담기** 줄바꿈 ④ **§0 실기 안내 축약 금지** (「`--clear` 후 매장→」 반복 지적) |
+| **Git (push됨)** | `bb426e5` 리뷰 모달·상세 🛒 · `e4cc670` 담기 2줄 · `661d81a` 주문내역 상세 · `d01fead` **CartDrawer** |
+| **CartDrawer** | `cart-drawer-shop.css` 라이트 전면 · **매장별 섹션** · 결제=`place_order(storeId)` **해당 매장만** · `clearStoreItems` · A+B **일괄 PG ❌** (v1) |
+| **다음 에이전트** | ① User 실기 피드백 ② **4-C** 다크 ③ **§58 #3** · **실기 안내 = §0 「표준 Expo 4줄」전체** — **축약 문장 금지** |
+| **손볼 파일** | `CartDrawer.tsx` · `cart-drawer-shop.css` · `CartContext.clearStoreItems` · `ReviewFormModal` · `product-detail-shop.css` |
+
+**User 실기:** HANDOFF **§0 「표준 Expo 4줄」+ 표준 안내문 5) 클릭 순서** — 에이전트가 **요약만** 덧붙이지 말 것.
+
+---
+
 ### 7.17 세션 인수인계 — **2026-08-14** (주문내역 상세 · 리뷰 조건)
 
 | | |
 |---|---|
-| **User 요청** | ① 배송완료 타임스탬프 ② 결제 상세 ③ 주문별 배송지 ④ 상품상세 리뷰 버튼 — 구매자만 |
-| **Git** | push 후 HEAD 갱신 · Vercel 1~2분 · Expo `--clear` (WebView) |
-| **확인** | 주문내역 **배송지·결제 상세·배송완료 칩** · 상품상세 **미구매=리뷰 버튼 없음** · 구매+미확정=confirm 후 리뷰 |
+| **User 요청** | ① 배송완료 타임스탬프 ② 결제 상세 ③ 주문별 배송지 ④ 상품상세 리뷰 — 구매자만 |
+| **Git** | `661d81a` |
+| **User 실기** | §0 **표준 Expo 4줄** + 이번: 주문내역 상세 · 리뷰 구매자만 |
 
 ---
 
@@ -748,8 +763,7 @@ npx expo start --tunnel --port 8082 --clear
 |---|---|
 | **User 지적** | 배송지 관리가 **마이·주문내역·⚙️** 세 군데 중복 |
 | **조치** | 주문/배송 **화면 분리** (`embed=panel`) · WebView **inApp=singlePanel** · 설정 **배송지 메뉴 제거** · §60.6 IA |
-| **실기** | Expo `--clear` (네이티브 헤더) + push (WebView 탭 숨김) |
-| **확인** | ① **주문내역** = 주문 카드만 ② **배송지** = 주소 CRUD만 ③ **⚙️** = 회원정보만 + 배송지 안내 문구 |
+| **User 실기** | §0 **표준 Expo 4줄** (축약 금지) |
 
 ---
 
@@ -760,7 +774,7 @@ npx expo start --tunnel --port 8082 --clear
 | **User 실기** | ① shop **4-A OK** ② **`/app/me` 라이트** OK (탭 색·글자·카드) ③ **구매내역 카드 가시성** OK (`826e5f6`) ④ **나머지 화면** = User가 **추가 요청 예정** (에이전트가 먼저 손대지 말 것) |
 | **Git (push됨)** | `fab1669` `/app/me` 라이트 · `826e5f6` `ShopperOrderCardLight` (점주 탭형 카드 위계) |
 | **Git (push됨)** | **`3428e48`** — 4-B 쿠팡형 **마이 허브** · ⚙️→**내정보관리** · 3탭 · WebView embed |
-| **다음 에이전트** | ① **4-B push** → User Expo `--clear` 실기 ② User **추가 요청** 반영 ③ **4-C** 다크모드 ④ **§58 #3** 몰 허브 · **PG 금지** |
+| **다음 에이전트** | ① User **추가 요청** 반영 ② **4-C** 다크모드 ③ **§58 #3** 몰 허브 · **PG 금지** · 실기 안내=§0 **4줄 전체** |
 | **4-B 실기 확인** | 하단 **홈·마이·장바구니** 3탭 · 마이 **⚙️** · 주문/배송 **각각 단일 화면** (§60.6) |
 
 **4-B 손볼 파일:**
@@ -1079,6 +1093,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-14 — HANDOFF §0 실기 안내 축약 금지 · §7.18
+- **Author:** Cursor Agent (User — 「`--clear` 후 매장→」식 설명 금지)
+- **Changed:** §0 항목 8 **금지 문구** · §7.18 CartDrawer 인수인계 · HEAD `d01fead`
+- **Notes:** User 실기 = **§0 표준 Expo 4줄 전체**만
 
 ### 2026-08-14 — §60 CartDrawer 라이트 · 매장별 장바구니 (User)
 - **Author:** Cursor Agent

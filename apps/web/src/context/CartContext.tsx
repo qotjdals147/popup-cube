@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { CartItem, Product } from '@popup-cube/shared';
+import { CART_STORAGE_KEY, cartCountFromItems, postCartCountToApp } from '../lib/cartSync';
 
-const STORAGE_KEY = 'popup_cube_cart_v1';
+const STORAGE_KEY = CART_STORAGE_KEY;
 
 interface CartContextValue {
   items: CartItem[];
@@ -38,6 +39,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    postCartCountToApp(cartCountFromItems(items));
   }, [items]);
 
   function addToCart(storeId: string, product: Product, quantity = 1) {

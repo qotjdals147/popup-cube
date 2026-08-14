@@ -6,6 +6,7 @@ import { canFileClaim, confirmPurchase, listMyOrders } from '../lib/orders';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { ReviewFormModal } from './ReviewFormModal';
+import { CartIconButton } from './CartIconButton';
 import { t } from '../i18n';
 import '../styles/product-detail-shop.css';
 
@@ -69,7 +70,7 @@ export function ProductDetailModal({
 }: ProductDetailModalProps) {
   const light = appearance === 'light';
   const rootClass = light ? 'product-detail--light' : undefined;
-  const { addToCart } = useCart();
+  const { addToCart, totalQuantity } = useCart();
   const { userId } = useAuth();
   const [detailBlocks, setDetailBlocks] = useState<ProductDetailBlock[]>([]);
   const [reviews, setReviews] = useState<ProductReview[]>([]);
@@ -178,11 +179,6 @@ export function ProductDetailModal({
     }
   }
 
-  const reviewNeedsConfirm =
-    reviewableOrder &&
-    reviewableOrder.status !== 'purchase_confirmed' &&
-    reviewableOrder.status !== 'completed';
-
   return (
     <div className={rootClass}>
     <div className="product-detail-overlay" style={styleFor(light, S.overlayLayout, S.overlayDark)} onClick={onClose}>
@@ -255,22 +251,15 @@ export function ProductDetailModal({
                     {reviews.length > 0 ? ` (${reviews.length})` : ''}
                   </h4>
                   {reviewableOrder && (
-                    <div style={S.reviewWriteCol}>
-                      <button
-                        type="button"
-                        className="product-detail-write-review"
-                        style={styleFor(light, S.writeReviewLayout, S.writeReviewDark)}
-                        disabled={confirmingForReview}
-                        onClick={() => void handleWriteReviewClick()}
-                      >
-                        {t('productDetail.writeReview')}
-                      </button>
-                      <p className="product-detail-review-hint" style={styleFor(light, S.reviewHintLayout, S.reviewHintDark)}>
-                        {reviewNeedsConfirm
-                          ? t('productDetail.reviewNeedConfirmHint')
-                          : t('productDetail.reviewPurchaserHint')}
-                      </p>
-                    </div>
+                    <button
+                      type="button"
+                      className="product-detail-write-review"
+                      style={styleFor(light, S.writeReviewLayout, S.writeReviewDark)}
+                      disabled={confirmingForReview}
+                      onClick={() => void handleWriteReviewClick()}
+                    >
+                      {t('productDetail.writeReview')}
+                    </button>
                   )}
                 </div>
                 {reviewConfirmError && (
@@ -321,15 +310,7 @@ export function ProductDetailModal({
                   +
                 </button>
               </div>
-              <button
-                type="button"
-                className="product-detail-cart-btn"
-                style={styleFor(light, S.cartBtnLayout, S.cartBtnDark)}
-                aria-label={t('shop.cart')}
-                onClick={onOpenCart}
-              >
-                🛒
-              </button>
+              <CartIconButton count={totalQuantity} onClick={onOpenCart} variant="bar" />
             </div>
             <button type="button" className="product-detail-add-btn" style={styleFor(light, S.addBtnLayout, S.addBtnDark)} onClick={handleAdd}>
               {added ? t('productDetail.added') : t('productDetail.addToCart')}

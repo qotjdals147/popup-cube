@@ -1,6 +1,7 @@
 import { useRouter, type Href } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useCartCount } from '../context/CartCountContext';
 import { t } from '../i18n/ko';
 import { colors } from '../theme/colors';
 
@@ -16,6 +17,7 @@ const TABS: { id: ShopperTab; label: string; icon: string; href: '/home' | '/me'
 export function ShopperBottomNav({ active }: { active: ShopperTab }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { count: cartCount } = useCartCount();
 
   return (
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 6) }]}>
@@ -32,7 +34,14 @@ export function ShopperBottomNav({ active }: { active: ShopperTab }) {
             }}
           >
             {isActive && <View style={styles.activeIndicator} />}
-            <Text style={styles.icon}>{tab.icon}</Text>
+            <View style={styles.iconWrap}>
+              <Text style={styles.icon}>{tab.icon}</Text>
+              {tab.id === 'cart' && cartCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{cartCount > 99 ? '99+' : cartCount}</Text>
+                </View>
+              )}
+            </View>
             <Text style={[styles.label, isActive && styles.labelActive]}>{tab.label}</Text>
           </Pressable>
         );
@@ -68,7 +77,28 @@ const styles = StyleSheet.create({
   icon: {
     fontSize: 20,
     lineHeight: 24,
+  },
+  iconWrap: {
+    position: 'relative',
     marginBottom: 2,
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -10,
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 4,
+    borderRadius: 8,
+    backgroundColor: '#e94560',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
+    lineHeight: 12,
   },
   label: {
     color: colors.textMuted,

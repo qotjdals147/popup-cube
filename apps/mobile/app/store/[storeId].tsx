@@ -13,6 +13,8 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/context/AuthContext';
+import { useCartCount } from '../../src/context/CartCountContext';
+import { CART_COUNT_INJECT_SCRIPT } from '../../src/lib/cartWebView';
 import { t } from '../../src/i18n/ko';
 import { getStoreSummary } from '../../src/lib/stores';
 import { getSupabase } from '../../src/lib/supabase';
@@ -36,6 +38,7 @@ export default function StoreScreen() {
   const router = useRouter();
   const { storeId } = useLocalSearchParams<{ storeId: string }>();
   const { userId, loading: authLoading, role } = useAuth();
+  const { handleWebViewMessage } = useCartCount();
   const [store, setStore] = useState<StoreSummary | null>(null);
   const [loadingMeta, setLoadingMeta] = useState(true);
   const [sessionReady, setSessionReady] = useState(false);
@@ -97,6 +100,7 @@ export default function StoreScreen() {
 
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
+      handleWebViewMessage(event);
       try {
         const msg = JSON.parse(event.nativeEvent.data) as { type?: string };
         if (msg.type === 'navigate_home') {
@@ -109,7 +113,7 @@ export default function StoreScreen() {
         // ignore non-JSON
       }
     },
-    [router]
+    [handleWebViewMessage, router],
   );
 
   const blankCheckScript = `
@@ -185,7 +189,7 @@ export default function StoreScreen() {
         )}
         onError={() => setWebError(t.store.shopError)}
         onHttpError={() => setWebError(t.store.shopError)}
-        injectedJavaScript={blankCheckScript}
+        injectedJavaScript={`${CART_COUNT_INJECT_SCRIPT}\n${blankCheckScript}`}
       />
     </SafeAreaView>
   );
