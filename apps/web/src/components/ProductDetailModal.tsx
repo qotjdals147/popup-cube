@@ -6,7 +6,6 @@ import { canFileClaim, confirmPurchase, listMyOrders } from '../lib/orders';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { ReviewFormModal } from './ReviewFormModal';
-import { CartIconButton } from './CartIconButton';
 import { t } from '../i18n';
 import '../styles/product-detail-shop.css';
 
@@ -64,13 +63,13 @@ export function ProductDetailModal({
   product,
   storeId,
   onClose,
-  onOpenCart,
+  onOpenCart: _onOpenCart,
   previewMode = false,
   appearance = 'light',
 }: ProductDetailModalProps) {
   const light = appearance === 'light';
   const rootClass = light ? 'product-detail--light' : undefined;
-  const { addToCart, totalQuantity } = useCart();
+  const { addToCart } = useCart();
   const { userId } = useAuth();
   const [detailBlocks, setDetailBlocks] = useState<ProductDetailBlock[]>([]);
   const [reviews, setReviews] = useState<ProductReview[]>([]);
@@ -300,7 +299,7 @@ export function ProductDetailModal({
 
         {!previewMode && (
           <div className="product-detail-buy-bar" style={styleFor(light, S.buyBarLayout, S.buyBarDark)}>
-            <div className="product-detail-buy-actions">
+            <div className="product-detail-buy-qty-row">
               <div className="product-detail-stepper" style={styleFor(light, S.stepperLayout, S.stepperDark)}>
                 <button type="button" className="product-detail-stepper-btn" style={styleFor(light, S.stepperBtnLayout, S.stepperBtnDark)} onClick={() => setQty((q) => Math.max(1, q - 1))}>
                   −
@@ -310,7 +309,6 @@ export function ProductDetailModal({
                   +
                 </button>
               </div>
-              <CartIconButton count={totalQuantity} onClick={onOpenCart} variant="bar" />
             </div>
             <button type="button" className="product-detail-add-btn" style={styleFor(light, S.addBtnLayout, S.addBtnDark)} onClick={handleAdd}>
               {added ? t('productDetail.added') : t('productDetail.addToCart')}
@@ -478,17 +476,4 @@ const S = {
     whiteSpace: 'nowrap' as const,
   },
   addBtnDark: { background: '#e94560', color: '#fff' },
-  cartBtnLayout: {
-    flexShrink: 0,
-    width: 44,
-    height: 44,
-    padding: 0,
-    borderRadius: 8,
-    fontSize: 20,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cartBtnDark: { border: '1px solid #4062a0', background: 'transparent', color: '#8ca4d8' },
 };

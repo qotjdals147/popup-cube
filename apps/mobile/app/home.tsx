@@ -131,24 +131,33 @@ export default function HomeScreen() {
             contentContainerStyle={styles.list}
             style={styles.flex}
             renderItem={({ item }) => (
-              <Pressable style={styles.card} onPress={() => setSelectedStore(item)}>
-                <View style={styles.thumbWrap}>
-                  {item.thumbnail_url ? (
-                    <Image source={{ uri: item.thumbnail_url }} style={styles.thumb} />
-                  ) : (
-                    <View style={styles.thumbFallback}>
-                      <Text style={styles.thumbLetter}>{item.name.charAt(0)}</Text>
+              <View style={styles.card}>
+                <Pressable style={styles.cardPreview} onPress={() => setSelectedStore(item)}>
+                  <View style={styles.thumbWrap}>
+                    {item.thumbnail_url ? (
+                      <Image source={{ uri: item.thumbnail_url }} style={styles.thumb} />
+                    ) : (
+                      <View style={styles.thumbFallback}>
+                        <Text style={styles.thumbLetter}>{item.name.charAt(0)}</Text>
+                      </View>
+                    )}
+                    <View style={styles.openBadge}>
+                      <Text style={styles.openBadgeText}>OPEN</Text>
                     </View>
-                  )}
-                  <View style={styles.openBadge}>
-                    <Text style={styles.openBadgeText}>OPEN</Text>
                   </View>
-                </View>
-                <Text style={styles.storeName} numberOfLines={2}>
-                  {item.name}
-                </Text>
-                <Text style={styles.enterLink}>{t.home.enter}</Text>
-              </Pressable>
+                  <Text style={styles.storeName} numberOfLines={2}>
+                    {item.name}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={({ pressed }) => [styles.enterButton, pressed && styles.enterButtonPressed]}
+                  onPress={() => handleEnterStore(item.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${item.name} ${t.home.enter}`}
+                >
+                  <Text style={styles.enterButtonText}>{t.home.enter}</Text>
+                </Pressable>
+              </View>
             )}
           />
         )}
@@ -228,12 +237,29 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     paddingHorizontal: 10,
     paddingTop: 10,
-    minHeight: 40,
+    paddingBottom: 8,
+    minHeight: 36,
   },
-  enterLink: {
-    color: colors.primary,
-    fontSize: 13,
+  cardPreview: {
+    flex: 1,
+  },
+  enterButton: {
+    marginHorizontal: 10,
+    marginBottom: 10,
+    marginTop: 2,
+    backgroundColor: colors.primary,
+    borderRadius: 10,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+  },
+  enterButtonPressed: {
+    opacity: 0.88,
+  },
+  enterButtonText: {
+    color: colors.primaryText,
+    fontSize: 14,
     fontWeight: '700',
-    padding: 10,
   },
 });

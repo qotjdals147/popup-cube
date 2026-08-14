@@ -14,7 +14,7 @@
 
 - **사용자가 지시했든, 에이전트가 스스로 다음 작업을 이어가든 — 새 작업(요청/할 일)을 시작할 때마다** 이 `## 0. Handoff Protocol`을 다시 읽고 따른다.
 - 같은 세션 안에서 이미 한 번 읽었어도, 다음 작업으로 넘어갈 때 **다시** §0을 확인한다 `(대화가 길어지며 규칙을 놓치는 것을 방지)`.
-- 특히 아래는 매번 재확인: **브리핑 형식(§0 하단)**, **모델 추천(§24)**, **HANDOFF 실시간 갱신**, **한국어 대화 규칙**, **UI/UX**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · **축약·「--clear 후 매장→」식 금지**).
+- 특히 아래는 매번 재확인: **브리핑 형식(§0 하단)**, **모델 추천(§24)**, **HANDOFF 실시간 갱신**, **한국어 대화 규칙**, **UI/UX · 쇼핑몰 퀄리티(§0)**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · **축약·「--clear 후 매장→」식 금지**).
 - 규칙을 지키지 못했다고 사용자가 지적하면, 즉시 인정하고 그 지점부터 규칙대로 다시 수행한다.
 
 ### 세션 시작 시
@@ -111,6 +111,23 @@
 **에이전트:** UI PR·화면 수정 시 **본인이 10초 실기 상상** — 「50대 투자자·일반 손님이 바로 이해하나?」 · 이상 있으면 **기능 추가보다 UX 먼저** (§58 #4 · §60).
 
 **User 지적 시:** 가시성·편의성 문제는 **버그급** — HANDOFF `ISS-0xx` 또는 §60에 기록 후 **우선 수정**.
+
+### 쇼핑몰 퀄리티 — 「구리면 안 됨」(User 2026-08-14 — **절대 규칙**)
+
+**지금 단계 = v1 쇼핑몰 런칭.** 손님이 보는 앱·WebView는 **에이블리·쿠팡급** 체감이 목표. **기능만 있고 UI가 허술하면 출시 불가.**
+
+**「구리다」 기준 (User 정의):**
+- **가시성** — 버튼·숫자·라벨이 **한눈에** 안 보임 · 텍스트 링크만 던져둔 CTA · 대비 부족 · 난잡한 뱃지·안내
+- **편의성** — 같은 기능인데 **화면마다 다르게** 동작 · 불필요한 탭·문구 · 터치 영역 44px 미만 · 어디서 뭘 해야 할지 모름
+
+| ❌ 금지 | ✅ 해야 할 것 |
+|---|---|
+| 「쇼핑하기」 **파란 글자만** | **full-width primary 버튼** (홈 카드 등) |
+| 상세·목록·헤더 **장바구니 UI 제각각** | **공통 컴포넌트** (`CartIconButton` 등) · 상세=**수량+담기** (헤더 🛒로 장바구니) |
+| v1 내부 설명(TMI) — 「매장별 결제…」 | **기능만** · 막힐 때만 토스트/confirm |
+| 점주만 예쁘고 손님은 placeholder | **손님 `/shop`·마이·장바구니** 매 작업 **실기 상상** |
+
+**에이전트:** 손님-facing PR마다 **§0 UI/UX + 이 절** 동시 검수. User 「구리다」= **기능 추가보다 UX 즉시 수정** · §8 Changelog + §7 인수인계 기록.
 
 ### 다음 작업 우선순위 판단 (User 요청, 2026-07-13)
 
@@ -281,7 +298,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`d01fead`** push ✅ (§60 CartDrawer 라이트 · 매장별 장바구니) |
+| **Git `main` HEAD** | **`1ecadb9`** push ✅ (장바구니 통일 · `/app/cart`) · **로컬** 상세·홈 CTA (push 대기) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -656,11 +673,11 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§60 손님 라이트** (shop·마이·CartDrawer·리뷰) push `d01fead` · User 피드백 수신 · 다음 **4-C** · **§58 #3** · **PG 금지** |
-| **Git 상태** | `main` **`d01fead`** push ✅ |
+| **한 줄 요약** | **§60 장바구니 통일** push `1ecadb9` · **§0 쇼핑몰 퀄리티** · 상세·홈 CTA · 다음 **4-C** · **§58 #3** |
+| **Git 상태** | `main` **`1ecadb9`** push ✅ · 로컬 UX 추가분 push 대기 |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · migrations **`20260812b`~`c`** 원격 적용 완료 |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~80% · P1·앱스토어 포함 **전체 ~55–60%** · **실결제** = P1 + 사업자 + PG |
-| **User 실기 (2026-08-14)** | §60 라이트 push됨 · **실기 안내 = §0 「표준 Expo 4줄」전체** (축약 금지 — §7.18) |
+| **User 실기 (2026-08-14)** | 장바구니 통일 OK · **구린 UX = 즉시 수정(§0)** · **실기 = §0 Expo 4줄 전체** |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -679,7 +696,8 @@ popup_store/                          # Turborepo root
 | **2** | ~~**§60 4-A** — shop UX(담기·헤더·세로·라이트)~~ | ✅ User 실기 OK |
 | **3** | ~~**§60 `/app/me`** — 라이트 · 구매내역 카드~~ | ✅ push `826e5f6` · User OK |
 | **4** | ~~**§60 4-B** — 쿠팡형 앱 shell~~ | ✅ User 실기 |
-| **4b** | ~~**§60 손님 라이트 잔여** — CartDrawer · ReviewForm · 상세 하단~~ | ✅ push `d01fead` |
+| **4b** | ~~**§60 손님 라이트·장바구니 통일**~~ | ✅ push `1ecadb9` |
+| **4c** | **§0 쇼핑몰 퀄리티** — 구린 UX 즉시 수정 | 진행 중 (상세·홈 CTA) |
 | **5** | **§60 4-C** — 다크 모드 토글 · WebView 연동 | 4-B 후 |
 | **6** | **§58 #3** — 홈 몰 허브 (카드·D-day·쇼핑하기) | 4-B/C 후 |
 | **7** | **§60 4-D** — 장바구니 전체화면 · 주문 썸네일 | 1~2세션 |
@@ -730,6 +748,21 @@ npx expo start --tunnel --port 8082 --clear
 | **4** | 샌드박스·실결제 테스트 → **런칭** | |
 
 **PG 착수 조건 (전부 충족 전 금지):** ① User **사업자 등록 완료** ② **PG 후보·계약 확정** ③ (권장) P1·실기 대부분 OK.
+
+---
+
+### 7.19 세션 인수인계 — **2026-08-14** (장바구니 통일 · §0 쇼핑몰 퀄리티 · 상세·홈 CTA)
+
+| | |
+|---|---|
+| **User 요청** | ① 장바구니 뱃지·탭 **통일** ② CartDrawer **TMI 제거** ③ 리뷰 **불필요 멘트 제거** ④ 상세 **🛒 버튼 제거** · 수량 가운데 ⑤ 홈 **쇼핑하기 버튼화** ⑥ **§0 쇼핑몰 퀄리티** 규칙 추가 |
+| **Git (push됨)** | `1ecadb9` — `CartIconButton` · `/app/cart` · `CartView` · 하단탭 뱃지 동기화 |
+| **Git (로컬)** | `ProductDetailModal` 🛒 제거 · `home.tsx` CTA 버튼 · §0 퀄리티 절 |
+| **상세 하단** | **수량 stepper 가운데** + **장바구니 담기** full-width · 장바구니=헤더 🛒·하단탭만 |
+| **홈 카드** | 썸네일·이름 탭→입장 모달 · **쇼핑하기=primary 버튼** → 매장 바로 입장 |
+| **다음 에이전트** | ① push 로컬 UX ② User 실기 ③ **4-C** ④ **§58 #3** · **§0 퀄리티** 매 작업 검수 |
+
+**손볼 파일:** `ProductDetailModal.tsx` · `product-detail-shop.css` · `apps/mobile/app/home.tsx` · `CartIconButton` · `ShopperCartPage`
 
 ---
 
@@ -1093,6 +1126,16 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-14 — §0 쇼핑몰 퀄리티 · 상세 🛒 제거 · 홈 CTA (User)
+- **Author:** Cursor Agent
+- **Changed:** §0 **「구리면 안 됨」** 절 · `ProductDetailModal` 상세 **장바구니 버튼 제거** · 수량 가운데 · `home.tsx` **쇼핑하기 primary 버튼** · §7.19
+- **Notes:** WebView=push 후 Vercel · 네이티브 홈=Expo `--clear`
+
+### 2026-08-14 — §60 장바구니 UX 통일 (User)
+- **Author:** Cursor Agent
+- **Changed:** `CartIconButton` · `/app/cart` · `CartView` · 앱 하단탭 뱃지 · CartDrawer TMI 제거 · 리뷰 hint 제거
+- **Notes:** push `1ecadb9`
 
 ### 2026-08-14 — HANDOFF §0 실기 안내 축약 금지 · §7.18
 - **Author:** Cursor Agent (User — 「`--clear` 후 매장→」식 설명 금지)

@@ -81,24 +81,28 @@
 .product-detail--light .product-detail-buy-bar {
   background: #ffffff;
   border-top: 1px solid #e5e8eb;
-  gap: 8px;
+  gap: 10px;
+  padding: 12px 16px 16px;
 }
 
-.product-detail--light .product-detail-buy-actions {
+.product-detail--light .product-detail-buy-qty-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  justify-content: center;
+  width: 100%;
 }
 
 .product-detail--light .product-detail-stepper {
   border: 1px solid #e5e8eb;
   background: #f9fafb;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .product-detail--light .product-detail-stepper-btn {
   background: transparent;
   color: #191f28;
+  min-width: 40px;
+  min-height: 40px;
 }
 
 .product-detail--light .product-detail-stepper-value {
@@ -113,17 +117,8 @@
   min-height: 48px;
   width: 100%;
   box-sizing: border-box;
-}
-
-.product-detail--light .product-detail-cart-btn {
-  border: 1.5px solid #3182f6;
-  background: #ffffff;
-  color: #3182f6;
-  flex-shrink: 0;
-}
-
-.product-detail--light .product-detail-cart-btn:active {
-  background: #eef4ff;
+  border-radius: 10px;
+  font-size: 16px;
 }
 
 .product-detail--light .product-detail-write-review {
