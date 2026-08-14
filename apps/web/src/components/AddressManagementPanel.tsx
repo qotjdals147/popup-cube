@@ -18,7 +18,8 @@ import {
 import { t } from '../i18n';
 
 /** AD-030 — 배송지 CRUD (마이페이지·앱 「내 정보」 공용) */
-export function AddressManagementPanel() {
+export function AddressManagementPanel({ appearance = 'dark' }: { appearance?: 'light' | 'dark' }) {
+  const isLight = appearance === 'light';
   const { userId } = useAuth();
 
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
@@ -110,43 +111,83 @@ export function AddressManagementPanel() {
   }
 
   return (
-    <>
-      <div style={styles.sectionHeader}>
-        <h2 style={styles.sectionTitle}>{t('mypage.addressTabTitle')}</h2>
-        <button type="button" style={styles.addButton} onClick={openCreateForm}>
+    <div className={isLight ? 'addr-root' : undefined}>
+      <div className={isLight ? 'addr-section-header' : undefined} style={isLight ? undefined : styles.sectionHeader}>
+        <h2 className={isLight ? 'addr-section-title' : undefined} style={isLight ? undefined : styles.sectionTitle}>
+          {t('mypage.addressTabTitle')}
+        </h2>
+        <button
+          type="button"
+          className={isLight ? 'addr-add-btn' : undefined}
+          style={isLight ? undefined : styles.addButton}
+          onClick={openCreateForm}
+        >
           {t('mypage.addNew')}
         </button>
       </div>
 
-      {loading && <p style={styles.hint}>{t('mypage.loading')}</p>}
-      {!loading && error && <p style={styles.error}>{t('mypage.errorLoad')}</p>}
-      {!loading && !error && addresses.length === 0 && <p style={styles.hint}>{t('mypage.empty')}</p>}
+      {loading && (
+        <p className={isLight ? 'addr-hint' : undefined} style={isLight ? undefined : styles.hint}>
+          {t('mypage.loading')}
+        </p>
+      )}
+      {!loading && error && (
+        <p className={isLight ? 'addr-error' : undefined} style={isLight ? undefined : styles.error}>
+          {t('mypage.errorLoad')}
+        </p>
+      )}
+      {!loading && !error && addresses.length === 0 && (
+        <p className={isLight ? 'addr-hint' : undefined} style={isLight ? undefined : styles.hint}>
+          {t('mypage.empty')}
+        </p>
+      )}
 
       {!loading && !error && addresses.length > 0 && (
-        <div style={styles.list}>
+        <div className={isLight ? 'addr-list' : undefined} style={isLight ? undefined : styles.list}>
           {addresses.map((address) => (
-            <div key={address.id} style={styles.card}>
-              <div style={styles.cardHeader}>
-                <strong style={styles.cardLabel}>{address.label}</strong>
-                {address.is_default && <span style={styles.defaultBadge}>{t('mypage.defaultBadge')}</span>}
+            <div key={address.id} className={isLight ? 'addr-card' : undefined} style={isLight ? undefined : styles.card}>
+              <div className={isLight ? 'addr-card-header' : undefined} style={isLight ? undefined : styles.cardHeader}>
+                <strong className={isLight ? 'addr-card-label' : undefined} style={isLight ? undefined : styles.cardLabel}>
+                  {address.label}
+                </strong>
+                {address.is_default && (
+                  <span className={isLight ? 'addr-default-badge' : undefined} style={isLight ? undefined : styles.defaultBadge}>
+                    {t('mypage.defaultBadge')}
+                  </span>
+                )}
               </div>
-              <div style={styles.cardLine}>
+              <div className={isLight ? 'addr-card-line' : undefined} style={isLight ? undefined : styles.cardLine}>
                 {address.recipient_name} · {address.phone}
               </div>
-              <div style={styles.cardLine}>
+              <div className={isLight ? 'addr-card-line' : undefined} style={isLight ? undefined : styles.cardLine}>
                 ({address.postal_code}) {address.address_line1}
                 {address.address_line2 ? ` ${address.address_line2}` : ''}
               </div>
-              <div style={styles.cardActions}>
+              <div className={isLight ? 'addr-card-actions' : undefined} style={isLight ? undefined : styles.cardActions}>
                 {!address.is_default && (
-                  <button type="button" style={styles.smallButton} onClick={() => void handleSetDefault(address.id)}>
+                  <button
+                    type="button"
+                    className={isLight ? 'addr-btn' : undefined}
+                    style={isLight ? undefined : styles.smallButton}
+                    onClick={() => void handleSetDefault(address.id)}
+                  >
                     {t('mypage.setDefault')}
                   </button>
                 )}
-                <button type="button" style={styles.smallButton} onClick={() => openEditForm(address)}>
+                <button
+                  type="button"
+                  className={isLight ? 'addr-btn' : undefined}
+                  style={isLight ? undefined : styles.smallButton}
+                  onClick={() => openEditForm(address)}
+                >
                   {t('mypage.edit')}
                 </button>
-                <button type="button" style={styles.smallButtonDanger} onClick={() => void handleDelete(address.id)}>
+                <button
+                  type="button"
+                  className={isLight ? 'addr-btn addr-btn-danger' : undefined}
+                  style={isLight ? undefined : styles.smallButtonDanger}
+                  onClick={() => void handleDelete(address.id)}
+                >
                   {t('mypage.delete')}
                 </button>
               </div>
@@ -156,22 +197,45 @@ export function AddressManagementPanel() {
       )}
 
       {formOpen && (
-        <div style={styles.overlay} onClick={() => setFormOpen(false)}>
-          <div style={styles.formPanel} onClick={(e) => e.stopPropagation()}>
-            <AddressFormFields values={form} onChange={setForm} />
-            {submitError && <p style={styles.error}>{submitError}</p>}
-            <div style={styles.formActions}>
-              <button type="button" style={styles.cancelButton} onClick={() => setFormOpen(false)}>
+        <div
+          className={isLight ? 'addr-form-overlay' : undefined}
+          style={isLight ? undefined : styles.overlay}
+          onClick={() => setFormOpen(false)}
+        >
+          <div
+            className={isLight ? 'addr-form-panel' : undefined}
+            style={isLight ? undefined : styles.formPanel}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AddressFormFields values={form} onChange={setForm} appearance={isLight ? 'light' : 'dark'} />
+            {submitError && (
+              <p className={isLight ? 'addr-error' : undefined} style={isLight ? undefined : styles.error}>
+                {submitError}
+              </p>
+            )}
+            <div className={isLight ? 'addr-form-actions' : undefined} style={isLight ? undefined : styles.formActions}>
+              <button
+                type="button"
+                className={isLight ? 'addr-cancel-btn' : undefined}
+                style={isLight ? undefined : styles.cancelButton}
+                onClick={() => setFormOpen(false)}
+              >
                 {t('mypage.cancel')}
               </button>
-              <button type="button" style={styles.saveButton} onClick={() => void handleSubmit()} disabled={submitting}>
+              <button
+                type="button"
+                className={isLight ? 'addr-save-btn' : undefined}
+                style={isLight ? undefined : styles.saveButton}
+                onClick={() => void handleSubmit()}
+                disabled={submitting}
+              >
                 {submitting ? t('mypage.saving') : t('mypage.save')}
               </button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 

@@ -5,6 +5,7 @@ import { OrderHistoryPanel } from '../components/OrderHistoryPanel';
 import { supabase } from '../lib/supabase';
 import { t } from '../i18n';
 import '../styles/shopper-account.css';
+import '../styles/shopper-account-panels.css';
 
 declare global {
   interface Window {
@@ -84,12 +85,16 @@ export function ShopperAccountPage() {
     );
   }
 
+  const inApp = typeof window !== 'undefined' && !!window.ReactNativeWebView;
+
   return (
     <div className="shopper-account-page" data-theme={theme}>
-      <header className="shopper-account-header">
-        <button type="button" className="shopper-account-back" onClick={goHome}>
-          {t('play.backHome')}
-        </button>
+      <header className={`shopper-account-header${inApp ? ' shopper-account-header--app' : ''}`}>
+        {!inApp && (
+          <button type="button" className="shopper-account-back" onClick={goHome}>
+            {t('play.backHome')}
+          </button>
+        )}
         <div className="shopper-account-header-text">
           <h1 className="shopper-account-title">{t('shopperAccount.title')}</h1>
           <p className="shopper-account-subtitle">{displayName}</p>
@@ -99,14 +104,14 @@ export function ShopperAccountPage() {
       <nav className="shopper-account-tabs" aria-label={t('shopperAccount.tabsLabel')}>
         <button
           type="button"
-          className={`shopper-account-tab${tab === 'orders' ? ' shopper-account-tab-active' : ''}`}
+          className={`shopper-account-tab shopper-account-tab--orders${tab === 'orders' ? ' shopper-account-tab-active' : ''}`}
           onClick={() => setTab('orders')}
         >
           {t('shopperAccount.tabOrders')}
         </button>
         <button
           type="button"
-          className={`shopper-account-tab${tab === 'addresses' ? ' shopper-account-tab-active' : ''}`}
+          className={`shopper-account-tab shopper-account-tab--addresses${tab === 'addresses' ? ' shopper-account-tab-active' : ''}`}
           onClick={() => setTab('addresses')}
         >
           {t('shopperAccount.tabAddresses')}
@@ -114,8 +119,8 @@ export function ShopperAccountPage() {
       </nav>
 
       <main className="shopper-account-main">
-        {tab === 'orders' && <OrderHistoryPanel embedded />}
-        {tab === 'addresses' && <AddressManagementPanel />}
+        {tab === 'orders' && <OrderHistoryPanel embedded appearance="light" />}
+        {tab === 'addresses' && <AddressManagementPanel appearance="light" />}
       </main>
     </div>
   );

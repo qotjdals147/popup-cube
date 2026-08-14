@@ -1,0 +1,371 @@
+/* §60 — /app/me 내 패널 (구매 내역 · 배송지) 라이트 · shopper-account 토큰 */
+
+.shopper-account-main .oh-root,
+.shopper-account-main .addr-root {
+  width: 100%;
+}
+
+.shopper-account-main .oh-title,
+.shopper-account-main .addr-section-title {
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--acct-text);
+}
+
+.shopper-account-main .oh-hint,
+.shopper-account-main .addr-hint {
+  color: var(--acct-muted);
+  font-size: 13px;
+  text-align: center;
+  padding: 24px 0;
+  margin: 0;
+}
+
+.shopper-account-main .oh-error,
+.shopper-account-main .addr-error {
+  color: #e03131;
+  font-size: 13px;
+  text-align: center;
+  padding: 8px 0;
+  margin: 0;
+}
+
+.shopper-account-main .oh-list,
+.shopper-account-main .addr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 주문 · 배송지 카드 — 흰 배경 · 명확한 테두리 */
+.shopper-account-main .oh-card,
+.shopper-account-main .addr-card {
+  background: var(--acct-surface);
+  border: 1px solid var(--acct-border);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.shopper-account-main .oh-card-header,
+.shopper-account-main .addr-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.shopper-account-main .oh-card-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.shopper-account-main .oh-store-name,
+.shopper-account-main .addr-card-label {
+  color: var(--acct-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.shopper-account-main .oh-order-ref {
+  color: #b45309;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.shopper-account-main .oh-status-badge,
+.shopper-account-main .addr-default-badge {
+  font-size: 11px;
+  color: var(--acct-text-secondary, #4e5968);
+  border: 1px solid var(--acct-border);
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: var(--acct-bg);
+  white-space: nowrap;
+}
+
+.shopper-account-main .oh-auto-note {
+  color: #b45309;
+  font-size: 11px;
+  margin: 0 0 8px;
+}
+
+.shopper-account-main .oh-item-line,
+.shopper-account-main .addr-card-line {
+  color: var(--acct-text-secondary, #4e5968);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.shopper-account-main .oh-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.shopper-account-main .oh-review-btn {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #3182f6;
+  background: #fff;
+  color: #3182f6;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shopper-account-main .oh-review-done {
+  font-size: 11px;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  border-radius: 999px;
+  padding: 3px 9px;
+  background: #ecfdf5;
+}
+
+.shopper-account-main .oh-gacha-box {
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fffbeb;
+  border: 1px dashed #fcd34d;
+}
+
+.shopper-account-main .oh-gacha-label {
+  color: #b45309;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.shopper-account-main .oh-gacha-prize-name {
+  color: var(--acct-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.shopper-account-main .oh-shipped-note {
+  color: #059669;
+  font-size: 12px;
+  margin-top: 10px;
+  line-height: 1.6;
+}
+
+.shopper-account-main .oh-cancelled-note {
+  color: #e03131;
+  font-size: 12px;
+  margin: 0 0 8px;
+}
+
+.shopper-account-main .oh-actions {
+  margin-top: 10px;
+}
+
+.shopper-account-main .oh-btn-primary {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #3182f6;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shopper-account-main .oh-btn-secondary {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #3182f6;
+  background: #fff;
+  color: #3182f6;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shopper-account-main .oh-btn-danger {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e94560;
+  background: #fff;
+  color: #e94560;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shopper-account-main .oh-auto-hint {
+  color: var(--acct-muted);
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 6px 0 0;
+}
+
+.shopper-account-main .oh-claim-box {
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f9fafb;
+  border: 1px solid var(--acct-border);
+}
+
+.shopper-account-main .oh-claim-label {
+  color: var(--acct-muted);
+  font-size: 11px;
+  margin-bottom: 3px;
+}
+
+.shopper-account-main .oh-claim-text {
+  color: var(--acct-text);
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0 0 8px;
+  white-space: pre-wrap;
+}
+
+.shopper-account-main .oh-claim-open-note {
+  color: #b45309;
+  font-size: 12px;
+  margin: 0;
+}
+
+.shopper-account-main .oh-claim-textarea {
+  min-height: 60px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--acct-border);
+  background: #fff;
+  color: var(--acct-text);
+  font-size: 12px;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.shopper-account-main .oh-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--acct-border);
+  gap: 12px;
+}
+
+.shopper-account-main .oh-date {
+  color: var(--acct-muted);
+  font-size: 11px;
+}
+
+.shopper-account-main .oh-total {
+  color: #e94560;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.shopper-account-main .oh-amount-line {
+  display: flex;
+  gap: 10px;
+  color: var(--acct-muted);
+  font-size: 12px;
+}
+
+.shopper-account-main .addr-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 10px;
+}
+
+.shopper-account-main .addr-add-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #3182f6;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.shopper-account-main .addr-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.shopper-account-main .addr-btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--acct-border);
+  background: #fff;
+  color: var(--acct-text);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shopper-account-main .addr-btn-danger {
+  border-color: #fecdd3;
+  color: #e94560;
+  background: #fff5f6;
+}
+
+.shopper-account-main .addr-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+  padding: 16px;
+}
+
+.shopper-account-main .addr-form-panel {
+  background: #fff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 440px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--acct-border);
+}
+
+.shopper-account-main .addr-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.shopper-account-main .addr-cancel-btn {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--acct-border);
+  background: #fff;
+  color: var(--acct-muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.shopper-account-main .addr-save-btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #3182f6;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}

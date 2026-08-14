@@ -6,8 +6,14 @@
   --acct-text: #191f28;
   --acct-muted: #8b95a1;
   --acct-primary: #3182f6;
-  --acct-tab-active-bg: #eef4ff;
-  --acct-tab-active-text: #2563eb;
+  --acct-accent: #e94560;
+  --acct-text-secondary: #4e5968;
+  --acct-tab-orders-bg: #fff5f6;
+  --acct-tab-orders-border: #e94560;
+  --acct-tab-orders-text: #e94560;
+  --acct-tab-address-bg: #eef4ff;
+  --acct-tab-address-border: #3182f6;
+  --acct-tab-address-text: #3182f6;
 
   min-height: 100dvh;
   background: var(--acct-bg);
@@ -75,6 +81,15 @@
   color: var(--acct-muted);
 }
 
+.shopper-account-header--app {
+  justify-content: center;
+  text-align: center;
+}
+
+.shopper-account-header--app .shopper-account-header-text {
+  flex: none;
+}
+
 .shopper-account-tabs {
   display: flex;
   gap: 8px;
@@ -86,20 +101,44 @@
 
 .shopper-account-tab {
   flex: 1;
-  padding: 10px 8px;
+  padding: 11px 8px;
+  min-height: 44px;
   border-radius: 10px;
-  border: 1px solid var(--acct-border);
-  background: transparent;
+  border: 1.5px solid var(--acct-border);
+  background: var(--acct-surface);
   color: var(--acct-muted);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
+  box-sizing: border-box;
+}
+
+.shopper-account-tab--orders {
+  border-color: var(--acct-tab-orders-border);
+  color: var(--acct-tab-orders-text);
+}
+
+.shopper-account-tab--addresses {
+  border-color: var(--acct-tab-address-border);
+  color: var(--acct-tab-address-text);
+}
+
+.shopper-account-tab--orders.shopper-account-tab-active {
+  background: var(--acct-tab-orders-bg);
+  border-color: var(--acct-tab-orders-border);
+  color: var(--acct-tab-orders-text);
+  box-shadow: 0 1px 2px rgba(233, 69, 96, 0.12);
+}
+
+.shopper-account-tab--addresses.shopper-account-tab-active {
+  background: var(--acct-tab-address-bg);
+  border-color: var(--acct-tab-address-border);
+  color: var(--acct-tab-address-text);
+  box-shadow: 0 1px 2px rgba(49, 130, 246, 0.12);
 }
 
 .shopper-account-tab-active {
-  background: var(--acct-tab-active-bg);
-  color: var(--acct-tab-active-text);
-  border-color: var(--acct-primary);
+  /* legacy — modifier 위 --orders/--addresses 사용 */
 }
 
 .shopper-account-main {

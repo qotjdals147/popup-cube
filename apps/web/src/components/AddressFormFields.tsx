@@ -31,12 +31,14 @@ export function isAddressFormValid(values: AddressFormValues): boolean {
 interface AddressFormFieldsProps {
   values: AddressFormValues;
   onChange: (values: AddressFormValues) => void;
+  appearance?: 'light' | 'dark';
 }
 
 /**
  * 배송지 입력 폼 (마이페이지 주소 관리 · 결제 시 신규 주소 추가에서 공통으로 사용, AD-030).
  */
-export function AddressFormFields({ values, onChange }: AddressFormFieldsProps) {
+export function AddressFormFields({ values, onChange, appearance = 'dark' }: AddressFormFieldsProps) {
+  const inputStyle = appearance === 'light' ? styles.inputLight : styles.input;
   function set<K extends keyof AddressFormValues>(key: K, value: string) {
     onChange({ ...values, [key]: value });
   }
@@ -44,42 +46,42 @@ export function AddressFormFields({ values, onChange }: AddressFormFieldsProps) 
   return (
     <div style={styles.grid}>
       <input
-        style={styles.input}
+        style={inputStyle}
         value={values.label}
         onChange={(e) => set('label', e.target.value)}
         placeholder={t('mypage.labelPlaceholder')}
         maxLength={40}
       />
       <input
-        style={styles.input}
+        style={inputStyle}
         value={values.recipient_name}
         onChange={(e) => set('recipient_name', e.target.value)}
         placeholder={t('mypage.recipientPlaceholder')}
         maxLength={60}
       />
       <input
-        style={styles.input}
+        style={inputStyle}
         value={values.phone}
         onChange={(e) => set('phone', e.target.value)}
         placeholder={t('mypage.phonePlaceholder')}
         maxLength={20}
       />
       <input
-        style={styles.input}
+        style={inputStyle}
         value={values.postal_code}
         onChange={(e) => set('postal_code', e.target.value)}
         placeholder={t('mypage.postalCodePlaceholder')}
         maxLength={10}
       />
       <input
-        style={{ ...styles.input, gridColumn: '1 / -1' }}
+        style={{ ...inputStyle, gridColumn: '1 / -1' }}
         value={values.address_line1}
         onChange={(e) => set('address_line1', e.target.value)}
         placeholder={t('mypage.addressLine1Placeholder')}
         maxLength={200}
       />
       <input
-        style={{ ...styles.input, gridColumn: '1 / -1' }}
+        style={{ ...inputStyle, gridColumn: '1 / -1' }}
         value={values.address_line2}
         onChange={(e) => set('address_line2', e.target.value)}
         placeholder={t('mypage.addressLine2Placeholder')}
@@ -101,6 +103,14 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #2c4270',
     background: '#0f3460',
     color: '#fff',
+    fontSize: 13,
+  },
+  inputLight: {
+    padding: '10px 12px',
+    borderRadius: 8,
+    border: '1px solid #e5e8eb',
+    background: '#fff',
+    color: '#191f28',
     fontSize: 13,
   },
 };
