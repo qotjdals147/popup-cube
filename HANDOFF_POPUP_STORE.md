@@ -276,7 +276,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`826e5f6`** push ✅ · **4-B shell 로컬 미 push** |
+| **Git `main` HEAD** | **`3428e48`** push ✅ (§60 4-B 쿠팡형 마이 허브 · 3탭) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -652,7 +652,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **§60 4-A·/app/me·구매내역 카드 push `826e5f6`** · **4-B 쿠팡 shell 착수(로컬)** · User **추가 요청 예정** · 다음 = **4-B push 실기** → **4-C 설정·다크** → **§58 #3 몰 허브** |
-| **Git 상태** | `main` **`826e5f6`** push ✅ · **4-B** (`ShopperBottomNav`·`cart`·`settings`) **로컬 미 push** |
+| **Git 상태** | `main` **`3428e48`** push ✅ · Vercel 1~2분 후 WebView 반영 |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · migrations **`20260812b`~`c`** 원격 적용 완료 |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~80% · P1·앱스토어 포함 **전체 ~55–60%** · **실결제** = P1 + 사업자 + PG |
 | **User 실기 (2026-08-14)** | **§60 4-A shop** OK · **`/app/me` 라이트** OK · **구매내역 카드 가시성** OK · **나머지 화면** = 추가 요청 대기 |
@@ -673,7 +673,7 @@ popup_store/                          # Turborepo root
 | **1** | ~~**§58 #1~2** — `/shop` + `StoreShopPage`~~ | ✅ push `fac4ccf`~`0d31f82` |
 | **2** | ~~**§60 4-A** — shop UX(담기·헤더·세로·라이트)~~ | ✅ User 실기 OK |
 | **3** | ~~**§60 `/app/me`** — 라이트 · 구매내역 카드~~ | ✅ push `826e5f6` · User OK |
-| **4** | **§60 4-B** — 쿠팡형 앱 shell (4탭·홈 헤더·설정 shell) | **← 진행 중 (로컬)** |
+| **4** | **§60 4-B** — 쿠팡형 앱 shell (마이 허브 · ⚙️ · 3탭) | ✅ push `3428e48` · User 실기 |
 | **5** | **§60 4-C** — 다크 모드 토글 · WebView 연동 | 4-B 후 |
 | **6** | **§58 #3** — 홈 몰 허브 (카드·D-day·쇼핑하기) | 4-B/C 후 |
 | **7** | **§60 4-D** — 장바구니 전체화면 · 주문 썸네일 | 1~2세션 |
@@ -735,7 +735,7 @@ npx expo start --tunnel --port 8082 --clear
 |---|---|
 | **User 실기** | ① shop **4-A OK** ② **`/app/me` 라이트** OK (탭 색·글자·카드) ③ **구매내역 카드 가시성** OK (`826e5f6`) ④ **나머지 화면** = User가 **추가 요청 예정** (에이전트가 먼저 손대지 말 것) |
 | **Git (push됨)** | `fab1669` `/app/me` 라이트 · `826e5f6` `ShopperOrderCardLight` (점주 탭형 카드 위계) |
-| **Git (로컬 · 미 push)** | **§60 4-B v2** — 쿠팡형 **마이 허브** · ⚙️→**내정보관리** · 3탭 · WebView embed |
+| **Git (push됨)** | **`3428e48`** — 4-B 쿠팡형 **마이 허브** · ⚙️→**내정보관리** · 3탭 · WebView embed |
 | **다음 에이전트** | ① **4-B push** → User Expo `--clear` 실기 ② User **추가 요청** 반영 ③ **4-C** 다크모드 ④ **§58 #3** 몰 허브 · **PG 금지** |
 | **4-B 실기 확인** | 하단 **홈·장바구니·마이·설정** 4탭 · 홈 **브랜드+검색바** · 설정 **로그아웃** · 장바구니 **empty + 매장별 안내** |
 
