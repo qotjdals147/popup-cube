@@ -379,6 +379,7 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
       orderId={reviewTarget.orderId}
       productId={reviewTarget.productId}
       productName={reviewTarget.productName}
+      appearance={appearance}
       onClose={() => setReviewTarget(null)}
       onSubmitted={() => {
         setReviewTarget(null);

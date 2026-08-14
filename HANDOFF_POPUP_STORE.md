@@ -1080,6 +1080,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-08-14 — §60 리뷰 모달·상품상세 장바구니 버튼 라이트 (User)
+- **Author:** Cursor Agent
+- **Changed:** `ReviewFormModal` → `review-form.css` 라이트 · `ProductDetailModal` **🛒 장바구니** 아웃라인 버튼
+- **Notes:** push + Vercel 1~2min · Expo `--clear`
+
 ### 2026-08-14 — §60.7 주문내역 상세 · 리뷰 구매자만 (User)
 - **Author:** Cursor Agent
 - **Changed:** `ShopperOrderCardLight` — 배송지·결제 상세·단가×수량·배송완료 타임라인 · `ProductDetailModal` — 매장 구매 이력만 리뷰 · §60.7 · §7.17
@@ -3615,6 +3620,8 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **리뷰 쓰기 버튼** | **무조건 노출 ❌** — **이 매장에서 해당 상품 구매 + 배송중 이후**(`canFileClaim`)만 · **미구매자=버튼 없음** | `ProductDetailModal` · `store_id` 필터 |
 | **구매확정 전 리뷰** | 버튼 누르면 **구매확정 confirm** → 실패 시 에러 문구 (상세·주문내역 동일) | `ProductDetailModal` · §54 |
 | **서버 최종 게이트** | `create_product_review` — `purchase_confirmed` \| `completed` 만 | migration `20260812b` |
+| **리뷰 작성 모달** | `ReviewFormModal` + `review-form.css` **라이트** (기본) · `appearance` prop | shop·/app/me |
+| **상품상세 하단** | **장바구니** = 아웃라인 버튼(🛒 · primary `#3182f6`) · 담기 = accent `#e94560` | `product-detail-shop.css` |
 
 ---
 

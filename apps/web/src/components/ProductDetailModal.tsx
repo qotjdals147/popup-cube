@@ -323,8 +323,8 @@ export function ProductDetailModal({
             <button type="button" className="product-detail-add-btn" style={styleFor(light, S.addBtnLayout, S.addBtnDark)} onClick={handleAdd}>
               {added ? t('productDetail.added') : t('productDetail.addToCart')}
             </button>
-            <button type="button" className="product-detail-cart-link" style={styleFor(light, S.cartLinkLayout, S.cartLinkDark)} onClick={onOpenCart}>
-              {t('shop.cart')}
+            <button type="button" className="product-detail-cart-btn" style={styleFor(light, S.cartBtnLayout, S.cartBtnDark)} onClick={onOpenCart}>
+              🛒 {t('shop.cart')}
             </button>
           </div>
         )}
@@ -335,6 +335,7 @@ export function ProductDetailModal({
           orderId={reviewTarget.orderId}
           productId={reviewTarget.productId}
           productName={reviewTarget.productName}
+          appearance={appearance}
           onClose={() => setReviewTarget(null)}
           onSubmitted={() => {
             setReviewTarget(null);
@@ -487,13 +488,19 @@ const S = {
     cursor: 'pointer',
   },
   addBtnDark: { background: '#e94560', color: '#fff' },
-  cartLinkLayout: {
-    border: 'none',
-    fontSize: 12,
-    textDecoration: 'underline',
-    cursor: 'pointer',
-    padding: 0,
+  cartBtnLayout: {
     flexShrink: 0,
+    minHeight: 44,
+    padding: '10px 12px',
+    borderRadius: 8,
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+    whiteSpace: 'nowrap' as const,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
   },
-  cartLinkDark: { background: 'transparent', color: '#8ca4d8' },
+  cartBtnDark: { border: '1px solid #4062a0', background: 'transparent', color: '#8ca4d8' },
 };

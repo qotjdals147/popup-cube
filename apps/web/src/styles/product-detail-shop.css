@@ -81,6 +81,7 @@
 .product-detail--light .product-detail-buy-bar {
   background: #ffffff;
   border-top: 1px solid #e5e8eb;
+  gap: 8px;
 }
 
 .product-detail--light .product-detail-stepper {
@@ -102,11 +103,17 @@
 .product-detail--light .product-detail-add-btn {
   background: #e94560;
   color: #ffffff;
+  min-height: 44px;
 }
 
-.product-detail--light .product-detail-cart-link {
+.product-detail--light .product-detail-cart-btn {
+  border: 1.5px solid #3182f6;
+  background: #ffffff;
   color: #3182f6;
-  background: transparent;
+}
+
+.product-detail--light .product-detail-cart-btn:active {
+  background: #eef4ff;
 }
 
 .product-detail--light .product-detail-write-review {
