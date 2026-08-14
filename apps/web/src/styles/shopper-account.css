@@ -24,14 +24,21 @@
 }
 
 .shopper-account-page[data-theme='dark'] {
-  --acct-bg: #0a0e1a;
-  --acct-surface: #16213e;
-  --acct-border: #1e293b;
-  --acct-text: #f5f5f5;
-  --acct-muted: #94a3b8;
-  --acct-primary: #3d8bfd;
-  --acct-tab-active-bg: #0f3460;
-  --acct-tab-active-text: #ffffff;
+  --acct-bg: #121214;
+  --acct-surface: #1c1c1f;
+  --acct-border: #2e2e32;
+  --acct-text: #f2f4f6;
+  --acct-muted: #98989f;
+  --acct-primary: #3182f6;
+  --acct-text-secondary: #c4c8cc;
+  --acct-tab-orders-bg: #2a2224;
+  --acct-tab-orders-border: #ff6b7a;
+  --acct-tab-orders-text: #ff8a96;
+  --acct-tab-address-bg: #1a2433;
+  --acct-tab-address-border: #3182f6;
+  --acct-tab-address-text: #6eb0ff;
+  --acct-tab-active-bg: #252528;
+  --acct-tab-active-text: #f2f4f6;
 }
 
 .shopper-account-status {

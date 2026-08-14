@@ -18,8 +18,14 @@ import {
 import { t } from '../i18n';
 
 /** AD-030 — 배송지 CRUD (마이페이지·앱 「내 정보」 공용) */
-export function AddressManagementPanel({ appearance = 'dark' }: { appearance?: 'light' | 'dark' }) {
-  const isLight = appearance === 'light';
+export function AddressManagementPanel({
+  appearance = 'dark',
+  embedded = false,
+}: {
+  appearance?: 'light' | 'dark';
+  embedded?: boolean;
+}) {
+  const useAccountTokens = appearance === 'light' || embedded;
   const { userId } = useAuth();
 
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
@@ -111,15 +117,15 @@ export function AddressManagementPanel({ appearance = 'dark' }: { appearance?: '
   }
 
   return (
-    <div className={isLight ? 'addr-root' : undefined}>
-      <div className={isLight ? 'addr-section-header' : undefined} style={isLight ? undefined : styles.sectionHeader}>
-        <h2 className={isLight ? 'addr-section-title' : undefined} style={isLight ? undefined : styles.sectionTitle}>
+    <div className={useAccountTokens ? 'addr-root' : undefined}>
+      <div className={useAccountTokens ? 'addr-section-header' : undefined} style={useAccountTokens ? undefined : styles.sectionHeader}>
+        <h2 className={useAccountTokens ? 'addr-section-title' : undefined} style={useAccountTokens ? undefined : styles.sectionTitle}>
           {t('mypage.addressTabTitle')}
         </h2>
         <button
           type="button"
-          className={isLight ? 'addr-add-btn' : undefined}
-          style={isLight ? undefined : styles.addButton}
+          className={useAccountTokens ? 'addr-add-btn' : undefined}
+          style={useAccountTokens ? undefined : styles.addButton}
           onClick={openCreateForm}
         >
           {t('mypage.addNew')}
@@ -127,48 +133,48 @@ export function AddressManagementPanel({ appearance = 'dark' }: { appearance?: '
       </div>
 
       {loading && (
-        <p className={isLight ? 'addr-hint' : undefined} style={isLight ? undefined : styles.hint}>
+        <p className={useAccountTokens ? 'addr-hint' : undefined} style={useAccountTokens ? undefined : styles.hint}>
           {t('mypage.loading')}
         </p>
       )}
       {!loading && error && (
-        <p className={isLight ? 'addr-error' : undefined} style={isLight ? undefined : styles.error}>
+        <p className={useAccountTokens ? 'addr-error' : undefined} style={useAccountTokens ? undefined : styles.error}>
           {t('mypage.errorLoad')}
         </p>
       )}
       {!loading && !error && addresses.length === 0 && (
-        <p className={isLight ? 'addr-hint' : undefined} style={isLight ? undefined : styles.hint}>
+        <p className={useAccountTokens ? 'addr-hint' : undefined} style={useAccountTokens ? undefined : styles.hint}>
           {t('mypage.empty')}
         </p>
       )}
 
       {!loading && !error && addresses.length > 0 && (
-        <div className={isLight ? 'addr-list' : undefined} style={isLight ? undefined : styles.list}>
+        <div className={useAccountTokens ? 'addr-list' : undefined} style={useAccountTokens ? undefined : styles.list}>
           {addresses.map((address) => (
-            <div key={address.id} className={isLight ? 'addr-card' : undefined} style={isLight ? undefined : styles.card}>
-              <div className={isLight ? 'addr-card-header' : undefined} style={isLight ? undefined : styles.cardHeader}>
-                <strong className={isLight ? 'addr-card-label' : undefined} style={isLight ? undefined : styles.cardLabel}>
+            <div key={address.id} className={useAccountTokens ? 'addr-card' : undefined} style={useAccountTokens ? undefined : styles.card}>
+              <div className={useAccountTokens ? 'addr-card-header' : undefined} style={useAccountTokens ? undefined : styles.cardHeader}>
+                <strong className={useAccountTokens ? 'addr-card-label' : undefined} style={useAccountTokens ? undefined : styles.cardLabel}>
                   {address.label}
                 </strong>
                 {address.is_default && (
-                  <span className={isLight ? 'addr-default-badge' : undefined} style={isLight ? undefined : styles.defaultBadge}>
+                  <span className={useAccountTokens ? 'addr-default-badge' : undefined} style={useAccountTokens ? undefined : styles.defaultBadge}>
                     {t('mypage.defaultBadge')}
                   </span>
                 )}
               </div>
-              <div className={isLight ? 'addr-card-line' : undefined} style={isLight ? undefined : styles.cardLine}>
+              <div className={useAccountTokens ? 'addr-card-line' : undefined} style={useAccountTokens ? undefined : styles.cardLine}>
                 {address.recipient_name} · {address.phone}
               </div>
-              <div className={isLight ? 'addr-card-line' : undefined} style={isLight ? undefined : styles.cardLine}>
+              <div className={useAccountTokens ? 'addr-card-line' : undefined} style={useAccountTokens ? undefined : styles.cardLine}>
                 ({address.postal_code}) {address.address_line1}
                 {address.address_line2 ? ` ${address.address_line2}` : ''}
               </div>
-              <div className={isLight ? 'addr-card-actions' : undefined} style={isLight ? undefined : styles.cardActions}>
+              <div className={useAccountTokens ? 'addr-card-actions' : undefined} style={useAccountTokens ? undefined : styles.cardActions}>
                 {!address.is_default && (
                   <button
                     type="button"
-                    className={isLight ? 'addr-btn' : undefined}
-                    style={isLight ? undefined : styles.smallButton}
+                    className={useAccountTokens ? 'addr-btn' : undefined}
+                    style={useAccountTokens ? undefined : styles.smallButton}
                     onClick={() => void handleSetDefault(address.id)}
                   >
                     {t('mypage.setDefault')}
@@ -176,16 +182,16 @@ export function AddressManagementPanel({ appearance = 'dark' }: { appearance?: '
                 )}
                 <button
                   type="button"
-                  className={isLight ? 'addr-btn' : undefined}
-                  style={isLight ? undefined : styles.smallButton}
+                  className={useAccountTokens ? 'addr-btn' : undefined}
+                  style={useAccountTokens ? undefined : styles.smallButton}
                   onClick={() => openEditForm(address)}
                 >
                   {t('mypage.edit')}
                 </button>
                 <button
                   type="button"
-                  className={isLight ? 'addr-btn addr-btn-danger' : undefined}
-                  style={isLight ? undefined : styles.smallButtonDanger}
+                  className={useAccountTokens ? 'addr-btn addr-btn-danger' : undefined}
+                  style={useAccountTokens ? undefined : styles.smallButtonDanger}
                   onClick={() => void handleDelete(address.id)}
                 >
                   {t('mypage.delete')}
@@ -198,34 +204,34 @@ export function AddressManagementPanel({ appearance = 'dark' }: { appearance?: '
 
       {formOpen && (
         <div
-          className={isLight ? 'addr-form-overlay' : undefined}
-          style={isLight ? undefined : styles.overlay}
+          className={useAccountTokens ? 'addr-form-overlay' : undefined}
+          style={useAccountTokens ? undefined : styles.overlay}
           onClick={() => setFormOpen(false)}
         >
           <div
-            className={isLight ? 'addr-form-panel' : undefined}
-            style={isLight ? undefined : styles.formPanel}
+            className={useAccountTokens ? 'addr-form-panel' : undefined}
+            style={useAccountTokens ? undefined : styles.formPanel}
             onClick={(e) => e.stopPropagation()}
           >
-            <AddressFormFields values={form} onChange={setForm} appearance={isLight ? 'light' : 'dark'} />
+            <AddressFormFields values={form} onChange={setForm} appearance={useAccountTokens ? appearance : 'dark'} />
             {submitError && (
-              <p className={isLight ? 'addr-error' : undefined} style={isLight ? undefined : styles.error}>
+              <p className={useAccountTokens ? 'addr-error' : undefined} style={useAccountTokens ? undefined : styles.error}>
                 {submitError}
               </p>
             )}
-            <div className={isLight ? 'addr-form-actions' : undefined} style={isLight ? undefined : styles.formActions}>
+            <div className={useAccountTokens ? 'addr-form-actions' : undefined} style={useAccountTokens ? undefined : styles.formActions}>
               <button
                 type="button"
-                className={isLight ? 'addr-cancel-btn' : undefined}
-                style={isLight ? undefined : styles.cancelButton}
+                className={useAccountTokens ? 'addr-cancel-btn' : undefined}
+                style={useAccountTokens ? undefined : styles.cancelButton}
                 onClick={() => setFormOpen(false)}
               >
                 {t('mypage.cancel')}
               </button>
               <button
                 type="button"
-                className={isLight ? 'addr-save-btn' : undefined}
-                style={isLight ? undefined : styles.saveButton}
+                className={useAccountTokens ? 'addr-save-btn' : undefined}
+                style={useAccountTokens ? undefined : styles.saveButton}
                 onClick={() => void handleSubmit()}
                 disabled={submitting}
               >

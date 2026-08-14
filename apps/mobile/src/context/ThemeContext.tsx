@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SystemUI from 'expo-system-ui';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { shopperDark, shopperLight, type ShopperThemeColors } from '../theme/shopperTheme';
 
@@ -46,6 +47,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const toggleDark = useCallback(async () => {
     await setMode(mode === 'dark' ? 'light' : 'dark');
   }, [mode, setMode]);
+
+  useEffect(() => {
+    if (!ready) return;
+    const bg = mode === 'dark' ? shopperDark.bg : shopperLight.bg;
+    void SystemUI.setBackgroundColorAsync(bg);
+  }, [mode, ready]);
 
   const value = useMemo<ThemeContextValue>(
     () => ({

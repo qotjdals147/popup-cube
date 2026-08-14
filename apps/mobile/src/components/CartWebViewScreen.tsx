@@ -2,10 +2,10 @@ import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
-import { ShopperBottomNav } from '../components/ShopperBottomNav';
 import { useCartCount } from '../context/CartCountContext';
 import { useTheme } from '../context/ThemeContext';
 import { buildCartWebViewUrl, CART_COUNT_INJECT_SCRIPT } from '../lib/cartWebView';
+import { buildWebViewBackgroundInject } from '../lib/webviewThemeInject';
 import { t } from '../i18n/ko';
 
 export function CartWebViewScreen() {
@@ -15,11 +15,13 @@ export function CartWebViewScreen() {
   const [ready, setReady] = useState(false);
   const [cartUrl, setCartUrl] = useState<string | null>(null);
   const [webError, setWebError] = useState<string | null>(null);
+  const [webLoaded, setWebLoaded] = useState(false);
 
   useEffect(() => {
     let active = true;
     setReady(false);
     setWebError(null);
+    setWebLoaded(false);
 
     buildCartWebViewUrl(mode)
       .then((url) => {
@@ -43,6 +45,8 @@ export function CartWebViewScreen() {
     };
   }, [mode]);
 
+  const backgroundInject = useMemo(() => buildWebViewBackgroundInject(mode), [mode]);
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -55,6 +59,7 @@ export function CartWebViewScreen() {
           backgroundColor: colors.bg,
         },
         webview: { flex: 1, backgroundColor: colors.bg },
+        webviewHidden: { opacity: 0 },
         webviewLoading: {
           ...StyleSheet.absoluteFillObject,
           alignItems: 'center',
@@ -106,7 +111,6 @@ export function CartWebViewScreen() {
         <Pressable style={styles.button} onPress={() => router.replace('/home')}>
           <Text style={styles.buttonText}>{t.common.back}</Text>
         </Pressable>
-        <ShopperBottomNav active="cart" />
       </View>
     );
   }
@@ -115,22 +119,23 @@ export function CartWebViewScreen() {
     <View style={styles.container}>
       <WebView
         source={{ uri: cartUrl }}
-        style={styles.webview}
+        style={[styles.webview, !webLoaded && styles.webviewHidden]}
         onMessage={onMessage}
         javaScriptEnabled
         domStorageEnabled
         originWhitelist={['*']}
         startInLoadingState
+        injectedJavaScriptBeforeContentLoaded={backgroundInject}
         injectedJavaScript={CART_COUNT_INJECT_SCRIPT}
         renderLoading={() => (
           <View style={styles.webviewLoading}>
             <ActivityIndicator color={colors.primary} />
           </View>
         )}
+        onLoadEnd={() => setWebLoaded(true)}
         onError={() => setWebError(t.me.loadError)}
         onHttpError={() => setWebError(t.me.loadError)}
       />
-      <ShopperBottomNav active="cart" />
     </View>
   );
 }

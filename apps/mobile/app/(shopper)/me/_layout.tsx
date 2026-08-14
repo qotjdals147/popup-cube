@@ -1,7 +1,9 @@
 import { Stack } from 'expo-router';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 
 export default function MeLayout() {
+  const { colors, isDark } = useTheme();
+
   return (
     <Stack
       screenOptions={{
@@ -9,7 +11,7 @@ export default function MeLayout() {
         headerTintColor: colors.text,
         headerTitleStyle: { fontWeight: '700', fontSize: 17 },
         contentStyle: { backgroundColor: colors.bg },
-        statusBarStyle: 'dark',
+        statusBarStyle: isDark ? 'light' : 'dark',
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />

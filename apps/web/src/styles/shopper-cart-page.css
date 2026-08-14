@@ -13,10 +13,10 @@
 }
 
 .shopper-cart-page[data-theme='dark'] {
-  --cart-page-bg: #0a0e1a;
-  --cart-page-surface: #16213e;
-  --cart-page-border: #2a3a5c;
-  --cart-page-text: #f5f5f5;
+  --cart-page-bg: #121214;
+  --cart-page-surface: #1c1c1f;
+  --cart-page-border: #2e2e32;
+  --cart-page-text: #f2f4f6;
 }
 
 .shopper-cart-page__header {

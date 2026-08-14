@@ -9,16 +9,15 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { StoreSummary } from '../src/types/domain';
-import { StoreEnterModal } from '../src/components/StoreEnterModal';
-import { StoreMallCard } from '../src/components/StoreMallCard';
-import { ShopperBottomNav } from '../src/components/ShopperBottomNav';
-import { useAuth } from '../src/context/AuthContext';
-import { useTheme } from '../src/context/ThemeContext';
-import { t } from '../src/i18n/ko';
-import { sortStoresByPopupEnd } from '../src/lib/popupPeriod';
-import { listPublishedStores } from '../src/lib/stores';
-import { useRestoreSystemChromeOnFocus } from '../src/hooks/useWorldImmersiveChrome';
+import type { StoreSummary } from '../../src/types/domain';
+import { StoreEnterModal } from '../../src/components/StoreEnterModal';
+import { StoreMallCard } from '../../src/components/StoreMallCard';
+import { useAuth } from '../../src/context/AuthContext';
+import { useTheme } from '../../src/context/ThemeContext';
+import { t } from '../../src/i18n/ko';
+import { sortStoresByPopupEnd } from '../../src/lib/popupPeriod';
+import { listPublishedStores } from '../../src/lib/stores';
+import { useRestoreSystemChromeOnFocus } from '../../src/hooks/useWorldImmersiveChrome';
 
 /** §58 #3 — 몰(홈) 허브: 검색 · D-day · 설명 · 쇼핑하기 CTA */
 export default function HomeScreen() {
@@ -131,7 +130,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.flex}>
         <View style={styles.header}>
           <Text style={styles.brandTitle}>{t.home.title}</Text>
@@ -191,7 +190,6 @@ export default function HomeScreen() {
           />
         )}
       </View>
-      <ShopperBottomNav active="home" />
     </SafeAreaView>
   );
 }

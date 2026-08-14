@@ -1,12 +1,11 @@
 import { useRouter, type Href } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ShopperBottomNav } from '../../src/components/ShopperBottomNav';
-import { useAuth } from '../../src/context/AuthContext';
-import { t } from '../../src/i18n/ko';
-import { colors } from '../../src/theme/colors';
-import { useRestoreSystemChromeOnFocus } from '../../src/hooks/useWorldImmersiveChrome';
+import { useAuth } from '../../../src/context/AuthContext';
+import { useTheme } from '../../../src/context/ThemeContext';
+import { t } from '../../../src/i18n/ko';
+import { useRestoreSystemChromeOnFocus } from '../../../src/hooks/useWorldImmersiveChrome';
 
 const QUICK_ACTIONS = [
   { id: 'orders', icon: '📦', labelKey: 'orders' as const, href: '/me/orders' as const, enabled: true },
@@ -19,7 +18,110 @@ const QUICK_ACTIONS = [
 export default function MeHubScreen() {
   const router = useRouter();
   const { userId, email, nickname, loading: authLoading } = useAuth();
+  const { colors, isDark } = useTheme();
   useRestoreSystemChromeOnFocus();
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        safe: { flex: 1, backgroundColor: colors.bg },
+        loadingWrap: {
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.bg,
+        },
+        scroll: { flex: 1 },
+        scrollContent: { paddingBottom: 8 },
+        profileRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 16,
+          paddingVertical: 14,
+          backgroundColor: colors.bgCard,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: colors.border,
+        },
+        profileLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
+        avatar: {
+          width: 48,
+          height: 48,
+          borderRadius: 24,
+          backgroundColor: isDark ? colors.bgElevated : '#eef4ff',
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        avatarText: { fontSize: 20, fontWeight: '700', color: colors.primary },
+        profileText: { flex: 1, minWidth: 0 },
+        profileName: { fontSize: 17, fontWeight: '700', color: colors.text },
+        profileSub: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+        gearBtn: {
+          width: 44,
+          height: 44,
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: 22,
+          backgroundColor: colors.bgElevated,
+          borderWidth: 1,
+          borderColor: colors.border,
+        },
+        gearIcon: { fontSize: 20 },
+        quickGrid: {
+          flexDirection: 'row',
+          backgroundColor: colors.bgCard,
+          paddingVertical: 14,
+          paddingHorizontal: 8,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: colors.border,
+        },
+        quickItem: {
+          flex: 1,
+          alignItems: 'center',
+          paddingVertical: 6,
+          minHeight: 72,
+        },
+        quickItemDisabled: { opacity: 0.45 },
+        quickIcon: { fontSize: 22, marginBottom: 6 },
+        quickLabel: { fontSize: 11, fontWeight: '600', color: colors.text, textAlign: 'center' },
+        quickLabelDisabled: { color: colors.textMuted },
+        comingSoon: { fontSize: 9, color: colors.textMuted, marginTop: 2 },
+        ordersSection: { paddingTop: 16, paddingHorizontal: 14 },
+        sectionHeader: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 10,
+        },
+        sectionTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
+        sectionLink: { fontSize: 13, fontWeight: '600', color: colors.primary },
+        ordersTeaser: {
+          backgroundColor: colors.bgCard,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: colors.border,
+          padding: 20,
+          alignItems: 'center',
+        },
+        ordersTeaserIcon: { fontSize: 36, marginBottom: 8 },
+        ordersTeaserTitle: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: 6 },
+        ordersTeaserBody: {
+          fontSize: 13,
+          color: colors.textSoft,
+          textAlign: 'center',
+          lineHeight: 20,
+          marginBottom: 14,
+        },
+        ordersTeaserBtn: {
+          backgroundColor: colors.primary,
+          paddingHorizontal: 20,
+          paddingVertical: 12,
+          borderRadius: 10,
+        },
+        ordersTeaserBtnText: { color: colors.primaryText, fontSize: 14, fontWeight: '700' },
+      }),
+    [colors, isDark],
+  );
 
   useEffect(() => {
     if (!authLoading && !userId) {
@@ -102,101 +204,6 @@ export default function MeHubScreen() {
           </Pressable>
         </View>
       </ScrollView>
-
-      <ShopperBottomNav active="me" />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg },
-  scroll: { flex: 1 },
-  scrollContent: { paddingBottom: 8 },
-  profileRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: colors.bgCard,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  profileLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#eef4ff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: { fontSize: 20, fontWeight: '700', color: colors.primary },
-  profileText: { flex: 1, minWidth: 0 },
-  profileName: { fontSize: 17, fontWeight: '700', color: colors.text },
-  profileSub: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
-  gearBtn: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 22,
-    backgroundColor: colors.bg,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  gearIcon: { fontSize: 20 },
-  quickGrid: {
-    flexDirection: 'row',
-    backgroundColor: colors.bgCard,
-    paddingVertical: 14,
-    paddingHorizontal: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  quickItem: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 6,
-    minHeight: 72,
-  },
-  quickItemDisabled: { opacity: 0.45 },
-  quickIcon: { fontSize: 22, marginBottom: 6 },
-  quickLabel: { fontSize: 11, fontWeight: '600', color: colors.text, textAlign: 'center' },
-  quickLabelDisabled: { color: colors.textMuted },
-  comingSoon: { fontSize: 9, color: colors.textMuted, marginTop: 2 },
-  ordersSection: { paddingTop: 16, paddingHorizontal: 14 },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
-  sectionLink: { fontSize: 13, fontWeight: '600', color: colors.primary },
-  ordersTeaser: {
-    backgroundColor: colors.bgCard,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 20,
-    alignItems: 'center',
-  },
-  ordersTeaserIcon: { fontSize: 36, marginBottom: 8 },
-  ordersTeaserTitle: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: 6 },
-  ordersTeaserBody: {
-    fontSize: 13,
-    color: colors.textSoft,
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 14,
-  },
-  ordersTeaserBtn: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 10,
-  },
-  ordersTeaserBtnText: { color: colors.primaryText, fontSize: 14, fontWeight: '700' },
-});

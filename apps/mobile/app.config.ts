@@ -33,7 +33,7 @@ const config: ExpoConfig = {
   splash: {
     image: './assets/splash-icon.png',
     resizeMode: 'contain',
-    backgroundColor: '#0A0E1A',
+    backgroundColor: '#121214',
   },
   ios: {
     supportsTablet: true,
@@ -42,7 +42,7 @@ const config: ExpoConfig = {
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/android-icon-foreground.png',
-      backgroundColor: '#0A0E1A',
+      backgroundColor: '#121214',
     },
     package: 'com.popupcube.app',
   },

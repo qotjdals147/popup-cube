@@ -32,18 +32,18 @@ html:has(.store-shop-page) body {
 }
 
 .store-shop-page[data-theme='dark'] {
-  --shop-bg: #0a0e1a;
-  --shop-surface: #16213e;
-  --shop-surface-muted: #0f3460;
-  --shop-border: #2a3a5c;
-  --shop-text: #f5f5f5;
-  --shop-text-secondary: #d8e4ff;
-  --shop-text-muted: #a0a0c0;
-  --shop-primary: #3d8bfd;
-  --shop-header-bg: rgba(15, 52, 96, 0.98);
-  --shop-card-bg: #16213e;
-  --shop-thumb-bg: #0d1730;
-  --shop-stepper-bg: #0d1730;
+  --shop-bg: #121214;
+  --shop-surface: #1c1c1f;
+  --shop-surface-muted: #252528;
+  --shop-border: #2e2e32;
+  --shop-text: #f2f4f6;
+  --shop-text-secondary: #c4c8cc;
+  --shop-text-muted: #98989f;
+  --shop-primary: #3182f6;
+  --shop-header-bg: #1c1c1f;
+  --shop-card-bg: #1c1c1f;
+  --shop-thumb-bg: #252528;
+  --shop-stepper-bg: #252528;
 }
 
 .store-shop-status {

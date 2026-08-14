@@ -19,25 +19,28 @@ export const shopperLight = {
   overlay: 'rgba(0,0,0,0.45)',
 } as const;
 
-/** v2 설정 다크 모드용 — 기본값은 light (AD-065) */
+/**
+ * §60 4-C — 쿠팡·에이블리형 **쇼핑 다크** (차콜·회색 카드).
+ * 예전 월드/게임 네이비(#0A0E1A·#0f3460) ❌ — 라이트와 같은 primary blue 유지.
+ */
 export const shopperDark = {
-  bg: '#0A0E1A',
-  bgCard: '#0f3460',
-  bgElevated: '#16213e',
-  text: '#ffffff',
-  textMuted: '#a0a0c0',
-  textSoft: '#d8e4ff',
-  primary: '#3d8bfd',
+  bg: '#121214',
+  bgCard: '#1c1c1f',
+  bgElevated: '#252528',
+  text: '#f2f4f6',
+  textMuted: '#98989f',
+  textSoft: '#c4c8cc',
+  primary: '#3182f6',
   primaryText: '#ffffff',
-  accent: '#e94560',
-  accentDark: '#c73550',
-  border: '#2a3a5c',
-  borderStrong: '#2a3a5c',
-  openBadge: '#0d5c45',
-  price: '#e94560',
-  danger: '#fca5a5',
-  success: '#6ee7b7',
-  overlay: 'rgba(0,0,0,0.65)',
+  accent: '#3182f6',
+  accentDark: '#2563eb',
+  border: '#2e2e32',
+  borderStrong: '#3a3a3e',
+  openBadge: '#087f5b',
+  price: '#ff6b7a',
+  danger: '#ff8787',
+  success: '#51cf66',
+  overlay: 'rgba(0,0,0,0.55)',
 } as const;
 
 export type ShopperThemeColors = typeof shopperLight | typeof shopperDark;

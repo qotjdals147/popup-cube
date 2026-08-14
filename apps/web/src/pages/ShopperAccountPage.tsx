@@ -101,8 +101,8 @@ export function ShopperAccountPage() {
     return (
       <div className="shopper-account-page shopper-account-page--embed-panel" data-theme={theme}>
         <main className="shopper-account-main">
-          {tab === 'orders' && <OrderHistoryPanel embedded appearance="light" />}
-          {tab === 'addresses' && <AddressManagementPanel appearance="light" />}
+          {tab === 'orders' && <OrderHistoryPanel embedded appearance={theme} />}
+          {tab === 'addresses' && <AddressManagementPanel appearance={theme} embedded />}
         </main>
       </div>
     );
@@ -140,8 +140,8 @@ export function ShopperAccountPage() {
       </nav>
 
       <main className="shopper-account-main">
-        {tab === 'orders' && <OrderHistoryPanel embedded appearance="light" />}
-        {tab === 'addresses' && <AddressManagementPanel appearance="light" />}
+        {tab === 'orders' && <OrderHistoryPanel embedded appearance={theme} />}
+        {tab === 'addresses' && <AddressManagementPanel appearance={theme} embedded />}
       </main>
     </div>
   );

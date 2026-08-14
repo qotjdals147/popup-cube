@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import { buildAccountWebViewUrl, type AccountWebEmbed, type AccountWebTab } from '../lib/accountWebView';
+import { buildWebViewBackgroundInject } from '../lib/webviewThemeInject';
 import { useTheme } from '../context/ThemeContext';
 import { t } from '../i18n/ko';
 
@@ -17,11 +18,13 @@ export function AccountWebViewScreen({ tab, embed = 'page' }: AccountWebViewScre
   const [ready, setReady] = useState(false);
   const [accountUrl, setAccountUrl] = useState<string | null>(null);
   const [webError, setWebError] = useState<string | null>(null);
+  const [webLoaded, setWebLoaded] = useState(false);
 
   useEffect(() => {
     let active = true;
     setReady(false);
     setWebError(null);
+    setWebLoaded(false);
 
     buildAccountWebViewUrl(tab, embed, mode)
       .then((url) => {
@@ -45,9 +48,12 @@ export function AccountWebViewScreen({ tab, embed = 'page' }: AccountWebViewScre
     };
   }, [tab, embed, mode]);
 
+  const backgroundInject = useMemo(() => buildWebViewBackgroundInject(mode), [mode]);
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
+        container: { flex: 1, backgroundColor: colors.bg },
         centered: {
           flex: 1,
           alignItems: 'center',
@@ -56,6 +62,7 @@ export function AccountWebViewScreen({ tab, embed = 'page' }: AccountWebViewScre
           backgroundColor: colors.bg,
         },
         webview: { flex: 1, backgroundColor: colors.bg },
+        webviewHidden: { opacity: 0 },
         webviewLoading: {
           ...StyleSheet.absoluteFillObject,
           alignItems: 'center',
@@ -111,21 +118,25 @@ export function AccountWebViewScreen({ tab, embed = 'page' }: AccountWebViewScre
   }
 
   return (
-    <WebView
-      source={{ uri: accountUrl }}
-      style={styles.webview}
-      onMessage={onMessage}
-      javaScriptEnabled
-      domStorageEnabled
-      originWhitelist={['*']}
-      startInLoadingState
-      renderLoading={() => (
-        <View style={styles.webviewLoading}>
-          <ActivityIndicator color={colors.primary} />
-        </View>
-      )}
-      onError={() => setWebError(t.me.loadError)}
-      onHttpError={() => setWebError(t.me.loadError)}
-    />
+    <View style={styles.container}>
+      <WebView
+        source={{ uri: accountUrl }}
+        style={[styles.webview, !webLoaded && styles.webviewHidden]}
+        onMessage={onMessage}
+        javaScriptEnabled
+        domStorageEnabled
+        originWhitelist={['*']}
+        startInLoadingState
+        injectedJavaScriptBeforeContentLoaded={backgroundInject}
+        renderLoading={() => (
+          <View style={styles.webviewLoading}>
+            <ActivityIndicator color={colors.primary} />
+          </View>
+        )}
+        onLoadEnd={() => setWebLoaded(true)}
+        onError={() => setWebError(t.me.loadError)}
+        onHttpError={() => setWebError(t.me.loadError)}
+      />
+    </View>
   );
 }

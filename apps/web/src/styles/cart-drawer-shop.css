@@ -1,4 +1,4 @@
-/* CartDrawer — §60 · AD-065 손님 라이트 (shop WebView) · dark = PlayWorld */
+/* CartDrawer — §60 · AD-065 손님 라이트 · dark = 쿠팡형 차콜 */
 
 .cart-drawer-overlay {
   position: fixed;
@@ -36,7 +36,7 @@
 }
 
 .cart-drawer--dark .cart-drawer-panel {
-  background: #16213e;
+  background: #1c1c1f;
   color: #ffffff;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
 }
@@ -130,7 +130,7 @@
 }
 
 .cart-drawer--dark .cart-drawer-per-store-note {
-  background: #0f3460;
+  background: #252528;
   color: #8ca4d8;
   border: 1px solid #2c4270;
 }
@@ -163,7 +163,7 @@
 }
 
 .cart-drawer--dark .cart-drawer-store-group--current {
-  background: #0f3460;
+  background: #252528;
   border: 1.5px solid #4062a0;
 }
 
@@ -225,7 +225,7 @@
 }
 
 .cart-drawer--dark .cart-drawer-item {
-  background: #0f3460;
+  background: #252528;
   border: 1px solid #2c4270;
 }
 
@@ -538,7 +538,7 @@
 
 .cart-drawer--dark .cart-drawer-address-option {
   border: 1px solid #2c4270;
-  background: #0f3460;
+  background: #252528;
 }
 
 .cart-drawer--dark .cart-drawer-address-option--selected {
@@ -568,7 +568,7 @@
 
 .cart-drawer--dark .cart-drawer-reward-btn {
   border: 1px solid #2c4270;
-  background: #0f3460;
+  background: #252528;
   color: #ffffff;
 }
 

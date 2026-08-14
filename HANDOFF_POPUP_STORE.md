@@ -664,6 +664,7 @@ popup_store/                          # Turborepo root
 | ISS-034 | ~~Play 세로 WebView에서 장바구니 상품명·버튼 줄바꿈 깨짐~~ | Resolved | `CartDrawer` `play-cart-row` 2단 · `play-world.css` narrow rules |
 | ISS-035 | ~~블록 에디터에서 블록 추가·저장마다 스크롤이 맨 위로 튐~~ | Resolved | `OwnerProductPanel.reload()`가 매번 `setLoading(true)` → 상품 목록 DOM 통째 교체가 원인 · **이미 목록 로드됐으면 loading UI 생략** (2026-08-12g) |
 | ISS-036 | ~~shop WebView 상단 ←·🛒 · 담기/상세 너비~~ | Resolved | `0d31f82` · User **2026-08-14 OK** |
+| ISS-037 | ~~다크모드 탭 전환 시 **흰 번쩍임**~~ | Resolved | **Tabs `(shopper)`** + `lazy:false` · `SystemUI`/`NavigationTheme` 배경 · WebView `webviewThemeInject` · User **2026-08-14 OK** |
 
 ---
 
@@ -673,11 +674,11 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§58 #6** 팝업 종료일 · **§60 4-C** 다크 · GUCCI D-day 데모 · 다음 **§60 4-D** · **PG 금지** |
-| **Git 상태** | 로컬 — GUCCI DB · owner popup_ends_at · ThemeContext · push 대기 |
+| **한 줄 요약** | **§60 4-C ✅** · **다음 = §60 4-D** (장바구니 쿠팡형·주문 썸네일) · **PG 금지** |
+| **Git 상태** | `main` **`4ac03ce`** push ✅ · **4-C 완성분(차콜·Tabs·번쩍임 fix)** **로컬 미 push** — User **「됐다」** 확인 |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** (데모 D-day) |
-| **런칭 진행률 (대략)** | **기능(mock 결제)** ~82% · P1·앱스토어 포함 **전체 ~58%** · **실결제** = P1 + 사업자 + PG |
-| **User 실기 (2026-08-14)** | §58 #3 홈 카드 OK · **4-C 다크** · **점주 종료일** 실기 대기 |
+| **런칭 진행률 (대략)** | **기능(mock 결제)** ~84% · P1·앱스토어 포함 **전체 ~59%** · **실결제** = P1 + 사업자 + PG |
+| **User 실기 (2026-08-14)** | §58 #3 홈 ✅ · **4-C 다크(차콜·마이·탭 번쩍임)** ✅ · §58 #6 점주 종료일 = push 후 Vercel |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -699,40 +700,35 @@ popup_store/                          # Turborepo root
 | **4b** | ~~**§60 손님 라이트·장바구니 통일**~~ | ✅ push `1ecadb9` |
 | **4c** | ~~**§0 쇼핑몰 퀄리티**~~ · ~~**§58 #3 홈 몰 허브**~~ | ✅ User 실기 OK |
 | **5** | ~~**§58 #6** — 점주 `popup_ends_at` 편집 · 손님 미리보기~~ | ✅ StoreEdit 개요 |
-| **6** | ~~**§60 4-C** — 다크 모드 · WebView `?theme=`~~ | ✅ ThemeContext · settings |
-| **7** | **§60 4-D** — 장바구니 쿠팡형 · 주문 썸네일 | 다음 |
+| **6** | ~~**§60 4-C** — 다크 모드 · WebView `?theme=` · 차콜 · Tabs 번쩍임~~ | ✅ User OK |
+| **7** | **§60 4-D** — 장바구니 쿠팡형 · 주문 썸네일 | **← 다음 1순위** |
 | **8** | **§58 #5** — 종료 팝업 구매 차단(선택) | PG 전 |
 | **9** | **§58 #8 P1** | PG 전 |
 | **10** | **PG** (§53.7-7) | 사업자 + 가맹 후 |
 
 > **점주센터 전체 리빌드 ❌** — §58: **80% 유지 · layout만 숨김 · P1만 추가**.
 
-**다음 에이전트가 shop UX 손볼 때 볼 파일:**
+**다음 에이전트가 4-D·shop 손볼 때 볼 파일:**
 
 | 파일 | 역할 |
 |---|---|
+| `apps/web/src/pages/ShopperCartPage.tsx` · `CartView.tsx` | **전체 장바구니** 쿠팡형 행(체크·썸네·수량·가격) |
+| `apps/web/src/styles/shopper-cart-page.css` | 장바구니 다크/라이트 토큰 |
+| `apps/web/src/components/ShopperOrderCardLight.tsx` | **주문 썸네일** join (`order_items` ↔ `products`) |
+| `apps/mobile/app/(shopper)/_layout.tsx` | 홈·마이·장바구니 **Tabs** (4-C · 화면 유지) |
+| `apps/mobile/app/(shopper)/cart.tsx` | 장바구니 탭 → `CartWebViewScreen` |
 | `apps/web/src/components/StoreShopCatalog.tsx` | 카드 grid · stepper · **담기/상세 버튼** |
 | `apps/web/src/pages/StoreShopPage.tsx` | 헤더 · sticky cart bar · `--shop-inset-top` |
-| `apps/web/src/styles/store-shop.css` | 라이트 토큰 · 2열 · **action-btn** |
-| `apps/mobile/app/store/[storeId].tsx` | WebView `/shop` · **SafeAreaView** · 세로 lock |
+| `apps/mobile/app/store/[storeId].tsx` | WebView `/shop` · SafeAreaView · 세로 lock |
 
 **미커밋 (의도적 제외):** `apps/mobile/AGENTS.md` · `CLAUDE.md` · `LICENSE`
 
-#### 사용자가 지금 해야 할 것 (실기 — **§0 표준 Expo 4줄 전체**, 축약 금지)
+#### 사용자가 지금 해야 할 것
 
-1) **Win → `cmd` → Enter**  
-2) **§0 「표준 Expo 4줄」** — 한 줄씩 복붙 (아래와 동일):
+**§60 4-C — User 실기 OK (2026-08-14).** 다음 코드 작업 = **§60 4-D**.  
+**push**는 User 「커밋·푸시」 요청 시 — 4-C 로컬분 일괄 push + Vercel 1~2분.
 
-```
-cd C:\Users\qotjd\Downloads\Cursor\popup_store
-npm install --legacy-peer-deps
-cd apps\mobile
-npx expo start --tunnel --port 8082 --clear
-```
-
-3) Expo Go **SDK 52** · `demo@shopper.com` / `demo`  
-4) **홈 → GUCCI → 쇼핑하기** · 담기/상세 버튼 · ←·🛒 확인  
-5) Vercel 웹: `https://popup-cube-web.vercel.app/store/popup_gucci_01/shop`
+**4-D 착수 후 실기** — §0 **표준 Expo 4줄** + PC `npm run dev` (아래 §0 참고 · **축약 금지**).
 
 ---
 
@@ -750,6 +746,26 @@ npx expo start --tunnel --port 8082 --clear
 **PG 착수 조건 (전부 충족 전 금지):** ① User **사업자 등록 완료** ② **PG 후보·계약 확정** ③ (권장) P1·실기 대부분 OK.
 
 ---
+
+### 7.23 세션 인수인계 — **2026-08-14** (4-C 완료 · Tabs · 번쩍임 fix)
+
+| | |
+|---|---|
+| **User** | 다크 **괜찮음** · 탭 전환 **흰 번쩍임** → 수정 후 **OK** · HANDOFF + **다음 브리핑** |
+| **원인** | Stack `replace`로 탭마다 화면 **재마운트** · OS/WebView 기본 **흰 배경** |
+| **조치** | `app/(shopper)/` **Tabs** (`lazy:false`, `animation:none`) · `NavigationThemeProvider` · `SystemUI` · `webviewThemeInject` · **쿠팡형 차콜** `shopperDark` · me ThemeContext · shop/cart/account CSS |
+| **구조 변경** | `home`·`cart`·`me/*` → **`app/(shopper)/`** (URL `/home` `/me` `/cart` 동일) · 하단탭 = Tabs `tabBar` |
+| **Git** | **로컬 미 push** — `4ac03ce` 이후 전부 워킹트리 |
+| **다음** | User **push** 요청 시 커밋 → **§60 4-D** 착수 |
+
+### 7.22 세션 인수인계 — **2026-08-14** (4-C 다크 피드백 · 마이·차콜)
+
+| | |
+|---|---|
+| **User** | 마이 탭 다크 미적용 · 다크=게임 네이비 재탕 아님? · **§0 실기 안내 제대로** |
+| **원인** | `me/index.tsx` ThemeContext 누락 · `shopperDark`=구 월드 팔레트 · WebView `appearance="light"` 고정 |
+| **조치(로컬)** | `me/index`·`me/_layout` ThemeContext · **쿠팡형 차콜** `shopperDark` · shop/cart/account CSS · OrderHistoryPanel embedded 다크 · **Tabs(홈·마이·장바구니) + OS/WebView 배경 → 흰 번쩍임 완화** |
+| **다음** | User 실기 → **push** → §60 4-D |
 
 ### 7.21 세션 인수인계 — **2026-08-14** (§58 #6 · §60 4-C · GUCCI D-day)
 
@@ -1146,6 +1162,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-14 — §60 4-C 완료 · Tabs · 다크 번쩍임 fix (User OK)
+- **Author:** Cursor Agent
+- **Changed:** `app/(shopper)/` Tabs · `shopperDark` 차콜 · me ThemeContext · `NavigationTheme` · `SystemUI` · `webviewThemeInject` · shop/cart/account CSS · ISS-037 · §7.23
+- **Notes:** **로컬 미 push** · User 탭 전환 번쩍임 **OK** · 다음 **§60 4-D**
 
 ### 2026-08-14 — §58 #6 · §60 4-C · GUCCI D-day (User 2→3→1)
 - **Author:** Cursor Agent
@@ -3691,10 +3712,10 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 |---|---|---|
 | **4-A** | shop 헤더·담기·**세로 고정** · **라이트 CSS** · **버튼 정렬·safe-area** | ✅ User OK |
 | **4-B** | 앱 shell — **3탭** · 마이 허브 · ⚙️ 설정 | ✅ push · User 실기 · **IA 정리** (배송지 중복 제거) |
-| **4-C** | **`/settings`** + 다크 모드 토글 → WebView 연동 | 4-B 후 |
-| **4-D** | 마이·장바구니 **쿠팡형** · **주문 썸네일** join | 1~2세션 |
+| **4-C** | **`/settings`** + 다크 · 차콜 · Tabs · WebView `?theme=` | ✅ User OK (ISS-037) |
+| **4-D** | 마이·장바구니 **쿠팡형** · **주문 썸네일** join | **← 다음** |
 
-*§60 Last updated: 2026-08-14 (§60.7 주문내역·리뷰)*
+*§60 Last updated: 2026-08-14 (4-C ✅ · ISS-037 · §7.23)*
 
 ### 60.6 마이 · 주문 · 배송지 진입 (IA — User 2026-08-14)
 
@@ -3702,8 +3723,8 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 
 | 기능 | 유일/주 진입 | 화면 | WebView |
 |---|---|---|---|
-| **주문내역** | 마이 › **주문내역** 아이콘 · **주문내역 열기** | `app/me/orders.tsx` | `?tab=orders&embed=panel` · **구매내역만** |
-| **배송지** | 마이 › **배송지** 아이콘 | `app/me/addresses.tsx` | `?tab=addresses&embed=panel` · **배송지만** |
+| **주문내역** | 마이 › **주문내역** 아이콘 · **주문내역 열기** | `app/(shopper)/me/orders.tsx` | `?tab=orders&embed=panel` · **구매내역만** |
+| **배송지** | 마이 › **배송지** 아이콘 | `app/(shopper)/me/addresses.tsx` | `?tab=addresses&embed=panel` · **배송지만** |
 | **내정보관리** | 마이 › **⚙️** | `app/settings.tsx` 네이티브 | 회원정보 · 알림(준비) · 다크(4-C) · 로그아웃 · **배송지 메뉴 ❌** |
 | **브라우저 전체** | (PC·직접 URL) | `/app/me` | `embed=page` · **구매내역/배송지 탭** 유지 |
 

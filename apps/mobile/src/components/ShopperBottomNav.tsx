@@ -15,7 +15,13 @@ const TABS: { id: ShopperTab; label: string; icon: string; href: '/home' | '/me'
 ];
 
 /** §60 4-B — 쿠팡형 하단 3탭 (홈 · 마이 · 장바구니) · 설정=마이 ⚙️ */
-export function ShopperBottomNav({ active }: { active: ShopperTab }) {
+export function ShopperBottomNav({
+  active,
+  onNavigate,
+}: {
+  active: ShopperTab;
+  onNavigate?: (tab: ShopperTab) => void;
+}) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { count: cartCount } = useCartCount();
@@ -96,7 +102,12 @@ export function ShopperBottomNav({ active }: { active: ShopperTab }) {
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
             onPress={() => {
-              if (!isActive) router.replace(tab.href as Href);
+              if (isActive) return;
+              if (onNavigate) {
+                onNavigate(tab.id);
+              } else {
+                router.navigate(tab.href as Href);
+              }
             }}
           >
             {isActive && <View style={styles.activeIndicator} />}

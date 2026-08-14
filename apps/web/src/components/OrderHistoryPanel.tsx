@@ -30,7 +30,8 @@ interface OrderHistoryPanelProps {
  * 배송 완료 이후 「구매확정」을 직접 누르거나, 누르지 않으면 주문일+7일 후 자동 확정됨.
  */
 export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dark' }: OrderHistoryPanelProps) {
-  const isLight = appearance === 'light';
+  /** 앱 `/app/me` WebView — CSS 변수(`--acct-*`) · 라이트·다크 모두 차콜/화이트 토큰 */
+  const useAccountTokens = appearance === 'light' || embedded;
   const [orders, setOrders] = useState<ShopperOrderView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -147,37 +148,37 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
       )}
 
       {embedded && (
-        <h2 className={isLight ? 'oh-title' : undefined} style={isLight ? undefined : styles.embeddedTitle}>
+        <h2 className={useAccountTokens ? 'oh-title' : undefined} style={useAccountTokens ? undefined : styles.embeddedTitle}>
           {t('myOrders.title')}
         </h2>
       )}
 
       {loading && (
-        <p className={isLight ? 'oh-hint' : undefined} style={isLight ? undefined : styles.hint}>
+        <p className={useAccountTokens ? 'oh-hint' : undefined} style={useAccountTokens ? undefined : styles.hint}>
           {t('myOrders.loading')}
         </p>
       )}
       {!loading && error && (
-        <p className={isLight ? 'oh-error' : undefined} style={isLight ? undefined : styles.error}>
+        <p className={useAccountTokens ? 'oh-error' : undefined} style={useAccountTokens ? undefined : styles.error}>
           {t('myOrders.errorLoad')}
         </p>
       )}
       {!loading && !error && orders.length === 0 && (
-        <p className={isLight ? 'oh-hint' : undefined} style={isLight ? undefined : styles.hint}>
+        <p className={useAccountTokens ? 'oh-hint' : undefined} style={useAccountTokens ? undefined : styles.hint}>
           {t('myOrders.empty')}
         </p>
       )}
 
       {actionError && (
-        <p className={isLight ? 'oh-error' : undefined} style={isLight ? undefined : styles.error}>
+        <p className={useAccountTokens ? 'oh-error' : undefined} style={useAccountTokens ? undefined : styles.error}>
           {actionError}
         </p>
       )}
 
       {!loading && !error && orders.length > 0 && (
-        <div className={isLight ? 'oh-list' : undefined} style={isLight ? undefined : styles.list}>
+        <div className={useAccountTokens ? 'oh-list' : undefined} style={useAccountTokens ? undefined : styles.list}>
           {orders.map((order) =>
-            isLight ? (
+            useAccountTokens ? (
               <ShopperOrderCardLight
                 key={order.id}
                 order={order}
@@ -390,7 +391,7 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
 
   if (embedded) {
     return (
-      <div className={isLight ? 'oh-root' : undefined} style={isLight ? undefined : styles.embeddedRoot}>
+      <div className={useAccountTokens ? 'oh-root' : undefined} style={useAccountTokens ? undefined : styles.embeddedRoot}>
         {listBody}
         {reviewModal}
       </div>
