@@ -256,11 +256,12 @@ export interface OrderItem {
   unit_price: number;
 }
 
-/** 점주 주문 관리 화면에서 쓰는 조인 결과 (상품명·구매자 닉네임 포함). */
+/** 점주·손님 주문 라인 조인 (상품명 · §60 4-D 썸네일). */
 export interface OwnerOrderItemView {
   id: string;
   product_id: string;
   product_name: string;
+  product_image_url?: string | null;
   quantity: number;
   unit_price: number;
 }

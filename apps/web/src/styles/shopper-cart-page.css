@@ -66,6 +66,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 12px;
+  padding-bottom: 132px;
 }
 
 .shopper-cart-page__status {

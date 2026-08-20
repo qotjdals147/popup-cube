@@ -361,6 +361,10 @@ export const ko = {
     otherStoresRemain: '다른 매장 상품 {count}건은 결제 후에도 장바구니에 남아 있어요.',
     emptyThisStore: '이 매장에 담긴 상품이 없어요.',
     removeItem: '삭제',
+    selectAll: '전체선택',
+    selectStoreAll: '매장 전체선택',
+    selectedSummary: '선택 {count}개',
+    multiStoreCheckoutHint: '매장별로 결제해 주세요.',
   },
   /** §54 — 상품 상세페이지 (긴 이미지 + 직접 쓴 설명 + 리뷰) */
   productDetail: {

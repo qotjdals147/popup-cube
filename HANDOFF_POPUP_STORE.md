@@ -674,8 +674,8 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§60 4-C ✅** · **다음 = §60 4-D** (장바구니 쿠팡형·주문 썸네일) · **PG 금지** |
-| **Git 상태** | `main` **`4ac03ce`** push ✅ · **4-C 완성분(차콜·Tabs·번쩍임 fix)** **로컬 미 push** — User **「됐다」** 확인 |
+| **한 줄 요약** | **§60 4-D ✅(로컬)** · 다음 **§58 #5** 또는 P1 · **PG 금지** |
+| **Git 상태** | `main` **`079b71a`** push ✅ · **4-D** 로컬 미 push |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** (데모 D-day) |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~84% · P1·앱스토어 포함 **전체 ~59%** · **실결제** = P1 + 사업자 + PG |
 | **User 실기 (2026-08-14)** | §58 #3 홈 ✅ · **4-C 다크(차콜·마이·탭 번쩍임)** ✅ · §58 #6 점주 종료일 = push 후 Vercel |
@@ -701,7 +701,7 @@ popup_store/                          # Turborepo root
 | **4c** | ~~**§0 쇼핑몰 퀄리티**~~ · ~~**§58 #3 홈 몰 허브**~~ | ✅ User 실기 OK |
 | **5** | ~~**§58 #6** — 점주 `popup_ends_at` 편집 · 손님 미리보기~~ | ✅ StoreEdit 개요 |
 | **6** | ~~**§60 4-C** — 다크 모드 · WebView `?theme=` · 차콜 · Tabs 번쩍임~~ | ✅ User OK |
-| **7** | **§60 4-D** — 장바구니 쿠팡형 · 주문 썸네일 | **← 다음 1순위** |
+| **7** | ~~**§60 4-D** — 장바구니 쿠팡형 · 주문 썸네일~~ | ✅ 로컬 · User 실기 대기 |
 | **8** | **§58 #5** — 종료 팝업 구매 차단(선택) | PG 전 |
 | **9** | **§58 #8 P1** | PG 전 |
 | **10** | **PG** (§53.7-7) | 사업자 + 가맹 후 |
@@ -725,10 +725,22 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**§60 4-C — User 실기 OK (2026-08-14).** 다음 코드 작업 = **§60 4-D**.  
-**push**는 User 「커밋·푸시」 요청 시 — 4-C 로컬분 일괄 push + Vercel 1~2분.
+**§60 4-D** — push 후 Vercel 1~2분 · Expo **`--clear`**
 
-**4-D 착수 후 실기** — §0 **표준 Expo 4줄** + PC `npm run dev` (아래 §0 참고 · **축약 금지**).
+**A) 장바구니 (쿠팡형)**
+1) Win → `cmd` → Enter
+2) **아래 한 줄씩 복붙:**
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+3) `demo@shopper.com` / `demo` · **장바구니 탭**
+4) **전체선택** · **체크·썸네·수량·가격** 한 행 · **하단 고정 결제하기**
+
+**B) 주문내역 썸네일**
+- **마이 → 주문내역** · 각 상품 **이미지** 보이는지
 
 ---
 
@@ -746,6 +758,16 @@ popup_store/                          # Turborepo root
 **PG 착수 조건 (전부 충족 전 금지):** ① User **사업자 등록 완료** ② **PG 후보·계약 확정** ③ (권장) P1·실기 대부분 OK.
 
 ---
+
+### 7.24 세션 인수인계 — **2026-08-14** (§60 4-D · 장바구니·주문 썸네일)
+
+| | |
+|---|---|
+| **User** | 4-D 착수 · HANDOFF 규칙 준수 |
+| **DB** | `get_my_orders` + **`product_image_url`** migration 원격 적용 ✅ |
+| **웹** | `CartView` page — **전체선택·체크·72px 썸네·하단 sticky 결제** · `ShopperOrderCardLight` **주문 줄 썸네** |
+| **Git** | **로컬 미 push** (4-D) |
+| **다음** | User 실기 → push → **§58 #5** |
 
 ### 7.23 세션 인수인계 — **2026-08-14** (4-C 완료 · Tabs · 번쩍임 fix)
 
@@ -1162,6 +1184,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-14 — §60 4-D 장바구니 쿠팡형 · 주문 썸네일
+- **Author:** Cursor Agent
+- **Changed:** `get_my_orders` + `product_image_url` · `CartView` page select-all/sticky · `ShopperOrderCardLight` thumb · CSS · §7.24
+- **Notes:** DB migration 원격 ✅ · **로컬 미 push** · Vercel+Expo `--clear` 실기
 
 ### 2026-08-14 — §60 4-C 완료 · Tabs · 다크 번쩍임 fix (User OK)
 - **Author:** Cursor Agent
@@ -3713,7 +3740,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **4-A** | shop 헤더·담기·**세로 고정** · **라이트 CSS** · **버튼 정렬·safe-area** | ✅ User OK |
 | **4-B** | 앱 shell — **3탭** · 마이 허브 · ⚙️ 설정 | ✅ push · User 실기 · **IA 정리** (배송지 중복 제거) |
 | **4-C** | **`/settings`** + 다크 · 차콜 · Tabs · WebView `?theme=` | ✅ User OK (ISS-037) |
-| **4-D** | 마이·장바구니 **쿠팡형** · **주문 썸네일** join | **← 다음** |
+| **4-D** | 마이·장바구니 **쿠팡형** · **주문 썸네일** join | ✅ 로컬 · User 실기 |
 
 *§60 Last updated: 2026-08-14 (4-C ✅ · ISS-037 · §7.23)*
 

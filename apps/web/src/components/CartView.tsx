@@ -84,11 +84,36 @@ export function CartView({
   const [rewardError, setRewardError] = useState<string | null>(null);
   const [storeNames, setStoreNames] = useState<Record<string, string>>({});
   const [storeInfoById, setStoreInfoById] = useState<Record<string, StoreSummary>>({});
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
 
+  const isPage = layout === 'page';
   const activeStoreId = checkoutStoreId ?? focusStoreId ?? null;
+
+  useEffect(() => {
+    setSelectedIds(new Set(items.map((item) => item.productId)));
+  }, [items]);
+
+  const selectedItems = useMemo(
+    () => items.filter((item) => selectedIds.has(item.productId)),
+    [items, selectedIds],
+  );
+  const allSelected = items.length > 0 && selectedIds.size === items.length;
+  const selectedSubtotal = useMemo(
+    () => selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    [selectedItems],
+  );
+  const storesWithSelection = useMemo(
+    () => [...new Set(selectedItems.map((item) => item.storeId))],
+    [selectedItems],
+  );
+  const singleCheckoutStoreId = storesWithSelection.length === 1 ? storesWithSelection[0] : null;
+
   const checkoutItems = useMemo(
-    () => (activeStoreId ? items.filter((item) => item.storeId === activeStoreId) : []),
-    [items, activeStoreId],
+    () =>
+      activeStoreId
+        ? items.filter((item) => item.storeId === activeStoreId && selectedIds.has(item.productId))
+        : [],
+    [items, activeStoreId, selectedIds],
   );
   const checkoutSubtotal = useMemo(
     () => checkoutItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -129,8 +154,40 @@ export function CartView({
   }, [storeInfo, checkoutSubtotal]);
   const estimatedPayTotal = checkoutSubtotal + estimatedShipping;
 
+  function toggleProduct(productId: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(productId)) next.delete(productId);
+      else next.add(productId);
+      return next;
+    });
+  }
+
+  function toggleStoreProducts(storeId: string) {
+    const storeProductIds = items.filter((item) => item.storeId === storeId).map((item) => item.productId);
+    const allInStore = storeProductIds.length > 0 && storeProductIds.every((id) => selectedIds.has(id));
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      for (const id of storeProductIds) {
+        if (allInStore) next.delete(id);
+        else next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function toggleAllProducts() {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(items.map((item) => item.productId)));
+    }
+  }
+
   function beginCheckout(forStoreId: string) {
-    const groupItems = items.filter((item) => item.storeId === forStoreId);
+    const groupItems = items.filter(
+      (item) => item.storeId === forStoreId && selectedIds.has(item.productId),
+    );
     if (groupItems.length === 0) return;
     setCheckoutStoreId(forStoreId);
     setPhase('address');
@@ -228,7 +285,9 @@ export function CartView({
   const addressAppearance = appearance === 'light' ? 'light' : 'dark';
 
   function renderStoreFooter(forStoreId: string) {
-    const groupItems = items.filter((item) => item.storeId === forStoreId);
+    const groupItems = items.filter(
+      (item) => item.storeId === forStoreId && selectedIds.has(item.productId),
+    );
     if (groupItems.length === 0) return null;
     const info = storeInfoById[forStoreId];
     const subtotal = groupItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -253,6 +312,55 @@ export function CartView({
           {t('cart.checkout')}
         </button>
       </div>
+    );
+  }
+
+  function renderCartItem(item: (typeof items)[number]) {
+    const checked = selectedIds.has(item.productId);
+    return (
+      <article
+        key={item.productId}
+        className={`cart-drawer-item${isPage ? ' cart-drawer-item--page' : ''}${!checked && isPage ? ' cart-drawer-item--unchecked' : ''}`}
+      >
+        {isPage && (
+          <label className="cart-drawer-item-check">
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={() => toggleProduct(item.productId)}
+              aria-label={item.name}
+            />
+          </label>
+        )}
+        <div className={`cart-drawer-item-thumb${isPage ? ' cart-drawer-item-thumb--page' : ''}`}>
+          {item.imageUrl ? (
+            <img src={item.imageUrl} alt={item.name} />
+          ) : (
+            <span className="cart-drawer-item-thumb-placeholder">🛍️</span>
+          )}
+        </div>
+        <div className="cart-drawer-item-body">
+          <p className="cart-drawer-item-name">{item.name}</p>
+          <p className="cart-drawer-item-unit">{formatPrice(item.price)}</p>
+          <div className="cart-drawer-item-actions">
+            <div className="cart-drawer-item-row">
+              <div className="cart-drawer-stepper">
+                <button type="button" className="cart-drawer-qty-btn" onClick={() => decrementQuantity(item.productId)}>
+                  −
+                </button>
+                <span className="cart-drawer-qty-value">{item.quantity}</span>
+                <button type="button" className="cart-drawer-qty-btn" onClick={() => incrementQuantity(item.productId)}>
+                  +
+                </button>
+              </div>
+              <span className="cart-drawer-line-total">{formatPrice(item.price * item.quantity)}</span>
+            </div>
+            <button type="button" className="cart-drawer-remove-btn" onClick={() => removeItem(item.productId)}>
+              {t('cart.removeItem')}
+            </button>
+          </div>
+        </div>
+      </article>
     );
   }
 
@@ -395,51 +503,43 @@ export function CartView({
           <p className="cart-drawer-hint">{t('cart.empty')}</p>
         ) : (
           <>
-            {storeGroups.map((group) => (
+            {isPage && (
+              <label className="cart-page-select-all">
+                <input type="checkbox" checked={allSelected} onChange={toggleAllProducts} />
+                <span>
+                  {t('cart.selectAll')} ({selectedIds.size}/{items.length})
+                </span>
+              </label>
+            )}
+            {storeGroups.map((group) => {
+              const storeProductIds = group.items.map((item) => item.productId);
+              const storeAllSelected =
+                storeProductIds.length > 0 && storeProductIds.every((id) => selectedIds.has(id));
+              return (
               <section
                 key={group.storeId}
                 className={`cart-drawer-store-group${focusStoreId && group.storeId === focusStoreId ? ' cart-drawer-store-group--current' : ''}`}
               >
                 <div className="cart-drawer-store-header">
+                  {isPage && (
+                    <label className="cart-drawer-store-select">
+                      <input
+                        type="checkbox"
+                        checked={storeAllSelected}
+                        onChange={() => toggleStoreProducts(group.storeId)}
+                        aria-label={t('cart.selectStoreAll')}
+                      />
+                    </label>
+                  )}
                   <h4 className="cart-drawer-store-name">{storeNames[group.storeId] ?? group.storeId}</h4>
                 </div>
                 <div className="cart-drawer-item-list">
-                  {group.items.map((item) => (
-                    <article key={item.productId} className="cart-drawer-item">
-                      <div className="cart-drawer-item-thumb">
-                        {item.imageUrl ? (
-                          <img src={item.imageUrl} alt={item.name} />
-                        ) : (
-                          <span className="cart-drawer-item-thumb-placeholder">🛍️</span>
-                        )}
-                      </div>
-                      <div className="cart-drawer-item-body">
-                        <p className="cart-drawer-item-name">{item.name}</p>
-                        <p className="cart-drawer-item-unit">{formatPrice(item.price)}</p>
-                        <div className="cart-drawer-item-actions">
-                          <div className="cart-drawer-item-row">
-                            <div className="cart-drawer-stepper">
-                              <button type="button" className="cart-drawer-qty-btn" onClick={() => decrementQuantity(item.productId)}>
-                                −
-                              </button>
-                              <span className="cart-drawer-qty-value">{item.quantity}</span>
-                              <button type="button" className="cart-drawer-qty-btn" onClick={() => incrementQuantity(item.productId)}>
-                                +
-                              </button>
-                            </div>
-                            <span className="cart-drawer-line-total">{formatPrice(item.price * item.quantity)}</span>
-                          </div>
-                          <button type="button" className="cart-drawer-remove-btn" onClick={() => removeItem(item.productId)}>
-                            {t('cart.removeItem')}
-                          </button>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
+                  {group.items.map((item) => renderCartItem(item))}
                 </div>
-                {layout === 'page' && renderStoreFooter(group.storeId)}
+                {layout === 'page' && !(isPage && singleCheckoutStoreId) && renderStoreFooter(group.storeId)}
               </section>
-            ))}
+            );
+            })}
 
             {layout === 'drawer' && focusStoreId && (
               <>
@@ -472,7 +572,45 @@ export function CartView({
   );
 
   if (layout === 'page') {
-    return <div className={`${rootClass} cart-view--page`}>{panel}</div>;
+    const stickyStoreId = singleCheckoutStoreId;
+    const stickyStoreInfo = stickyStoreId ? storeInfoById[stickyStoreId] : null;
+    const stickyItems = stickyStoreId
+      ? selectedItems.filter((item) => item.storeId === stickyStoreId)
+      : [];
+    const stickySubtotal = stickyItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const stickyShipping = stickyStoreInfo ? calcShippingFee(stickyStoreInfo, stickySubtotal) : 0;
+    const stickyPayTotal = stickySubtotal + stickyShipping;
+
+    return (
+      <div className={`${rootClass} cart-view--page`}>
+        {panel}
+        {phase === 'cart' && items.length > 0 && (
+          <footer className="cart-page-sticky-footer">
+            <div className="cart-page-sticky-summary">
+              <span className="cart-page-sticky-count">{t('cart.selectedSummary', { count: selectedIds.size })}</span>
+              <strong className="cart-page-sticky-total">{formatPrice(selectedSubtotal)}</strong>
+            </div>
+            {stickyStoreId ? (
+              <button
+                type="button"
+                className="cart-drawer-primary-btn cart-page-sticky-btn"
+                disabled={stickyItems.length === 0}
+                onClick={() => beginCheckout(stickyStoreId)}
+              >
+                {t('cart.checkout')}
+              </button>
+            ) : (
+              <p className="cart-page-sticky-hint">{t('cart.multiStoreCheckoutHint')}</p>
+            )}
+            {stickyStoreId && stickyItems.length > 0 && (
+              <p className="cart-page-sticky-pay-total">
+                {t('cart.payTotal')} {formatPrice(stickyPayTotal)}
+              </p>
+            )}
+          </footer>
+        )}
+      </div>
+    );
   }
 
   return (

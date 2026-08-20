@@ -577,6 +577,8 @@ interface MyOrderRow {
 
   product_name: string;
 
+  product_image_url: string | null;
+
   quantity: number;
 
   unit_price: number;
@@ -707,6 +709,8 @@ export async function listMyOrders(): Promise<ShopperOrderView[]> {
       product_id: row.product_id,
 
       product_name: row.product_name,
+
+      product_image_url: row.product_image_url,
 
       quantity: row.quantity,
 

@@ -103,29 +103,38 @@ export function ShopperOrderCardLight({
             const lineTotal = item.unit_price * item.quantity;
             return (
               <li key={item.id} className="oh-item-row">
-                <div className="oh-item-main">
-                  <span className="oh-item-name">{item.product_name}</span>
-                  <span className="oh-item-unit">
-                    {t('myOrders.lineItemUnit', {
-                      price: item.unit_price.toLocaleString('ko-KR'),
-                      qty: item.quantity,
-                    })}
-                  </span>
+                <div className="oh-item-thumb" aria-hidden="true">
+                  {item.product_image_url ? (
+                    <img src={item.product_image_url} alt="" className="oh-item-thumb-img" />
+                  ) : (
+                    <span className="oh-item-thumb-placeholder">🛍️</span>
+                  )}
+                </div>
+                <div className="oh-item-body">
+                  <div className="oh-item-main">
+                    <span className="oh-item-name">{item.product_name}</span>
+                    <span className="oh-item-unit">
+                      {t('myOrders.lineItemUnit', {
+                        price: item.unit_price.toLocaleString('ko-KR'),
+                        qty: item.quantity,
+                      })}
+                    </span>
+                  </div>
+                  {reviewEligible &&
+                    (alreadyReviewed ? (
+                      <span className="oh-review-done">{t('myOrders.reviewDone')}</span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="oh-review-btn"
+                        disabled={actionId === order.id}
+                        onClick={() => onWriteReview(order, item.product_id, item.product_name)}
+                      >
+                        {t('myOrders.writeReview')}
+                      </button>
+                    ))}
                 </div>
                 <span className="oh-item-line-total">{formatPrice(lineTotal)}</span>
-                {reviewEligible &&
-                  (alreadyReviewed ? (
-                    <span className="oh-review-done">{t('myOrders.reviewDone')}</span>
-                  ) : (
-                    <button
-                      type="button"
-                      className="oh-review-btn"
-                      disabled={actionId === order.id}
-                      onClick={() => onWriteReview(order, item.product_id, item.product_name)}
-                    >
-                      {t('myOrders.writeReview')}
-                    </button>
-                  ))}
               </li>
             );
           })}
