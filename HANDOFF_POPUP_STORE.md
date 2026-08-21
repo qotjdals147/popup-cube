@@ -298,7 +298,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`1391162`** push ✅ (장바구니 매장별 fix) · **로컬** 통합 CartView UI (push 대기) |
+| **Git `main` HEAD** | **`b28af15`** push ✅ (장바구니 UI 통합 · 탭=서랍) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -674,8 +674,8 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **장바구니 UI 통합 ✅ push 대기** · 다음 **§58 #8 P1** · **PG 금지** |
-| **Git 상태** | `main` **`1391162`** → **통합 CartView** 커밋 후 push · Vercel 1~2분 |
+| **한 줄 요약** | **장바구니 UI 통합 ✅ push** · 다음 **§58 #8 P1** · **PG 금지** |
+| **Git 상태** | `main` **`b28af15`** push ✅ (탭·서랍 동일 CartView) · Vercel 1~2분 |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~90% · P1·앱스토어 포함 **전체 ~63%** · **실결제** = P1 + 사업자 + PG |
 | **User 실기** | §58 #3·4-C·4-D·#5 ✅ · **장바구니 통합 UI** = push 후 Vercel+Expo `--clear` · **JWT issued at future** = 폰 시계 |
@@ -788,7 +788,7 @@ npx expo start --tunnel --port 8082 --clear
 | **원인** | localStorage는 **1개**였으나 매장 `CartDrawer`가 **현재 매장만 결제** UI + **다른 매장 줄도 표시** → 「매장마다 카트」처럼 보임 |
 | **조치** | **`CartView` 탭·서랍 동일 UI** — 전체 목록 · 체크박스 · 매장별 섹션 · multi-store=섹션별 결제 · single=sticky · `storeId`=정렬만 · `orderNoValidItems`/`orderDiscountMismatch` i18n |
 | **유지** | v1 결제 = **`place_order` 매장별** (일괄 PG ❌) · AD-061 |
-| **Git** | push 대기 (이 커밋) |
+| **Git** | push **`b28af15`** ✅ |
 | **다음** | User 실기(§0) → **§58 #8 P1** |
 
 **실기 확인:** GUCCI+다른 매장 담기 → 매장 🛒 열기 = **탭과 같은 목록** · A매장 결제 후 B만 남음 · `orderSaveError` 시 장바구니 비우고 재담기
@@ -1233,7 +1233,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-08-21 — 장바구니 UI 통합 (탭·매장 서랍 = 동일 CartView)
 - **Author:** Cursor Agent
 - **Changed:** `CartView` drawer=page 동일(전체·체크·매장별 footer/sticky) · `cart-drawer-shell` · 결제 에러 i18n · §7.0·§7.26 · HANDOFF
-- **Notes:** User — 쿠팡형 **한 장바구니** · 결제만 매장별 유지 · **실기 테스트: §0 Expo Go `--clear`**
+- **Notes:** User — 쿠팡형 **한 장바구니** · 결제만 매장별 유지 · push **`b28af15`** · **실기 테스트: §0 Expo Go `--clear`**
 
 ### 2026-08-21 — 장바구니 매장별 결제 버그 fix (User 실기)
 - **Author:** Cursor Agent
