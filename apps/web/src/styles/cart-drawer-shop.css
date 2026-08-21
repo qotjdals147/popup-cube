@@ -779,6 +779,18 @@
   color: #8b95a1;
 }
 
+.cart-drawer-ended-hint {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+  color: #e03131;
+}
+
+.cart-drawer--dark .cart-drawer-ended-hint {
+  color: #ff8787;
+}
+
 .cart-drawer--dark .cart-page-sticky-hint,
 .cart-drawer--dark .cart-page-sticky-pay-total {
   color: #98989f;

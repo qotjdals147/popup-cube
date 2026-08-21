@@ -18,6 +18,8 @@ interface ProductDetailModalProps {
   previewMode?: boolean;
   /** AD-065 — shop WebView 라이트 */
   appearance?: 'light' | 'dark';
+  /** §58 #5 — 종료 팝업: 담기 숨김 */
+  shoppingBlocked?: boolean;
 }
 
 /** layout = 항상 적용 · dark = 다크일 때만 추가(색·테두리) */
@@ -66,6 +68,7 @@ export function ProductDetailModal({
   onOpenCart: _onOpenCart,
   previewMode = false,
   appearance = 'light',
+  shoppingBlocked = false,
 }: ProductDetailModalProps) {
   const light = appearance === 'light';
   const rootClass = light ? 'product-detail--light' : undefined;
@@ -297,7 +300,7 @@ export function ProductDetailModal({
           )}
         </div>
 
-        {!previewMode && (
+        {!previewMode && !shoppingBlocked && (
           <div className="product-detail-buy-bar" style={styleFor(light, S.buyBarLayout, S.buyBarDark)}>
             <div className="product-detail-buy-qty-row">
               <div className="product-detail-stepper" style={styleFor(light, S.stepperLayout, S.stepperDark)}>

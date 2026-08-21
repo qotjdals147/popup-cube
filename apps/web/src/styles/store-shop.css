@@ -46,6 +46,27 @@ html:has(.store-shop-page) body {
   --shop-stepper-bg: #252528;
 }
 
+.store-shop-ended-banner {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--shop-surface-muted);
+  border: 1px solid var(--shop-border);
+  color: var(--shop-text-secondary);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.store-shop-page[data-theme='dark'] .store-shop-ended-banner {
+  background: #252528;
+  color: var(--shop-text-muted);
+}
+
+.store-shop-card__action-btn--add:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .store-shop-status {
   margin: auto;
   color: var(--shop-text-muted);

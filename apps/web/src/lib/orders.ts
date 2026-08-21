@@ -70,6 +70,7 @@ export async function placeOrder(
   if (error) {
 
     if (error.message.includes('insufficient_stock')) throw new OrderError('insufficient_stock');
+    if (error.message.includes('popup_ended')) throw new OrderError('popup_ended');
 
     throw new OrderError(error.message);
 

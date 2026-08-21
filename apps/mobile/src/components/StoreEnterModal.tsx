@@ -26,6 +26,7 @@ export function StoreEnterModal({ store, visible, onEnter, onClose }: StoreEnter
     today: t.home.periodToday,
     dDay: (n) => t.home.periodDDay(n),
   });
+  const isEnded = period.tone === 'ended';
 
   const styles = useMemo(
     () =>
@@ -100,7 +101,11 @@ export function StoreEnterModal({ store, visible, onEnter, onClose }: StoreEnter
           paddingVertical: 14,
           alignItems: 'center',
         },
+        enterButtonDisabled: {
+          backgroundColor: colors.border,
+        },
         enterButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: '600' },
+        enterButtonTextDisabled: { color: colors.textMuted },
         closeButton: {
           marginTop: 10,
           marginHorizontal: 20,
@@ -135,8 +140,16 @@ export function StoreEnterModal({ store, visible, onEnter, onClose }: StoreEnter
           <Text style={styles.description}>
             {store.description || t.enterModal.noDescription}
           </Text>
-          <Pressable style={styles.enterButton} onPress={onEnter}>
-            <Text style={styles.enterButtonText}>{t.enterModal.enter}</Text>
+          <Pressable
+            style={[styles.enterButton, isEnded && styles.enterButtonDisabled]}
+            disabled={isEnded}
+            onPress={onEnter}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isEnded }}
+          >
+            <Text style={[styles.enterButtonText, isEnded && styles.enterButtonTextDisabled]}>
+              {isEnded ? t.home.periodEnded : t.enterModal.enter}
+            </Text>
           </Pressable>
           <Pressable style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>{t.enterModal.close}</Text>

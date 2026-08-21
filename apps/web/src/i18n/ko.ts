@@ -18,9 +18,9 @@ export const ko = {
   landing: {
     title: 'POP-UP CUBE',
     subtitle: '스토어 관리',
-    tagline: '매장·상품·진열·주문을 PC에서 관리하세요',
+    tagline: '매장·상품·주문을 PC에서 관리하세요',
     ownerButton: '🏪 스토어 관리자 로그인',
-    appNote: '일반 회원 쇼핑·팝업 입장은 모바일 앱에서 이용해 주세요.',
+    appNote: '일반 회원 쇼핑은 모바일 앱에서 이용해 주세요.',
   },
   viewMode: {
     switchToMobile: '📱 모바일 버전',
@@ -28,15 +28,15 @@ export const ko = {
   },
   login: {
     ownerTitle: '🏪 스토어 관리자 로그인',
-    ownerSubtitle: '매장·상품·진열·주문을 관리하세요.',
-    ownerPcHint: '쇼핑·팝업 월드 체험은 모바일 앱에서 — 여기는 관리 전용입니다.',
+    ownerSubtitle: '매장·상품·주문을 관리하세요.',
+    ownerPcHint: '손님 쇼핑은 모바일 앱에서 — 여기는 관리 전용입니다.',
     toggleToSignup: '계정이 없으신가요? 회원가입',
     toggleToLogin: '이미 계정이 있으신가요? 로그인',
     backToLanding: '처음으로',
   },
   signup: {
     nicknameLabel: '닉네임',
-    nicknamePlaceholder: '게임에서 보일 이름 (2~16자)',
+    nicknamePlaceholder: '앱에서 보일 이름 (2~16자)',
     checkButton: '중복확인',
     checking: '확인 중...',
     available: '사용 가능한 닉네임이에요 ✅',
@@ -64,10 +64,10 @@ export const ko = {
     unpublishConfirm: '「{name}」 매장을 출시 해제할까요? 손님 앱에서 더 이상 보이지 않습니다.',
     unpublishError: '출시 해제에 실패했어요. 다시 시도해 주세요.',
     deleteError: '매장 삭제에 실패했어요. 다시 시도해 주세요.',
-    deleteBlockedPublished: '출시 중인 매장은 삭제할 수 없어요. 먼저 「출시 해제」로 월드를 끈 뒤 삭제해 주세요.',
+    deleteBlockedPublished: '출시 중인 매장은 삭제할 수 없어요. 먼저 「출시 해제」로 노출을 끈 뒤 삭제해 주세요.',
     deleteBlockedOrders:
       '구매확정되지 않은 주문(수락 대기·수락·배송 중 등)이 남아 있어 삭제할 수 없어요. 주문을 모두 처리한 뒤 다시 시도해 주세요.',
-    deleteHintUnpublish: '삭제하려면 먼저 「출시 해제」로 손님 월드를 끄세요.',
+    deleteHintUnpublish: '삭제하려면 먼저 「출시 해제」로 손님 노출을 끄세요.',
     deleteHintActiveOrders: '처리 중인 주문 {count}건 — 모두 구매확정·취소·거절된 뒤 삭제할 수 있어요.',
     demoStoreNoDelete: '데모 매장(GUCCI)은 삭제할 수 없어요.',
     statusDraft: '임시저장',
@@ -101,7 +101,7 @@ export const ko = {
     storeCodePreview: '주문번호 예시: {code}-{number}',
     noDescription: '아직 등록된 매장 설명이 없어요.',
     draftNote: '임시저장 중입니다. 상품·매장 꾸미기를 마친 뒤 「매장 OPEN」을 누르면 손님 앱에 노출됩니다.',
-    publishedNote: '출시된 매장입니다. 손님 앱 홈에서 볼 수 있어요. 「매장 OFF」로 손님 월드를 끌 수 있습니다.',
+    publishedNote: '출시된 매장입니다. 손님 앱 홈에서 볼 수 있어요. 「매장 OFF」로 노출을 끌 수 있습니다.',
     storeOpen: '매장 OPEN',
     storeOff: '매장 OFF',
     opening: 'OPEN 처리 중...',
@@ -115,10 +115,10 @@ export const ko = {
     deleting: '삭제 중…',
     deleteConfirm: '「{name}」 매장을 완전히 삭제할까요? 되돌릴 수 없습니다.',
     deleteError: '매장 삭제에 실패했어요. 다시 시도해 주세요.',
-    deleteBlockedPublished: '출시 중인 매장은 삭제할 수 없어요. 먼저 「매장 OFF」로 월드를 끈 뒤 삭제해 주세요.',
+    deleteBlockedPublished: '출시 중인 매장은 삭제할 수 없어요. 먼저 「매장 OFF」로 노출을 끈 뒤 삭제해 주세요.',
     deleteBlockedOrders:
       '구매확정되지 않은 주문(수락 대기·수락·배송 중 등)이 남아 있어 삭제할 수 없어요. 주문을 모두 처리한 뒤 다시 시도해 주세요.',
-    deleteHintUnpublish: '삭제하려면 먼저 「매장 OFF」로 손님 월드를 끄세요.',
+    deleteHintUnpublish: '삭제하려면 먼저 「매장 OFF」로 손님 노출을 끄세요.',
     deleteHintActiveOrders: '처리 중인 주문 {count}건 — 모두 구매확정·취소·거절된 뒤 삭제할 수 있어요.',
     demoStoreNoDelete: '데모 매장(GUCCI)은 삭제할 수 없어요.',
     layoutTitle: '매장 꾸미기',
@@ -188,7 +188,7 @@ export const ko = {
   },
   appOnly: {
     title: '모바일 앱에서 이용해 주세요',
-    body: '일반 회원 쇼핑·팝업 월드는 모바일 앱 전용입니다. PC 웹은 스토어 관리자만 이용할 수 있어요.',
+    body: '일반 회원 쇼핑은 모바일 앱 전용입니다. PC 웹은 스토어 관리자만 이용할 수 있어요.',
     hint: 'POP-UP CUBE 앱(Expo)을 설치한 뒤 「일반 회원 로그인」으로 입장해 주세요.',
     backLanding: '← 처음으로',
   },
@@ -205,6 +205,9 @@ export const ko = {
     notFound: '매장을 찾을 수 없어요.',
     cartBar: '장바구니 보기 ({count}개)',
     cartBarEmpty: '담은 상품이 없어요',
+    cartBarEnded: '장바구니 ({count}개) · 팝업 종료',
+    popupEnded: '이 팝업은 종료되어 새로 담거나 결제할 수 없어요. 상품은 둘러볼 수 있습니다.',
+    popupEndedShort: '팝업 종료',
   },
   play: {
     backHome: '← 홈',
@@ -218,7 +221,7 @@ export const ko = {
   },
   createStore: {
     title: '매장 만들기',
-    subtitle: '이름 · 대표 이미지 · 설명을 입력하면 나만의 팝업 월드가 생겨요.',
+    subtitle: '이름 · 대표 이미지 · 설명을 입력하면 나만의 팝업 스토어가 생겨요.',
     nameLabel: '매장 이름',
     namePlaceholder: '예: MY BRAND POP-UP',
     storeCodeLabel: '주문 코드',
@@ -365,6 +368,8 @@ export const ko = {
     selectStoreAll: '매장 전체선택',
     selectedSummary: '선택 {count}개',
     multiStoreCheckoutHint: '매장별로 결제해 주세요.',
+    popupEnded: '팝업이 종료된 매장은 결제할 수 없어요.',
+    popupEndedShort: '팝업 종료',
   },
   /** §54 — 상품 상세페이지 (긴 이미지 + 직접 쓴 설명 + 리뷰) */
   productDetail: {

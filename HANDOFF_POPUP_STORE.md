@@ -674,10 +674,10 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§60 4-D ✅(로컬)** · 다음 **§58 #5** 또는 P1 · **PG 금지** |
-| **Git 상태** | `main` **`079b71a`** push ✅ · **4-D** 로컬 미 push |
+| **한 줄 요약** | **§58 #5 ✅(로컬)** · 다음 **§58 #8 P1** · **PG 금지** |
+| **Git 상태** | `main` **`fd2b37f`** (§60 4-D) · **§58 #5 로컬 미 push** |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** (데모 D-day) |
-| **런칭 진행률 (대략)** | **기능(mock 결제)** ~84% · P1·앱스토어 포함 **전체 ~59%** · **실결제** = P1 + 사업자 + PG |
+| **런칭 진행률 (대략)** | **기능(mock 결제)** ~90% · P1·앱스토어 포함 **전체 ~63%** · **실결제** = P1 + 사업자 + PG |
 | **User 실기 (2026-08-14)** | §58 #3 홈 ✅ · **4-C 다크(차콜·마이·탭 번쩍임)** ✅ · §58 #6 점주 종료일 = push 후 Vercel |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
@@ -701,8 +701,8 @@ popup_store/                          # Turborepo root
 | **4c** | ~~**§0 쇼핑몰 퀄리티**~~ · ~~**§58 #3 홈 몰 허브**~~ | ✅ User 실기 OK |
 | **5** | ~~**§58 #6** — 점주 `popup_ends_at` 편집 · 손님 미리보기~~ | ✅ StoreEdit 개요 |
 | **6** | ~~**§60 4-C** — 다크 모드 · WebView `?theme=` · 차콜 · Tabs 번쩍임~~ | ✅ User OK |
-| **7** | ~~**§60 4-D** — 장바구니 쿠팡형 · 주문 썸네일~~ | ✅ 로컬 · User 실기 대기 |
-| **8** | **§58 #5** — 종료 팝업 구매 차단(선택) | PG 전 |
+| **7** | ~~**§60 4-D** — 장바구니 쿠팡형 · 주문 썸네일~~ | ✅ User 실기 |
+| **8** | ~~**§58 #5** — 종료 팝업 구매 차단 · i18n 정리~~ | ✅ 로컬 · DB ✅ · User 실기 대기 |
 | **9** | **§58 #8 P1** | PG 전 |
 | **10** | **PG** (§53.7-7) | 사업자 + 가맹 후 |
 
@@ -1184,6 +1184,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-14 — §58 #5 종료 팝업 구매 차단 · v1 톤 정리
+- **Author:** Cursor Agent
+- **Changed:** `isPopupEnded` · `/shop` 배너·담기/결제 차단 · `CartView` checkout block · `place_order` `popup_ended` · `StoreEnterModal` 종료 CTA · landing/login i18n(월드→쇼핑) · layout 탭=`VITE_WORLD_ENABLED` 기존 유지
+- **Notes:** DB migration **`20260815_place_order_popup_ended`** 원격 ✅ · **로컬 미 push** · 종료 매장 테스트=DB `popup_ends_at` 과거일 또는 GUCCI 종료 후
 
 ### 2026-08-14 — §60 4-D 장바구니 쿠팡형 · 주문 썸네일
 - **Author:** Cursor Agent

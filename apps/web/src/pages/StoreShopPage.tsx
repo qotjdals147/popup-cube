@@ -6,6 +6,7 @@ import { CartDrawer } from '../components/CartDrawer';
 import { CartIconButton } from '../components/CartIconButton';
 import { StoreShopCatalog } from '../components/StoreShopCatalog';
 import { getStoreSummary } from '../lib/stores';
+import { isPopupEnded } from '../lib/popupPeriod';
 import { supabase } from '../lib/supabase';
 import { t } from '../i18n';
 import { useShopperThemeMode } from '../lib/shopperThemeMode';
@@ -62,6 +63,7 @@ export function StoreShopPage() {
   );
   const [bootstrapping, setBootstrapping] = useState(true);
   const [storeName, setStoreName] = useState<string | null>(null);
+  const [popupEndsAt, setPopupEndsAt] = useState<string | null>(null);
   const [storeError, setStoreError] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -83,6 +85,7 @@ export function StoreShopPage() {
       .then((summary) => {
         if (!active) return;
         setStoreName(summary?.name ?? null);
+        setPopupEndsAt(summary?.popup_ends_at ?? null);
         if (!summary) setStoreError(true);
       })
       .catch(() => {
@@ -105,6 +108,7 @@ export function StoreShopPage() {
   }
 
   const pageClass = 'store-shop-page';
+  const shoppingBlocked = isPopupEnded(popupEndsAt);
 
   if (bootstrapping || authLoading) {
     return (
@@ -157,7 +161,17 @@ export function StoreShopPage() {
       </header>
 
       <main className="store-shop-main">
-        <StoreShopCatalog storeId={storeId} variant="page" onOpenCart={openCart} />
+        {shoppingBlocked && (
+          <div className="store-shop-ended-banner" role="status">
+            {t('storeShop.popupEnded')}
+          </div>
+        )}
+        <StoreShopCatalog
+          storeId={storeId}
+          variant="page"
+          onOpenCart={openCart}
+          shoppingBlocked={shoppingBlocked}
+        />
       </main>
 
       <div className="store-shop-sticky-bar">
@@ -167,9 +181,11 @@ export function StoreShopPage() {
           onClick={openCart}
           disabled={totalQuantity === 0}
         >
-          {totalQuantity > 0
-            ? t('storeShop.cartBar', { count: totalQuantity })
-            : t('storeShop.cartBarEmpty')}
+          {shoppingBlocked && totalQuantity > 0
+            ? t('storeShop.cartBarEnded', { count: totalQuantity })
+            : totalQuantity > 0
+              ? t('storeShop.cartBar', { count: totalQuantity })
+              : t('storeShop.cartBarEmpty')}
         </button>
       </div>
 

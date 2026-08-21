@@ -10,6 +10,8 @@ export interface StoreShopCatalogProps {
   /** overlay = ShopPanel modal grid · page = full-page shop (2-col mobile) */
   variant?: 'overlay' | 'page';
   onOpenCart?: () => void;
+  /** §58 #5 — popup_ends_at 지난 매장: 담기·결제 차단 */
+  shoppingBlocked?: boolean;
 }
 
 function formatPrice(price: number): string {
@@ -21,6 +23,7 @@ export function StoreShopCatalog({
   storeId,
   variant = 'overlay',
   onOpenCart,
+  shoppingBlocked = false,
 }: StoreShopCatalogProps) {
   const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
@@ -58,6 +61,7 @@ export function StoreShopCatalog({
   }
 
   function handleAdd(product: Product) {
+    if (shoppingBlocked) return;
     addToCart(storeId, product, getQty(product.id));
     setAddedId(product.id);
     window.setTimeout(() => setAddedId((prev) => (prev === product.id ? null : prev)), 1200);
@@ -100,6 +104,7 @@ export function StoreShopCatalog({
                   <button
                     type="button"
                     className="store-shop-stepper__btn"
+                    disabled={shoppingBlocked}
                     onClick={() => setQty(product.id, getQty(product.id) - 1)}
                   >
                     −
@@ -108,6 +113,7 @@ export function StoreShopCatalog({
                   <button
                     type="button"
                     className="store-shop-stepper__btn"
+                    disabled={shoppingBlocked}
                     onClick={() => setQty(product.id, getQty(product.id) + 1)}
                   >
                     +
@@ -116,9 +122,14 @@ export function StoreShopCatalog({
                 <button
                   type="button"
                   className="store-shop-card__action-btn store-shop-card__action-btn--add"
+                  disabled={shoppingBlocked}
                   onClick={() => handleAdd(product)}
                 >
-                  {addedId === product.id ? t('shop.added') : t('shop.addToCart')}
+                  {shoppingBlocked
+                    ? t('storeShop.popupEndedShort')
+                    : addedId === product.id
+                      ? t('shop.added')
+                      : t('shop.addToCart')}
                 </button>
                 <button
                   type="button"
@@ -138,6 +149,7 @@ export function StoreShopCatalog({
           product={detailProduct}
           storeId={storeId}
           appearance={variant === 'page' ? 'light' : 'dark'}
+          shoppingBlocked={shoppingBlocked}
           onClose={() => setDetailProduct(null)}
           onOpenCart={() => {
             setDetailProduct(null);

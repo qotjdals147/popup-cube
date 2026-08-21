@@ -5,6 +5,7 @@ import { getActivePromotion, GachaError, rollGacha } from '../lib/gacha';
 import { createAddress, listMyAddresses } from '../lib/addresses';
 import { OrderError, placeOrder } from '../lib/orders';
 import { getStoreSummary } from '../lib/stores';
+import { isPopupEnded } from '../lib/popupPeriod';
 import { calcShippingFee } from '../lib/storePolicy';
 import {
   AddressFormFields,
@@ -29,6 +30,7 @@ type Phase = 'cart' | 'address' | 'reward' | 'discountResult' | 'gachaRolling' |
 
 function orderErrorMessage(err: unknown): string {
   if (err instanceof OrderError && err.message === 'insufficient_stock') return t('cart.insufficientStock');
+  if (err instanceof OrderError && err.message.includes('popup_ended')) return t('cart.popupEnded');
   if (err instanceof OrderError) return t('cart.orderSaveError');
   if (err instanceof GachaError) return t('cart.gachaError');
   return t('cart.rewardError');
@@ -184,7 +186,13 @@ export function CartView({
     }
   }
 
+  function isStoreCheckoutBlocked(forStoreId: string): boolean {
+    const info = storeInfoById[forStoreId];
+    return info ? isPopupEnded(info.popup_ends_at) : false;
+  }
+
   function beginCheckout(forStoreId: string) {
+    if (isStoreCheckoutBlocked(forStoreId)) return;
     const groupItems = items.filter(
       (item) => item.storeId === forStoreId && selectedIds.has(item.productId),
     );
@@ -293,9 +301,11 @@ export function CartView({
     const subtotal = groupItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const shipping = info ? calcShippingFee(info, subtotal) : 0;
     const payTotal = subtotal + shipping;
+    const blocked = isStoreCheckoutBlocked(forStoreId);
 
     return (
       <div className="cart-drawer-group-footer">
+        {blocked && <p className="cart-drawer-ended-hint">{t('cart.popupEnded')}</p>}
         <div className="cart-drawer-total-row">
           <span>{t('cart.total')}</span>
           <strong>{formatPrice(subtotal)}</strong>
@@ -308,8 +318,13 @@ export function CartView({
           <span>{t('cart.payTotal')}</span>
           <strong>{formatPrice(payTotal)}</strong>
         </div>
-        <button type="button" className="cart-drawer-primary-btn" onClick={() => beginCheckout(forStoreId)}>
-          {t('cart.checkout')}
+        <button
+          type="button"
+          className="cart-drawer-primary-btn"
+          disabled={blocked}
+          onClick={() => beginCheckout(forStoreId)}
+        >
+          {blocked ? t('cart.popupEndedShort') : t('cart.checkout')}
         </button>
       </div>
     );
@@ -559,8 +574,16 @@ export function CartView({
                       <span>{t('cart.payTotal')}</span>
                       <strong>{formatPrice(estimatedPayTotal)}</strong>
                     </div>
-                    <button type="button" className="cart-drawer-primary-btn" onClick={() => beginCheckout(focusStoreId)}>
-                      {t('cart.checkout')}
+                    {isStoreCheckoutBlocked(focusStoreId) && (
+                      <p className="cart-drawer-ended-hint">{t('cart.popupEnded')}</p>
+                    )}
+                    <button
+                      type="button"
+                      className="cart-drawer-primary-btn"
+                      disabled={isStoreCheckoutBlocked(focusStoreId)}
+                      onClick={() => beginCheckout(focusStoreId)}
+                    >
+                      {isStoreCheckoutBlocked(focusStoreId) ? t('cart.popupEndedShort') : t('cart.checkout')}
                     </button>
                   </div>
                 )}
@@ -580,6 +603,7 @@ export function CartView({
     const stickySubtotal = stickyItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const stickyShipping = stickyStoreInfo ? calcShippingFee(stickyStoreInfo, stickySubtotal) : 0;
     const stickyPayTotal = stickySubtotal + stickyShipping;
+    const stickyBlocked = stickyStoreId ? isStoreCheckoutBlocked(stickyStoreId) : false;
 
     return (
       <div className={`${rootClass} cart-view--page`}>
@@ -591,14 +615,17 @@ export function CartView({
               <strong className="cart-page-sticky-total">{formatPrice(selectedSubtotal)}</strong>
             </div>
             {stickyStoreId ? (
-              <button
-                type="button"
-                className="cart-drawer-primary-btn cart-page-sticky-btn"
-                disabled={stickyItems.length === 0}
-                onClick={() => beginCheckout(stickyStoreId)}
-              >
-                {t('cart.checkout')}
-              </button>
+              <>
+                {stickyBlocked && <p className="cart-page-sticky-hint">{t('cart.popupEnded')}</p>}
+                <button
+                  type="button"
+                  className="cart-drawer-primary-btn cart-page-sticky-btn"
+                  disabled={stickyItems.length === 0 || stickyBlocked}
+                  onClick={() => beginCheckout(stickyStoreId)}
+                >
+                  {stickyBlocked ? t('cart.popupEndedShort') : t('cart.checkout')}
+                </button>
+              </>
             ) : (
               <p className="cart-page-sticky-hint">{t('cart.multiStoreCheckoutHint')}</p>
             )}
