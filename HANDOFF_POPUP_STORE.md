@@ -674,11 +674,11 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§58 #5 ✅(로컬)** · 다음 **§58 #8 P1** · **PG 금지** |
-| **Git 상태** | `main` **`fd2b37f`** (§60 4-D) · **§58 #5 로컬 미 push** |
-| **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** (데모 D-day) |
+| **한 줄 요약** | **§58 #5 ✅ push** · 다음 **§58 #8 P1** · **PG 금지** |
+| **Git 상태** | `main` **`60aab5c`** push ✅ (§58 #5) · Vercel 1~2분 |
+| **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~90% · P1·앱스토어 포함 **전체 ~63%** · **실결제** = P1 + 사업자 + PG |
-| **User 실기 (2026-08-14)** | §58 #3 홈 ✅ · **4-C 다크(차콜·마이·탭 번쩍임)** ✅ · §58 #6 점주 종료일 = push 후 Vercel |
+| **User 실기** | §58 #3·4-C·4-D ✅ · **§58 #5** = push 후 Vercel+Expo `--clear` · **JWT issued at future** = 폰 시계(푸시 무관) |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -688,6 +688,21 @@ popup_store/                          # Turborepo root
 | **픽셀 월드 `/play`** (legacy) | + Railway Socket + Upstash Redis | **✅** 실시간 이동·채팅·채널 |
 
 → 앱 WebView가 Vercel을 여는 것 = **하이브리드 쇼핑 화면**이지 게임 서버 접속이 **아님**. v1 런칭에 Socket 서버 **필수 아님** (월드 demo/dev만).
+
+#### 손님 장바구니·결제 모델 (v1 — User 2026-08-21 확인)
+
+> **쉬운 비유:** 쿠팡 **한 장바구니**에 브랜드 A·B 물건을 같이 담을 수 있지만, **결제는 가게(매장)마다 영수증이 따로** 나온다.
+
+| | v1 동작 |
+|---|---|
+| **담기** | 여러 매장 상품 **한 장바구니**(localStorage)에 **함께** 보관 |
+| **화면** | 장바구니 탭에서 **매장별 섹션**으로 구분 (쿠팡형 체크·썸네) |
+| **결제** | **`place_order` = 매장 1곳당 주문 1건**. A매장 결제 → A 상품만 DB 저장·장바구니에서 A만 비움 → B매장 **또 결제** |
+| **한 번에?** | **❌ v1 일괄 결제 없음** — 매장 2곳이면 **결제 버튼 2번**(배송지·할인/가챠 흐름도 **매장마다**). 여러 매장 선택 시 하단 **「매장별로 결제해 주세요」** |
+| **주문번호** | 매장마다 **`{store_code}-{번호}`** (예: GUCCI-1042 · OTHER-3) — 점주는 **자기 매장 주문만** 봄 |
+| **PG 이후** | mock 앞단에 PG만 끼움(AD-061). **매장별 `place_order` 구조 유지** · A+B **한 번에 카드 승인**은 v1 범위 밖(PG 후 검토) |
+
+**코드:** `CartView.tsx` — `beginCheckout(forStoreId)` · `placeOrder(activeStoreId, …)` · 결제 후 **`removeItemsByProductIds`** (주문된 줄만 삭제).
 
 **다음 작업 우선순위 (에이전트 판단 — User에게 선택지 나열 금지):**
 
@@ -702,7 +717,7 @@ popup_store/                          # Turborepo root
 | **5** | ~~**§58 #6** — 점주 `popup_ends_at` 편집 · 손님 미리보기~~ | ✅ StoreEdit 개요 |
 | **6** | ~~**§60 4-C** — 다크 모드 · WebView `?theme=` · 차콜 · Tabs 번쩍임~~ | ✅ User OK |
 | **7** | ~~**§60 4-D** — 장바구니 쿠팡형 · 주문 썸네일~~ | ✅ User 실기 |
-| **8** | ~~**§58 #5** — 종료 팝업 구매 차단 · i18n 정리~~ | ✅ 로컬 · DB ✅ · User 실기 대기 |
+| **8** | ~~**§58 #5** — 종료 팝업 구매 차단 · i18n 정리~~ | ✅ push `60aab5c` · DB ✅ · User 실기 대기 |
 | **9** | **§58 #8 P1** | PG 전 |
 | **10** | **PG** (§53.7-7) | 사업자 + 가맹 후 |
 
@@ -725,9 +740,9 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**§60 4-D** — push 후 Vercel 1~2분 · Expo **`--clear`**
+**§58 #5** — push `60aab5c` · Vercel 1~2분 · Expo **`--clear`**
 
-**A) 장바구니 (쿠팡형)**
+**A) 정상 쇼핑 (GUCCI 등 진행 중 팝업)**
 1) Win → `cmd` → Enter
 2) **아래 한 줄씩 복붙:**
 ```
@@ -736,11 +751,17 @@ npm install --legacy-peer-deps
 cd apps\mobile
 npx expo start --tunnel --port 8082 --clear
 ```
-3) `demo@shopper.com` / `demo` · **장바구니 탭**
-4) **전체선택** · **체크·썸네·수량·가격** 한 행 · **하단 고정 결제하기**
+3) `demo@shopper.com` / `demo`
+4) 매장 **쇼핑하기** → 담기 → 장바구니 → **결제하기 (mock)**
 
-**B) 주문내역 썸네일**
-- **마이 → 주문내역** · 각 상품 **이미지** 보이는지
+**B) 매장별 결제 확인 (매장 2곳 이상 담았을 때)**
+- 장바구니 **매장별 섹션** · **매장마다 결제하기** 따로 · 한 매장 결제 후 **다른 매장 상품은 장바구니에 남음**
+
+**C) 종료 팝업 차단 (선택)**
+- 테스트 매장 `popup_ends_at` **어제** → 홈 CTA 「종료」·`/shop` 담기/결제 비활성
+
+**D) `JWT issued at future` (푸시와 무관)**
+- 폰 **설정 → 날짜·시간 → 자동 설정** · Expo Go **데이터 삭제** 또는 재설치 → `--clear` 후 **재로그인**
 
 ---
 
@@ -759,6 +780,17 @@ npx expo start --tunnel --port 8082 --clear
 
 ---
 
+### 7.25 세션 인수인계 — **2026-08-21** (§58 #5 push · 장바구니 결제 모델 확인)
+
+| | |
+|---|---|
+| **User** | §58 #5 착수 → **push** · `JWT issued at future` (푸시 때문인지) · **매장별 결제** 구조 확인 |
+| **Git** | **`60aab5c`** push ✅ |
+| **DB** | `20260815_place_order_popup_ended` 원격 ✅ |
+| **JWT** | **푸시와 무관** — 기기 시계 · Expo Go 토큰 캐시 |
+| **결제 모델** | v1 = **장바구니 통합 · 결제 매장별** · 일괄 PG ❌ |
+| **다음** | User §58 #5 실기 → **§58 #8 P1** |
+
 ### 7.24 세션 인수인계 — **2026-08-14** (§60 4-D · 장바구니·주문 썸네일)
 
 | | |
@@ -766,7 +798,7 @@ npx expo start --tunnel --port 8082 --clear
 | **User** | 4-D 착수 · HANDOFF 규칙 준수 |
 | **DB** | `get_my_orders` + **`product_image_url`** migration 원격 적용 ✅ |
 | **웹** | `CartView` page — **전체선택·체크·72px 썸네·하단 sticky 결제** · `ShopperOrderCardLight` **주문 줄 썸네** |
-| **Git** | **로컬 미 push** (4-D) |
+| **Git** | **로컬 미 push** (4-D) → 이후 **`fd2b37f`** push |
 | **다음** | User 실기 → push → **§58 #5** |
 
 ### 7.23 세션 인수인계 — **2026-08-14** (4-C 완료 · Tabs · 번쩍임 fix)
@@ -1185,10 +1217,20 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-08-21 — 장바구니 매장별 결제 버그 fix (User 실기)
+- **Author:** Cursor Agent
+- **Changed:** `addToCart` → `product.store_id` · `removeItemsByProductIds` · 매장 🛒 **「○○ 매장만 결제」** 안내 · HANDOFF §7.0·ISS
+- **Notes:** GUCCI 결제 시 Sim&Bee **주문 없이 삭제** 현상 · **로컬 → push 대기**
+
+### 2026-08-21 — HANDOFF · 매장별 결제 모델 정리 (User Q&A)
+- **Author:** Cursor Agent
+- **Changed:** §7.0 **손님 장바구니·결제 모델** 표 · §7.25 · §23 glossary · 실기 안내 §58 #5
+- **Notes:** v1 = **통합 장바구니 + 매장별 `place_order`** · 일괄 PG ❌ · JWT=시계 문제
+
 ### 2026-08-14 — §58 #5 종료 팝업 구매 차단 · v1 톤 정리
 - **Author:** Cursor Agent
 - **Changed:** `isPopupEnded` · `/shop` 배너·담기/결제 차단 · `CartView` checkout block · `place_order` `popup_ended` · `StoreEnterModal` 종료 CTA · landing/login i18n(월드→쇼핑) · layout 탭=`VITE_WORLD_ENABLED` 기존 유지
-- **Notes:** DB migration **`20260815_place_order_popup_ended`** 원격 ✅ · **로컬 미 push** · 종료 매장 테스트=DB `popup_ends_at` 과거일 또는 GUCCI 종료 후
+- **Notes:** DB migration **`20260815_place_order_popup_ended`** 원격 ✅ · push **`60aab5c`** · 종료 매장 테스트=DB `popup_ends_at` 과거일
 
 ### 2026-08-14 — §60 4-D 장바구니 쿠팡형 · 주문 썸네일
 - **Author:** Cursor Agent
@@ -3822,7 +3864,9 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **상품 상세정보** `(스마트스토어 용어)` | 쇼핑몰에서 **상품 페이지 본문** — 소재·사이즈·착용컷 등. 점주가 **한 공간**에서 글·이미지를 **순서대로** 쌓아 만듦. POP-UP **목표 = §56 AD-060** |
 | **블록 에디터** `(Block Editor)` | 상세페이지를 **글 블록·이미지 블록**으로 나눠 **순서 자유롭게** 편집하는 방식. 한글·워드처럼 **한 작업 공간**에서 배치·순서 변경. **AD-060** |
 | **WYSIWYG** `(위지윅)` | **보이는 대로 편집** — 손님 화면과 비슷하게 보면서 글·이미지를 배치하는 편집 방식. 스마트스토어 **스마트에디터**가 이 계열 |
-| **장바구니** | 담아 둔 상품·수량·결제 화면. HUD·헤더에 별도 버튼. |
+| **장바구니** | 담아 둔 상품·수량·결제 화면. HUD·헤더에 별도 버튼. **v1: 여러 매장 담기 가능 · 결제는 매장별** (§7.0 표) |
+| **매장별 결제** `(Per-store checkout)` | 장바구니는 **한 곳**에 모이지만 **`place_order`는 매장 ID마다 1번** — 주문·배송비·할인/가챠·점주 알림이 **그 매장만** 묶임. 쿠팡 **한 번에 결제**와 다름. |
+| **JWT issued at future** | Supabase가 **폰 시계가 서버보다 느리다**고 판단할 때 — 로그인 토큰 거부. **푸시/Vercel과 무관** · 폰 **날짜·시간 자동** + Expo Go 재로그인. |
 | **HUD 바** `(하단 조작 바)` | 월드 화면 **아래 알약 모양 버튼 줄**. 상호작용·채팅·장바구니·전체상품 **4칸 고정** (AD-047 · Sprint 4-3 · pptx 슬라이드 9 원칙 — 늘리지 않음). **내 주문**(AD-054)은 여기 넣지 않고 헤더 별도 버튼으로 분리(08-08b). |
 | **근접 알약** `(PlayProximityPill)` | 조형물 가까이 갔을 때 **짧은 가운데 알약** — 이름 + 「탭·상호작용」. 탭 = HUD 상호작용과 같음 (AD-049). |
 

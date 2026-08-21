@@ -12,6 +12,8 @@ interface CartContextValue {
   incrementQuantity: (productId: string) => void;
   decrementQuantity: (productId: string) => void;
   removeItem: (productId: string) => void;
+  /** 결제 완료된 product_id만 제거 (매장 통째 clearStoreItems 대신) */
+  removeItemsByProductIds: (productIds: string[]) => void;
   clearCart: () => void;
   /** 매장별 결제 완료 시 — 해당 매장 품목만 제거 (§60 v1) */
   clearStoreItems: (storeId: string) => void;
@@ -43,18 +45,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items]);
 
   function addToCart(storeId: string, product: Product, quantity = 1) {
+    const lineStoreId = product.store_id || storeId;
     setItems((prev) => {
       const existing = prev.find((item) => item.productId === product.id);
       if (existing) {
         return prev.map((item) =>
-          item.productId === product.id ? { ...item, quantity: item.quantity + quantity } : item
+          item.productId === product.id
+            ? { ...item, quantity: item.quantity + quantity, storeId: lineStoreId }
+            : item
         );
       }
       return [
         ...prev,
         {
           productId: product.id,
-          storeId,
+          storeId: lineStoreId,
           name: product.name,
           price: product.price,
           imageUrl: product.image_url,
@@ -82,6 +87,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => prev.filter((item) => item.productId !== productId));
   }
 
+  function removeItemsByProductIds(productIds: string[]) {
+    if (productIds.length === 0) return;
+    const drop = new Set(productIds);
+    setItems((prev) => prev.filter((item) => !drop.has(item.productId)));
+  }
+
   function clearCart() {
     setItems([]);
   }
@@ -103,6 +114,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         incrementQuantity,
         decrementQuantity,
         removeItem,
+        removeItemsByProductIds,
         clearCart,
         clearStoreItems,
       }}

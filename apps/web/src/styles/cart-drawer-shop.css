@@ -787,6 +787,26 @@
   color: #e03131;
 }
 
+.cart-drawer-scope-note {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+  color: #4e5968;
+}
+
+.cart-drawer-scope-note--muted {
+  color: #8b95a1;
+}
+
+.cart-drawer--dark .cart-drawer-scope-note {
+  color: #c4c8cc;
+}
+
+.cart-drawer--dark .cart-drawer-scope-note--muted {
+  color: #98989f;
+}
+
 .cart-drawer--dark .cart-drawer-ended-hint {
   color: #ff8787;
 }

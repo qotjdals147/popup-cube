@@ -68,7 +68,7 @@ export function CartView({
 }: CartViewProps) {
   const rootClass = appearance === 'light' ? 'cart-drawer--light' : 'cart-drawer--dark';
   const pageClass = layout === 'page' ? ' cart-view--page' : '';
-  const { items, incrementQuantity, decrementQuantity, removeItem, clearStoreItems } = useCart();
+  const { items, incrementQuantity, decrementQuantity, removeItem, removeItemsByProductIds } = useCart();
   const [phase, setPhase] = useState<Phase>('cart');
   const [checkoutStoreId, setCheckoutStoreId] = useState<string | null>(focusStoreId ?? null);
 
@@ -87,6 +87,8 @@ export function CartView({
   const [storeNames, setStoreNames] = useState<Record<string, string>>({});
   const [storeInfoById, setStoreInfoById] = useState<Record<string, StoreSummary>>({});
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  /** 결제 성공 직후 — 해당 줄만 장바구니에서 제거 (매장 storeId 통째 삭제 방지) */
+  const [lastOrderedProductIds, setLastOrderedProductIds] = useState<string[]>([]);
 
   const isPage = layout === 'page';
   const activeStoreId = checkoutStoreId ?? focusStoreId ?? null;
@@ -246,10 +248,12 @@ export function CartView({
   async function handleChooseDiscount() {
     if (!activeStoreId) return;
     setRewardError(null);
+    const ordering = [...checkoutItems];
     try {
       const promo = await getActivePromotion(activeStoreId);
       const percent = promo?.discount_percent ?? 0;
-      const result = await placeOrder(activeStoreId, selectedAddressId, checkoutItems, 'discount', percent);
+      const result = await placeOrder(activeStoreId, selectedAddressId, ordering, 'discount', percent);
+      setLastOrderedProductIds(ordering.map((item) => item.productId));
       setDiscountPercent(percent);
       setFinalTotal(result.totalAmount);
       setPhase('discountResult');
@@ -262,8 +266,10 @@ export function CartView({
     if (!activeStoreId) return;
     setRewardError(null);
     setPhase('gachaRolling');
+    const ordering = [...checkoutItems];
     try {
-      const orderResult = await placeOrder(activeStoreId, selectedAddressId, checkoutItems, 'gacha', null);
+      const orderResult = await placeOrder(activeStoreId, selectedAddressId, ordering, 'gacha', null);
+      setLastOrderedProductIds(ordering.map((item) => item.productId));
       const result = await rollGacha(activeStoreId, orderResult.orderId);
       setGachaResult(result);
       setPhase('gachaResult');
@@ -274,7 +280,12 @@ export function CartView({
   }
 
   function handleFinish() {
-    if (activeStoreId) clearStoreItems(activeStoreId);
+    const ids =
+      lastOrderedProductIds.length > 0
+        ? lastOrderedProductIds
+        : checkoutItems.map((item) => item.productId);
+    removeItemsByProductIds(ids);
+    setLastOrderedProductIds([]);
     setPhase('cart');
     setCheckoutStoreId(focusStoreId ?? null);
     setDiscountPercent(null);
@@ -291,6 +302,9 @@ export function CartView({
   const gachaImage = gachaResult?.product_image_url ?? gachaResult?.exclusive_image_url ?? null;
   const gachaIsRealProduct = !!gachaResult?.product_id;
   const addressAppearance = appearance === 'light' ? 'light' : 'dark';
+  const otherStoreLineCount =
+    focusStoreId != null ? items.filter((item) => item.storeId !== focusStoreId).length : 0;
+  const focusStoreLabel = focusStoreId ? (storeNames[focusStoreId] ?? focusStoreId) : '';
 
   function renderStoreFooter(forStoreId: string) {
     const groupItems = items.filter(
@@ -562,6 +576,14 @@ export function CartView({
                   <p className="cart-drawer-hint">{t('cart.emptyThisStore')}</p>
                 ) : (
                   <div className="cart-drawer-footer">
+                    <p className="cart-drawer-scope-note">
+                      {t('cart.perStoreCheckoutNote', { store: focusStoreLabel })}
+                    </p>
+                    {otherStoreLineCount > 0 && (
+                      <p className="cart-drawer-scope-note cart-drawer-scope-note--muted">
+                        {t('cart.otherStoresRemain', { count: otherStoreLineCount })}
+                      </p>
+                    )}
                     <div className="cart-drawer-total-row">
                       <span>{t('cart.total')}</span>
                       <strong>{formatPrice(checkoutSubtotal)}</strong>
