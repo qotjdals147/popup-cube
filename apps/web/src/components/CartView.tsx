@@ -18,9 +18,9 @@ import '../styles/cart-drawer-shop.css';
 
 interface CartViewProps {
   userId: string | null;
-  /** drawer = 매장 쇼핑 중 오버레이 · page = 앱 장바구니 탭 전체화면 */
+  /** page = 앱 장바구니 탭 · drawer = 매장 쇼핑 중 오버레이 (동일 localStorage · 동일 UI) */
   layout?: 'drawer' | 'page';
-  /** drawer일 때 결제 대상 매장 */
+  /** 목록 정렬 시 현재 매장을 위로 (별도 장바구니 아님) */
   storeId?: string;
   onClose?: () => void;
   appearance?: 'light' | 'dark';
@@ -31,6 +31,8 @@ type Phase = 'cart' | 'address' | 'reward' | 'discountResult' | 'gachaRolling' |
 function orderErrorMessage(err: unknown): string {
   if (err instanceof OrderError && err.message === 'insufficient_stock') return t('cart.insufficientStock');
   if (err instanceof OrderError && err.message.includes('popup_ended')) return t('cart.popupEnded');
+  if (err instanceof OrderError && err.message.includes('no_valid_items')) return t('cart.orderNoValidItems');
+  if (err instanceof OrderError && err.message.includes('discount_mismatch')) return t('cart.orderDiscountMismatch');
   if (err instanceof OrderError) return t('cart.orderSaveError');
   if (err instanceof GachaError) return t('cart.gachaError');
   return t('cart.rewardError');
@@ -57,7 +59,7 @@ function groupItemsByStore(items: ReturnType<typeof useCart>['items'], focusStor
 }
 
 /**
- * 장바구니 본문 — mock 결제 · 매장별 `place_order`.
+ * 장바구니 — localStorage 1개 · 화면도 탭/매장 서랍 동일 · 결제만 매장별 `place_order`.
  */
 export function CartView({
   userId,
@@ -67,7 +69,6 @@ export function CartView({
   appearance = 'light',
 }: CartViewProps) {
   const rootClass = appearance === 'light' ? 'cart-drawer--light' : 'cart-drawer--dark';
-  const pageClass = layout === 'page' ? ' cart-view--page' : '';
   const { items, incrementQuantity, decrementQuantity, removeItem, removeItemsByProductIds } = useCart();
   const [phase, setPhase] = useState<Phase>('cart');
   const [checkoutStoreId, setCheckoutStoreId] = useState<string | null>(focusStoreId ?? null);
@@ -90,7 +91,7 @@ export function CartView({
   /** 결제 성공 직후 — 해당 줄만 장바구니에서 제거 (매장 storeId 통째 삭제 방지) */
   const [lastOrderedProductIds, setLastOrderedProductIds] = useState<string[]>([]);
 
-  const isPage = layout === 'page';
+  const isPageLayout = layout === 'page';
   const activeStoreId = checkoutStoreId ?? focusStoreId ?? null;
 
   useEffect(() => {
@@ -150,13 +151,6 @@ export function CartView({
       active = false;
     };
   }, [items]);
-
-  const storeInfo = activeStoreId ? storeInfoById[activeStoreId] ?? null : null;
-  const estimatedShipping = useMemo(() => {
-    if (!storeInfo) return 0;
-    return calcShippingFee(storeInfo, checkoutSubtotal);
-  }, [storeInfo, checkoutSubtotal]);
-  const estimatedPayTotal = checkoutSubtotal + estimatedShipping;
 
   function toggleProduct(productId: string) {
     setSelectedIds((prev) => {
@@ -302,9 +296,47 @@ export function CartView({
   const gachaImage = gachaResult?.product_image_url ?? gachaResult?.exclusive_image_url ?? null;
   const gachaIsRealProduct = !!gachaResult?.product_id;
   const addressAppearance = appearance === 'light' ? 'light' : 'dark';
-  const otherStoreLineCount =
-    focusStoreId != null ? items.filter((item) => item.storeId !== focusStoreId).length : 0;
-  const focusStoreLabel = focusStoreId ? (storeNames[focusStoreId] ?? focusStoreId) : '';
+
+  function renderStickyFooter() {
+    if (phase !== 'cart' || items.length === 0) return null;
+
+    const stickyStoreId = singleCheckoutStoreId;
+    const stickyStoreInfo = stickyStoreId ? storeInfoById[stickyStoreId] : null;
+    const stickyItems = stickyStoreId ? selectedItems.filter((item) => item.storeId === stickyStoreId) : [];
+    const stickySubtotal = stickyItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const stickyShipping = stickyStoreInfo ? calcShippingFee(stickyStoreInfo, stickySubtotal) : 0;
+    const stickyPayTotal = stickySubtotal + stickyShipping;
+    const stickyBlocked = stickyStoreId ? isStoreCheckoutBlocked(stickyStoreId) : false;
+
+    return (
+      <footer className={`cart-page-sticky-footer${layout === 'drawer' ? ' cart-page-sticky-footer--drawer' : ''}`}>
+        <div className="cart-page-sticky-summary">
+          <span className="cart-page-sticky-count">{t('cart.selectedSummary', { count: selectedIds.size })}</span>
+          <strong className="cart-page-sticky-total">{formatPrice(selectedSubtotal)}</strong>
+        </div>
+        {stickyStoreId ? (
+          <>
+            {stickyBlocked && <p className="cart-page-sticky-hint">{t('cart.popupEnded')}</p>}
+            <button
+              type="button"
+              className="cart-drawer-primary-btn cart-page-sticky-btn"
+              disabled={stickyItems.length === 0 || stickyBlocked}
+              onClick={() => beginCheckout(stickyStoreId)}
+            >
+              {stickyBlocked ? t('cart.popupEndedShort') : t('cart.checkout')}
+            </button>
+          </>
+        ) : (
+          <p className="cart-page-sticky-hint">{t('cart.multiStoreCheckoutHint')}</p>
+        )}
+        {stickyStoreId && stickyItems.length > 0 && (
+          <p className="cart-page-sticky-pay-total">
+            {t('cart.payTotal')} {formatPrice(stickyPayTotal)}
+          </p>
+        )}
+      </footer>
+    );
+  }
 
   function renderStoreFooter(forStoreId: string) {
     const groupItems = items.filter(
@@ -349,19 +381,17 @@ export function CartView({
     return (
       <article
         key={item.productId}
-        className={`cart-drawer-item${isPage ? ' cart-drawer-item--page' : ''}${!checked && isPage ? ' cart-drawer-item--unchecked' : ''}`}
+        className={`cart-drawer-item cart-drawer-item--page${!checked ? ' cart-drawer-item--unchecked' : ''}`}
       >
-        {isPage && (
-          <label className="cart-drawer-item-check">
-            <input
-              type="checkbox"
-              checked={checked}
-              onChange={() => toggleProduct(item.productId)}
-              aria-label={item.name}
-            />
-          </label>
-        )}
-        <div className={`cart-drawer-item-thumb${isPage ? ' cart-drawer-item-thumb--page' : ''}`}>
+        <label className="cart-drawer-item-check">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={() => toggleProduct(item.productId)}
+            aria-label={item.name}
+          />
+        </label>
+        <div className="cart-drawer-item-thumb cart-drawer-item-thumb--page">
           {item.imageUrl ? (
             <img src={item.imageUrl} alt={item.name} />
           ) : (
@@ -394,7 +424,7 @@ export function CartView({
   }
 
   const panel = (
-    <div className={`cart-drawer-panel${pageClass ? ' cart-view-panel--page' : ''}`}>
+    <div className={`cart-drawer-panel${isPageLayout ? ' cart-view-panel--page' : ' cart-view-panel--unified'}`}>
       {layout === 'drawer' && (
         <div className="cart-drawer-header">
           <h3 className="cart-drawer-title">{t('cart.title')}</h3>
@@ -532,14 +562,12 @@ export function CartView({
           <p className="cart-drawer-hint">{t('cart.empty')}</p>
         ) : (
           <>
-            {isPage && (
-              <label className="cart-page-select-all">
-                <input type="checkbox" checked={allSelected} onChange={toggleAllProducts} />
-                <span>
-                  {t('cart.selectAll')} ({selectedIds.size}/{items.length})
-                </span>
-              </label>
-            )}
+            <label className="cart-page-select-all">
+              <input type="checkbox" checked={allSelected} onChange={toggleAllProducts} />
+              <span>
+                {t('cart.selectAll')} ({selectedIds.size}/{items.length})
+              </span>
+            </label>
             {storeGroups.map((group) => {
               const storeProductIds = group.items.map((item) => item.productId);
               const storeAllSelected =
@@ -550,114 +578,33 @@ export function CartView({
                 className={`cart-drawer-store-group${focusStoreId && group.storeId === focusStoreId ? ' cart-drawer-store-group--current' : ''}`}
               >
                 <div className="cart-drawer-store-header">
-                  {isPage && (
-                    <label className="cart-drawer-store-select">
-                      <input
-                        type="checkbox"
-                        checked={storeAllSelected}
-                        onChange={() => toggleStoreProducts(group.storeId)}
-                        aria-label={t('cart.selectStoreAll')}
-                      />
-                    </label>
-                  )}
+                  <label className="cart-drawer-store-select">
+                    <input
+                      type="checkbox"
+                      checked={storeAllSelected}
+                      onChange={() => toggleStoreProducts(group.storeId)}
+                      aria-label={t('cart.selectStoreAll')}
+                    />
+                  </label>
                   <h4 className="cart-drawer-store-name">{storeNames[group.storeId] ?? group.storeId}</h4>
                 </div>
                 <div className="cart-drawer-item-list">
                   {group.items.map((item) => renderCartItem(item))}
                 </div>
-                {layout === 'page' && !(isPage && singleCheckoutStoreId) && renderStoreFooter(group.storeId)}
+                {!singleCheckoutStoreId && renderStoreFooter(group.storeId)}
               </section>
             );
             })}
-
-            {layout === 'drawer' && focusStoreId && (
-              <>
-                {checkoutItems.length === 0 ? (
-                  <p className="cart-drawer-hint">{t('cart.emptyThisStore')}</p>
-                ) : (
-                  <div className="cart-drawer-footer">
-                    <p className="cart-drawer-scope-note">
-                      {t('cart.perStoreCheckoutNote', { store: focusStoreLabel })}
-                    </p>
-                    {otherStoreLineCount > 0 && (
-                      <p className="cart-drawer-scope-note cart-drawer-scope-note--muted">
-                        {t('cart.otherStoresRemain', { count: otherStoreLineCount })}
-                      </p>
-                    )}
-                    <div className="cart-drawer-total-row">
-                      <span>{t('cart.total')}</span>
-                      <strong>{formatPrice(checkoutSubtotal)}</strong>
-                    </div>
-                    <div className="cart-drawer-total-row">
-                      <span>{t('cart.shippingFee')}</span>
-                      <strong>{estimatedShipping === 0 ? t('cart.shippingFree') : formatPrice(estimatedShipping)}</strong>
-                    </div>
-                    <div className="cart-drawer-total-row cart-drawer-total-row--pay">
-                      <span>{t('cart.payTotal')}</span>
-                      <strong>{formatPrice(estimatedPayTotal)}</strong>
-                    </div>
-                    {isStoreCheckoutBlocked(focusStoreId) && (
-                      <p className="cart-drawer-ended-hint">{t('cart.popupEnded')}</p>
-                    )}
-                    <button
-                      type="button"
-                      className="cart-drawer-primary-btn"
-                      disabled={isStoreCheckoutBlocked(focusStoreId)}
-                      onClick={() => beginCheckout(focusStoreId)}
-                    >
-                      {isStoreCheckoutBlocked(focusStoreId) ? t('cart.popupEndedShort') : t('cart.checkout')}
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
           </>
         ))}
     </div>
   );
 
-  if (layout === 'page') {
-    const stickyStoreId = singleCheckoutStoreId;
-    const stickyStoreInfo = stickyStoreId ? storeInfoById[stickyStoreId] : null;
-    const stickyItems = stickyStoreId
-      ? selectedItems.filter((item) => item.storeId === stickyStoreId)
-      : [];
-    const stickySubtotal = stickyItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const stickyShipping = stickyStoreInfo ? calcShippingFee(stickyStoreInfo, stickySubtotal) : 0;
-    const stickyPayTotal = stickySubtotal + stickyShipping;
-    const stickyBlocked = stickyStoreId ? isStoreCheckoutBlocked(stickyStoreId) : false;
-
+  if (isPageLayout) {
     return (
       <div className={`${rootClass} cart-view--page`}>
         {panel}
-        {phase === 'cart' && items.length > 0 && (
-          <footer className="cart-page-sticky-footer">
-            <div className="cart-page-sticky-summary">
-              <span className="cart-page-sticky-count">{t('cart.selectedSummary', { count: selectedIds.size })}</span>
-              <strong className="cart-page-sticky-total">{formatPrice(selectedSubtotal)}</strong>
-            </div>
-            {stickyStoreId ? (
-              <>
-                {stickyBlocked && <p className="cart-page-sticky-hint">{t('cart.popupEnded')}</p>}
-                <button
-                  type="button"
-                  className="cart-drawer-primary-btn cart-page-sticky-btn"
-                  disabled={stickyItems.length === 0 || stickyBlocked}
-                  onClick={() => beginCheckout(stickyStoreId)}
-                >
-                  {stickyBlocked ? t('cart.popupEndedShort') : t('cart.checkout')}
-                </button>
-              </>
-            ) : (
-              <p className="cart-page-sticky-hint">{t('cart.multiStoreCheckoutHint')}</p>
-            )}
-            {stickyStoreId && stickyItems.length > 0 && (
-              <p className="cart-page-sticky-pay-total">
-                {t('cart.payTotal')} {formatPrice(stickyPayTotal)}
-              </p>
-            )}
-          </footer>
-        )}
+        {renderStickyFooter()}
       </div>
     );
   }
@@ -665,7 +612,10 @@ export function CartView({
   return (
     <div className={rootClass}>
       <div className="cart-drawer-overlay" onClick={onClose}>
-        <div onClick={(e) => e.stopPropagation()}>{panel}</div>
+        <div className="cart-drawer-shell" onClick={(e) => e.stopPropagation()}>
+          {panel}
+          {renderStickyFooter()}
+        </div>
       </div>
     </div>
   );

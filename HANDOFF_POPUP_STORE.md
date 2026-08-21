@@ -298,7 +298,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`1ecadb9`** push ✅ (장바구니 통일 · `/app/cart`) · **로컬** 상세·홈 CTA (push 대기) |
+| **Git `main` HEAD** | **`1391162`** push ✅ (장바구니 매장별 fix) · **로컬** 통합 CartView UI (push 대기) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -674,11 +674,11 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§58 #5 ✅ push** · 다음 **§58 #8 P1** · **PG 금지** |
-| **Git 상태** | `main` **`60aab5c`** push ✅ (§58 #5) · Vercel 1~2분 |
+| **한 줄 요약** | **장바구니 UI 통합 ✅ push 대기** · 다음 **§58 #8 P1** · **PG 금지** |
+| **Git 상태** | `main` **`1391162`** → **통합 CartView** 커밋 후 push · Vercel 1~2분 |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~90% · P1·앱스토어 포함 **전체 ~63%** · **실결제** = P1 + 사업자 + PG |
-| **User 실기** | §58 #3·4-C·4-D ✅ · **§58 #5** = push 후 Vercel+Expo `--clear` · **JWT issued at future** = 폰 시계(푸시 무관) |
+| **User 실기** | §58 #3·4-C·4-D·#5 ✅ · **장바구니 통합 UI** = push 후 Vercel+Expo `--clear` · **JWT issued at future** = 폰 시계 |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -696,9 +696,9 @@ popup_store/                          # Turborepo root
 | | v1 동작 |
 |---|---|
 | **담기** | 여러 매장 상품 **한 장바구니**(localStorage)에 **함께** 보관 |
-| **화면** | 장바구니 탭에서 **매장별 섹션**으로 구분 (쿠팡형 체크·썸네) |
+| **화면** | **탭·매장 서랍 = 동일 `CartView`** — 전체 목록 · 매장별 섹션 · 체크박스 (쿠팡형). 서랍은 현재 매장 섹션만 위로 정렬 |
 | **결제** | **`place_order` = 매장 1곳당 주문 1건**. A매장 결제 → A 상품만 DB 저장·장바구니에서 A만 비움 → B매장 **또 결제** |
-| **한 번에?** | **❌ v1 일괄 결제 없음** — 매장 2곳이면 **결제 버튼 2번**(배송지·할인/가챠 흐름도 **매장마다**). 여러 매장 선택 시 하단 **「매장별로 결제해 주세요」** |
+| **한 번에?** | **❌ v1 일괄 결제 없음** — 매장 2곳이면 **결제 버튼 2번**(섹션별 또는 단일 매장 선택 시 하단 sticky). 여러 매장 선택 시 **「매장별 결제하기」** 안내 |
 | **주문번호** | 매장마다 **`{store_code}-{번호}`** (예: GUCCI-1042 · OTHER-3) — 점주는 **자기 매장 주문만** 봄 |
 | **PG 이후** | mock 앞단에 PG만 끼움(AD-061). **매장별 `place_order` 구조 유지** · A+B **한 번에 카드 승인**은 v1 범위 밖(PG 후 검토) |
 
@@ -779,6 +779,19 @@ npx expo start --tunnel --port 8082 --clear
 **PG 착수 조건 (전부 충족 전 금지):** ① User **사업자 등록 완료** ② **PG 후보·계약 확정** ③ (권장) P1·실기 대부분 OK.
 
 ---
+
+### 7.26 세션 인수인계 — **2026-08-21** (장바구니 UI 통합 · 쿠팡형 단일 카트)
+
+| | |
+|---|---|
+| **User** | 매장 🛒 vs 하단 장바구니 **이중 UX 이상함** · 쿠팡처럼 **한 장바구니**여야 함 · **push + HANDOFF** |
+| **원인** | localStorage는 **1개**였으나 매장 `CartDrawer`가 **현재 매장만 결제** UI + **다른 매장 줄도 표시** → 「매장마다 카트」처럼 보임 |
+| **조치** | **`CartView` 탭·서랍 동일 UI** — 전체 목록 · 체크박스 · 매장별 섹션 · multi-store=섹션별 결제 · single=sticky · `storeId`=정렬만 · `orderNoValidItems`/`orderDiscountMismatch` i18n |
+| **유지** | v1 결제 = **`place_order` 매장별** (일괄 PG ❌) · AD-061 |
+| **Git** | push 대기 (이 커밋) |
+| **다음** | User 실기(§0) → **§58 #8 P1** |
+
+**실기 확인:** GUCCI+다른 매장 담기 → 매장 🛒 열기 = **탭과 같은 목록** · A매장 결제 후 B만 남음 · `orderSaveError` 시 장바구니 비우고 재담기
 
 ### 7.25 세션 인수인계 — **2026-08-21** (§58 #5 push · 장바구니 결제 모델 확인)
 
@@ -1217,10 +1230,15 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-08-21 — 장바구니 UI 통합 (탭·매장 서랍 = 동일 CartView)
+- **Author:** Cursor Agent
+- **Changed:** `CartView` drawer=page 동일(전체·체크·매장별 footer/sticky) · `cart-drawer-shell` · 결제 에러 i18n · §7.0·§7.26 · HANDOFF
+- **Notes:** User — 쿠팡형 **한 장바구니** · 결제만 매장별 유지 · **실기 테스트: §0 Expo Go `--clear`**
+
 ### 2026-08-21 — 장바구니 매장별 결제 버그 fix (User 실기)
 - **Author:** Cursor Agent
 - **Changed:** `addToCart` → `product.store_id` · `removeItemsByProductIds` · 매장 🛒 **「○○ 매장만 결제」** 안내 · HANDOFF §7.0·ISS
-- **Notes:** GUCCI 결제 시 Sim&Bee **주문 없이 삭제** 현상 · **로컬 → push 대기**
+- **Notes:** GUCCI 결제 시 Sim&Bee **주문 없이 삭제** 현상 · push **`1391162`**
 
 ### 2026-08-21 — HANDOFF · 매장별 결제 모델 정리 (User Q&A)
 - **Author:** Cursor Agent
