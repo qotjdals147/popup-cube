@@ -15,7 +15,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/context/AuthContext';
 import { useCartCount } from '../../src/context/CartCountContext';
 import { useTheme } from '../../src/context/ThemeContext';
-import { CART_COUNT_INJECT_SCRIPT } from '../../src/lib/cartWebView';
+import { CART_COUNT_INJECT_SCRIPT, buildCartHydrateScript } from '../../src/lib/cartWebView';
+import { buildWebViewBackgroundInject } from '../../src/lib/webviewThemeInject';
 import { t } from '../../src/i18n/ko';
 import { getStoreSummary } from '../../src/lib/stores';
 import { getSupabase } from '../../src/lib/supabase';
@@ -38,7 +39,7 @@ export default function StoreScreen() {
   const router = useRouter();
   const { storeId } = useLocalSearchParams<{ storeId: string }>();
   const { userId, loading: authLoading, role } = useAuth();
-  const { handleWebViewMessage } = useCartCount();
+  const { handleWebViewMessage, itemsJson, bridgeReady } = useCartCount();
   const { colors, mode, isDark } = useTheme();
   const [store, setStore] = useState<StoreSummary | null>(null);
   const [loadingMeta, setLoadingMeta] = useState(true);
@@ -116,6 +117,11 @@ export default function StoreScreen() {
     },
     [handleWebViewMessage, router],
   );
+
+  const shopBeforeLoadInject = useMemo(() => {
+    if (!bridgeReady) return buildWebViewBackgroundInject(mode);
+    return `${buildCartHydrateScript(itemsJson)}\n${buildWebViewBackgroundInject(mode)}`;
+  }, [bridgeReady, itemsJson, mode]);
 
   const blankCheckScript = `
     (function() {
@@ -237,6 +243,7 @@ export default function StoreScreen() {
         )}
         onError={() => setWebError(t.store.shopError)}
         onHttpError={() => setWebError(t.store.shopError)}
+        injectedJavaScriptBeforeContentLoaded={shopBeforeLoadInject}
         injectedJavaScript={`${CART_COUNT_INJECT_SCRIPT}\n${blankCheckScript}`}
       />
     </SafeAreaView>

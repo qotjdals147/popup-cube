@@ -124,7 +124,7 @@
 |---|---|
 | 「쇼핑하기」 **파란 글자만** | **full-width primary 버튼** (홈 카드 등) |
 | 상세·목록·헤더 **장바구니 UI 제각각** | **공통 컴포넌트** (`CartIconButton` 등) · 상세=**수량+담기** (헤더 🛒로 장바구니) |
-| v1 내부 설명(TMI) — 「매장별 결제…」 | **기능만** · 막힐 때만 토스트/confirm |
+| v1 내부 설명(TMI) — 「매장별 결제…」 | **기능만** · 막힐 때만 토스트/confirm · **목표 UX(AD-066)=한 번에 결제** — 매장 나눠 결제 안내 **런칭 UX ❌** |
 | 점주만 예쁘고 손님은 placeholder | **손님 `/shop`·마이·장바구니** 매 작업 **실기 상상** |
 
 **에이전트:** 손님-facing PR마다 **§0 UI/UX + 이 절** 동시 검수. User 「구리다」= **기능 추가보다 UX 즉시 수정** · §8 Changelog + §7 인수인계 기록.
@@ -476,7 +476,8 @@ npm run dev
 | AD-057 | **(구현) 점주 PC 관리센터 라이트 테마** — `ownerAdminTheme.ts` 화이트/그레이 본문 + 네이비 사이드바 · 주문/상품 카드 · 상태 뱃지 · +2pt 가독성 | User 2026-08-11 | 2026-08-11 |
 | AD-058 | **(구현) 점주 매장 생명주기·대시보드 UX** — **`/home` 대시보드**=매장 카드+「매장 관리 열기」만 · **매장 개요**=「매장 OPEN」/「매장 OFF」/「매장 삭제」(조건부) · 로그인 성공→**항상 `/home`**(마지막 매장/GUCCI 직행 제거) · `StoreEditPage` **사이드바+상단바** 「대시보드로 이동」+ 로그아웃 **항상 노출**(본문 스크롤과 분리 `100vh`) · **GUCCI(`popup_gucci_01`)**=삭제만 UI·RPC 보호, OPEN/OFF는 일반 매장과 동일 · 탭명 **「매장 개요」**·**「운영·배송 안내」**(발주·배송과 구분) · `LandingPage`/`LoginPage` **ownerAdminTheme** 통일 | User 2026-08-12 | 2026-08-12 |
 | AD-060 | **(구현) 상품 상세 블록 에디터** — 스마트스토어 「상품 상세정보」처럼 **한 작업 공간**에서 **글 블록·이미지 블록**을 원하는 순서로 넣고·빼고·**드래그로 순서 변경**. 셀러 케이스 전부 수용: **긴 상세컷 한 장** / **사진+글 번갈아** / **글 위주+가끔 이미지**. §54 `detail_description`+`product_detail_images` → **`product_detail_blocks` 테이블**로 통합(1회 마이그레이션) · `OwnerProductDetailEditor` → `OwnerProductBlockEditor` 교체(native HTML5 drag) · `ProductDetailModal` 블록 순서 렌더. **PG보다 먼저**(User 2026-08-12e). 상세 **§56** | User 2026-08-12e | 2026-08-12 |
-| AD-061 | **(확정) PG = 런칭 게이트 · 맨 마지막** — **사업자 미등록** · PG 가맹 전까지 **mock 결제 유지**. 그 전에 **P1·실기·운영 기능**을 최대한 완성 → 런칭 시 **사업자 등록 + PG 가맹 + PG 연동 개발**만 남기는 전략. mock→실 PG는 `CartDrawer`/`place_order` 앞단 **결제 승인+webhook** 끼워 넣기(대규모 리팩터 불필요). **에이전트 PG 착수 금지** = 사업자+PG 후보 확정 전. §53.7 순서 **7** · §7.0 「런칭 게이트」 | User 2026-08-13 | 2026-08-13 |
+| AD-061 | **(확정) PG = 런칭 게이트 · 맨 마지막** — **사업자 미등록** · PG 가맹 전까지 **mock 결제 유지**. 그 전에 **P1·실기·운영 기능**을 최대한 완성 → 런칭 시 **사업자 등록 + PG 가맹 + PG 연동 개발**만 남기는 전략. mock→실 PG는 **`CartView` 앞단 결제 승인 + webhook** · **AD-066 통합 결제 오케스트레이션** (`place_order`는 **매장별 주문 레코드**로 **내부 분할**). **에이전트 PG 착수 금지** = 사업자+PG 후보 확정 전. §53.7 순서 **7** · §7.0 「런칭 게이트」 | User 2026-08-13 · **AD-066 연계 2026-08-24** | 2026-08-13 |
+| AD-066 | **(확정) 손님 결제 = 쿠팡형 통합 결제 (User 2026-08-24)** — 장바구니 **한 번 · 결제 버튼 한 번 · 카드 승인 한 번**. 손님 UX는 **매장별로 나눠 결제 ❌**. **뒤에서:** 선택 상품을 `store_id`로 묶어 **매장별 `orders` N건** 생성(할인/가챠·배송비·점주 알림은 **매장 단위 유지**) · PG **분할 정산**(토스 서브몰·포트원 split 등)은 **PG 계약 후** 설계. **지금(mock):** `place_order`를 매장마다 **손님이 반복 호출** = **임시·UX 부채** — AD-066 전까지 유지하되 **새 UX는 통합 결제 전제**. 상세 **§7.0 · §61** | User 2026-08-24 | 2026-08-24 |
 | AD-062 | **(확정) v1 = 팝업 쇼핑몰 런칭 · 픽셀 월드 v2 보존** — CEO(mr심) 2026-08-13: Google 실물=PG 확정 · 월드+PG UX 이질감 · **에이블리/룩핀형 쇼핑몰**로 v1 출시. **코드 삭제 금지** — `/play`·Phaser·WebView·fixture·socket = **`legacy/world-v1` 보관** · 손님 **기본 진입 = 상품 쇼핑**(ShopPanel·ProductDetailModal·CartDrawer). v2/이벤트 = **2D 픽셀 재활용 또는 그래픽 업grade(영상·360 등) 별도 판단**. 상세 **§57** | User·CEO 2026-08-13 | 2026-08-13 |
 | AD-063 | **(확정) v1 런칭 범위 · 점주센터 정리** — **팝업 점주 입점 → 팝업 상품만 판매** 플랫폼. 점주 PC **대부분 유지** · **「매장 꾸미기(layout)」탭 v1 숨김**(코드 유지) · 손님 **월드 우회→쇼핑** · P1=리뷰답글·KPI·팝업기간 UI. 실행 순서 **§58** | User 2026-08-13 | 2026-08-13 |
 | AD-064 | **(확정) 수익·월드 재포지셔닝 — B2B 마케팅 인벤토리** — 월드 = 손님 **기본 쇼핑 경로 ❌** · **유료 브랜드 홍보(배너·스폰서 팝업존·월드 체험)** = 플랫폼 **광고/마케팅 SKU** (에이블리형 배너 수익과 동급 축). v1 **커머스(몰→shop)** + v2+ **스폰서 월드**. 상세 **§59** | User 2026-08-13 | 2026-08-13 |
@@ -665,6 +666,7 @@ popup_store/                          # Turborepo root
 | ISS-035 | ~~블록 에디터에서 블록 추가·저장마다 스크롤이 맨 위로 튐~~ | Resolved | `OwnerProductPanel.reload()`가 매번 `setLoading(true)` → 상품 목록 DOM 통째 교체가 원인 · **이미 목록 로드됐으면 loading UI 생략** (2026-08-12g) |
 | ISS-036 | ~~shop WebView 상단 ←·🛒 · 담기/상세 너비~~ | Resolved | `0d31f82` · User **2026-08-14 OK** |
 | ISS-037 | ~~다크모드 탭 전환 시 **흰 번쩍임**~~ | Resolved | **Tabs `(shopper)`** + `lazy:false` · `SystemUI`/`NavigationTheme` 배경 · WebView `webviewThemeInject` · User **2026-08-14 OK** |
+| ISS-038 | ~~장바구니 탭 🛒 뱃지만 보이고 목록 비음~~ | Resolved | WebView **localStorage 분리** — `@popup_cart_items` + `buildCartHydrateScript` · 탭 포커스 `popup_cart_hydrate` · `postCartToApp` |
 
 ---
 
@@ -674,7 +676,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **장바구니 UI 통합 ✅ push** · 다음 **§58 #8 P1** · **PG 금지** |
+| **한 줄 요약** | **AD-066 통합 결제 확정** · mock=매장별 임시 · 다음 **§58 #8 P1** · **PG+AD-066 = 런칭 게이트** |
 | **Git 상태** | `main` **`b28af15`** push ✅ (탭·서랍 동일 CartView) · Vercel 1~2분 |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~90% · P1·앱스토어 포함 **전체 ~63%** · **실결제** = P1 + 사업자 + PG |
@@ -689,20 +691,28 @@ popup_store/                          # Turborepo root
 
 → 앱 WebView가 Vercel을 여는 것 = **하이브리드 쇼핑 화면**이지 게임 서버 접속이 **아님**. v1 런칭에 Socket 서버 **필수 아님** (월드 demo/dev만).
 
-#### 손님 장바구니·결제 모델 (v1 — User 2026-08-21 확인)
+#### 손님 장바구니·결제 모델 (User 2026-08-24 **통합 결제 확정** · AD-066)
 
-> **쉬운 비유:** 쿠팡 **한 장바구니**에 브랜드 A·B 물건을 같이 담을 수 있지만, **결제는 가게(매장)마다 영수증이 따로** 나온다.
+> **쉬운 비유 (목표):** 쿠팡 — **장바구니 하나 · 결제 한 번** · 손님은 플랫폼에만 돈 냄 · **뒤에서** 판매자(매장)별 주문·배송·정산 쪼개짐.
 
-| | v1 동작 |
-|---|---|
-| **담기** | 여러 매장 상품 **한 장바구니**(localStorage)에 **함께** 보관 |
-| **화면** | **탭·매장 서랍 = 동일 `CartView`** — 전체 목록 · 매장별 섹션 · 체크박스 (쿠팡형). 서랍은 현재 매장 섹션만 위로 정렬 |
-| **결제** | **`place_order` = 매장 1곳당 주문 1건**. A매장 결제 → A 상품만 DB 저장·장바구니에서 A만 비움 → B매장 **또 결제** |
-| **한 번에?** | **❌ v1 일괄 결제 없음** — 매장 2곳이면 **결제 버튼 2번**(섹션별 또는 단일 매장 선택 시 하단 sticky). 여러 매장 선택 시 **「매장별 결제하기」** 안내 |
-| **주문번호** | 매장마다 **`{store_code}-{번호}`** (예: GUCCI-1042 · OTHER-3) — 점주는 **자기 매장 주문만** 봄 |
-| **PG 이후** | mock 앞단에 PG만 끼움(AD-061). **매장별 `place_order` 구조 유지** · A+B **한 번에 카드 승인**은 v1 범위 밖(PG 후 검토) |
+| | **목표 (런칭 UX · AD-066)** | **지금 (mock 임시 · PG 전)** |
+|---|---|---|
+| **담기** | 여러 매장 **한 장바구니** (localStorage) | ✅ 동일 |
+| **화면** | 탭·매장 서랍 = **동일 `CartView`** (쿠팡형) | ✅ `b28af15` |
+| **결제 UX** | **결제하기 1번** · 배송지 1번 · (필요 시) 혜택 단계 → **완료** | ❌ **매장마다 결제 반복** (기술 부채) |
+| **DB** | **카드 승인 1번** → 서버가 **매장별 `orders` N건** 생성 | **`place_order` 1매장 1호출** (손님이 N번) |
+| **점주** | 자기 매장 **`orders`만** (기존과 동일) | ✅ 동일 |
+| **PG** | 플랫폼 **분할 정산** (서브몰/split) | mock · AD-061 게이트 |
 
-**코드:** `CartView.tsx` — `beginCheckout(forStoreId)` · `placeOrder(activeStoreId, …)` · 결제 후 **`removeItemsByProductIds`** (주문된 줄만 삭제).
+**에이전트 규칙:** 손님-facing에 「매장별로 결제해 주세요」를 **최종 UX로 설계·고착 ❌**. mock 기간 한시 허용 · **PG 착수 시 AD-066 필수**.
+
+**PG 구현 스케치 (착수 시 §61 참고):**
+1. `CartView` — 선택 상품 전체 **한 번** checkout CTA
+2. **`place_checkout`** (신규 RPC 또는 Edge) — `store_id` 그룹별 금액·배송비·프로모 검증 → **pending checkout**
+3. PG 승인 **1건** (총액) → webhook → **그룹마다 `place_order` 내부 호출** (또는 단일 트랜잭션)
+4. 실패/부분 실패 롤백 · 가챠는 **매장별** roll 유지
+
+**코드(현재):** `CartView.tsx` — `beginCheckout(forStoreId)` · mock 중 **매장별** · 결제 후 `removeItemsByProductIds`.
 
 **다음 작업 우선순위 (에이전트 판단 — User에게 선택지 나열 금지):**
 
@@ -719,7 +729,7 @@ popup_store/                          # Turborepo root
 | **7** | ~~**§60 4-D** — 장바구니 쿠팡형 · 주문 썸네일~~ | ✅ User 실기 |
 | **8** | ~~**§58 #5** — 종료 팝업 구매 차단 · i18n 정리~~ | ✅ push `60aab5c` · DB ✅ · User 실기 대기 |
 | **9** | **§58 #8 P1** | PG 전 |
-| **10** | **PG** (§53.7-7) | 사업자 + 가맹 후 |
+| **10** | **PG + AD-066 통합 결제** (§53.7-7 · §61) | 사업자 + 가맹 후 |
 
 > **점주센터 전체 리빌드 ❌** — §58: **80% 유지 · layout만 숨김 · P1만 추가**.
 
@@ -754,8 +764,9 @@ npx expo start --tunnel --port 8082 --clear
 3) `demo@shopper.com` / `demo`
 4) 매장 **쇼핑하기** → 담기 → 장바구니 → **결제하기 (mock)**
 
-**B) 매장별 결제 확인 (매장 2곳 이상 담았을 때)**
-- 장바구니 **매장별 섹션** · **매장마다 결제하기** 따로 · 한 매장 결제 후 **다른 매장 상품은 장바구니에 남음**
+**B) 장바구니·결제 (매장 2곳 이상 담았을 때)**
+- **화면:** 탭·매장 🛒 = **같은 목록** (`b28af15`)
+- **목표(AD-066):** **결제 1번** — mock 전까지는 **매장별 결제 반복**이 남아 있음(임시) · User 불편 **인지됨** · PG 때 통합
 
 **C) 종료 팝업 차단 (선택)**
 - 테스트 매장 `popup_ends_at` **어제** → 홈 CTA 「종료」·`/shop` 담기/결제 비활성
@@ -773,12 +784,34 @@ npx expo start --tunnel --port 8082 --clear
 |---|---|---|
 | **1** | **사업자 등록** | 행정 처리 (수일~수주) |
 | **2** | **PG 후보 선정·가맹** (토스/포트원 등) | 가입비·심사 (수일~2주) |
-| **3** | **PG 연동 개발** — 결제창 · webhook · `pending_payment`→`paid` · 실패/취소 | **코드만** 보통 **1~2세션~2주** |
+| **3** | **PG 연동 + AD-066 통합 결제** — 결제창 1번 · webhook · `place_checkout`→매장별 `orders` · 분할 정산 | **코드** 보통 **2~4세션~3주** |
 | **4** | 샌드박스·실결제 테스트 → **런칭** | |
 
 **PG 착수 조건 (전부 충족 전 금지):** ① User **사업자 등록 완료** ② **PG 후보·계약 확정** ③ (권장) P1·실기 대부분 OK.
 
 ---
+
+### 7.28 세션 인수인계 — **2026-08-24** (장바구니 탭 비어 있음 · 행 정렬)
+
+| | |
+|---|---|
+| **User** | 🛒 뱃지는 실시간인데 **장바구니 탭 비어 있음** · 재로그인하면 보임 · **수량·가격 우측 쏠림** |
+| **원인 1** | RN WebView **localStorage 분리** — 매장 WebView만 담김 · 탭 WebView는 빈 storage · 뱃지=count만 AsyncStorage |
+| **조치 1** | `postCartToApp(items)` · `@popup_cart_items` · `buildCartHydrateScript` · 탭 `useFocusEffect` + `popup_cart_hydrate` |
+| **원인 2** | `cart-drawer-item-row` `space-between` + grid `min-width` — ISS-034 회귀(서랍=page UI 통합) |
+| **조치 2** | `.cart-drawer-item--page` row **flex-start** · body `min-width:0` |
+| **Git** | push 대기 |
+| **실기** | §0 — 담기 → **장바구니 탭 즉시 목록** · 재로그인 불필요 |
+
+### 7.27 세션 인수인계 — **2026-08-24** (통합 결제 방향 확정 · AD-066)
+
+| | |
+|---|---|
+| **User** | 쿠팡은 **한 번에 결제** — 우리도 **당연히 그렇게** · 매장마다 결제는 **유저 불편** |
+| **결정** | **AD-066** — 손님 UX = **통합 결제 1번** · DB/점주 = **매장별 `orders` 유지**(내부 분할) |
+| **현재 코드** | mock **`place_order` 매장별** = **임시** · `CartView` UI는 통합 장바구니(`b28af15`) |
+| **다음 (PG 시)** | `place_checkout` · PG split · `CartView` **단일 결제 CTA** · §61 |
+| **다음 (PG 전)** | **§58 #8 P1** · mock UX 개선 시 **통합 결제 전제**로 설계 |
 
 ### 7.26 세션 인수인계 — **2026-08-21** (장바구니 UI 통합 · 쿠팡형 단일 카트)
 
@@ -787,7 +820,7 @@ npx expo start --tunnel --port 8082 --clear
 | **User** | 매장 🛒 vs 하단 장바구니 **이중 UX 이상함** · 쿠팡처럼 **한 장바구니**여야 함 · **push + HANDOFF** |
 | **원인** | localStorage는 **1개**였으나 매장 `CartDrawer`가 **현재 매장만 결제** UI + **다른 매장 줄도 표시** → 「매장마다 카트」처럼 보임 |
 | **조치** | **`CartView` 탭·서랍 동일 UI** — 전체 목록 · 체크박스 · 매장별 섹션 · multi-store=섹션별 결제 · single=sticky · `storeId`=정렬만 · `orderNoValidItems`/`orderDiscountMismatch` i18n |
-| **유지** | v1 결제 = **`place_order` 매장별** (일괄 PG ❌) · AD-061 |
+| **유지** | mock 중 결제 = **`place_order` 매장별**(임시) · **런칭 목표 = AD-066 통합** |
 | **Git** | push **`b28af15`** ✅ |
 | **다음** | User 실기(§0) → **§58 #8 P1** |
 
@@ -1229,6 +1262,16 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-24 — 장바구니 WebView 동기화 + 행 정렬 fix (ISS-038)
+- **Author:** Cursor Agent
+- **Changed:** `CartCountContext` items AsyncStorage · `cartWebView` hydrate · `CartWebViewScreen` focus inject · `postCartToApp` · CSS `--page` row · §7.28 · ISS-038
+- **Notes:** 뱃지 O 목록 X = WebView storage 분리 · **실기: §0 `--clear`**
+
+### 2026-08-24 — AD-066 통합 결제 방향 확정 (User · 쿠팡형)
+- **Author:** Cursor Agent
+- **Changed:** **AD-066** · §7.0 결제 모델(목표 vs mock 임시) · AD-061 PG 스코프 · §7.27 · §23 · §61 · 런칭 게이트 step 3
+- **Notes:** User — **매장마다 결제 = 불편** · 런칭 UX = **한 번에 결제** · DB는 **매장별 orders** 내부 분할 유지
 
 ### 2026-08-21 — 장바구니 UI 통합 (탭·매장 서랍 = 동일 CartView)
 - **Author:** Cursor Agent
@@ -3837,7 +3880,45 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **서버 최종 게이트** | `create_product_review` — `purchase_confirmed` \| `completed` 만 | migration `20260812b` |
 | **리뷰 작성 모달** | `ReviewFormModal` + `review-form.css` **라이트** (기본) · `appearance` prop | shop·/app/me |
 | **상품상세 하단** | **장바구니** = 아웃라인 버튼(🛒 · primary `#3182f6`) · 담기 = accent `#e94560` | `product-detail-shop.css` |
-| **CartDrawer** | **라이트 CSS 전면** (`cart-drawer-shop.css`) · **매장별 그룹** · 결제=해당 매장만 · `clearStoreItems` | v1 mock · PG 전 매장 일괄결제 ❌ |
+| **CartDrawer** | **라이트 CSS 전면** · **탭=동일 CartView** (`b28af15`) | mock **매장별 결제=임시** · **AD-066 통합 결제** |
+
+---
+
+## 61. 통합 결제 — 쿠팡형 checkout (AD-066)
+
+> **User 2026-08-24 확정** — 손님은 **결제 1번**. 매장마다 결제 반복 = **런칭 UX ❌**.
+
+### 61.1 원칙
+
+| 레이어 | 동작 |
+|---|---|
+| **손님 UX** | 장바구니 1개 · **결제하기 1번** · 배송지 1번 · (필요 시) 혜택 UI |
+| **PG** | **카드 승인 1건** (총액) · 플랫폼 **분할 정산**(PG별 sub-mall / split API) |
+| **DB** | **매장별 `orders` N건** — 점주·배송비·가챠·주문번호 `{store_code}-n` **기존 유지** |
+| **mock (지금)** | `place_order` **매장별 수동 반복** = **임시** only |
+
+### 61.2 구현 순서 (PG 착수 시 — AD-061 전제 충족 후)
+
+1. **`place_checkout(p_items, p_address_id, …)`** — 선택 줄을 `store_id`로 그룹 · 금액·배송비·`popup_ended`·재고 검증 · `checkout_id` 발급
+2. **`CartView`** — multi-store여도 **하단 결제 1버튼** · `multiStoreCheckoutHint` 제거
+3. **PG 결제창** — `checkout_id` + 총액 · webhook `paid`
+4. **webhook 핸들러** — 그룹별 **`place_order` 내부 호출** (트랜잭션 · 부분 실패 시 전체 롤백 또는 보상 트랜잭션)
+5. **가챠/할인** — **매장 그룹마다** 기존 규칙 (UI: 한 플로우 안에서 매장별 카드 또는 순차 1화면)
+6. **정산** — PG split 정책 + (장기) `settlements` 테이블
+
+### 61.3 PG 후보 질문 (User·계약 시)
+
+- **한 번 승인 + N 판매자 분할** 지원 여부 (토스페이먼츠 서브몰 · 포트원 split 등)
+- 위탁 판매 **플랫폼 사업자** vs 입점점 **각자 PG** — **AD-066 = 플랫폼 1 PG 권장**
+
+### 61.4 관련 파일 (예상)
+
+- `apps/web/src/components/CartView.tsx` — 단일 checkout CTA
+- `apps/web/src/lib/orders.ts` — `placeCheckout()` 클라이언트
+- `supabase/migrations/*_place_checkout.sql` — RPC + `checkouts` (선택)
+- HANDOFF §7.0 · AD-061 · AD-066
+
+*§61 Last updated: 2026-08-24 (AD-066 User 확정)*
 
 ---
 
@@ -3882,8 +3963,10 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **상품 상세정보** `(스마트스토어 용어)` | 쇼핑몰에서 **상품 페이지 본문** — 소재·사이즈·착용컷 등. 점주가 **한 공간**에서 글·이미지를 **순서대로** 쌓아 만듦. POP-UP **목표 = §56 AD-060** |
 | **블록 에디터** `(Block Editor)` | 상세페이지를 **글 블록·이미지 블록**으로 나눠 **순서 자유롭게** 편집하는 방식. 한글·워드처럼 **한 작업 공간**에서 배치·순서 변경. **AD-060** |
 | **WYSIWYG** `(위지윅)` | **보이는 대로 편집** — 손님 화면과 비슷하게 보면서 글·이미지를 배치하는 편집 방식. 스마트스토어 **스마트에디터**가 이 계열 |
-| **장바구니** | 담아 둔 상품·수량·결제 화면. HUD·헤더에 별도 버튼. **v1: 여러 매장 담기 가능 · 결제는 매장별** (§7.0 표) |
-| **매장별 결제** `(Per-store checkout)` | 장바구니는 **한 곳**에 모이지만 **`place_order`는 매장 ID마다 1번** — 주문·배송비·할인/가챠·점주 알림이 **그 매장만** 묶임. 쿠팡 **한 번에 결제**와 다름. |
+| **장바구니** | 담아 둔 상품·수량·결제. **한 localStorage · 한 UI**(탭=서랍). **목표(AD-066): 결제 1번** · §7.0 |
+| **통합 결제** `(Unified checkout · AD-066)` | 손님은 **결제 버튼·카드 승인 1번**. 플랫폼이 **매장별 주문·정산**을 뒤에서 처리 — **쿠팡과 동일 원칙**. |
+| **WebView 장바구니 브리지** | WebView마다 localStorage **분리** → 앱 `@popup_cart_items` + `buildCartHydrateScript` + `popup_cart_hydrate` (ISS-038) |
+| **매장별 결제** `(Per-store checkout · mock 임시)` | **지금 mock만** — 손님이 **`place_order`를 매장마다 반복**. **런칭 UX ❌** · PG+AD-066로 제거. |
 | **JWT issued at future** | Supabase가 **폰 시계가 서버보다 느리다**고 판단할 때 — 로그인 토큰 거부. **푸시/Vercel과 무관** · 폰 **날짜·시간 자동** + Expo Go 재로그인. |
 | **HUD 바** `(하단 조작 바)` | 월드 화면 **아래 알약 모양 버튼 줄**. 상호작용·채팅·장바구니·전체상품 **4칸 고정** (AD-047 · Sprint 4-3 · pptx 슬라이드 9 원칙 — 늘리지 않음). **내 주문**(AD-054)은 여기 넣지 않고 헤더 별도 버튼으로 분리(08-08b). |
 | **근접 알약** `(PlayProximityPill)` | 조형물 가까이 갔을 때 **짧은 가운데 알약** — 이름 + 「탭·상호작용」. 탭 = HUD 상호작용과 같음 (AD-049). |

@@ -1,16 +1,22 @@
-import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import { useCartCount } from '../context/CartCountContext';
 import { useTheme } from '../context/ThemeContext';
-import { buildCartWebViewUrl, CART_COUNT_INJECT_SCRIPT } from '../lib/cartWebView';
+import {
+  buildCartHydrateAndNotifyScript,
+  buildCartHydrateScript,
+  buildCartWebViewUrl,
+  CART_COUNT_INJECT_SCRIPT,
+} from '../lib/cartWebView';
 import { buildWebViewBackgroundInject } from '../lib/webviewThemeInject';
 import { t } from '../i18n/ko';
 
 export function CartWebViewScreen() {
   const router = useRouter();
-  const { handleWebViewMessage } = useCartCount();
+  const webViewRef = useRef<WebView>(null);
+  const { handleWebViewMessage, itemsJson, bridgeReady } = useCartCount();
   const { colors, mode } = useTheme();
   const [ready, setReady] = useState(false);
   const [cartUrl, setCartUrl] = useState<string | null>(null);
@@ -18,6 +24,7 @@ export function CartWebViewScreen() {
   const [webLoaded, setWebLoaded] = useState(false);
 
   useEffect(() => {
+    if (!bridgeReady) return;
     let active = true;
     setReady(false);
     setWebError(null);
@@ -43,9 +50,21 @@ export function CartWebViewScreen() {
     return () => {
       active = false;
     };
-  }, [mode]);
+  }, [mode, bridgeReady]);
 
   const backgroundInject = useMemo(() => buildWebViewBackgroundInject(mode), [mode]);
+
+  const beforeLoadInject = useMemo(
+    () => `${buildCartHydrateScript(itemsJson)}\n${backgroundInject}`,
+    [itemsJson, backgroundInject],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!webLoaded) return;
+      webViewRef.current?.injectJavaScript(buildCartHydrateAndNotifyScript(itemsJson));
+    }, [itemsJson, webLoaded]),
+  );
 
   const styles = useMemo(
     () =>
@@ -95,7 +114,7 @@ export function CartWebViewScreen() {
     [handleWebViewMessage, router],
   );
 
-  if (!ready) {
+  if (!bridgeReady || !ready) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color={colors.primary} size="large" />
@@ -118,6 +137,7 @@ export function CartWebViewScreen() {
   return (
     <View style={styles.container}>
       <WebView
+        ref={webViewRef}
         source={{ uri: cartUrl }}
         style={[styles.webview, !webLoaded && styles.webviewHidden]}
         onMessage={onMessage}
@@ -125,7 +145,7 @@ export function CartWebViewScreen() {
         domStorageEnabled
         originWhitelist={['*']}
         startInLoadingState
-        injectedJavaScriptBeforeContentLoaded={backgroundInject}
+        injectedJavaScriptBeforeContentLoaded={beforeLoadInject}
         injectedJavaScript={CART_COUNT_INJECT_SCRIPT}
         renderLoading={() => (
           <View style={styles.webviewLoading}>

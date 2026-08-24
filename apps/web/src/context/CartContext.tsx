@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { CartItem, Product } from '@popup-cube/shared';
-import { CART_STORAGE_KEY, cartCountFromItems, postCartCountToApp } from '../lib/cartSync';
+import { CART_STORAGE_KEY, postCartToApp } from '../lib/cartSync';
 
 const STORAGE_KEY = CART_STORAGE_KEY;
 
@@ -41,8 +41,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    postCartCountToApp(cartCountFromItems(items));
+    postCartToApp(items);
   }, [items]);
+
+  useEffect(() => {
+    function syncFromNativeBridge() {
+      setItems(loadFromStorage());
+    }
+    window.addEventListener('popup_cart_hydrate', syncFromNativeBridge);
+    return () => window.removeEventListener('popup_cart_hydrate', syncFromNativeBridge);
+  }, []);
 
   function addToCart(storeId: string, product: Product, quantity = 1) {
     const lineStoreId = product.store_id || storeId;

@@ -749,6 +749,21 @@
   padding: 14px 12px;
 }
 
+.cart-drawer-item--page .cart-drawer-item-body {
+  min-width: 0;
+}
+
+.cart-drawer-item--page .cart-drawer-item-row {
+  justify-content: flex-start;
+  gap: 10px;
+  width: auto;
+  max-width: 100%;
+}
+
+.cart-drawer-item--page .cart-drawer-line-total {
+  margin-left: 0;
+}
+
 .cart-drawer-item-check {
   display: flex;
   align-items: flex-start;
