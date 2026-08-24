@@ -298,7 +298,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`adde5ef`** push ✅ (장바구니 footer · stepper|줄금액 한 줄) |
+| **Git `main` HEAD** | **(배포 대기)** `cart-drawer-item-head` — 줄금액 상품명 우측 · stepper 단독 행 |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -677,7 +677,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **AD-066 통합 결제 확정** · mock=매장별 임시 · 다음 **§58 #8 P1** · **PG+AD-066 = 런칭 게이트** |
-| **Git 상태** | `main` **`ad2d14c`** push ✅ · Vercel 1~2분 후 WebView CSS 반영 |
+| **Git 상태** | `main` **`adde5ef`** push ✅ · Vercel 1~2분 |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~90% · P1·앱스토어 포함 **전체 ~63%** · **실결제** = P1 + 사업자 + PG |
 | **User 실기** | **§7.0 「사용자가 지금 해야 할 것」** — ISS-038 장바구니 sync + 행 정렬 · **§0 Expo 4줄 전체** |
@@ -750,7 +750,7 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**ISS-038 (장바구니 탭 sync + 행 정렬)** — push **`ad2d14c`** · **Vercel 1~2분** · 아래 **Expo 4줄 전체** 필수
+**ISS-038 (장바구니 탭 sync + 행 footer)** — push **`adde5ef`** · **Vercel 1~2분** · 아래 **Expo 4줄 전체** 필수
 
 0) 폰 **Expo Go SDK 52** (Play 54+ ❌) — §0 표준 안내문 1) 참고
 
@@ -774,8 +774,8 @@ npx expo start --tunnel --port 8082 --clear
 
 5) **이번에 볼 것 (합격 기준)**
    - ✅ 탭 🛒 **뱃지 숫자** = 장바구니 **목록 개수** (비어 있으면 ❌)
-   - ✅ 각 상품: **상품명 → 단가 → 한 줄 `[− n +]` 왼쪽 · 빨간 줄금액 오른쪽(본문 열 안)** · 아래 **삭제** 텍스트
-   - ❌ 수량·줄금액이 **세로로 쌓임** · 줄금액이 **카드 밖/끝**에 붙음
+   - ✅ 각 상품: **1행** 상품명(좌) · **빨간 줄금액(우, 잘리지 않음)** → **2행** 회색 단가 → **3행** `[− n +]` → **삭제** 텍스트(좌)
+   - ❌ 줄금액 **카드 밖 잘림** · stepper와 줄금액 **한 줄에 겹침**
    - ✅ 매장 🛒(서랍) = **탭과 같은 목록**
    - (선택) 매장 2곳 담기 → 매장별 섹션 · sticky 「매장별 결제하기」 안내
 
@@ -801,6 +801,15 @@ npx expo start --tunnel --port 8082 --clear
 
 ---
 
+### 7.30 세션 인수인계 — **2026-08-24** (장바구니 줄금액 잘림)
+
+| | |
+|---|---|
+| **User** | `adde5ef` footer 후에도 **줄금액 카드 밖 잘림** (1,780,0… · 500,000 잘림) |
+| **원인** | 본문 열 ~200px · stepper ~96px + 줄금액 ~110px **한 줄** · `flex-shrink:0` → overflow |
+| **조치** | **`cart-drawer-item-head`** — 상품명↔줄금액 1행 · 단가 2행 · stepper 3행 (쿠팡형) |
+| **Git** | push 대기 |
+
 ### 7.29 세션 인수인계 — **2026-08-24** (장바구니 행 쿠팡형 footer)
 
 | | |
@@ -808,7 +817,7 @@ npx expo start --tunnel --port 8082 --clear
 | **User** | 우측 밖으로 나감은 해결 · **수량·가격 세로 쌓임** — 배열 이상함 |
 | **판단** | **`ad2d14c` inline-flex+wrap = 의도한 최종 UX ❌** — 좁은 본문에서 줄바꿈 → 4줄 스택 |
 | **조치** | `cart-drawer-item-footer` — 본문 열 **100%** · stepper 좌 · 줄금액 우 · **삭제** 텍스트 링크 아래 |
-| **Git** | push 대기 |
+| **Git** | push **`adde5ef`** ✅ |
 
 ### 7.28 세션 인수인계 — **2026-08-24** (장바구니 탭 비어 있음 · 행 정렬)
 
@@ -1296,6 +1305,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-24 — 장바구니 줄금액 잘림 (ISS-038 4차 · item-head)
+- **Author:** Cursor Agent
+- **Changed:** `CartView` `cart-drawer-item-head` · 줄금액→상품명 우측 · footer=stepper만 · §7.30 · §7.0 실기 기준
+- **Notes:** 본문 ~200px에서 stepper+금액 한 줄 불가 · **실기 테스트: §0 Expo 4줄 전체**
 
 ### 2026-08-24 — 장바구니 상품 행 쿠팡형 footer (ISS-038 3차)
 - **Author:** Cursor Agent

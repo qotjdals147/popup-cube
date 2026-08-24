@@ -399,7 +399,10 @@ export function CartView({
           )}
         </div>
         <div className="cart-drawer-item-body">
-          <p className="cart-drawer-item-name">{item.name}</p>
+          <div className="cart-drawer-item-head">
+            <p className="cart-drawer-item-name">{item.name}</p>
+            <span className="cart-drawer-line-total">{formatPrice(item.price * item.quantity)}</span>
+          </div>
           <p className="cart-drawer-item-unit">{formatPrice(item.price)}</p>
           <div className="cart-drawer-item-footer">
             <div className="cart-drawer-stepper">
@@ -411,7 +414,6 @@ export function CartView({
                 +
               </button>
             </div>
-            <span className="cart-drawer-line-total">{formatPrice(item.price * item.quantity)}</span>
           </div>
           <button type="button" className="cart-drawer-remove-btn" onClick={() => removeItem(item.productId)}>
             {t('cart.removeItem')}

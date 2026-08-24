@@ -308,9 +308,22 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  overflow: hidden;
+}
+
+/** 상품명(줄바꿈) + 줄금액(우상단) — 좁은 열에서 stepper와 경쟁하지 않음 */
+.cart-drawer-item-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
 }
 
 .cart-drawer-item-name {
+  flex: 1;
+  min-width: 0;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.4;
@@ -347,15 +360,13 @@
   margin-top: 4px;
 }
 
-/** 쿠팡형 — 본문 열 안: stepper 왼쪽 · 줄 금액 오른쪽 (카드 끝 ❌) */
+/** 수량 stepper — 줄금액은 item-head 우측 */
 .cart-drawer-item-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: flex-start;
   width: 100%;
-  margin-top: 6px;
-  flex-wrap: nowrap;
+  margin-top: 2px;
 }
 
 .cart-drawer-item-row {
@@ -411,12 +422,12 @@
 }
 
 .cart-drawer-line-total {
-  font-size: 15px;
-  font-weight: 700;
-  white-space: nowrap;
   flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
   text-align: right;
-  margin-left: auto;
 }
 
 .cart-drawer--light .cart-drawer-line-total {
@@ -761,6 +772,7 @@
   align-items: start;
   gap: 10px;
   padding: 14px 12px;
+  overflow: hidden;
 }
 
 .cart-drawer-item--page .cart-drawer-item-body {
