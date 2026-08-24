@@ -298,7 +298,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`ad2d14c`** push ✅ (ISS-038 · 장바구니 행 정렬 2차) |
+| **Git `main` HEAD** | **`ad2d14c`** → **cart footer 레이아웃** push 대기 |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -774,7 +774,8 @@ npx expo start --tunnel --port 8082 --clear
 
 5) **이번에 볼 것 (합격 기준)**
    - ✅ 탭 🛒 **뱃지 숫자** = 장바구니 **목록 개수** (비어 있으면 ❌)
-   - ✅ 각 상품 줄: **`[− 1 +]` 바로 옆**에 빨간 **줄 금액**(예: 890,000원) — **카드 오른쪽 끝**에 붙으면 ❌
+   - ✅ 각 상품: **상품명 → 단가 → 한 줄 `[− n +]` 왼쪽 · 빨간 줄금액 오른쪽(본문 열 안)** · 아래 **삭제** 텍스트
+   - ❌ 수량·줄금액이 **세로로 쌓임** · 줄금액이 **카드 밖/끝**에 붙음
    - ✅ 매장 🛒(서랍) = **탭과 같은 목록**
    - (선택) 매장 2곳 담기 → 매장별 섹션 · sticky 「매장별 결제하기」 안내
 
