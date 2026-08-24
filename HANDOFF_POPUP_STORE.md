@@ -298,7 +298,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`ad2d14c`** → **cart footer 레이아웃** push 대기 |
+| **Git `main` HEAD** | **`adde5ef`** push ✅ (장바구니 footer · stepper|줄금액 한 줄) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -801,6 +801,15 @@ npx expo start --tunnel --port 8082 --clear
 
 ---
 
+### 7.29 세션 인수인계 — **2026-08-24** (장바구니 행 쿠팡형 footer)
+
+| | |
+|---|---|
+| **User** | 우측 밖으로 나감은 해결 · **수량·가격 세로 쌓임** — 배열 이상함 |
+| **판단** | **`ad2d14c` inline-flex+wrap = 의도한 최종 UX ❌** — 좁은 본문에서 줄바꿈 → 4줄 스택 |
+| **조치** | `cart-drawer-item-footer` — 본문 열 **100%** · stepper 좌 · 줄금액 우 · **삭제** 텍스트 링크 아래 |
+| **Git** | push 대기 |
+
 ### 7.28 세션 인수인계 — **2026-08-24** (장바구니 탭 비어 있음 · 행 정렬)
 
 | | |
@@ -1287,6 +1296,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-24 — 장바구니 상품 행 쿠팡형 footer (ISS-038 3차)
+- **Author:** Cursor Agent
+- **Changed:** `CartView` `cart-drawer-item-footer` · stepper|줄금액 한 줄 · §7.29 · §7.0 실기 기준
+- **Notes:** User — 세로 쌓임 ❌ · **실기 테스트: §0 Expo 4줄 전체**
 
 ### 2026-08-24 — 장바구니 행 정렬 2차 (ISS-038 · stretch fix)
 - **Author:** Cursor Agent
