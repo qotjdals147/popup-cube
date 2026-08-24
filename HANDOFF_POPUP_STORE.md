@@ -188,7 +188,10 @@
    - **SDK 57** = 실기기 크래시 이력 (ISS-025) — 쓰지 말 것.  
    - 해결: Play 스토어 Expo Go **삭제** → **SDK 52 APK** 설치 → QR 다시.
 2. **명령은 Windows cmd·PowerShell 공통** — **한 줄씩 Enter** · 워크스페이스 절대 경로부터 (`cd C:\Users\qotjd\Downloads\Cursor\popup_store`)
-3. **Tunnel 기본** — 폰과 PC가 다른 네트워크일 수 있음 → `npx expo start --tunnel --port 8082 --clear`
+3. **Tunnel 기본** — 폰과 PC가 **다른 네트워크**(회사 폰 ↔ 집 PC 원격)일 수 있음 → `npx expo start --tunnel --port 8082 --clear`  
+   - **`--tunnel` = Expo가 ngrok 중계를 대신 켜줌** — HANDOFF 표준 4줄 그대로. **우리 코드/명령을 바꾼 게 아님.**  
+   - **2026-08~ ngrok·Expo 공용 tunnel 불안정** → `TypeError … reading 'body'` · **ISS-039**. **우회:** `apps/mobile/start-remote.cmd` (본인 ngrok Authtoken 1회) — §0 「tunnel 실패 시」 참고.  
+   - **`--lan` / `start-lan.cmd` = 같은 Wi‑Fi만** — 원격(RDP) 환경에서 QR 스캔 시 **무한 로딩** (집 PC 내부 IP에 폰이 못 붙음). **원격 작업엔 tunnel(또는 start-remote)만.**
 4. **데모 계정**을 함께 적는다: `demo@shopper.com` / `demo` (손님) · `demo@owner.com` / `demo` (점주·월드 입장만, 관리는 PC)
 5. **Sprint 4-1+ 월드 테스트**면 추가로 안내:
    - 웹 `/play` 가 **Vercel에 배포됐는지** (앱 WebView가 `EXPO_PUBLIC_WEB_ORIGIN` = `https://popup-cube-web.vercel.app` 를 염)
@@ -222,6 +225,27 @@ npx expo start --tunnel --port 8082 --clear
 ```
 
 3) QR → 폰 **Expo Go SDK 52** · `demo@shopper.com` / `demo`
+
+#### tunnel 실패 시 (`body` undefined · ngrok outage) — **ISS-039**
+
+**원인:** Expo **공용** ngrok 중계 장애/한도 — 프로젝트·HANDOFF 방식 변경 ❌.  
+**User 환경:** 회사 폰 + **집 PC 원격** → **`--lan`으로 대체 금지** (무한 로딩).
+
+**우회 — 원격(회사 폰 ↔ 집 PC) · tunnel `body` 오류:**
+
+```
+winget install Cloudflare.cloudflared
+cd C:\Users\qotjd\Downloads\Cursor\popup_store\apps\mobile
+start-remote-cloudflare.cmd
+```
+
+(ngrok: `start-remote.cmd` — **무료 ngrok는 Expo Go 무한로딩** 가능)
+
+**같은 Wi‑Fi(집)** 일 때: 4줄 마지막을 `npx expo start --lan --port 8082 --clear` 또는 **`start-lan.cmd`**
+
+**8082 이미 사용:** `start-lan.cmd` (8082 프로세스 정리 후 시작)
+
+**WebView UI만** (장바구니 레이아웃): `https://popup-cube-web.vercel.app` 폰 브라우저 · push 1~2min
 
 ### PC 웹(점주·스토어 관리) 로컬 테스트 안내 규칙 (필수 — 2026-08-03)
 
@@ -298,7 +322,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **(배포 대기)** `cart-drawer-item-head` — 줄금액 상품명 우측 · stepper 단독 행 |
+| **Git `main` HEAD** | **`2807275`** push ✅ (장바구니 쿠팡형 행 · Expo 원격 스크립트) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -666,7 +690,8 @@ popup_store/                          # Turborepo root
 | ISS-035 | ~~블록 에디터에서 블록 추가·저장마다 스크롤이 맨 위로 튐~~ | Resolved | `OwnerProductPanel.reload()`가 매번 `setLoading(true)` → 상품 목록 DOM 통째 교체가 원인 · **이미 목록 로드됐으면 loading UI 생략** (2026-08-12g) |
 | ISS-036 | ~~shop WebView 상단 ←·🛒 · 담기/상세 너비~~ | Resolved | `0d31f82` · User **2026-08-14 OK** |
 | ISS-037 | ~~다크모드 탭 전환 시 **흰 번쩍임**~~ | Resolved | **Tabs `(shopper)`** + `lazy:false` · `SystemUI`/`NavigationTheme` 배경 · WebView `webviewThemeInject` · User **2026-08-14 OK** |
-| ISS-038 | ~~장바구니 탭 🛒 뱃지만 보이고 목록 비음 · 수량·금액 우측 쏠림~~ | Resolved | **`0b0e3a5`** WebView sync · **`ad2d14c`** `align-items:stretch`→`inline-flex` row |
+| ISS-038 | ~~장바구니 탭 🛒 뱃지만 보이고 목록 비음 · 수량·금액 우측 쏠림~~ | Resolved | **`0b0e3a5`** WebView sync · **`c2206ae`** item-head 줄금액 |
+| ISS-039 | **Expo `--tunnel` ngrok `body` 오류** · 공용 tunnel 불안정 (2026-08~) | Open (외부) | §0 표준 4줄 **유지** · 원격 우회 **`start-remote-cloudflare.cmd`** (cloudflared) · ngrok 무료=Expo 무한로딩 가능 · **`--lan`=같은 Wi‑Fi만** · 8082 점유→`start-lan.cmd` |
 
 ---
 
@@ -677,10 +702,10 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **AD-066 통합 결제 확정** · mock=매장별 임시 · 다음 **§58 #8 P1** · **PG+AD-066 = 런칭 게이트** |
-| **Git 상태** | `main` **`adde5ef`** push ✅ · Vercel 1~2분 |
+| **Git 상태** | `main` **`2807275`** push ✅ · Vercel 1~2분 |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~90% · P1·앱스토어 포함 **전체 ~63%** · **실결제** = P1 + 사업자 + PG |
-| **User 실기** | **§7.0 「사용자가 지금 해야 할 것」** — ISS-038 장바구니 sync + 행 정렬 · **§0 Expo 4줄 전체** |
+| **User 실기** | **§7.0 「사용자가 지금 해야 할 것」** — 장바구니 쿠팡형 행 **`2807275`** · **§0 Expo 4줄 전체** |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -750,9 +775,9 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**ISS-038 (장바구니 탭 sync + 행 footer)** — push **`adde5ef`** · **Vercel 1~2분** · 아래 **Expo 4줄 전체** 필수
+**장바구니 쿠팡형 행** — push **`2807275`** · **Vercel 1~2분** · WebView = Vercel (`EXPO_PUBLIC_WEB_ORIGIN`)
 
-0) 폰 **Expo Go SDK 52** (Play 54+ ❌) — §0 표준 안내문 1) 참고
+0) 폰 **Expo Go SDK 52** (Play 54+ ❌)
 
 1) **Win → `cmd` → Enter**
 
@@ -769,20 +794,31 @@ npx expo start --tunnel --port 8082 --clear
 
 4) **클릭 순서**
    - **홈** → GUCCI **쇼핑하기** → 상품 **담기** (1개 이상)
-   - (선택) 다른 매장도 **담기** → 하단 🛒 뱃지 숫자 확인
-   - **하단 「장바구니」탭** 탭 → **재로그인 없이** 담은 상품 목록 보이는지
+   - **하단 「장바구니」탭** → **재로그인 없이** 목록 보이는지
 
-5) **이번에 볼 것 (합격 기준)**
-   - ✅ 탭 🛒 **뱃지 숫자** = 장바구니 **목록 개수** (비어 있으면 ❌)
-   - ✅ 각 상품: **1행** 상품명(좌) · **빨간 줄금액(우, 잘리지 않음)** → **2행** 회색 단가 → **3행** `[− n +]` → **삭제** 텍스트(좌)
-   - ❌ 줄금액 **카드 밖 잘림** · stepper와 줄금액 **한 줄에 겹침**
-   - ✅ 매장 🛒(서랍) = **탭과 같은 목록**
-   - (선택) 매장 2곳 담기 → 매장별 섹션 · sticky 「매장별 결제하기」 안내
+5) **이번에 볼 것 (합격 기준 — 쿠팡형)**
+   - ✅ 상품 **1행:** 이름(좌) · **✕**(우)
+   - ✅ **2행:** 회색 **단가**
+   - ✅ **3행:** `[− n +]`(좌) · **빨간 줄금액**(우, **잘리지 않음**)
+   - ✅ 매장 안 상품 = **구분선** (카드 안 카드 ❌)
+   - ✅ 탭 🛒 **뱃지** = 목록 수량 합
+   - ❌ 가운데 「삭제」 텍스트 · 금액 **화면 밖** 잘림
 
-6) **안 되면**
-   - Metro **Ctrl+C** → 위 2) **4줄 다시** (`--clear` 포함)
-   - Vercel 배포 **1~2분** 더 기다린 뒤 장바구니 탭 **나갔다 다시 들어가기**
-   - `JWT issued at future` → 폰 **설정 → 날짜·시간 자동** → Expo Go 재로그인
+6) **Expo 연결 — 아래 순서대로 시도**
+
+| 순서 | 상황 | 명령 |
+|---|---|---|
+| **A** | §0 4줄 `--tunnel` OK | 그대로 QR |
+| **B** | `body` 오류 · **폰·PC 같은 Wi‑Fi** | 4줄 마지막만 → `npx expo start --lan --port 8082 --clear` |
+| **C** | **회사 폰 + 집 PC 원격** · tunnel ❌ | `winget install Cloudflare.cloudflared` 후 **`start-remote-cloudflare.cmd`** |
+| **D** | `Port 8082 is being used` | **`start-lan.cmd`** (8082 정리 후 시작) |
+
+7) **WebView만 급히** (Expo 없이): 폰 브라우저 → `https://popup-cube-web.vercel.app/login` → 담기 → `/app/cart`
+
+8) **안 되면**
+   - Metro **Ctrl+C** → 2) **4줄 다시** (`--clear` 포함)
+   - 장바구니 탭 **나갔다 다시** (Vercel 반영)
+   - `JWT issued at future` → 폰 **날짜·시간 자동** → 재로그인
 
 ---
 
@@ -801,6 +837,25 @@ npx expo start --tunnel --port 8082 --clear
 
 ---
 
+### 7.32 세션 인수인계 — **2026-08-24** (장바구니 쿠팡형 행 · Expo 실기)
+
+| | |
+|---|---|
+| **User** | 쿠팡 장바구니 **레퍼런스** · 배열 깔끔하게 · **§0 테스트 안내** |
+| **조치** | `CartView` — 이름+**✕** / 단가 / stepper\|줄금액 · 매장 내 **구분선** · `start-lan.cmd` · `start-remote-cloudflare.cmd` |
+| **Git** | push **`2807275`** ✅ |
+| **Expo 실기** | User **`--lan` 같은 Wi‑Fi OK** · tunnel `body`=ISS-039 · 원격=cloudflared |
+| **다음** | User **§7.0 실기 OK** 확인 → **§58 #8 P1** |
+
+### 7.31 세션 인수인계 — **2026-08-24** (Expo tunnel · User 원격 작업)
+
+| | |
+|---|---|
+| **User** | HANDOFF §0 4줄 예전엔 됐는데 **갑자기 tunnel `body` 오류** · **회사↔집 PC 원격** 작업 |
+| **판단** | **HANDOFF 방식 변경 ❌** — **`--tunnel` = Expo 공용 ngrok** 장애(**ISS-039**) · 에이전트가 **`--lan` 제안 = User 환경에 부적합** → 무한 로딩 |
+| **조치** | §0 「tunnel 실패 시」 · **`start-remote.cmd`** · ISS-039 · `apps/mobile/README.md` |
+| **표준** | **여전히 §0 Expo 4줄 `--tunnel`** — 안 되면 **start-remote** (본인 ngrok 1회) |
+
 ### 7.30 세션 인수인계 — **2026-08-24** (장바구니 줄금액 잘림)
 
 | | |
@@ -808,7 +863,7 @@ npx expo start --tunnel --port 8082 --clear
 | **User** | `adde5ef` footer 후에도 **줄금액 카드 밖 잘림** (1,780,0… · 500,000 잘림) |
 | **원인** | 본문 열 ~200px · stepper ~96px + 줄금액 ~110px **한 줄** · `flex-shrink:0` → overflow |
 | **조치** | **`cart-drawer-item-head`** — 상품명↔줄금액 1행 · 단가 2행 · stepper 3행 (쿠팡형) |
-| **Git** | push 대기 |
+| **Git** | push **`c2206ae`** ✅ |
 
 ### 7.29 세션 인수인계 — **2026-08-24** (장바구니 행 쿠팡형 footer)
 
@@ -1305,6 +1360,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-24 — 장바구니 쿠팡형 행 + Expo 원격 스크립트 (§7.32)
+- **Author:** Cursor Agent
+- **Changed:** `CartView` item-top(✕) · footer stepper|total · page 구분선 · `start-lan.cmd` · `start-remote-cloudflare.cmd` · §7.0 · ISS-039
+- **Notes:** push **`2807275`** · **실기 테스트: §7.0 「사용자가 지금 해야 할 것」= §0 Expo 4줄 전체**
 
 ### 2026-08-24 — 장바구니 줄금액 잘림 (ISS-038 4차 · item-head)
 - **Author:** Cursor Agent
