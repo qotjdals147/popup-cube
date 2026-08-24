@@ -298,7 +298,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`0b0e3a5`** push ✅ (ISS-038 장바구니 WebView sync · 행 정렬) |
+| **Git `main` HEAD** | **`ad2d14c`** push ✅ (ISS-038 · 장바구니 행 정렬 2차) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -666,7 +666,7 @@ popup_store/                          # Turborepo root
 | ISS-035 | ~~블록 에디터에서 블록 추가·저장마다 스크롤이 맨 위로 튐~~ | Resolved | `OwnerProductPanel.reload()`가 매번 `setLoading(true)` → 상품 목록 DOM 통째 교체가 원인 · **이미 목록 로드됐으면 loading UI 생략** (2026-08-12g) |
 | ISS-036 | ~~shop WebView 상단 ←·🛒 · 담기/상세 너비~~ | Resolved | `0d31f82` · User **2026-08-14 OK** |
 | ISS-037 | ~~다크모드 탭 전환 시 **흰 번쩍임**~~ | Resolved | **Tabs `(shopper)`** + `lazy:false` · `SystemUI`/`NavigationTheme` 배경 · WebView `webviewThemeInject` · User **2026-08-14 OK** |
-| ISS-038 | ~~장바구니 탭 🛒 뱃지만 보이고 목록 비음~~ | Resolved | WebView **localStorage 분리** — `@popup_cart_items` + `buildCartHydrateScript` · 탭 포커스 `popup_cart_hydrate` · `postCartToApp` |
+| ISS-038 | ~~장바구니 탭 🛒 뱃지만 보이고 목록 비음 · 수량·금액 우측 쏠림~~ | Resolved | **`0b0e3a5`** WebView sync · **`ad2d14c`** `align-items:stretch`→`inline-flex` row |
 
 ---
 
@@ -677,10 +677,10 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **AD-066 통합 결제 확정** · mock=매장별 임시 · 다음 **§58 #8 P1** · **PG+AD-066 = 런칭 게이트** |
-| **Git 상태** | `main` **`0b0e3a5`** push ✅ · Vercel 1~2분 |
+| **Git 상태** | `main` **`ad2d14c`** push ✅ · Vercel 1~2분 후 WebView CSS 반영 |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~90% · P1·앱스토어 포함 **전체 ~63%** · **실결제** = P1 + 사업자 + PG |
-| **User 실기** | §58 #3·4-C·4-D·#5 ✅ · **장바구니 통합 UI** = push 후 Vercel+Expo `--clear` · **JWT issued at future** = 폰 시계 |
+| **User 실기** | **§7.0 「사용자가 지금 해야 할 것」** — ISS-038 장바구니 sync + 행 정렬 · **§0 Expo 4줄 전체** |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -750,29 +750,38 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**§58 #5** — push `60aab5c` · Vercel 1~2분 · Expo **`--clear`**
+**ISS-038 (장바구니 탭 sync + 행 정렬)** — push **`ad2d14c`** · **Vercel 1~2분** · 아래 **Expo 4줄 전체** 필수
 
-**A) 정상 쇼핑 (GUCCI 등 진행 중 팝업)**
-1) Win → `cmd` → Enter
-2) **아래 한 줄씩 복붙:**
+0) 폰 **Expo Go SDK 52** (Play 54+ ❌) — §0 표준 안내문 1) 참고
+
+1) **Win → `cmd` → Enter**
+
+2) **아래 한 줄씩 복붙** (각 줄 Enter):
+
 ```
 cd C:\Users\qotjd\Downloads\Cursor\popup_store
 npm install --legacy-peer-deps
 cd apps\mobile
 npx expo start --tunnel --port 8082 --clear
 ```
-3) `demo@shopper.com` / `demo`
-4) 매장 **쇼핑하기** → 담기 → 장바구니 → **결제하기 (mock)**
 
-**B) 장바구니·결제 (매장 2곳 이상 담았을 때)**
-- **화면:** 탭·매장 🛒 = **같은 목록** (`b28af15`)
-- **목표(AD-066):** **결제 1번** — mock 전까지는 **매장별 결제 반복**이 남아 있음(임시) · User 불편 **인지됨** · PG 때 통합
+3) QR 스캔 → `demo@shopper.com` / `demo`
 
-**C) 종료 팝업 차단 (선택)**
-- 테스트 매장 `popup_ends_at` **어제** → 홈 CTA 「종료」·`/shop` 담기/결제 비활성
+4) **클릭 순서**
+   - **홈** → GUCCI **쇼핑하기** → 상품 **담기** (1개 이상)
+   - (선택) 다른 매장도 **담기** → 하단 🛒 뱃지 숫자 확인
+   - **하단 「장바구니」탭** 탭 → **재로그인 없이** 담은 상품 목록 보이는지
 
-**D) `JWT issued at future` (푸시와 무관)**
-- 폰 **설정 → 날짜·시간 → 자동 설정** · Expo Go **데이터 삭제** 또는 재설치 → `--clear` 후 **재로그인**
+5) **이번에 볼 것 (합격 기준)**
+   - ✅ 탭 🛒 **뱃지 숫자** = 장바구니 **목록 개수** (비어 있으면 ❌)
+   - ✅ 각 상품 줄: **`[− 1 +]` 바로 옆**에 빨간 **줄 금액**(예: 890,000원) — **카드 오른쪽 끝**에 붙으면 ❌
+   - ✅ 매장 🛒(서랍) = **탭과 같은 목록**
+   - (선택) 매장 2곳 담기 → 매장별 섹션 · sticky 「매장별 결제하기」 안내
+
+6) **안 되면**
+   - Metro **Ctrl+C** → 위 2) **4줄 다시** (`--clear` 포함)
+   - Vercel 배포 **1~2분** 더 기다린 뒤 장바구니 탭 **나갔다 다시 들어가기**
+   - `JWT issued at future` → 폰 **설정 → 날짜·시간 자동** → Expo Go 재로그인
 
 ---
 
@@ -799,9 +808,24 @@ npx expo start --tunnel --port 8082 --clear
 | **원인 1** | RN WebView **localStorage 분리** — 매장 WebView만 담김 · 탭 WebView는 빈 storage · 뱃지=count만 AsyncStorage |
 | **조치 1** | `postCartToApp(items)` · `@popup_cart_items` · `buildCartHydrateScript` · 탭 `useFocusEffect` + `popup_cart_hydrate` |
 | **원인 2** | `cart-drawer-item-row` `space-between` + grid `min-width` — ISS-034 회귀(서랍=page UI 통합) |
-| **조치 2** | `.cart-drawer-item--page` row **flex-start** · body `min-width:0` |
-| **Git** | push **`0b0e3a5`** ✅ |
-| **실기** | §0 — 담기 → **장바구니 탭 즉시 목록** · 재로그인 불필요 |
+| **조치 2** | **`ad2d14c`** — actions `align-items:flex-start` · row `inline-flex`/`fit-content` (stretch가 row를 카드 전체 너비로 늘림) |
+| **Git** | **`0b0e3a5`** sync · **`ad2d14c`** row · push ✅ |
+
+**실기 (§0 전체 — §7.0 「사용자가 지금 해야 할 것」과 동일):**
+
+1) Win → `cmd` → Enter  
+2) **아래 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+3) SDK 52 Expo Go · `demo@shopper.com` / `demo`  
+4) 홈 → GUCCI **쇼핑하기** → **담기** → **하단 장바구니 탭** (재로그인 ❌)  
+5) **`[− 1 +]` 옆 줄 금액** · 뱃지=목록 일치 확인
 
 ### 7.27 세션 인수인계 — **2026-08-24** (통합 결제 방향 확정 · AD-066)
 
@@ -1263,10 +1287,15 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
-### 2026-08-24 — 장바구니 WebView 동기화 + 행 정렬 fix (ISS-038)
+### 2026-08-24 — 장바구니 행 정렬 2차 (ISS-038 · stretch fix)
 - **Author:** Cursor Agent
-- **Changed:** `CartCountContext` items AsyncStorage · `cartWebView` hydrate · `CartWebViewScreen` focus inject · `postCartToApp` · CSS `--page` row · §7.28 · ISS-038
-- **Notes:** 뱃지 O 목록 X = WebView storage 분리 · push **`0b0e3a5`** · **실기: §0 `--clear`**
+- **Changed:** `cart-drawer-item-actions` flex-start · row `inline-flex`/`fit-content` · `shopper-cart-page.css` · §7.0 실기 안내
+- **Notes:** push **`ad2d14c`** · **실기 테스트: §0 Expo 4줄 전체 + §7.0 「사용자가 지금 해야 할 것」**
+
+### 2026-08-24 — 장바구니 WebView 동기화 (ISS-038)
+- **Author:** Cursor Agent
+- **Changed:** `CartCountContext` items AsyncStorage · `cartWebView` hydrate · `CartViewScreen` focus inject · `postCartToApp` · §7.28 · ISS-038
+- **Notes:** push **`0b0e3a5`** · **실기 테스트: §0 Expo 4줄 전체**
 
 ### 2026-08-24 — AD-066 통합 결제 방향 확정 (User · 쿠팡형)
 - **Author:** Cursor Agent
