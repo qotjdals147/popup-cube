@@ -298,7 +298,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`b28af15`** push ✅ (장바구니 UI 통합 · 탭=서랍) |
+| **Git `main` HEAD** | **`0b0e3a5`** push ✅ (ISS-038 장바구니 WebView sync · 행 정렬) |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -677,7 +677,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **AD-066 통합 결제 확정** · mock=매장별 임시 · 다음 **§58 #8 P1** · **PG+AD-066 = 런칭 게이트** |
-| **Git 상태** | `main` **`b28af15`** push ✅ (탭·서랍 동일 CartView) · Vercel 1~2분 |
+| **Git 상태** | `main` **`0b0e3a5`** push ✅ · Vercel 1~2분 |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~90% · P1·앱스토어 포함 **전체 ~63%** · **실결제** = P1 + 사업자 + PG |
 | **User 실기** | §58 #3·4-C·4-D·#5 ✅ · **장바구니 통합 UI** = push 후 Vercel+Expo `--clear` · **JWT issued at future** = 폰 시계 |
@@ -800,7 +800,7 @@ npx expo start --tunnel --port 8082 --clear
 | **조치 1** | `postCartToApp(items)` · `@popup_cart_items` · `buildCartHydrateScript` · 탭 `useFocusEffect` + `popup_cart_hydrate` |
 | **원인 2** | `cart-drawer-item-row` `space-between` + grid `min-width` — ISS-034 회귀(서랍=page UI 통합) |
 | **조치 2** | `.cart-drawer-item--page` row **flex-start** · body `min-width:0` |
-| **Git** | push 대기 |
+| **Git** | push **`0b0e3a5`** ✅ |
 | **실기** | §0 — 담기 → **장바구니 탭 즉시 목록** · 재로그인 불필요 |
 
 ### 7.27 세션 인수인계 — **2026-08-24** (통합 결제 방향 확정 · AD-066)
@@ -1266,7 +1266,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-08-24 — 장바구니 WebView 동기화 + 행 정렬 fix (ISS-038)
 - **Author:** Cursor Agent
 - **Changed:** `CartCountContext` items AsyncStorage · `cartWebView` hydrate · `CartWebViewScreen` focus inject · `postCartToApp` · CSS `--page` row · §7.28 · ISS-038
-- **Notes:** 뱃지 O 목록 X = WebView storage 분리 · **실기: §0 `--clear`**
+- **Notes:** 뱃지 O 목록 X = WebView storage 분리 · push **`0b0e3a5`** · **실기: §0 `--clear`**
 
 ### 2026-08-24 — AD-066 통합 결제 방향 확정 (User · 쿠팡형)
 - **Author:** Cursor Agent
