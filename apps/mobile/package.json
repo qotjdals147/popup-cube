@@ -6,6 +6,9 @@
   "scripts": {
     "start": "expo start",
     "start:go": "expo start --tunnel --port 8082 --clear",
+    "start:lan": "expo start --lan --port 8082 --clear",
+    "start:lan:clean": "start-lan.cmd",
+    "start:remote": "start-remote.cmd",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "dev": "expo start",

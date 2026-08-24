@@ -12,14 +12,52 @@
 
 ## 로컬 실행
 
+### 어디서 테스트하나요?
+
+| 상황 | 명령 | 이유 |
+|---|---|---|
+| **폰·PC 같은 Wi‑Fi** (집) | `start-lan.cmd` | QR = PC 내부 IP — 같은 Wi‑Fi만 됨 |
+| **회사 폰 + 집 PC 원격(RDP)** | `start-remote.cmd` | 폰은 집 IP에 못 붙음 → **ngrok** 필요 |
+| **`--tunnel` body 오류** | `start-remote.cmd` | Expo 공용 ngrok 장애 시 **본인 ngrok 계정** |
+
 ```powershell
 cd C:\Users\qotjd\Downloads\Cursor\popup_store
 npm install --legacy-peer-deps
 cd apps\mobile
+start-lan.cmd          # 같은 Wi‑Fi
+# 또는
+start-remote.cmd       # 원격·LTE (ngrok 1회 설정 필요)
+```
+
+> **`--tunnel`만 쓰면** ngrok `body` 오류가 자주 납니다. 원격 작업은 **`start-remote.cmd`** 권장.
+
+### 원격 작업 — ngrok 1회 설정
+
+1. https://dashboard.ngrok.com 가입 (무료)
+2. **Authtoken** 복사 → cmd:
+   ```
+   ngrok config add-authtoken 여기_토큰
+   ```
+3. ngrok CLI 없으면: `winget install ngrok.ngrok`
+4. `start-remote.cmd` 실행 → QR 스캔
+
+### 장바구니 UI만 빠르게 (Expo 없이)
+
+앱 껍데기·뱃지 동기화는 제외, **웹 레이아웃만** 보려면 폰 브라우저:
+
+`https://popup-cube-web.vercel.app` → `demo@shopper.com` / `demo` → 장바구니
+
+(Vercel 배포 반영 후 1~2분)
+
+---
+
+### (구) tunnel 한 줄
+
+```powershell
 npx expo start --tunnel --port 8082 --clear
 ```
 
-> **Tunnel:** `@expo/ngrok` devDependency 필요. 원격(직장 폰 ↔ 집 PC)은 `--tunnel` 필수.
+> **Tunnel:** `@expo/ngrok` devDependency 필요. **2026-08 기준 Expo 공용 tunnel 불안정** — 원격은 `start-remote.cmd`.
 
 Expo Go **SDK 52** APK로 QR 스캔 → m01 랜딩 → 로그인 → 홈.
 

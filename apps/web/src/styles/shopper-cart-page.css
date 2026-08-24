@@ -127,7 +127,11 @@
   background: #ffffff;
   border: 1px solid #e5e8eb;
   border-radius: 12px;
-  padding: 12px;
+  padding: 4px 14px 12px;
+}
+
+.cart-view--page .cart-drawer-item-list {
+  padding: 0;
 }
 
 .cart-view--page .cart-drawer-store-group {

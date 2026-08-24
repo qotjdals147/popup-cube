@@ -255,6 +255,10 @@
   gap: 10px;
 }
 
+.cart-view--page .cart-drawer-item-list {
+  gap: 0;
+}
+
 .cart-drawer-item {
   display: flex;
   gap: 12px;
@@ -307,12 +311,12 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   overflow: hidden;
 }
 
-/** 상품명(줄바꿈) + 줄금액(우상단) — 좁은 열에서 stepper와 경쟁하지 않음 */
-.cart-drawer-item-head {
+/** 쿠팡형 — 상품명 + ✕ 삭제 (우상단) */
+.cart-drawer-item-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -325,10 +329,14 @@
   flex: 1;
   min-width: 0;
   font-size: 14px;
-  font-weight: 600;
-  line-height: 1.4;
+  font-weight: 500;
+  line-height: 1.45;
   margin: 0;
   word-break: keep-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .cart-drawer--light .cart-drawer-item-name {
@@ -340,8 +348,9 @@
 }
 
 .cart-drawer-item-unit {
-  font-size: 12px;
+  font-size: 13px;
   margin: 0;
+  line-height: 1.3;
 }
 
 .cart-drawer--light .cart-drawer-item-unit {
@@ -360,13 +369,14 @@
   margin-top: 4px;
 }
 
-/** 수량 stepper — 줄금액은 item-head 우측 */
+/** 쿠팡형 — stepper 좌 · 줄금액 우 (한 줄) */
 .cart-drawer-item-footer {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   width: 100%;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .cart-drawer-item-row {
@@ -423,11 +433,38 @@
 
 .cart-drawer-line-total {
   flex-shrink: 0;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
-  line-height: 1.4;
+  line-height: 1.3;
   white-space: nowrap;
   text-align: right;
+  margin-left: auto;
+}
+
+.cart-drawer-remove-x {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  margin: -6px -8px 0 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: #b0b8c1;
+}
+
+.cart-drawer--light .cart-drawer-remove-x:hover {
+  color: #4e5968;
+}
+
+.cart-drawer--dark .cart-drawer-remove-x {
+  color: #6b7280;
+}
+
+.cart-drawer--dark .cart-drawer-remove-x:hover {
+  color: #98989f;
 }
 
 .cart-drawer--light .cart-drawer-line-total {
@@ -768,52 +805,47 @@
 
 .cart-drawer-item--page {
   display: grid;
-  grid-template-columns: auto 72px minmax(0, 1fr);
+  grid-template-columns: auto 80px minmax(0, 1fr);
   align-items: start;
-  gap: 10px;
+  gap: 12px;
   padding: 14px 12px;
   overflow: hidden;
 }
 
+.cart-view--page .cart-drawer-item--page {
+  padding: 16px 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.cart-view--page .cart-drawer-item-list .cart-drawer-item--page:not(:last-child) {
+  border-bottom: 1px solid #e5e8eb;
+}
+
+.cart-drawer--dark.cart-view--page .cart-drawer-item-list .cart-drawer-item--page:not(:last-child) {
+  border-bottom-color: #2e2e32;
+}
+
 .cart-drawer-item--page .cart-drawer-item-body {
   min-width: 0;
+  gap: 6px;
 }
 
 .cart-drawer-item--page .cart-drawer-item-footer {
   width: 100%;
 }
 
-.cart-drawer-item--page .cart-drawer-remove-btn {
-  align-self: flex-start;
-  margin-top: 8px;
-  padding: 0;
-  min-height: 28px;
-  border: none;
-  background: transparent;
-  color: #8b95a1;
-  font-weight: 500;
-}
-
-.cart-drawer--dark .cart-drawer-item--page .cart-drawer-remove-btn {
-  background: transparent;
-  border: none;
-  color: #98989f;
-}
-
-.cart-drawer-item--page .cart-drawer-remove-btn:hover {
-  color: #4e5968;
-}
-
 .cart-drawer-item-check {
   display: flex;
   align-items: flex-start;
-  padding-top: 26px;
+  padding-top: 2px;
 }
 
 .cart-drawer-item-thumb--page {
-  width: 72px;
-  height: 72px;
-  border-radius: 10px;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
 }
 
 .cart-drawer-item--unchecked {
