@@ -130,6 +130,12 @@
   padding: 12px;
 }
 
+.cart-view--page .cart-drawer-item-row {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+}
+
 .cart-view--page .cart-drawer-store-group {
   margin-bottom: 12px;
 }
