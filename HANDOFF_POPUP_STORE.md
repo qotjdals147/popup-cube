@@ -14,7 +14,7 @@
 
 - **사용자가 지시했든, 에이전트가 스스로 다음 작업을 이어가든 — 새 작업(요청/할 일)을 시작할 때마다** 이 `## 0. Handoff Protocol`을 다시 읽고 따른다.
 - 같은 세션 안에서 이미 한 번 읽었어도, 다음 작업으로 넘어갈 때 **다시** §0을 확인한다 `(대화가 길어지며 규칙을 놓치는 것을 방지)`.
-- 특히 아래는 매번 재확인: **브리핑 형식(§0 하단)**, **모델 추천(§24)**, **HANDOFF 실시간 갱신**, **한국어 대화 규칙**, **UI/UX · 쇼핑몰 퀄리티(§0)**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · **축약·「--clear 후 매장→」식 금지**).
+- 특히 아래는 매번 재확인: **브리핑 형식(§0 하단)**, **모델 추천(§24)**, **HANDOFF 실시간 갱신**, **한국어 대화 규칙**, **UI/UX · 쇼핑몰 퀄리티(§0)**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · **축약·「--clear 후 매장→」식 금지**), **Expo 재시작 여부 표(§0 · commit/push·테스트 안내 시 필수 동반)**.
 - 규칙을 지키지 못했다고 사용자가 지적하면, 즉시 인정하고 그 지점부터 규칙대로 다시 수행한다.
 
 ### 세션 시작 시
@@ -33,6 +33,7 @@
 | **아키텍처·방향 합의 직후** | `## 4. Architecture Decisions` (AD-0xx 추가) |
 | **파일/폴더/API/환경변수/DB 변경 직후** | `## 5` 체크리스트, `## 9`~`## 13` 해당 섹션, `## 19` 파일 트리 |
 | **막힘·해결·버그 발견** | `## 6. Blockers` (ISS-0xx 추가/Resolved) |
+| **commit/push·테스트 안내** | §0 **「Expo 재시작 여부」표** 해당 행 (필수 동반) |
 | **우선순위·다음 할 일이 바뀔 때** | `## 7. Next Steps` |
 | **의미 있는 작업 단위 완료 시** | `## 8. Changelog`에 항목 추가 *(세션 끝까지 미루지 말 것)* |
 | **새 UI 문구·i18n 규칙** | `## 25` + `apps/web/src/i18n/ko.ts` |
@@ -208,11 +209,32 @@
    - PC 점주만 → **PC 웹 3줄** · 앱 WebView까지 → **Expo 4줄** (+ 필요 시 PC 3줄)
    - Vercel만 → `https://popup-cube-web.vercel.app` + push 1~2분
    - **❌ 금지 (User 반복 지적):** 「Expo `--clear` 후 매장 → …」 「`--clear` 재시작 후 장바구니 확인」 등 **명령 블록 없이** 테스트만 설명 · 「Vercel 1~2분 + `--clear`」 한 줄로 **§0 4줄 생략**
-   - **✅ 올바른 예:** §0 **「표준 Expo 4줄」코드 블록 전체** → SDK 52 → `demo@shopper.com` → **표준 안내문 5) 클릭 순서** → **이번에 볼 것**
-9. **앱 실기 = push + Metro 재시작 (User 2026-08-14 — 필수)**
-   - **WebView 내용** (`/shop` · `/app/me` 등 `apps/web`) → **`main` push** → Vercel 1~2분 · **「푸쉬해줘?」 묻지 말고 push**
-   - **네이티브 UI** (`apps/mobile` — 하단탭 · 마이 허브 · ⚙️) → push와 **무관** · PC에서 Expo **완전 종료(Ctrl+C)** 후 **`npx expo start --tunnel --port 8082 --clear`** 필수 · 예전 JS 캐시면 **매장/내 정보 2탭** 그대로 보임
-   - **적용 확인:** 하단 **홈·마이·장바구니 3탭** · 마이 **⚙️** · **주문내역/배송지** 퀵아이콘 — 이게 안 보이면 `--clear` 재시작
+   - **✅ 올바른 예:** §0 **「표준 Expo 4줄」코드 블록 전체** → SDK 52 → `demo@shopper.com` → **표준 안내문 5) 클릭 순서** → **이번에 볼 것** → **§0 「Expo 재시작 여부」표에서 해당 행**
+9. **commit/push·테스트 안내 = Expo 재시작 여부 표 필수 동반 (User 2026-08-25 — 절대 규칙)**
+   - **❌ 금지:** 「push 했으니 `--clear` 재시작」만 단독 안내 · web-only 수정인데 **매번 Expo 껐다 켜라**고만 말하기
+   - **✅ 필수:** 아래 **「Expo 재시작 여부」표**에서 **이번 커밋에 해당하는 행**을 **반드시** 같이 적는다 (Changelog · §7 「사용자가 지금 해야 할 것」 · 대화 답변 **전부**)
+   - **push:** WebView(`apps/web`) 수정 시 **「푸쉬해줘?」 묻지 말고 push** (기존 규칙 유지)
+10. **앱 실기 — 무엇을 바꿨는지에 따라 (User 2026-08-14 + 2026-08-25 정리)**
+   - 상세 표 = **아래 「Expo 재시작 여부」** · **네이티브 UI**(`apps/mobile`) 변경 시에만 Metro **`--clear` 재시작** 필수
+
+#### Expo 재시작 여부 — commit/push·테스트 안내 시 **필수 동반** (User 2026-08-25)
+
+> **쉬운 말:** 앱 껍데기(Expo)와 쇼핑 화면(WebView·Vercel)은 **별개**. 장바구니·쇼핑만 고쳤으면 **Expo 끄고 켤 필요 없음** — **Vercel 배포 기다렸다가 탭만 다시** 들어가면 됨.
+
+| 이번에 수정한 곳 | Expo(Metro) **재시작** | User가 할 일 |
+|---|---|---|
+| **`apps/web`만** — 장바구니·`/shop`·`/app/me`·상품상세 등 **WebView 안 UI** | ❌ **안 해도 됨** (켜 둔 채 OK) | **`main` push** → **Vercel 1~2분** → 해당 **탭 나갔다 다시** (장바구니·쇼핑) |
+| **`apps/mobile`** — 하단 **홈·마이·장바구니 탭** · 홈 카드 · ⚙️ · WebView **설정** | ✅ **Ctrl+C** 후 §0 **4줄 `--clear`** | QR 다시 또는 Expo Go **Reload** |
+| **`.env`** · **`app.config.ts`** · 네이티브 패키지 추가 | ✅ **`--clear` 필수** | §0 4줄 |
+| **tunnel `body` 오류** · **Port 8082** 사용 중 (ISS-039) | ✅ **재시작** | §0 4줄 `--tunnel` (표준) |
+| **push 했는데 WebView만 예전 화면** | ❌ **먼저 재시작 아님** | ① Vercel **1~2분** 더 ② **탭 재진입** ③ 그래도면 Expo Go **앱 완전 종료** ④ 그다음 `--clear` |
+
+**에이전트 체크 (매 commit/push·테스트 안내):**
+1. 변경 파일이 **`apps/web`만**인지 **`apps/mobile` 포함**인지 판별
+2. 위 표 **해당 1~2행**을 User 답변·§7·Changelog **Notes**에 **반드시** 포함
+3. Expo 4줄 블록은 **Metro가 꺼져 있을 때** 또는 **재시작 필요 행(✅)** 일 때 전체 제시 · web-only면 **「Expo 재시작 ❌ · Vercel 1~2min · 탭 재진입」**을 **먼저** 쓴다
+
+**적용 확인 (네이티브 변경 시만):** 하단 **홈·마이·장바구니 3탭** · 마이 **⚙️** · **주문내역/배송지** 퀵아이콘 — 안 바뀌면 `--clear` 재시작
 
 #### 표준 Expo 4줄 (앱 · 손님 WebView — **§7·Changelog와 동일**)
 
@@ -313,7 +335,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`d67f871`** push ✅ · **미커밋(2026-08-25):** 장바구니 ISS-038 5차 + AD-066 mock UX — `CartView.tsx` · `cart-drawer-shop.css` · HANDOFF |
+| **Git `main` HEAD** | **`1413647`** — 장바구니 ISS-038 5차 · AD-066 mock UX push ✅ |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -692,12 +714,12 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **ISS-038 5차 + AD-066 mock UX** (미커밋) · **commit+push → User §0 실기** · 다음 **§58 #8 P1** · **PG+AD-066 = 런칭 게이트** |
-| **Git 상태** | `main` **`d67f871`** push ✅ · **워킹트리:** `CartView.tsx` · `cart-drawer-shop.css` · `HANDOFF_POPUP_STORE.md` · (`start-lan.cmd` = fallback만, §0 아님) |
+| **한 줄 요약** | **ISS-038 5차 push `1413647`** · User §0 실기 · **§58 #8 P1** · **PG+AD-066 = 런칭 게이트** |
+| **Git 상태** | `main` **`1413647`** push ✅ · HANDOFF Expo 재시작 규칙 **미커밋** |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~90% · P1·앱스토어 포함 **전체 ~63%** · **실결제** = P1 + 사업자 + PG |
-| **User 실기** | **ISS-038 5차 대기** — 줄금액 전체 표시 · 하단 결제 1버튼 · Expo = **§0 4줄 `--tunnel` only** |
-| **다음 에이전트 1순위** | ① **commit+push** (web+HANDOFF) → Vercel 1~2min ② User §0 실기 합격 확인 ③ **§58 #8 P1** |
+| **User 실기** | **ISS-038 5차** — 줄금액 · 결제 1버튼 · **Expo 재시작 ❌** (web-only) · §0 표 |
+| **다음 에이전트 1순위** | ① HANDOFF commit ② User §0 실기 ③ **§58 #8 P1** |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -729,18 +751,7 @@ popup_store/                          # Turborepo root
 3. PG 승인 **1건** (총액) → webhook → **그룹마다 `place_order` 내부 호출** (또는 단일 트랜잭션)
 4. 실패/부분 실패 롤백 · 가챠는 **매장별** roll 유지
 
-**코드(현재 · mock):** `CartView.tsx` — `beginUnifiedCheckout()` · `checkoutStoreIds[]` · sticky **결제 1버튼** · 할인/가챠 시 **매장별 `place_order` for-loop** · 결제 후 `removeItemsByProductIds`. **PG 착수 시** → `place_checkout` + 결제창 1번 (§61).
-
-**미커밋 (2026-08-25 — 다음 세션 먼저 처리):**
-
-| 파일 | 변경 |
-|---|---|
-| `apps/web/src/components/CartView.tsx` | 줄금액 별도 행 · 통합 checkout · `renderStoreFooter` 제거 |
-| `apps/web/src/styles/cart-drawer-shop.css` | `.cart-drawer-line-total-row` · `overflow:hidden` 제거 |
-| `HANDOFF_POPUP_STORE.md` | §7.34 · §7.0 · ISS-038 |
-| `apps/mobile/start-lan.cmd` | ISS-039 env clear (§0 **아님** · fallback만) |
-
-**의도적 제외:** `apps/mobile/AGENTS.md` · `CLAUDE.md` · `LICENSE`
+**코드(현재 · mock):** `CartView.tsx` — `beginUnifiedCheckout()` · `checkoutStoreIds[]` · sticky **결제 1버튼** · 할인/가챠 시 **매장별 `place_order` for-loop** · 결제 후 `removeItemsByProductIds`. **PG 착수 시** → `place_checkout` + 결제창 1번 (§61). **push `1413647`**.
 
 **다음 작업 우선순위 (에이전트 판단 — User에게 선택지 나열 금지):**
 
@@ -776,7 +787,18 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**장바구니 ISS-038 5차** — **에이전트 commit+push 후** · **Vercel 1~2min** · Expo = **§0와 동일** (RDP·집 **같은 명령**)
+**장바구니 ISS-038 5차** — push **`1413647`** · **Vercel 1~2min**
+
+#### Expo 재시작 여부 (이번 변경 — **필수**)
+
+| | |
+|---|---|
+| **수정** | `apps/web`만 (장바구니·CSS) |
+| **Expo 재시작** | ❌ **안 해도 됨** — Metro **켜 둔 채** OK |
+| **User** | **1~2분** 기다린 뒤 **장바구니 탭 나갔다 다시** |
+| **그래도 예전 화면** | Expo Go **앱 완전 종료** 후 다시 열기 → 그다음에만 §0 4줄 |
+
+**(Metro가 꺼져 있을 때만)** §0 Expo 4줄:
 
 0) 폰 **Expo Go SDK 52** (Play 54+ ❌)
 
@@ -804,6 +826,7 @@ npx expo start --tunnel --port 8082 --clear
    - ❌ 가운데 「삭제」 · 금액 화면 밖 · 「매장별 결제」 안내
 
 6) **안 되면**
+   - **예전 장바구니 UI** → Vercel **1~2분** 더 · **탭 재진입** (Expo 재시작 **먼저 아님** · §0 표)
    - `body` 오류 → **2) 4줄 `--tunnel` 그대로 재시도** (§0 「tunnel 실패 시」)
    - `Port 8082` → 예전 Metro **Ctrl+C** → 2) **4줄 다시**
    - WebView만 → 장바구니 탭 **나갔다 다시** (Vercel 1~2min)
@@ -826,6 +849,16 @@ npx expo start --tunnel --port 8082 --clear
 
 ---
 
+### 7.35 세션 인수인계 — **2026-08-25** (Expo 재시작 규칙 · push `1413647`)
+
+| | |
+|---|---|
+| **User** | ① push **`1413647`** 후 QR 실기 ② **매번 Expo 껐다 켜야 하나?** |
+| **답** | **web-only(`apps/web`) = 재시작 ❌** · Vercel 1~2분 · **탭 재진입** · **mobile(`apps/mobile`) = `--clear` ✅** |
+| **조치** | §0 **「Expo 재시작 여부」표** 신설 · commit/push·테스트 안내 **필수 동반** 규칙 |
+| **Git** | 코드 **`1413647`** push ✅ · HANDOFF 규칙 **미커밋** |
+| **다음** | User ISS-038 5차 실기 → **§58 #8 P1** |
+
 ### 7.34 세션 인수인계 — **2026-08-25** (장바구니 줄금액·AD-066 mock UX)
 
 | | |
@@ -835,7 +868,7 @@ npx expo start --tunnel --port 8082 --clear
 | **조치 1** | stepper **아래** `.cart-drawer-line-total-row` (전체 너비 우측 정렬) · body/page item **`overflow:hidden` 제거** |
 | **원인 2** | multi-store 시 sticky에 **`multiStoreCheckoutHint`** · 매장 섹션 **`renderStoreFooter`** — AD-066 **런칭 UX ❌** |
 | **조치 2** | hint·매장별 footer **삭제** · sticky **결제하기 1버튼** · `beginUnifiedCheckout()` + `checkoutStoreIds[]` · mock **할인/가챠 시 `place_order` for-loop** |
-| **Git** | **미커밋** — 다음 세션 **commit+push** → Vercel → User §0 실기 |
+| **Git** | push **`1413647`** ✅ |
 | **다음** | User §0 합격 → **§58 #8 P1** · PG 전 |
 
 **실기 (§0 전체 — §7.0 「사용자가 지금 해야 할 것」과 동일):**
@@ -1385,6 +1418,16 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-25 — §0 Expo 재시작 여부 규칙 (User 질문)
+- **Author:** Cursor Agent / User
+- **Changed:** §0 「Expo 재시작 여부」표 · commit/push·테스트 **필수 동반** · §7.0 · §7.35 · §7.34 Git
+- **Notes:** **web-only = Expo 재시작 ❌** · Vercel 1~2min · 탭 재진입 · **mobile = `--clear` ✅**
+
+### 2026-08-25 — fix(cart) ISS-038 5차 · AD-066 mock UX (`1413647`)
+- **Author:** Cursor Agent / User
+- **Changed:** `CartView` · `cart-drawer-shop.css` · `start-lan.cmd` · HANDOFF §7.34
+- **Notes:** push **`1413647`** · **Expo 재시작 ❌** (web-only) · Vercel 1~2min · 장바구니 **탭 재진입** · **실기: §7.0**
 
 ### 2026-08-25 — HANDOFF 인수인계 정리 (ISS-038 5차 · AD-066 mock UX)
 - **Author:** Cursor Agent / User
@@ -4122,6 +4165,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **블록 에디터** `(Block Editor)` | 상세페이지를 **글 블록·이미지 블록**으로 나눠 **순서 자유롭게** 편집하는 방식. 한글·워드처럼 **한 작업 공간**에서 배치·순서 변경. **AD-060** |
 | **WYSIWYG** `(위지윅)` | **보이는 대로 편집** — 손님 화면과 비슷하게 보면서 글·이미지를 배치하는 편집 방식. 스마트스토어 **스마트에디터**가 이 계열 |
 | **장바구니** | 담아 둔 상품·수량·결제. **한 localStorage · 한 UI**(탭=서랍). **목표(AD-066): 결제 1번** · §7.0 |
+| **Expo(Metro) vs WebView(Vercel)** | **Expo** = 앱 껍데기(하단 탭·QR로 띄우는 Metro 서버). **WebView** = 그 안에서 **Vercel 웹**(`/shop`·장바구니)을 브라우저처럼 보여줌. **`apps/web`만 수정** → Vercel 배포만 기다리면 됨 · **Expo 재시작 ❌** (§0 표). **`apps/mobile` 수정** → **`--clear` 재시작 ✅**. |
 | **통합 결제** `(Unified checkout · AD-066)` | 손님은 **결제 버튼·카드 승인 1번**. 플랫폼이 **매장별 주문·정산**을 뒤에서 처리 — **쿠팡과 동일 원칙**. |
 | **WebView 장바구니 브리지** | WebView마다 localStorage **분리** → 앱 `@popup_cart_items` + `buildCartHydrateScript` + `popup_cart_hydrate` (ISS-038) |
 | **매장별 결제** `(Per-store checkout · mock 임시)` | **PG 전 내부 구현** — DB는 **`place_order` 매장별 N회**. **2026-08-25 mock UX:** 손님은 **결제 1버튼** · 뒤에서 for-loop. 「매장별로 나눠 결제」 **안내 문구 = 런칭 UX ❌**. |
