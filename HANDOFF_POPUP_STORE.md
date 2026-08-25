@@ -335,7 +335,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`38d09d5`** — AD-028 v1b 프로모·가챠 점주 탭 |
+| **Git `main` HEAD** | **`9c87f70`** — cart promo badges · gacha UX · `place_order` discount_only fix |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -558,7 +558,8 @@ npm run dev
 - [x] **닉네임 회원가입 시스템(AD-023)** — `profiles.nickname`(유니크, 2~16자) + `is_nickname_available` RPC + `LoginPage` 회원가입 모드(중복확인 통과해야 가입 가능)
 - [x] **캐릭터 이름표 개편** — 발밑 닉네임(검정 반투명+흰글자 통일), 점주는 왕관 표시, 채팅 시 머리 위 말풍선(5초 후 사라짐, 최신 메시지만)
 - [x] **상품 등록/목록 + 장바구니 MVP (§10, AD-027 연속선)** — `products` 테이블+RLS, 점주 상품 등록/수정/숨기기 패널(`OwnerProductPanel`), 소비자 상품 보기 패널(`ShopPanel`, 수량 +/-), 장바구니(`CartContext` — client-only, `localStorage`)+장바구니 Drawer(`CartDrawer`, mock 결제)
-- [x] **구매 프로모션 점주 UI (AD-028 v1b, 2026-08-25)** — `OwnerPromotionPanel` · 매장 기본(`default_promo_mode`+할인%) · 상품별 inherit/none/discount/gacha/choice · 가챠 풀 CRUD · `place_order` 라인 할인 · `CartView` 혜택 단계 자동 스kip
+- [x] **구매 프로모션 점주 UI (AD-028 v1b, 2026-08-25)** — `OwnerPromotionPanel` · 매장 기본(`default_promo_mode`+할인%) · 상품별 inherit/none/discount/gacha/choice · 가챠 풀 CRUD · `place_order` 라인 할인 · `CartView` 혜택 단계 자동 skip
+- [x] **손님 장바구니 프로모 표시 + 가챠 결제 fix (AD-028 v1b, 2026-08-25)** — 라인 뱃지(할인/가챠/선택형/없음) · `discount_only` 취소선 · 가챠 경로에서도 `discount_only` 서버·클라 할인 · 다매장 가챠 roll 분리 · 빈 가챠 결과 UI · migration `20260825_place_order_discount_only_on_gacha.sql` ✅
 - [x] **구매 완료 시 "할인 vs 가챠" 선택 (AD-028, §10)** — `store_promotions`(매장별 할인%), `gacha_pools`/`gacha_pool_entries`(실제 상품+가챠 전용 아이템 혼합, 매장 공용 풀)/`gacha_rolls` 테이블+RLS, `roll_gacha()` SECURITY DEFINER 함수(서버 측 가중치 랜덤, 클라이언트 조작 불가), GUCCI 데모 매장에 10% 할인 + 가챠 아이템 4종 시드, `CartDrawer`에 결제 완료 후 혜택 선택 단계 추가
 - [x] **주문 저장 + 소비자 배송지 관리 (AD-030, §10)** — `user_addresses`(여러 배송지+별명+기본 지정) + `orders`/`order_items`(실제 주문 저장) 테이블+RLS, `place_order()`(서버가 가격·할인 재검증 후 원자적 저장) + `get_store_orders()`(점주가 본인 매장 주문+구매자 닉네임+배송지 조회) SECURITY DEFINER/INVOKER 함수, 마이페이지(`/mypage`) 배송지 관리 UI, `CartDrawer`에 배송지 선택 단계 추가, 점주 툴바 "📊 주문 관리" 연동(`OwnerOrdersPanel`)
 - [x] **Phase 4 Sprint 0 — fixture DB + occupancy (2026-07-27)** — `fixture_templates`(§42.3 8종 시드) + `display_fixtures` + `display_slots` + RLS/GRANT; `packages/game-core/src/occupancyGrid.ts` (`buildOccupancyGrid`, `canWalk`, `canPlaceFixture`); `apps/web/src/lib/displayFixtures.ts` CRUD; `packages/shared` 타입; SQL `supabase/migrations/20260727_phase4_display_fixtures.sql`
@@ -704,7 +705,7 @@ popup_store/                          # Turborepo root
 | ISS-035 | ~~블록 에디터에서 블록 추가·저장마다 스크롤이 맨 위로 튐~~ | Resolved | `OwnerProductPanel.reload()`가 매번 `setLoading(true)` → 상품 목록 DOM 통째 교체가 원인 · **이미 목록 로드됐으면 loading UI 생략** (2026-08-12g) |
 | ISS-036 | ~~shop WebView 상단 ←·🛒 · 담기/상세 너비~~ | Resolved | `0d31f82` · User **2026-08-14 OK** |
 | ISS-037 | ~~다크모드 탭 전환 시 **흰 번쩍임**~~ | Resolved | **Tabs `(shopper)`** + `lazy:false` · `SystemUI`/`NavigationTheme` 배경 · WebView `webviewThemeInject` · User **2026-08-14 OK** |
-| ISS-038 | ~~장바구니 탭 sync · 행 정렬 · 쿠팡형 · 줄금액 · 통합 결제 UX~~ | **Resolved** | User **`1413647`** UI OK · **`28c01b1`** 줄금액 좌측·`placeUnifiedStoreOrder` · **2매장 결제 재실기 대기** |
+| ISS-038 | ~~장바구니 탭 sync · 행 정렬 · 쿠팡형 · 줄금액 · 통합 결제 UX~~ | **Resolved** | User **`1413647`** UI OK · **`28c01b1`** 줄금액 · **2매장 가챠·혼합 프로모** = §7.39 fix · **User 재실기 대기** |
 | ISS-039 | Expo `--tunnel` ngrok **`body` 일시 오류** (2026-08~) | Open (외부·간헐) | **§0 4줄 `--tunnel` 유지** · User **2026-08-24 정상** · 에이전트 **`--lan` 선제안 ❌** · 지속 실패만 `start-remote-cloudflare.cmd` |
 
 ---
@@ -715,12 +716,12 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **프로모·가챠 점주 탭 (AD-028 v1b)** · User 실기 · **§58 #8 P1** · PG=게이트 |
-| **Git 상태** | `main` **`38d09d5`** push ✅ |
-| **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
+| **한 줄 요약** | **프로모 손님 UX (뱃지·가챠 fix)** · User 실기 · **§58 #8 P1** · PG=게이트 |
+| **Git 상태** | `main` **`9c87f70`** push ✅ |
+| **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **discount_only on gacha** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~92% · P1·앱스토어 포함 **전체 ~63%** · **실결제·택배 API** = 사업자 + 계약 후 |
-| **User 실기** | **`1413647`** — 잘림·1버튼·문구 ✅ · **`28c01b1`** — 2매장 할인/가챠 **재확인 필요** |
-| **다음 에이전트 1순위** | ① User **프로모 탭·혼합 결제** 실기 ② commit/push (User 요청) ③ **§58 #8 P1** |
+| **User 실기** | §7.39 시나리오 ①~④ · **commit/push 후** Vercel 1~2min · **Expo ❌** · 탭 재진입 |
+| **다음 에이전트 1순위** | ① User **§7.39 실기** ② commit/push (User 요청 시) ③ **§58 #8 P1** |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -859,6 +860,41 @@ npx expo start --tunnel --port 8082 --clear
 | **4** | 샌드박스·실결제 테스트 → **런칭** | |
 
 **PG 착수 조건 (전부 충족 전 금지):** ① User **사업자 등록 완료** ② **PG 후보·계약 확정** ③ (권장) P1·실기 대부분 OK.
+
+---
+
+### 7.39 세션 인수인계 — **2026-08-25** (장바구니 프로모 뱃지 · 가챠 UX · discount_only 서버 fix)
+
+| | |
+|---|---|
+| **User** | 「그렇게 가자」— `discount_only`는 가챠 선택해도 할인 유지 · 장바구니 라인 뱃지 · 가챠 UX(빈 결과·매장별 roll) · HANDOFF 철저 |
+| **원인 1** | `place_order` — `p_reward_type=gacha`면 **전 라인 정가** (`discount_only` 할인 누락) |
+| **조치 1** | migration **`20260825_place_order_discount_only_on_gacha.sql`** ✅ Supabase — `discount_only` **항상** `line_discount_percent` · `choice`는 **할인 경로만** |
+| **원인 2** | 2매장 통합 결제 — 가챠 풀 없는 매장도 roll 시도 / `gachaResult &&` guard → **결과 화면 공백** |
+| **조치 2** | `shouldRollGacha = mode==='gacha' && plan.hasGachaEligible` · `gachaResultsByStore[]` · 당첨 없을 때 **`gachaNoPrizeTitle`** · rolling **≥900ms** |
+| **손님 UX** | 장바구니 각 줄 — **`10% 할인` / `가챠` / `선택형` / `혜택 없음`** 뱃지 · `discount_only` **취소선 정가** |
+| **코드** | `CartView.tsx` · `packages/shared/src/promo.ts` (`computeGachaCheckoutSubtotal`) · `cart-drawer-shop.css` · `ko.ts` |
+| **Git** | **`9c87f70`** push ✅ |
+| **Expo** | **web-only ❌** 재시작 · Vercel push 후 **장바구니 탭 재진입** |
+
+#### 손님 결제 규칙표 (AD-028 v1b — 점주 프리셋 → 손님은 주문당 1번만 선택)
+
+| 상품 `promo_mode` | 장바구니 표시 | 할인 경로 | 가챠 경로 |
+|---|---|---|---|
+| `none` | 혜택 없음 | 정가 | 정가 |
+| `discount_only` | N% 할인 뱃지 + 취소선 | **라인 %** | **라인 %** *(가챠 골라도 유지)* |
+| `gacha_only` | 가챠 | 정가 | 가챠 roll *(풀 있을 때)* |
+| `choice` | 선택형 | **라인 %** | 정가 *(가챠 소비)* |
+| `inherit` | 매장 `default_promo_mode` 따름 | 위와 동일 | 위와 동일 |
+
+**통합 2매장 (AD-066):** 결제 1버튼 · 혜택 선택 **1번** · 뒤에서 **`place_order` 매장별** · 가챠 roll = **풀+eligible 있는 매장만**
+
+#### User 실기 체크 (§0 — web-only면 Expo 4줄 생략 · PC 브라우저/Vercel)
+
+1. GUCCI 점주 → 프로모 탭에서 상품별 모드 섞기 (`discount_only` + `choice` + `none`)
+2. 손님 장바구니 — **줄마다 뱃지·할인 취소선** 확인
+3. **`choice` 있는 주문 → 가챠 선택** → `discount_only` 줄은 **주문 금액 할인 반영** (점주 주문 관리 `line_discount_percent`)
+4. **2매장** (한쪽만 가챠 풀) → 가챠 선택 → **당첨 UI 또는 「주문 완료」 fallback** · 풀 없는 매장은 roll 없음
 
 ---
 
@@ -1471,6 +1507,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-25 — cart promo badges · gacha UX · place_order discount_only (AD-028 v1b)
+- **Author:** Cursor Agent / User
+- **Changed:** `CartView` line badges · `computeGachaCheckoutSubtotal` · migration `20260825_place_order_discount_only_on_gacha.sql` · `cart-drawer-shop.css` · `ko.ts` · §7.39
+- **Notes:** Supabase migration ✅ · push **`9c87f70`** · **Expo 재시작 ❌** (web-only) · Vercel 1~2min · 탭 재진입 · **실기: §7.39**
 
 ### 2026-08-25 — HANDOFF §7.37 PG·택배·SDK · ISS-038 User OK
 - **Author:** Cursor Agent / User
@@ -2714,15 +2755,20 @@ npx expo start --tunnel --port 8082 --clear
 | product_id | UUID FK → products | |
 | quantity | INTEGER | `>= 1` |
 | unit_price | INTEGER | 주문 시점 단가 스냅샷(**서버가 `products.price`에서 직접 읽음** — 클라이언트가 보낸 가격은 신뢰하지 않음) |
+| line_discount_percent | INTEGER NULL | **AD-028 v1b** — 라인별 적용 % (`order_items`). `discount_only`는 가챠 경로에서도 저장 |
 
 **RLS:** `orders`/`order_items` — 구매자 본인(`user_id = auth.uid()`) 또는 그 매장 점주(`stores.owner_id = auth.uid()`)만 SELECT. INSERT는 본인 것만(실제로는 `place_order()` 함수를 통해서만 발생). **Grant:** `authenticated`만.
 
-**`place_order(p_store_id, p_address_id, p_items, p_reward_type, p_discount_percent)` — 주문 생성 함수 (SECURITY INVOKER):**
+**`place_order(p_store_id, p_address_id, p_items, p_reward_type, p_discount_percent)` — 주문 생성 함수 (SECURITY DEFINER):**
 - 로그인 필요, 주소는 본인 소유인지 검증
 - **가격은 클라이언트가 보낸 값을 절대 믿지 않고 `products.price`를 다시 읽어서 계산** (가격 조작 방지 — `roll_gacha()`와 같은 보안 철학)
-- 할인(`discount`) 선택 시 클라이언트가 보낸 `discount_percent`가 **그 매장의 실제 활성 프로모션과 일치하는지 검증** (임의 할인율 주입 방지)
+- **AD-028 v1b 라인 할인 (2026-08-25):** `resolve_effective_promo()`로 상품·매장 설정 해석 → `order_items.line_discount_percent` 저장
+  - **`discount_only`** — `p_reward_type`이 `discount`든 `gacha`든 **항상** 라인 %
+  - **`choice`** — **`discount` 경로만** 라인 % · `gacha` 경로는 정가
+  - **`gacha_only` / `none`** — 정가
+- **`p_discount_percent` 인자** — v1b부터 클라이언트 null 전달 · 서버가 라인별 계산 (legacy 단일 % 검증 폐기)
 - 주문(`orders`) + 라인(`order_items`)을 한 함수 호출로 원자적 저장, 최종 `order_id`/`total_amount` 반환
-- 장바구니에 다른 매장 상품이 섞여 있어도 **현재 매장(`p_store_id`) 상품만 주문에 포함**(할인/가챠와 동일한 기존 알려진 한계 정책)
+- 장바구니에 다른 매장 상품이 섞여 있어도 **현재 매장(`p_store_id`) 상품만 주문에 포함**
 - `authenticated`에게만 EXECUTE (anon 불가, `PUBLIC` 기본 권한도 명시적으로 회수)
 
 **`get_store_orders(p_store_id)` — 점주 주문 조회 함수 (SECURITY DEFINER, `roll_gacha()`와 같은 패턴):**

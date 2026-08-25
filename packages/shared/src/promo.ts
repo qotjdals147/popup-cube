@@ -88,6 +88,7 @@ export function planStoreCheckoutBenefit(
 ): CheckoutBenefitPlan {
   let preDiscountSubtotal = 0;
   let discountedSubtotal = 0;
+  let gachaPathSubtotal = 0;
   let hasDiscountEligible = false;
   let hasGachaEligible = false;
   let hasChoice = false;
@@ -99,17 +100,22 @@ export function planStoreCheckoutBenefit(
 
     if (mode === 'discount_only' && discountPercent > 0) {
       hasDiscountEligible = true;
-      discountedSubtotal += roundLineTotal(linePre * (100 - discountPercent) / 100);
+      const lineDisc = roundLineTotal(linePre * (100 - discountPercent) / 100);
+      discountedSubtotal += lineDisc;
+      gachaPathSubtotal += lineDisc;
     } else if (mode === 'choice') {
       hasChoice = true;
       if (discountPercent > 0) hasDiscountEligible = true;
       hasGachaEligible = true;
       discountedSubtotal += linePre;
+      gachaPathSubtotal += linePre;
     } else if (mode === 'gacha_only') {
       hasGachaEligible = true;
       discountedSubtotal += linePre;
+      gachaPathSubtotal += linePre;
     } else {
       discountedSubtotal += linePre;
+      gachaPathSubtotal += linePre;
     }
   }
 
@@ -142,7 +148,11 @@ export function planStoreCheckoutBenefit(
   }
 
   const finalDiscounted =
-    autoRewardType === 'discount' ? discountedSubtotal : preDiscountSubtotal;
+    autoRewardType === 'discount'
+      ? discountedSubtotal
+      : autoRewardType === 'gacha'
+        ? gachaPathSubtotal
+        : preDiscountSubtotal;
 
   return {
     skipRewardStep,
@@ -157,7 +167,7 @@ export function planStoreCheckoutBenefit(
   };
 }
 
-/** 사용자가 「할인」 선택 시 라인별 % 합산 */
+/** 사용자가 「할인」 선택 시 라인별 % 합산 (discount_only + choice) */
 export function computeDiscountSubtotal(
   lines: CheckoutLineInput[],
   store: StorePromotionSettings | null,
@@ -170,6 +180,24 @@ export function computeDiscountSubtotal(
       (mode === 'discount_only' || mode === 'choice') &&
       discountPercent > 0
     ) {
+      total += roundLineTotal(linePre * (100 - discountPercent) / 100);
+    } else {
+      total += linePre;
+    }
+  }
+  return total;
+}
+
+/** 가챠 경로 — discount_only 라인만 자동 할인 (choice는 가챠 선택 시 정가) */
+export function computeGachaCheckoutSubtotal(
+  lines: CheckoutLineInput[],
+  store: StorePromotionSettings | null,
+): number {
+  let total = 0;
+  for (const line of lines) {
+    const { mode, discountPercent } = resolveEffectivePromo(line.promo, store);
+    const linePre = line.price * line.quantity;
+    if (mode === 'discount_only' && discountPercent > 0) {
       total += roundLineTotal(linePre * (100 - discountPercent) / 100);
     } else {
       total += linePre;

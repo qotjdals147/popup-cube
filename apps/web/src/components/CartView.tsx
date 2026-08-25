@@ -1,15 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { CheckoutBenefitPlan, GachaRollResult, StoreSummary, UserAddress } from '@popup-cube/shared';
+import type {
+  CheckoutBenefitPlan,
+  GachaRollResult,
+  ProductPromoFields,
+  StorePromotion,
+  StoreSummary,
+  UserAddress,
+} from '@popup-cube/shared';
 import {
   computeDiscountSubtotal,
+  computeGachaCheckoutSubtotal,
   planStoreCheckoutBenefit,
   planUnifiedCheckoutBenefit,
+  resolveEffectivePromo,
 } from '@popup-cube/shared';
 import { useCart } from '../context/CartContext';
 import { getActivePromotion, GachaError, rollGacha } from '../lib/gacha';
 import { createAddress, listMyAddresses } from '../lib/addresses';
 import { OrderError, placeOrder } from '../lib/orders';
-import { getProductPromosByIds, shopperStoreHasGachaPool } from '../lib/promotions';
+import { getProductPromosByIds, getStorePromotion, shopperStoreHasGachaPool } from '../lib/promotions';
 import { getStoreSummary } from '../lib/stores';
 import { isPopupEnded } from '../lib/popupPeriod';
 import { calcShippingFee } from '../lib/storePolicy';
@@ -51,15 +60,18 @@ function formatPrice(price: number): string {
 
 type CartLineItem = ReturnType<typeof useCart>['items'][number];
 
+type GachaResultWithStore = { storeId: string; storeName: string; result: GachaRollResult };
+
 /** AD-066 mock — 매장별 place_order (서버가 라인 할인·혜택 검증) */
 async function placeUnifiedStoreOrder(
   storeId: string,
   addressId: string,
   ordering: CartLineItem[],
   mode: 'discount' | 'gacha',
+  shouldRollGacha: boolean,
 ): Promise<{ totalAmount: number; gachaResult: GachaRollResult | null }> {
   const result = await placeOrder(storeId, addressId, ordering, mode, null);
-  if (mode !== 'gacha') {
+  if (mode !== 'gacha' || !shouldRollGacha) {
     return { totalAmount: result.totalAmount, gachaResult: null };
   }
   try {
@@ -130,6 +142,7 @@ export function CartView({
   const [discountAmountSaved, setDiscountAmountSaved] = useState(0);
   const [finalTotal, setFinalTotal] = useState<number | null>(null);
   const [gachaResult, setGachaResult] = useState<GachaRollResult | null>(null);
+  const [gachaResultsByStore, setGachaResultsByStore] = useState<GachaResultWithStore[]>([]);
   const [rewardError, setRewardError] = useState<string | null>(null);
   const [storeNames, setStoreNames] = useState<Record<string, string>>({});
   const [storeInfoById, setStoreInfoById] = useState<Record<string, StoreSummary>>({});
@@ -145,6 +158,10 @@ export function CartView({
     showGachaButton: false,
   });
   const [checkoutBusy, setCheckoutBusy] = useState(false);
+  const [productPromoById, setProductPromoById] = useState<
+    Record<string, ProductPromoFields>
+  >({});
+  const [storePromoById, setStorePromoById] = useState<Record<string, StorePromotion | null>>({});
 
   const isPageLayout = layout === 'page';
   const activeStoreId = checkoutStoreId ?? focusStoreId ?? null;
@@ -207,6 +224,32 @@ export function CartView({
         Object.fromEntries(results.filter(({ summary }) => summary).map(({ id, summary }) => [id, summary!])),
       );
     });
+    return () => {
+      active = false;
+    };
+  }, [items]);
+
+  useEffect(() => {
+    const productIds = items.map((item) => item.productId);
+    const storeIds = [...new Set(items.map((item) => item.storeId))];
+    if (productIds.length === 0) {
+      setProductPromoById({});
+      setStorePromoById({});
+      return;
+    }
+    let active = true;
+    Promise.all([
+      getProductPromosByIds(productIds),
+      Promise.all(storeIds.map((id) => getStorePromotion(id).then((promo) => [id, promo] as const))),
+    ])
+      .then(([promoMap, storePairs]) => {
+        if (!active) return;
+        setProductPromoById(promoMap);
+        setStorePromoById(Object.fromEntries(storePairs));
+      })
+      .catch(() => {
+        if (!active) return;
+      });
     return () => {
       active = false;
     };
@@ -350,12 +393,15 @@ export function CartView({
     setRewardError(null);
     setCheckoutBusy(true);
     if (userChoice === 'gacha') setPhase('gachaRolling');
+    const rollingStarted = userChoice === 'gacha' ? Date.now() : 0;
     try {
       let totalAmount = 0;
       let preSubtotal = 0;
       let discountSubtotal = 0;
       const orderedProductIds: string[] = [];
+      const rolledGacha: GachaResultWithStore[] = [];
       let lastGacha: GachaRollResult | null = null;
+      let anyGachaRollAttempted = false;
 
       for (const storeId of checkoutTargetStoreIds) {
         const ordering = items.filter(
@@ -366,11 +412,15 @@ export function CartView({
         const mode = userChoice
           ? resolveStorePlacementMode(plan, userChoice)
           : (plan?.autoRewardType ?? 'gacha');
-        const { totalAmount: storeTotal, gachaResult } = await placeUnifiedStoreOrder(
+        const shouldRollGacha = mode === 'gacha' && (plan?.hasGachaEligible ?? false);
+        if (shouldRollGacha) anyGachaRollAttempted = true;
+
+        const { totalAmount: storeTotal, gachaResult: storeGacha } = await placeUnifiedStoreOrder(
           storeId,
           selectedAddressId,
           ordering,
           mode,
+          shouldRollGacha,
         );
         orderedProductIds.push(...ordering.map((item) => item.productId));
         totalAmount += storeTotal;
@@ -382,26 +432,48 @@ export function CartView({
           const productIds = ordering.map((i) => i.productId);
           const promoMap = await getProductPromosByIds(productIds);
           const storePromo = await getActivePromotion(storeId);
-          const storeDisc = computeDiscountSubtotal(
-            ordering.map((item) => ({
-              productId: item.productId,
-              price: item.price,
-              quantity: item.quantity,
-              promo: promoMap[item.productId] ?? { promo_mode: 'inherit', promo_discount_percent: null },
-            })),
-            storePromo,
-          );
-          discountSubtotal += storeDisc;
+          const lines = ordering.map((item) => ({
+            productId: item.productId,
+            price: item.price,
+            quantity: item.quantity,
+            promo: promoMap[item.productId] ?? { promo_mode: 'inherit', promo_discount_percent: null },
+          }));
+          discountSubtotal += computeDiscountSubtotal(lines, storePromo);
         } else {
-          discountSubtotal += storePre;
+          const productIds = ordering.map((i) => i.productId);
+          const promoMap = await getProductPromosByIds(productIds);
+          const storePromo = await getActivePromotion(storeId);
+          const lines = ordering.map((item) => ({
+            productId: item.productId,
+            price: item.price,
+            quantity: item.quantity,
+            promo: promoMap[item.productId] ?? { promo_mode: 'inherit', promo_discount_percent: null },
+          }));
+          discountSubtotal += computeGachaCheckoutSubtotal(lines, storePromo);
         }
-        if (gachaResult) lastGacha = gachaResult;
+        if (storeGacha) {
+          lastGacha = storeGacha;
+          rolledGacha.push({
+            storeId,
+            storeName: storeNames[storeId] ?? storeId,
+            result: storeGacha,
+          });
+        }
+      }
+
+      if (rollingStarted > 0) {
+        const elapsed = Date.now() - rollingStarted;
+        if (elapsed < 900) {
+          await new Promise((resolve) => setTimeout(resolve, 900 - elapsed));
+        }
       }
 
       setLastOrderedProductIds(orderedProductIds);
       setFinalTotal(totalAmount);
+      setGachaResultsByStore(rolledGacha);
 
-      if (userChoice === 'gacha' || (!userChoice && lastGacha)) {
+      const choseGacha = userChoice === 'gacha' || (!userChoice && anyGachaRollAttempted);
+      if (choseGacha) {
         setGachaResult(lastGacha);
         setPhase('gachaResult');
       } else {
@@ -440,15 +512,13 @@ export function CartView({
     setDiscountAmountSaved(0);
     setFinalTotal(null);
     setGachaResult(null);
+    setGachaResultsByStore([]);
     setSelectedAddressId(null);
     setAddresses([]);
     if (layout === 'drawer') onClose?.();
   }
 
   const discountAmount = discountAmountSaved;
-  const gachaLabel = gachaResult?.product_name ?? gachaResult?.exclusive_name ?? '';
-  const gachaImage = gachaResult?.product_image_url ?? gachaResult?.exclusive_image_url ?? null;
-  const gachaIsRealProduct = !!gachaResult?.product_id;
   const addressAppearance = appearance === 'light' ? 'light' : 'dark';
 
   function renderStickyFooter() {
@@ -490,6 +560,34 @@ export function CartView({
 
   function renderCartItem(item: (typeof items)[number]) {
     const checked = selectedIds.has(item.productId);
+    const productPromo = productPromoById[item.productId] ?? {
+      promo_mode: 'inherit' as const,
+      promo_discount_percent: null,
+    };
+    const storePromo = storePromoById[item.storeId] ?? null;
+    const resolved = resolveEffectivePromo(productPromo, storePromo);
+    const hasLineDiscount =
+      resolved.mode === 'discount_only' && resolved.discountPercent > 0;
+    const unitDiscounted = hasLineDiscount
+      ? Math.round(item.price * (100 - resolved.discountPercent) / 100)
+      : null;
+
+    let promoBadge: string | null = null;
+    let promoBadgeKind: 'discount' | 'gacha' | 'choice' | 'none' = 'none';
+    if (resolved.mode === 'discount_only' && resolved.discountPercent > 0) {
+      promoBadge = t('cart.linePromoDiscount', { percent: resolved.discountPercent });
+      promoBadgeKind = 'discount';
+    } else if (resolved.mode === 'gacha_only') {
+      promoBadge = t('cart.linePromoGacha');
+      promoBadgeKind = 'gacha';
+    } else if (resolved.mode === 'choice') {
+      promoBadge = t('cart.linePromoChoice');
+      promoBadgeKind = 'choice';
+    } else if (resolved.mode === 'none') {
+      promoBadge = t('cart.linePromoNone');
+      promoBadgeKind = 'none';
+    }
+
     return (
       <article
         key={item.productId}
@@ -522,7 +620,19 @@ export function CartView({
               ✕
             </button>
           </div>
-          <p className="cart-drawer-item-unit">{formatPrice(item.price)}</p>
+          {promoBadge && (
+            <span className={`cart-line-promo-badge cart-line-promo-badge--${promoBadgeKind}`}>
+              {promoBadge}
+            </span>
+          )}
+          {hasLineDiscount && unitDiscounted !== null ? (
+            <p className="cart-drawer-item-unit cart-drawer-item-unit--discounted">
+              <span className="cart-drawer-item-unit-original">{formatPrice(item.price)}</span>
+              <span className="cart-drawer-item-unit-sale">{formatPrice(unitDiscounted)}</span>
+            </p>
+          ) : (
+            <p className="cart-drawer-item-unit">{formatPrice(item.price)}</p>
+          )}
           <div className="cart-drawer-item-footer">
             <div className="cart-drawer-item-qty-col">
               <div className="cart-drawer-stepper">
@@ -534,7 +644,11 @@ export function CartView({
                   +
                 </button>
               </div>
-              <p className="cart-drawer-line-total-row">{formatPrice(item.price * item.quantity)}</p>
+              <p className="cart-drawer-line-total-row">
+                {hasLineDiscount && unitDiscounted !== null
+                  ? formatPrice(unitDiscounted * item.quantity)
+                  : formatPrice(item.price * item.quantity)}
+              </p>
             </div>
           </div>
         </div>
@@ -677,18 +791,39 @@ export function CartView({
         </div>
       )}
 
-      {phase === 'gachaResult' && gachaResult && (
+      {phase === 'gachaResult' && (
         <div className="cart-drawer-complete">
-          <div className="cart-drawer-complete-icon">
-            {gachaImage ? <img src={gachaImage} alt={gachaLabel} style={{ width: 96, height: 96, objectFit: 'contain' }} /> : '🎉'}
-          </div>
-          <p className="cart-drawer-complete-text">{t('cart.gachaWonTitle')}</p>
-          <p className="cart-drawer-complete-text" style={{ color: '#e94560' }}>
-            {gachaLabel}
-          </p>
-          <span className="cart-drawer-gacha-type">
-            {gachaIsRealProduct ? t('cart.gachaBadgeProduct') : t('cart.gachaBadgeExclusive')}
-          </span>
+          {gachaResultsByStore.length > 0 ? (
+            <>
+              <div className="cart-drawer-complete-icon">🎉</div>
+              <p className="cart-drawer-complete-text">{t('cart.gachaWonTitle')}</p>
+              {gachaResultsByStore.map(({ storeId, storeName, result }) => {
+                const label = result.product_name ?? result.exclusive_name ?? '';
+                const image = result.product_image_url ?? result.exclusive_image_url ?? null;
+                const isProduct = !!result.product_id;
+                return (
+                  <div key={storeId} style={{ marginBottom: 16 }}>
+                    <p className="cart-drawer-step-hint">{t('cart.gachaStoreLabel', { store: storeName })}</p>
+                    {image ? (
+                      <img src={image} alt={label} style={{ width: 96, height: 96, objectFit: 'contain' }} />
+                    ) : null}
+                    <p className="cart-drawer-complete-text" style={{ color: '#e94560' }}>
+                      {label}
+                    </p>
+                    <span className="cart-drawer-gacha-type">
+                      {isProduct ? t('cart.gachaBadgeProduct') : t('cart.gachaBadgeExclusive')}
+                    </span>
+                  </div>
+                );
+              })}
+            </>
+          ) : (
+            <>
+              <div className="cart-drawer-complete-icon">✅</div>
+              <p className="cart-drawer-complete-text">{t('cart.gachaNoPrizeTitle')}</p>
+              <p className="cart-drawer-step-hint">{t('cart.gachaNoPrizeHint')}</p>
+            </>
+          )}
           <p className="cart-drawer-step-hint">{t('cart.purchaseConfirmAutoRule')}</p>
           <button type="button" className="cart-drawer-primary-btn" style={{ marginTop: 16 }} onClick={handleFinish}>
             {t('cart.confirm')}
