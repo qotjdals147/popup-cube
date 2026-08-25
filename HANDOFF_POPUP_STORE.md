@@ -335,7 +335,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`947be01`** — cart **`28c01b1`** · HANDOFF **`947be01`** |
+| **Git `main` HEAD** | **`3064017`** — cart **`28c01b1`** · §7.37 HANDOFF |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -715,7 +715,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **ISS-038 User OK** · **2매장 결제 `28c01b1` 재실기** · **§58 #8 P1** · **PG+택배=런칭 게이트(AD-061)** |
-| **Git 상태** | `main` **`947be01`** push ✅ (`28c01b1` cart · Expo 규칙 · HANDOFF) |
+| **Git 상태** | `main` **`3064017`** push ✅ |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~92% · P1·앱스토어 포함 **전체 ~63%** · **실결제·택배 API** = 사업자 + 계약 후 |
 | **User 실기** | **`1413647`** — 잘림·1버튼·문구 ✅ · **`28c01b1`** — 2매장 할인/가챠 **재확인 필요** |
