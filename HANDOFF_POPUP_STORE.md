@@ -335,7 +335,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`ca6a1be`** — §7.41 choice badge · **§7.42 pending push** |
+| **Git `main` HEAD** | **`473fe90`** — none badge removed · order-once promo hint |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -563,6 +563,7 @@ npm run dev
 - [x] **손님 장바구니 프로모 표시 + 가챠 결제 fix (AD-028 v1b, 2026-08-25)** — 라인 뱃지(할인/가챠/선택형/없음) · `discount_only` 취소선 · 가챠 경로에서도 `discount_only` 서버·클라 할인 · 다매장 가챠 roll 분리 · 빈 가챠 결과 UI · migration `20260825_place_order_discount_only_on_gacha.sql` ✅
 - [x] **매장 서랍 장바구니 적응형 UI (2026-08-25)** — `cart-drawer-item--drawer` · 뱃지 `fit-content` · User 실기 **✅** · §7.40
 - [x] **손님 `choice` 뱃지 카피 (2026-08-25)** — `선택형` → **`할인·가챠 선택`** · §7.41
+- [x] **결제당 1혜택 손님 안내 (2026-08-25 · AD-067)** — `promoOrderOnceHint` · `rewardPromoOnceHint` · `none` 뱃지 제거 · §7.42
 - [x] **구매 완료 시 "할인 vs 가챠" 선택 (AD-028, §10)** — `store_promotions`(매장별 할인%), `gacha_pools`/`gacha_pool_entries`(실제 상품+가챠 전용 아이템 혼합, 매장 공용 풀)/`gacha_rolls` 테이블+RLS, `roll_gacha()` SECURITY DEFINER 함수(서버 측 가중치 랜덤, 클라이언트 조작 불가), GUCCI 데모 매장에 10% 할인 + 가챠 아이템 4종 시드, `CartDrawer`에 결제 완료 후 혜택 선택 단계 추가
 - [x] **주문 저장 + 소비자 배송지 관리 (AD-030, §10)** — `user_addresses`(여러 배송지+별명+기본 지정) + `orders`/`order_items`(실제 주문 저장) 테이블+RLS, `place_order()`(서버가 가격·할인 재검증 후 원자적 저장) + `get_store_orders()`(점주가 본인 매장 주문+구매자 닉네임+배송지 조회) SECURITY DEFINER/INVOKER 함수, 마이페이지(`/mypage`) 배송지 관리 UI, `CartDrawer`에 배송지 선택 단계 추가, 점주 툴바 "📊 주문 관리" 연동(`OwnerOrdersPanel`)
 - [x] **Phase 4 Sprint 0 — fixture DB + occupancy (2026-07-27)** — `fixture_templates`(§42.3 8종 시드) + `display_fixtures` + `display_slots` + RLS/GRANT; `packages/game-core/src/occupancyGrid.ts` (`buildOccupancyGrid`, `canWalk`, `canPlaceFixture`); `apps/web/src/lib/displayFixtures.ts` CRUD; `packages/shared` 타입; SQL `supabase/migrations/20260727_phase4_display_fixtures.sql`
@@ -719,9 +720,9 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§58 #8 P1** · 프로모 손님 카피 정리 · PG=게이트 |
-| **Git 상태** | `main` **`1610632`** push ✅ |
-| **User 실기** | §7.40 서랍 UI **✅** · §7.39 결제·2매장 (잔여) |
+| **한 줄 요약** | **§58 #8 P1** · 손님 프로모 안내(§7.42) · PG=게이트 |
+| **Git 상태** | push 후 **`§1` HEAD** |
+| **User 실기** | §7.42 — 혜택 없음 제거 · 파란 1혜택 안내 · §7.39 결제 잔여 |
 | **다음 에이전트 1순위** | ① **§58 #8 P1** ② 혜택 단계 가챠 1회 한 줄 카피(User 요청 시) |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
@@ -1570,6 +1571,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-25 — hide none promo badge · order-once shopper hints (AD-067)
+- **Author:** Cursor Agent / User
+- **Changed:** `CartView` · `ko.ts` · `cart-drawer-shop.css` · §7.42
+- **Notes:** **Expo 재시작 ❌** · Vercel 1~2min · 탭 재진입
 
 ### 2026-08-25 — choice badge copy for shoppers · §7.40 User OK
 - **Author:** Cursor Agent / User
