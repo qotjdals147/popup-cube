@@ -515,6 +515,7 @@ npm run dev
 | AD-060 | **(구현) 상품 상세 블록 에디터** — 스마트스토어 「상품 상세정보」처럼 **한 작업 공간**에서 **글 블록·이미지 블록**을 원하는 순서로 넣고·빼고·**드래그로 순서 변경**. 셀러 케이스 전부 수용: **긴 상세컷 한 장** / **사진+글 번갈아** / **글 위주+가끔 이미지**. §54 `detail_description`+`product_detail_images` → **`product_detail_blocks` 테이블**로 통합(1회 마이그레이션) · `OwnerProductDetailEditor` → `OwnerProductBlockEditor` 교체(native HTML5 drag) · `ProductDetailModal` 블록 순서 렌더. **PG보다 먼저**(User 2026-08-12e). 상세 **§56** | User 2026-08-12e | 2026-08-12 |
 | AD-061 | **(확정) PG = 런칭 게이트 · 맨 마지막** — **사업자 미등록** · PG 가맹 전까지 **mock 결제 유지**. 그 전에 **P1·실기·운영 기능**을 최대한 완성 → 런칭 시 **사업자 등록 + PG 가맹 + PG 연동 개발**만 남기는 전략. mock→실 PG는 **`CartView` 앞단 결제 승인 + webhook** · **AD-066 통합 결제 오케스트레이션** (`place_order`는 **매장별 주문 레코드**로 **내부 분할**). **에이전트 PG 착수 금지** = 사업자+PG 후보 확정 전. §53.7 순서 **7** · §7.0 「런칭 게이트」 | User 2026-08-13 · **AD-066 연계 2026-08-24** | 2026-08-13 |
 | AD-066 | **(확정) 손님 결제 = 쿠팡형 통합 결제 (User 2026-08-24)** — 장바구니 **한 번 · 결제 버튼 한 번 · 카드 승인 한 번**. 손님 UX는 **매장별로 나눠 결제 ❌**. **뒤에서:** 선택 상품을 `store_id`로 묶어 **매장별 `orders` N건** 생성(할인/가챠·배송비·점주 알림은 **매장 단위 유지**) · PG **분할 정산**(토스 서브몰·포트원 split 등)은 **PG 계약 후** 설계. **지금(mock · 2026-08-25):** UX=**결제 1버튼** · 배송지·혜택 1번 · **뒤에서 `place_order` 매장별 for-loop** — PG·`place_checkout` 전 임시. 상세 **§7.0 · §61** | User 2026-08-24 · mock UX 2026-08-25 | 2026-08-24 |
+| AD-067 | **(확정) 가챠 = 주문(매장)당 1회 · 상품 개수 ≠ 뽑기 횟수 (User 2026-08-25)** — `roll_gacha` **주문 1건당 1번** · 매장 **공용 풀 1개** (`linked_product_id IS NULL`, `LIMIT 1`). 손님은 **상품마다 할인/가챠 고르지 않음** — **결제 1번 = 보너스 뽑기 1번**(오프라인 「이번 구매 감사 뽑기」). v1 **N번 roll UX ❌** (결제 지옥·풀 비용 폭주 방지). **손님 문의 대응·카피 후보 = §7.40** · v2 검토: 줄당 roll / 상품별 풀 | User 2026-08-25 | 2026-08-25 |
 | AD-062 | **(확정) v1 = 팝업 쇼핑몰 런칭 · 픽셀 월드 v2 보존** — CEO(mr심) 2026-08-13: Google 실물=PG 확정 · 월드+PG UX 이질감 · **에이블리/룩핀형 쇼핑몰**로 v1 출시. **코드 삭제 금지** — `/play`·Phaser·WebView·fixture·socket = **`legacy/world-v1` 보관** · 손님 **기본 진입 = 상품 쇼핑**(ShopPanel·ProductDetailModal·CartDrawer). v2/이벤트 = **2D 픽셀 재활용 또는 그래픽 업grade(영상·360 등) 별도 판단**. 상세 **§57** | User·CEO 2026-08-13 | 2026-08-13 |
 | AD-063 | **(확정) v1 런칭 범위 · 점주센터 정리** — **팝업 점주 입점 → 팝업 상품만 판매** 플랫폼. 점주 PC **대부분 유지** · **「매장 꾸미기(layout)」탭 v1 숨김**(코드 유지) · 손님 **월드 우회→쇼핑** · P1=리뷰답글·KPI·팝업기간 UI. 실행 순서 **§58** | User 2026-08-13 | 2026-08-13 |
 | AD-064 | **(확정) 수익·월드 재포지셔닝 — B2B 마케팅 인벤토리** — 월드 = 손님 **기본 쇼핑 경로 ❌** · **유료 브랜드 홍보(배너·스폰서 팝업존·월드 체험)** = 플랫폼 **광고/마케팅 SKU** (에이블리형 배너 수익과 동급 축). v1 **커머스(몰→shop)** + v2+ **스폰서 월드**. 상세 **§59** | User 2026-08-13 | 2026-08-13 |
@@ -560,6 +561,7 @@ npm run dev
 - [x] **상품 등록/목록 + 장바구니 MVP (§10, AD-027 연속선)** — `products` 테이블+RLS, 점주 상품 등록/수정/숨기기 패널(`OwnerProductPanel`), 소비자 상품 보기 패널(`ShopPanel`, 수량 +/-), 장바구니(`CartContext` — client-only, `localStorage`)+장바구니 Drawer(`CartDrawer`, mock 결제)
 - [x] **구매 프로모션 점주 UI (AD-028 v1b, 2026-08-25)** — `OwnerPromotionPanel` · 매장 기본(`default_promo_mode`+할인%) · 상품별 inherit/none/discount/gacha/choice · 가챠 풀 CRUD · `place_order` 라인 할인 · `CartView` 혜택 단계 자동 skip
 - [x] **손님 장바구니 프로모 표시 + 가챠 결제 fix (AD-028 v1b, 2026-08-25)** — 라인 뱃지(할인/가챠/선택형/없음) · `discount_only` 취소선 · 가챠 경로에서도 `discount_only` 서버·클라 할인 · 다매장 가챠 roll 분리 · 빈 가챠 결과 UI · migration `20260825_place_order_discount_only_on_gacha.sql` ✅
+- [x] **매장 서랍 장바구니 적응형 UI (2026-08-25)** — `cart-drawer-item--drawer` · 뱃지 `fit-content` · 좁은 WebView 할인가 세로 쌓기 · §7.40
 - [x] **구매 완료 시 "할인 vs 가챠" 선택 (AD-028, §10)** — `store_promotions`(매장별 할인%), `gacha_pools`/`gacha_pool_entries`(실제 상품+가챠 전용 아이템 혼합, 매장 공용 풀)/`gacha_rolls` 테이블+RLS, `roll_gacha()` SECURITY DEFINER 함수(서버 측 가중치 랜덤, 클라이언트 조작 불가), GUCCI 데모 매장에 10% 할인 + 가챠 아이템 4종 시드, `CartDrawer`에 결제 완료 후 혜택 선택 단계 추가
 - [x] **주문 저장 + 소비자 배송지 관리 (AD-030, §10)** — `user_addresses`(여러 배송지+별명+기본 지정) + `orders`/`order_items`(실제 주문 저장) 테이블+RLS, `place_order()`(서버가 가격·할인 재검증 후 원자적 저장) + `get_store_orders()`(점주가 본인 매장 주문+구매자 닉네임+배송지 조회) SECURITY DEFINER/INVOKER 함수, 마이페이지(`/mypage`) 배송지 관리 UI, `CartDrawer`에 배송지 선택 단계 추가, 점주 툴바 "📊 주문 관리" 연동(`OwnerOrdersPanel`)
 - [x] **Phase 4 Sprint 0 — fixture DB + occupancy (2026-07-27)** — `fixture_templates`(§42.3 8종 시드) + `display_fixtures` + `display_slots` + RLS/GRANT; `packages/game-core/src/occupancyGrid.ts` (`buildOccupancyGrid`, `canWalk`, `canPlaceFixture`); `apps/web/src/lib/displayFixtures.ts` CRUD; `packages/shared` 타입; SQL `supabase/migrations/20260727_phase4_display_fixtures.sql`
@@ -716,12 +718,11 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **프로모 손님 UX (뱃지·가챠 fix)** · User 실기 · **§58 #8 P1** · PG=게이트 |
-| **Git 상태** | `main` **`c2e5fc5`** push ✅ |
-| **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **discount_only on gacha** ✅ |
-| **런칭 진행률 (대략)** | **기능(mock 결제)** ~92% · P1·앱스토어 포함 **전체 ~63%** · **실결제·택배 API** = 사업자 + 계약 후 |
-| **User 실기** | §7.39 시나리오 ①~④ · **commit/push 후** Vercel 1~2min · **Expo ❌** · 탭 재진입 |
-| **다음 에이전트 1순위** | ① User **§7.39 실기** ② commit/push (User 요청 시) ③ **§58 #8 P1** |
+| **한 줄 요약** | **서랍 장바구니 UI + 가챠 1회 규칙(AD-067)** · User 실기 · **§58 #8 P1** |
+| **Git 상태** | push 후 **`§1` HEAD** 확인 |
+| **Supabase** | `place_order` discount_only on gacha ✅ · `roll_gacha` **주문당 1회** |
+| **User 실기** | §7.40 — 서랍 뱃지·할인가 줄바꿈 · §7.39 결제 시나리오 |
+| **다음 에이전트 1순위** | ① User **§7.40 실기** ② 손님 가챠 FAQ 카피(User 요청 시) ③ **§58 #8 P1** |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -863,6 +864,31 @@ npx expo start --tunnel --port 8082 --clear
 
 ---
 
+### 7.40 세션 인수인계 — **2026-08-25** (서랍 적응형 UI · 가챠 1회 고객 FAQ · AD-067)
+
+| | |
+|---|---|
+| **User** | ① 매장 서랍 — 할인가 **숫자 튀어남** · 뱃지 **가로로 늘어짐** → **적응형 `--drawer`** ② commit/push ③ 「가챠 상품 여러 개인데 왜 1번?」 — **손님 설명** |
+| **UI 조치** | `CartView` — page=`--page` / drawer=`--drawer` 분리 · 뱃지 `width:fit-content` · 서랍 할인가 **세로 쌓기** · `clamp()` 금액 |
+| **가챠 규칙 (AD-067)** | **주문(매장)당 1회** · `roll_gacha(order_id)` 중복 시 `gacha_already_rolled` · 풀 여러 개여도 **`LIMIT 1`** 공용 풀만 |
+| **손님이 헷갈리는 이유** | 줄 **「가챠」뱃지** = 「이 상품은 가챠 프로모 **대상**」이지 「뽑기 N번」이 **아님** |
+| **손님에게 (쉬운 말)** | 「**이번 결제 보너스 뽑기 1번**」— 쿠폰 3장 써도 **럭키드로우 1번**인 것과 비슷 · **상품은 정상 구매** · 당첨은 **추가 혜택 1개** |
+| **점주에게** | 공용 풀 1개 관리 · 가챠-only 상품 많아도 **주문당 roll 1회** → 풀 비용·남용 방지 |
+| **v2 (미착수)** | 줄당 roll · 상품별 풀(`linked_product_id`) — **User 확정 전 코드 금지** |
+| **손님 FAQ 카피 (User 요청 전 UI 삽입 ❌)** | 혜택 단계 한 줄: 「가챠는 **이번 주문당 1번** 뽑기예요」 · CS: §7.40 표 참고 |
+| **Expo** | **web-only ❌** · Vercel 1~2min · **장바구니 탭 재진입** |
+
+#### 「왜 1번?」 — 내부 vs 손님 설명
+
+| | |
+|---|---|
+| **기술** | `CartView` → 매장별 `place_order` 1건 → `roll_gacha` **최대 1번** · eligible 줄 수와 무관 |
+| **제품 (v1)** | AD-066 **결제 1번** · AD-028 **혜택 1번 선택** — 줄마다 roll이면 결제 UX 붕괴 |
+| **비유** | 오프라인 팝업 「3벌 사면 **영수증 1장**으로 뽑기 1번」— 3번 뽑기 아님 |
+| **장바구니 뱃지 의미** | `가챠` = 이 줄은 **가챠 프로모 포함 상품** (횟수 표시 ❌) |
+
+---
+
 ### 7.39 세션 인수인계 — **2026-08-25** (장바구니 프로모 뱃지 · 가챠 UX · discount_only 서버 fix)
 
 | | |
@@ -874,7 +900,7 @@ npx expo start --tunnel --port 8082 --clear
 | **조치 2** | `shouldRollGacha = mode==='gacha' && plan.hasGachaEligible` · `gachaResultsByStore[]` · 당첨 없을 때 **`gachaNoPrizeTitle`** · rolling **≥900ms** |
 | **손님 UX** | 장바구니 각 줄 — **`10% 할인` / `가챠` / `선택형` / `혜택 없음`** 뱃지 · `discount_only` **취소선 정가** |
 | **코드** | `CartView.tsx` · `packages/shared/src/promo.ts` (`computeGachaCheckoutSubtotal`) · `cart-drawer-shop.css` · `ko.ts` |
-| **Git** | **`9c87f70`** push ✅ |
+| **Git** | **`c2e5fc5`** push ✅ |
 | **Expo** | **web-only ❌** 재시작 · Vercel push 후 **장바구니 탭 재진입** |
 
 #### 손님 결제 규칙표 (AD-028 v1b — 점주 프리셋 → 손님은 주문당 1번만 선택)
@@ -887,7 +913,9 @@ npx expo start --tunnel --port 8082 --clear
 | `choice` | 선택형 | **라인 %** | 정가 *(가챠 소비)* |
 | `inherit` | 매장 `default_promo_mode` 따름 | 위와 동일 | 위와 동일 |
 
-**통합 2매장 (AD-066):** 결제 1버튼 · 혜택 선택 **1번** · 뒤에서 **`place_order` 매장별** · 가챠 roll = **풀+eligible 있는 매장만**
+**통합 2매장 (AD-066):** 결제 1버튼 · 혜택 선택 **1번** · 뒤에서 **`place_order` 매장별** · 가챠 roll = **풀+eligible 있는 매장만 · 매장당 1회 (AD-067)**
+
+> **손님 FAQ:** 가챠 뱃지 여러 개 ≠ 뽑기 여러 번. **§7.40 · AD-067**
 
 #### User 실기 체크 (§0 — web-only면 Expo 4줄 생략 · PC 브라우저/Vercel)
 
@@ -1508,10 +1536,15 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-08-25 — cart drawer adaptive UI · AD-067 gacha once per order FAQ
+- **Author:** Cursor Agent / User
+- **Changed:** `CartView` `--drawer` layout · `cart-drawer-shop.css` badge fit · §7.40 · **AD-067**
+- **Notes:** **Expo 재시작 ❌** (web-only) · Vercel 1~2min · 탭 재진입 · 손님 FAQ 카피는 User 요청 전 UI 미삽입
+
 ### 2026-08-25 — cart promo badges · gacha UX · place_order discount_only (AD-028 v1b)
 - **Author:** Cursor Agent / User
 - **Changed:** `CartView` line badges · `computeGachaCheckoutSubtotal` · migration `20260825_place_order_discount_only_on_gacha.sql` · `cart-drawer-shop.css` · `ko.ts` · §7.39
-- **Notes:** Supabase migration ✅ · push **`9c87f70`** · **Expo 재시작 ❌** (web-only) · Vercel 1~2min · 탭 재진입 · **실기: §7.39**
+- **Notes:** Supabase migration ✅ · push **`c2e5fc5`** · **Expo 재시작 ❌** (web-only) · Vercel 1~2min · 탭 재진입 · **실기: §7.39**
 
 ### 2026-08-25 — HANDOFF §7.37 PG·택배·SDK · ISS-038 User OK
 - **Author:** Cursor Agent / User
@@ -4277,6 +4310,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **장바구니** | 담아 둔 상품·수량·결제. **한 localStorage · 한 UI**(탭=서랍). **목표(AD-066): 결제 1번** · §7.0 |
 | **Expo(Metro) vs WebView(Vercel)** | **Expo** = 앱 껍데기(하단 탭·QR로 띄우는 Metro 서버). **WebView** = 그 안에서 **Vercel 웹**(`/shop`·장바구니)을 브라우저처럼 보여줌. **`apps/web`만 수정** → Vercel 배포만 기다리면 됨 · **Expo 재시작 ❌** (§0 표). **`apps/mobile` 수정** → **`--clear` 재시작 ✅**. |
 | **통합 결제** `(Unified checkout · AD-066)` | 손님은 **결제 버튼·카드 승인 1번**. 플랫폼이 **매장별 주문·정산**을 뒤에서 처리 — **쿠팡과 동일 원칙**. |
+| **주문당 가챠 1회** `(AD-067)` | 가챠는 **상품 개수 ≠ 뽑기 횟수**. **매장·주문 1건당 `roll_gacha` 1번**. 줄 **「가챠」뱃지** = 프로모 **대상** 표시. §7.40 |
 | **WebView 장바구니 브리지** | WebView마다 localStorage **분리** → 앱 `@popup_cart_items` + `buildCartHydrateScript` + `popup_cart_hydrate` (ISS-038) |
 | **매장별 결제** `(Per-store checkout · mock 임시)` | **PG 전 내부** — `place_order` N회 · mock UX=**결제 1버튼** · `placeUnifiedStoreOrder` |
 | **PG 연동** `(Payment Gateway)` | **카드 대행** — 결제창·승인·webhook · POP-UP=**승인 1번→매장별 orders·분할 정산** · §61 · **mock≠PG 그대로** |

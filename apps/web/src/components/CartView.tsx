@@ -591,7 +591,7 @@ export function CartView({
     return (
       <article
         key={item.productId}
-        className={`cart-drawer-item cart-drawer-item--page${!checked ? ' cart-drawer-item--unchecked' : ''}`}
+        className={`cart-drawer-item ${isPageLayout ? 'cart-drawer-item--page' : 'cart-drawer-item--drawer'}${!checked ? ' cart-drawer-item--unchecked' : ''}`}
       >
         <label className="cart-drawer-item-check">
           <input
