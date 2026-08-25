@@ -15,7 +15,7 @@ export class ProductError extends Error {
 }
 
 const PRODUCT_SELECT =
-  'id, store_id, name, description, price, image_url, is_active, stock_quantity, auto_accept_enabled, auto_accept_limit, auto_accept_remaining, created_at, detail_description';
+  'id, store_id, name, description, price, image_url, is_active, stock_quantity, auto_accept_enabled, auto_accept_limit, auto_accept_remaining, created_at, detail_description, promo_mode, promo_discount_percent';
 
 /**
  * 소비자용 — 특정 매장의 활성 상품만 조회 (RLS `products_public_read`).

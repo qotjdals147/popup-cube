@@ -8,7 +8,7 @@ import { supabase } from './supabase';
 export async function getActivePromotion(storeId: string): Promise<StorePromotion | null> {
   const { data, error } = await supabase
     .from('store_promotions')
-    .select('store_id, discount_percent, is_active')
+    .select('store_id, discount_percent, is_active, default_promo_mode')
     .eq('store_id', storeId)
     .eq('is_active', true)
     .maybeSingle();

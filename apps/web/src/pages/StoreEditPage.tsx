@@ -8,6 +8,7 @@ import { OwnerProductPanel } from '../components/OwnerProductPanel';
 import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
 import { OwnerDisplayPanel } from '../components/OwnerDisplayPanel';
 import { OwnerStorePolicyPanel } from '../components/OwnerStorePolicyPanel';
+import { OwnerPromotionPanel } from '../components/OwnerPromotionPanel';
 import { DemoToast } from '../components/DemoToast';
 import { useOwnerOrderRealtime } from '../hooks/useOwnerOrderRealtime';
 import { isValidStoreCode, normalizeStoreCode } from '../lib/orderRef';
@@ -16,7 +17,7 @@ import { isWorldEnabled } from '../lib/featureFlags';
 import { t } from '../i18n';
 import type { StoreSummary } from '@popup-cube/shared';
 
-type EditTab = 'overview' | 'products' | 'orders' | 'fulfillment' | 'layout' | 'policy';
+type EditTab = 'overview' | 'products' | 'orders' | 'fulfillment' | 'promotions' | 'layout' | 'policy';
 
 function formatBadgeCount(n: number): string {
   if (n <= 0) return '';
@@ -253,6 +254,7 @@ export function StoreEditPage() {
     { id: 'products', label: t('ownerEdit.tabProducts') },
     { id: 'orders', label: t('ownerEdit.tabOrders'), badge: pendingAccept },
     { id: 'fulfillment', label: t('ownerEdit.tabFulfillment'), badge: awaitingShip },
+    { id: 'promotions', label: t('ownerEdit.tabPromotions') },
     { id: 'policy', label: t('ownerEdit.tabPolicy') },
     ...(worldEnabled ? [{ id: 'layout' as const, label: t('ownerEdit.tabLayout') }] : []),
   ];
@@ -508,6 +510,10 @@ export function StoreEditPage() {
 
           {!loading && !error && tab === 'policy' && storeId && (
             <OwnerStorePolicyPanel storeId={storeId} />
+          )}
+
+          {!loading && !error && tab === 'promotions' && storeId && (
+            <OwnerPromotionPanel storeId={storeId} />
           )}
           </main>
         </div>

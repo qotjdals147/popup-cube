@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { GachaRollResult, StoreSummary, UserAddress } from '@popup-cube/shared';
+import type { CheckoutBenefitPlan, GachaRollResult, StoreSummary, UserAddress } from '@popup-cube/shared';
+import {
+  computeDiscountSubtotal,
+  planStoreCheckoutBenefit,
+  planUnifiedCheckoutBenefit,
+} from '@popup-cube/shared';
 import { useCart } from '../context/CartContext';
 import { getActivePromotion, GachaError, rollGacha } from '../lib/gacha';
 import { createAddress, listMyAddresses } from '../lib/addresses';
 import { OrderError, placeOrder } from '../lib/orders';
+import { getProductPromosByIds, shopperStoreHasGachaPool } from '../lib/promotions';
 import { getStoreSummary } from '../lib/stores';
 import { isPopupEnded } from '../lib/popupPeriod';
 import { calcShippingFee } from '../lib/storePolicy';
@@ -33,6 +39,7 @@ function orderErrorMessage(err: unknown): string {
   if (err instanceof OrderError && err.message.includes('popup_ended')) return t('cart.popupEnded');
   if (err instanceof OrderError && err.message.includes('no_valid_items')) return t('cart.orderNoValidItems');
   if (err instanceof OrderError && err.message.includes('discount_mismatch')) return t('cart.orderDiscountMismatch');
+  if (err instanceof OrderError && err.message.includes('invalid_reward_choice')) return t('cart.invalidRewardChoice');
   if (err instanceof OrderError) return t('cart.orderSaveError');
   if (err instanceof GachaError) return t('cart.gachaError');
   return t('cart.rewardError');
@@ -44,25 +51,17 @@ function formatPrice(price: number): string {
 
 type CartLineItem = ReturnType<typeof useCart>['items'][number];
 
-/** AD-066 mock — 매장별 place_order (할인/가챠 없는 매장은 정가·roll 생략) */
+/** AD-066 mock — 매장별 place_order (서버가 라인 할인·혜택 검증) */
 async function placeUnifiedStoreOrder(
   storeId: string,
   addressId: string,
   ordering: CartLineItem[],
   mode: 'discount' | 'gacha',
 ): Promise<{ totalAmount: number; gachaResult: GachaRollResult | null }> {
-  if (mode === 'discount') {
-    const promo = await getActivePromotion(storeId);
-    const percent = promo?.discount_percent ?? 0;
-    if (percent > 0) {
-      const result = await placeOrder(storeId, addressId, ordering, 'discount', percent);
-      return { totalAmount: result.totalAmount, gachaResult: null };
-    }
-    const result = await placeOrder(storeId, addressId, ordering, 'gacha', null);
+  const result = await placeOrder(storeId, addressId, ordering, mode, null);
+  if (mode !== 'gacha') {
     return { totalAmount: result.totalAmount, gachaResult: null };
   }
-
-  const result = await placeOrder(storeId, addressId, ordering, 'gacha', null);
   try {
     const gachaResult = await rollGacha(storeId, result.orderId);
     return { totalAmount: result.totalAmount, gachaResult };
@@ -75,6 +74,17 @@ async function placeUnifiedStoreOrder(
     }
     throw err;
   }
+}
+
+function resolveStorePlacementMode(
+  plan: CheckoutBenefitPlan,
+  userChoice: 'discount' | 'gacha',
+): 'discount' | 'gacha' {
+  if (plan.skipRewardStep) return plan.autoRewardType ?? 'gacha';
+  if (userChoice === 'discount' && plan.hasDiscountEligible) return 'discount';
+  if (userChoice === 'gacha' && plan.hasGachaEligible) return 'gacha';
+  if (plan.hasDiscountEligible) return 'discount';
+  return 'gacha';
 }
 
 function groupItemsByStore(items: ReturnType<typeof useCart>['items'], focusStoreId?: string) {
@@ -117,6 +127,7 @@ export function CartView({
   const [savingAddress, setSavingAddress] = useState(false);
 
   const [discountPercent, setDiscountPercent] = useState<number | null>(null);
+  const [discountAmountSaved, setDiscountAmountSaved] = useState(0);
   const [finalTotal, setFinalTotal] = useState<number | null>(null);
   const [gachaResult, setGachaResult] = useState<GachaRollResult | null>(null);
   const [rewardError, setRewardError] = useState<string | null>(null);
@@ -127,6 +138,13 @@ export function CartView({
   const [lastOrderedProductIds, setLastOrderedProductIds] = useState<string[]>([]);
   /** AD-066 mock — 한 번의 결제 플로우에서 처리할 매장 목록 */
   const [checkoutStoreIds, setCheckoutStoreIds] = useState<string[]>([]);
+  const [checkoutPlansByStore, setCheckoutPlansByStore] = useState<Record<string, CheckoutBenefitPlan>>({});
+  const [benefitUi, setBenefitUi] = useState({
+    skipRewardStep: false,
+    showDiscountButton: false,
+    showGachaButton: false,
+  });
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
 
   const isPageLayout = layout === 'page';
   const activeStoreId = checkoutStoreId ?? focusStoreId ?? null;
@@ -279,71 +297,133 @@ export function CartView({
       return;
     }
     setAddressError(null);
-    setPhase('reward');
     setRewardError(null);
+    setCheckoutBusy(true);
+    void (async () => {
+      try {
+        const storeIds = checkoutTargetStoreIds;
+        const plans: Record<string, CheckoutBenefitPlan> = {};
+        for (const storeId of storeIds) {
+          const ordering = items.filter(
+            (item) => item.storeId === storeId && selectedIds.has(item.productId),
+          );
+          if (ordering.length === 0) continue;
+          const productIds = ordering.map((item) => item.productId);
+          const [promoMap, storePromo, hasPool] = await Promise.all([
+            getProductPromosByIds(productIds),
+            getActivePromotion(storeId),
+            shopperStoreHasGachaPool(storeId),
+          ]);
+          const lines = ordering.map((item) => ({
+            productId: item.productId,
+            price: item.price,
+            quantity: item.quantity,
+            promo: promoMap[item.productId] ?? {
+              promo_mode: 'inherit' as const,
+              promo_discount_percent: null,
+            },
+          }));
+          plans[storeId] = planStoreCheckoutBenefit(lines, storePromo, hasPool);
+        }
+        setCheckoutPlansByStore(plans);
+        const unified = planUnifiedCheckoutBenefit(Object.values(plans));
+        setBenefitUi(unified);
+
+        if (unified.skipRewardStep) {
+          await executeCheckout(plans);
+        } else {
+          setPhase('reward');
+        }
+      } catch (err) {
+        setAddressError(orderErrorMessage(err));
+      } finally {
+        setCheckoutBusy(false);
+      }
+    })();
   }
 
-  async function handleChooseDiscount() {
+  async function executeCheckout(
+    plans: Record<string, CheckoutBenefitPlan>,
+    userChoice?: 'discount' | 'gacha',
+  ) {
     if (checkoutTargetStoreIds.length === 0 || !selectedAddressId) return;
     setRewardError(null);
+    setCheckoutBusy(true);
+    if (userChoice === 'gacha') setPhase('gachaRolling');
     try {
       let totalAmount = 0;
-      let lastPercent = 0;
+      let preSubtotal = 0;
+      let discountSubtotal = 0;
       const orderedProductIds: string[] = [];
+      let lastGacha: GachaRollResult | null = null;
+
       for (const storeId of checkoutTargetStoreIds) {
         const ordering = items.filter(
           (item) => item.storeId === storeId && selectedIds.has(item.productId),
         );
         if (ordering.length === 0) continue;
-        const promo = await getActivePromotion(storeId);
-        const percent = promo?.discount_percent ?? 0;
-        const { totalAmount: storeTotal } = await placeUnifiedStoreOrder(
+        const plan = plans[storeId];
+        const mode = userChoice
+          ? resolveStorePlacementMode(plan, userChoice)
+          : (plan?.autoRewardType ?? 'gacha');
+        const { totalAmount: storeTotal, gachaResult } = await placeUnifiedStoreOrder(
           storeId,
           selectedAddressId,
           ordering,
-          'discount',
+          mode,
         );
         orderedProductIds.push(...ordering.map((item) => item.productId));
         totalAmount += storeTotal;
-        if (percent > 0) lastPercent = percent;
+        const storePre =
+          plan?.preDiscountSubtotal ?? ordering.reduce((s, i) => s + i.price * i.quantity, 0);
+        preSubtotal += storePre;
+
+        if (mode === 'discount') {
+          const productIds = ordering.map((i) => i.productId);
+          const promoMap = await getProductPromosByIds(productIds);
+          const storePromo = await getActivePromotion(storeId);
+          const storeDisc = computeDiscountSubtotal(
+            ordering.map((item) => ({
+              productId: item.productId,
+              price: item.price,
+              quantity: item.quantity,
+              promo: promoMap[item.productId] ?? { promo_mode: 'inherit', promo_discount_percent: null },
+            })),
+            storePromo,
+          );
+          discountSubtotal += storeDisc;
+        } else {
+          discountSubtotal += storePre;
+        }
+        if (gachaResult) lastGacha = gachaResult;
       }
+
       setLastOrderedProductIds(orderedProductIds);
-      setDiscountPercent(lastPercent);
       setFinalTotal(totalAmount);
-      setPhase('discountResult');
+
+      if (userChoice === 'gacha' || (!userChoice && lastGacha)) {
+        setGachaResult(lastGacha);
+        setPhase('gachaResult');
+      } else {
+        const saved = Math.max(0, preSubtotal - discountSubtotal);
+        setDiscountAmountSaved(saved);
+        setDiscountPercent(saved > 0 && preSubtotal > 0 ? Math.round((saved / preSubtotal) * 100) : 0);
+        setPhase('discountResult');
+      }
     } catch (err) {
       setRewardError(orderErrorMessage(err));
+      if (userChoice) setPhase('reward');
+    } finally {
+      setCheckoutBusy(false);
     }
   }
 
+  async function handleChooseDiscount() {
+    await executeCheckout(checkoutPlansByStore, 'discount');
+  }
+
   async function handleChooseGacha() {
-    if (checkoutTargetStoreIds.length === 0 || !selectedAddressId) return;
-    setRewardError(null);
-    setPhase('gachaRolling');
-    try {
-      const orderedProductIds: string[] = [];
-      let lastGacha: GachaRollResult | null = null;
-      for (const storeId of checkoutTargetStoreIds) {
-        const ordering = items.filter(
-          (item) => item.storeId === storeId && selectedIds.has(item.productId),
-        );
-        if (ordering.length === 0) continue;
-        const { gachaResult } = await placeUnifiedStoreOrder(
-          storeId,
-          selectedAddressId,
-          ordering,
-          'gacha',
-        );
-        orderedProductIds.push(...ordering.map((item) => item.productId));
-        if (gachaResult) lastGacha = gachaResult;
-      }
-      setLastOrderedProductIds(orderedProductIds);
-      setGachaResult(lastGacha);
-      setPhase('gachaResult');
-    } catch (err) {
-      setRewardError(orderErrorMessage(err));
-      setPhase('reward');
-    }
+    await executeCheckout(checkoutPlansByStore, 'gacha');
   }
 
   function handleFinish() {
@@ -357,6 +437,7 @@ export function CartView({
     setCheckoutStoreId(focusStoreId ?? null);
     setCheckoutStoreIds([]);
     setDiscountPercent(null);
+    setDiscountAmountSaved(0);
     setFinalTotal(null);
     setGachaResult(null);
     setSelectedAddressId(null);
@@ -364,8 +445,7 @@ export function CartView({
     if (layout === 'drawer') onClose?.();
   }
 
-  const discountAmount =
-    discountPercent && finalTotal !== null ? Math.max(0, checkoutSubtotal - finalTotal) : 0;
+  const discountAmount = discountAmountSaved;
   const gachaLabel = gachaResult?.product_name ?? gachaResult?.exclusive_name ?? '';
   const gachaImage = gachaResult?.product_image_url ?? gachaResult?.exclusive_image_url ?? null;
   const gachaIsRealProduct = !!gachaResult?.product_id;
@@ -534,8 +614,14 @@ export function CartView({
           )}
 
           {!addAddressOpen && (
-            <button type="button" className="cart-drawer-primary-btn" style={{ marginTop: 14 }} onClick={handleContinueToReward}>
-              {t('cart.addressContinue')}
+            <button
+              type="button"
+              className="cart-drawer-primary-btn"
+              style={{ marginTop: 14 }}
+              disabled={checkoutBusy}
+              onClick={handleContinueToReward}
+            >
+              {checkoutBusy ? t('cart.checkoutProcessing') : t('cart.addressContinue')}
             </button>
           )}
         </div>
@@ -548,12 +634,26 @@ export function CartView({
           <p className="cart-drawer-step-hint">{t('cart.rewardHint')}</p>
           {rewardError && <p className="cart-drawer-error">{rewardError}</p>}
           <div className="cart-drawer-reward-row">
-            <button type="button" className="cart-drawer-reward-btn" onClick={() => void handleChooseDiscount()}>
-              💸 {t('cart.chooseDiscount')}
-            </button>
-            <button type="button" className="cart-drawer-reward-btn" onClick={() => void handleChooseGacha()}>
-              🎰 {t('cart.chooseGacha')}
-            </button>
+            {benefitUi.showDiscountButton && (
+              <button
+                type="button"
+                className="cart-drawer-reward-btn"
+                disabled={checkoutBusy}
+                onClick={() => void handleChooseDiscount()}
+              >
+                💸 {t('cart.chooseDiscount')}
+              </button>
+            )}
+            {benefitUi.showGachaButton && (
+              <button
+                type="button"
+                className="cart-drawer-reward-btn"
+                disabled={checkoutBusy}
+                onClick={() => void handleChooseGacha()}
+              >
+                🎰 {t('cart.chooseGacha')}
+              </button>
+            )}
           </div>
         </div>
       )}

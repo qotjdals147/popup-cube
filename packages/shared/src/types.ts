@@ -3,6 +3,8 @@
  * Keep in sync with Supabase schema (see HANDOFF_POPUP_STORE.md §10).
  */
 
+import type { ProductPromoMode, StoreDefaultPromoMode } from './promo';
+
 export type UserRole = 'shopper' | 'owner' | 'admin';
 
 export interface Profile {
@@ -106,6 +108,10 @@ export interface Product {
   created_at: string;
   /** §54 — 상세페이지에 직접 쓰는 긴 설명 글 (선택, 상세 이미지와 함께/대신 사용) */
   detail_description: string | null;
+  /** AD-028 v1b — inherit=매장 기본 · none/discount_only/gacha_only/choice */
+  promo_mode: ProductPromoMode;
+  /** 상품별 할인 % (discount_only/choice, null이면 매장 기본 %) */
+  promo_discount_percent: number | null;
 }
 
 /** §54 — 상품 상세페이지 이미지 1장 (여러 장을 세로로 쌓아 표시). @deprecated §56 블록 에디터로 대체 — 레거시 데이터 호환용으로만 남김. */
@@ -153,11 +159,13 @@ export interface CartItem {
   quantity: number;
 }
 
-/** 매장별 할인 프로모션 설정 (AD-028, §10). MVP: 고정 퍼센트 하나. */
+/** 매장별 프로모션 기본 설정 (AD-028, §10). */
 export interface StorePromotion {
   store_id: string;
   discount_percent: number;
   is_active: boolean;
+  /** 매장 기본 혜택 — 상품 inherit 시 적용 */
+  default_promo_mode: StoreDefaultPromoMode;
 }
 
 /**

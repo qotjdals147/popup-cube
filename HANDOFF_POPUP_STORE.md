@@ -558,6 +558,7 @@ npm run dev
 - [x] **닉네임 회원가입 시스템(AD-023)** — `profiles.nickname`(유니크, 2~16자) + `is_nickname_available` RPC + `LoginPage` 회원가입 모드(중복확인 통과해야 가입 가능)
 - [x] **캐릭터 이름표 개편** — 발밑 닉네임(검정 반투명+흰글자 통일), 점주는 왕관 표시, 채팅 시 머리 위 말풍선(5초 후 사라짐, 최신 메시지만)
 - [x] **상품 등록/목록 + 장바구니 MVP (§10, AD-027 연속선)** — `products` 테이블+RLS, 점주 상품 등록/수정/숨기기 패널(`OwnerProductPanel`), 소비자 상품 보기 패널(`ShopPanel`, 수량 +/-), 장바구니(`CartContext` — client-only, `localStorage`)+장바구니 Drawer(`CartDrawer`, mock 결제)
+- [x] **구매 프로모션 점주 UI (AD-028 v1b, 2026-08-25)** — `OwnerPromotionPanel` · 매장 기본(`default_promo_mode`+할인%) · 상품별 inherit/none/discount/gacha/choice · 가챠 풀 CRUD · `place_order` 라인 할인 · `CartView` 혜택 단계 자동 스kip
 - [x] **구매 완료 시 "할인 vs 가챠" 선택 (AD-028, §10)** — `store_promotions`(매장별 할인%), `gacha_pools`/`gacha_pool_entries`(실제 상품+가챠 전용 아이템 혼합, 매장 공용 풀)/`gacha_rolls` 테이블+RLS, `roll_gacha()` SECURITY DEFINER 함수(서버 측 가중치 랜덤, 클라이언트 조작 불가), GUCCI 데모 매장에 10% 할인 + 가챠 아이템 4종 시드, `CartDrawer`에 결제 완료 후 혜택 선택 단계 추가
 - [x] **주문 저장 + 소비자 배송지 관리 (AD-030, §10)** — `user_addresses`(여러 배송지+별명+기본 지정) + `orders`/`order_items`(실제 주문 저장) 테이블+RLS, `place_order()`(서버가 가격·할인 재검증 후 원자적 저장) + `get_store_orders()`(점주가 본인 매장 주문+구매자 닉네임+배송지 조회) SECURITY DEFINER/INVOKER 함수, 마이페이지(`/mypage`) 배송지 관리 UI, `CartDrawer`에 배송지 선택 단계 추가, 점주 툴바 "📊 주문 관리" 연동(`OwnerOrdersPanel`)
 - [x] **Phase 4 Sprint 0 — fixture DB + occupancy (2026-07-27)** — `fixture_templates`(§42.3 8종 시드) + `display_fixtures` + `display_slots` + RLS/GRANT; `packages/game-core/src/occupancyGrid.ts` (`buildOccupancyGrid`, `canWalk`, `canPlaceFixture`); `apps/web/src/lib/displayFixtures.ts` CRUD; `packages/shared` 타입; SQL `supabase/migrations/20260727_phase4_display_fixtures.sql`
@@ -714,12 +715,12 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **ISS-038 User OK** · **2매장 결제 `28c01b1` 재실기** · **§58 #8 P1** · **PG+택배=런칭 게이트(AD-061)** |
-| **Git 상태** | `main` **`3064017`** push ✅ |
+| **한 줄 요약** | **프로모·가챠 점주 탭 (AD-028 v1b)** · User 실기 · **§58 #8 P1** · PG=게이트 |
+| **Git 상태** | ⬜ **commit/push 전** — 로컬 구현 완료 · DB ✅ |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~92% · P1·앱스토어 포함 **전체 ~63%** · **실결제·택배 API** = 사업자 + 계약 후 |
 | **User 실기** | **`1413647`** — 잘림·1버튼·문구 ✅ · **`28c01b1`** — 2매장 할인/가챠 **재확인 필요** |
-| **다음 에이전트 1순위** | ① User **2매장 결제** 재실기 ② **§58 #8 P1** ③ (User 결정 전) PG·택배 API **착수 금지** |
+| **다음 에이전트 1순위** | ① User **프로모 탭·혼합 결제** 실기 ② commit/push (User 요청) ③ **§58 #8 P1** |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -860,6 +861,19 @@ npx expo start --tunnel --port 8082 --clear
 **PG 착수 조건 (전부 충족 전 금지):** ① User **사업자 등록 완료** ② **PG 후보·계약 확정** ③ (권장) P1·실기 대부분 OK.
 
 ---
+
+### 7.38 세션 인수인계 — **2026-08-25** (프로모션·가챠 점주 탭 · 라인 할인 AD-028 v1b)
+
+| | |
+|---|---|
+| **User** | 추천 방식(매장 기본+상품 프리셋)으로 프로모 탭 · 결제 UX 지옥 방지 |
+| **코드** | `OwnerPromotionPanel` · `StoreEditPage` **프로모션·가챠** 탭 · `packages/shared/src/promo.ts` · `CartView` 혜택 자동 분기 · `lib/promotions.ts` |
+| **DB** | migration `20260825_product_promo_line_discount.sql` ✅ Supabase 적용 — `products.promo_mode`/`promo_discount_percent` · `store_promotions.default_promo_mode` · `order_items.line_discount_percent` · `resolve_effective_promo()` · `place_order` 라인 할인 · `store_has_active_gacha_pool()` |
+| **손님 UX 규칙** | 혜택 **주문당 1번** · 할인=**라인별 %** · 선택형(`choice`) 있을 때만 할인 vs 가챠 · 전부 할인만/가챠만/없음 → **단계 스킵** |
+| **Git** | ⬜ commit/push 전 (User 요청 시) |
+| **Expo** | **web-only ❌** 재시작 · Vercel push 후 탭 재진입 |
+| **User 실기** | ① GUCCI 점주 → **프로모션·가챠** 탭에서 기본·상품·풀 설정 ② 손님 혼합 장바구니(할인만+선택형+없음) 결제 ③ 2매장 통합 결제 |
+| **다음** | User 실기 → commit/push → §58 #8 P1 나머지 |
 
 ### 7.37 세션 인수인계 — **2026-08-25** (PG·택배·SDK 방향 · HANDOFF 정리)
 
@@ -3894,6 +3908,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | **상품** | ✅ **핵심** | 유지 — 등록·재고·자동수락·**블록 상세** 이미 v1 무기 |
 | **주문** | ✅ **핵심** | 유지 — Realtime·뱃지·검색·취소·클레임 |
 | **발주·배송** | ✅ **핵심** | 유지 — 송장·배송완료 |
+| **프로모션·가챠** | ✅ **핵심 (2026-08-25)** | **신규 탭** — 매장 기본·상품별·가챠 풀 (AD-028 v1b) |
 | **운영·배송 안내** | ✅ **핵심** | 유지 — CS·반품지·배송비 |
 | **매장 꾸미기 (`layout`)** | ⏸ **v1 점주 셀프 숨김** | 일반 입점 점주 UI에서 비노출 · **플랫폼/스폰서 월드 제작**은 v2+ (AD-064) · legacy 코드 유지 |
 
