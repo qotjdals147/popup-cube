@@ -335,7 +335,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`ebd3648`** — drawer adaptive UI · AD-067 gacha FAQ |
+| **Git `main` HEAD** | **`56099e9`** — drawer adaptive UI · AD-067 gacha FAQ |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -719,7 +719,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **서랍 장바구니 UI + 가챠 1회 규칙(AD-067)** · User 실기 · **§58 #8 P1** |
-| **Git 상태** | push 후 **`§1` HEAD** 확인 |
+| **Git 상태** | `main` **`56099e9`** (docs) · feature **`ebd3648`** push ✅ |
 | **Supabase** | `place_order` discount_only on gacha ✅ · `roll_gacha` **주문당 1회** |
 | **User 실기** | §7.40 — 서랍 뱃지·할인가 줄바꿈 · §7.39 결제 시나리오 |
 | **다음 에이전트 1순위** | ① User **§7.40 실기** ② 손님 가챠 FAQ 카피(User 요청 시) ③ **§58 #8 P1** |
