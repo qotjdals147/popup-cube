@@ -90,6 +90,8 @@ export function CartView({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   /** 결제 성공 직후 — 해당 줄만 장바구니에서 제거 (매장 storeId 통째 삭제 방지) */
   const [lastOrderedProductIds, setLastOrderedProductIds] = useState<string[]>([]);
+  /** AD-066 mock — 한 번의 결제 플로우에서 처리할 매장 목록 */
+  const [checkoutStoreIds, setCheckoutStoreIds] = useState<string[]>([]);
 
   const isPageLayout = layout === 'page';
   const activeStoreId = checkoutStoreId ?? focusStoreId ?? null;
@@ -111,14 +113,19 @@ export function CartView({
     () => [...new Set(selectedItems.map((item) => item.storeId))],
     [selectedItems],
   );
-  const singleCheckoutStoreId = storesWithSelection.length === 1 ? storesWithSelection[0] : null;
+  const checkoutTargetStoreIds = useMemo(
+    () => (checkoutStoreIds.length > 0 ? checkoutStoreIds : activeStoreId ? [activeStoreId] : []),
+    [checkoutStoreIds, activeStoreId],
+  );
 
   const checkoutItems = useMemo(
     () =>
-      activeStoreId
-        ? items.filter((item) => item.storeId === activeStoreId && selectedIds.has(item.productId))
+      checkoutTargetStoreIds.length > 0
+        ? items.filter(
+            (item) => checkoutTargetStoreIds.includes(item.storeId) && selectedIds.has(item.productId),
+          )
         : [],
-    [items, activeStoreId, selectedIds],
+    [items, checkoutTargetStoreIds, selectedIds],
   );
   const checkoutSubtotal = useMemo(
     () => checkoutItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -187,13 +194,15 @@ export function CartView({
     return info ? isPopupEnded(info.popup_ends_at) : false;
   }
 
-  function beginCheckout(forStoreId: string) {
-    if (isStoreCheckoutBlocked(forStoreId)) return;
-    const groupItems = items.filter(
-      (item) => item.storeId === forStoreId && selectedIds.has(item.productId),
+  function beginUnifiedCheckout() {
+    const eligible = storesWithSelection.filter(
+      (storeId) =>
+        !isStoreCheckoutBlocked(storeId) &&
+        items.some((item) => item.storeId === storeId && selectedIds.has(item.productId)),
     );
-    if (groupItems.length === 0) return;
-    setCheckoutStoreId(forStoreId);
+    if (eligible.length === 0) return;
+    setCheckoutStoreIds(eligible);
+    setCheckoutStoreId(eligible[0]);
     setPhase('address');
     setAddressError(null);
     setAddressLoading(true);
@@ -240,16 +249,27 @@ export function CartView({
   }
 
   async function handleChooseDiscount() {
-    if (!activeStoreId) return;
+    if (checkoutTargetStoreIds.length === 0 || !selectedAddressId) return;
     setRewardError(null);
-    const ordering = [...checkoutItems];
     try {
-      const promo = await getActivePromotion(activeStoreId);
-      const percent = promo?.discount_percent ?? 0;
-      const result = await placeOrder(activeStoreId, selectedAddressId, ordering, 'discount', percent);
-      setLastOrderedProductIds(ordering.map((item) => item.productId));
-      setDiscountPercent(percent);
-      setFinalTotal(result.totalAmount);
+      let totalAmount = 0;
+      let lastPercent = 0;
+      const orderedProductIds: string[] = [];
+      for (const storeId of checkoutTargetStoreIds) {
+        const ordering = items.filter(
+          (item) => item.storeId === storeId && selectedIds.has(item.productId),
+        );
+        if (ordering.length === 0) continue;
+        const promo = await getActivePromotion(storeId);
+        const percent = promo?.discount_percent ?? 0;
+        const result = await placeOrder(storeId, selectedAddressId, ordering, 'discount', percent);
+        orderedProductIds.push(...ordering.map((item) => item.productId));
+        totalAmount += result.totalAmount;
+        lastPercent = percent;
+      }
+      setLastOrderedProductIds(orderedProductIds);
+      setDiscountPercent(lastPercent);
+      setFinalTotal(totalAmount);
       setPhase('discountResult');
     } catch (err) {
       setRewardError(orderErrorMessage(err));
@@ -257,15 +277,23 @@ export function CartView({
   }
 
   async function handleChooseGacha() {
-    if (!activeStoreId) return;
+    if (checkoutTargetStoreIds.length === 0 || !selectedAddressId) return;
     setRewardError(null);
     setPhase('gachaRolling');
-    const ordering = [...checkoutItems];
     try {
-      const orderResult = await placeOrder(activeStoreId, selectedAddressId, ordering, 'gacha', null);
-      setLastOrderedProductIds(ordering.map((item) => item.productId));
-      const result = await rollGacha(activeStoreId, orderResult.orderId);
-      setGachaResult(result);
+      const orderedProductIds: string[] = [];
+      let lastGacha: GachaRollResult | null = null;
+      for (const storeId of checkoutTargetStoreIds) {
+        const ordering = items.filter(
+          (item) => item.storeId === storeId && selectedIds.has(item.productId),
+        );
+        if (ordering.length === 0) continue;
+        const orderResult = await placeOrder(storeId, selectedAddressId, ordering, 'gacha', null);
+        orderedProductIds.push(...ordering.map((item) => item.productId));
+        lastGacha = await rollGacha(storeId, orderResult.orderId);
+      }
+      setLastOrderedProductIds(orderedProductIds);
+      setGachaResult(lastGacha);
       setPhase('gachaResult');
     } catch (err) {
       setRewardError(orderErrorMessage(err));
@@ -282,6 +310,7 @@ export function CartView({
     setLastOrderedProductIds([]);
     setPhase('cart');
     setCheckoutStoreId(focusStoreId ?? null);
+    setCheckoutStoreIds([]);
     setDiscountPercent(null);
     setFinalTotal(null);
     setGachaResult(null);
@@ -300,13 +329,15 @@ export function CartView({
   function renderStickyFooter() {
     if (phase !== 'cart' || items.length === 0) return null;
 
-    const stickyStoreId = singleCheckoutStoreId;
-    const stickyStoreInfo = stickyStoreId ? storeInfoById[stickyStoreId] : null;
-    const stickyItems = stickyStoreId ? selectedItems.filter((item) => item.storeId === stickyStoreId) : [];
-    const stickySubtotal = stickyItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const stickyShipping = stickyStoreInfo ? calcShippingFee(stickyStoreInfo, stickySubtotal) : 0;
-    const stickyPayTotal = stickySubtotal + stickyShipping;
-    const stickyBlocked = stickyStoreId ? isStoreCheckoutBlocked(stickyStoreId) : false;
+    const eligibleStores = storesWithSelection.filter((storeId) => !isStoreCheckoutBlocked(storeId));
+    const stickyPayTotal = storesWithSelection.reduce((sum, storeId) => {
+      const storeItems = selectedItems.filter((item) => item.storeId === storeId);
+      if (storeItems.length === 0) return sum;
+      const subtotal = storeItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+      const info = storeInfoById[storeId];
+      return sum + subtotal + (info ? calcShippingFee(info, subtotal) : 0);
+    }, 0);
+    const stickyBlocked = selectedItems.length > 0 && eligibleStores.length === 0;
 
     return (
       <footer className={`cart-page-sticky-footer${layout === 'drawer' ? ' cart-page-sticky-footer--drawer' : ''}`}>
@@ -314,65 +345,21 @@ export function CartView({
           <span className="cart-page-sticky-count">{t('cart.selectedSummary', { count: selectedIds.size })}</span>
           <strong className="cart-page-sticky-total">{formatPrice(selectedSubtotal)}</strong>
         </div>
-        {stickyStoreId ? (
-          <>
-            {stickyBlocked && <p className="cart-page-sticky-hint">{t('cart.popupEnded')}</p>}
-            <button
-              type="button"
-              className="cart-drawer-primary-btn cart-page-sticky-btn"
-              disabled={stickyItems.length === 0 || stickyBlocked}
-              onClick={() => beginCheckout(stickyStoreId)}
-            >
-              {stickyBlocked ? t('cart.popupEndedShort') : t('cart.checkout')}
-            </button>
-          </>
-        ) : (
-          <p className="cart-page-sticky-hint">{t('cart.multiStoreCheckoutHint')}</p>
-        )}
-        {stickyStoreId && stickyItems.length > 0 && (
+        {stickyBlocked && <p className="cart-page-sticky-hint">{t('cart.popupEnded')}</p>}
+        <button
+          type="button"
+          className="cart-drawer-primary-btn cart-page-sticky-btn"
+          disabled={selectedItems.length === 0 || stickyBlocked}
+          onClick={() => beginUnifiedCheckout()}
+        >
+          {stickyBlocked ? t('cart.popupEndedShort') : t('cart.checkout')}
+        </button>
+        {selectedItems.length > 0 && (
           <p className="cart-page-sticky-pay-total">
             {t('cart.payTotal')} {formatPrice(stickyPayTotal)}
           </p>
         )}
       </footer>
-    );
-  }
-
-  function renderStoreFooter(forStoreId: string) {
-    const groupItems = items.filter(
-      (item) => item.storeId === forStoreId && selectedIds.has(item.productId),
-    );
-    if (groupItems.length === 0) return null;
-    const info = storeInfoById[forStoreId];
-    const subtotal = groupItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const shipping = info ? calcShippingFee(info, subtotal) : 0;
-    const payTotal = subtotal + shipping;
-    const blocked = isStoreCheckoutBlocked(forStoreId);
-
-    return (
-      <div className="cart-drawer-group-footer">
-        {blocked && <p className="cart-drawer-ended-hint">{t('cart.popupEnded')}</p>}
-        <div className="cart-drawer-total-row">
-          <span>{t('cart.total')}</span>
-          <strong>{formatPrice(subtotal)}</strong>
-        </div>
-        <div className="cart-drawer-total-row">
-          <span>{t('cart.shippingFee')}</span>
-          <strong>{shipping === 0 ? t('cart.shippingFree') : formatPrice(shipping)}</strong>
-        </div>
-        <div className="cart-drawer-total-row cart-drawer-total-row--pay">
-          <span>{t('cart.payTotal')}</span>
-          <strong>{formatPrice(payTotal)}</strong>
-        </div>
-        <button
-          type="button"
-          className="cart-drawer-primary-btn"
-          disabled={blocked}
-          onClick={() => beginCheckout(forStoreId)}
-        >
-          {blocked ? t('cart.popupEndedShort') : t('cart.checkout')}
-        </button>
-      </div>
     );
   }
 
@@ -421,8 +408,8 @@ export function CartView({
                 +
               </button>
             </div>
-            <span className="cart-drawer-line-total">{formatPrice(item.price * item.quantity)}</span>
           </div>
+          <p className="cart-drawer-line-total-row">{formatPrice(item.price * item.quantity)}</p>
         </div>
       </article>
     );
@@ -596,7 +583,6 @@ export function CartView({
                 <div className="cart-drawer-item-list">
                   {group.items.map((item) => renderCartItem(item))}
                 </div>
-                {!singleCheckoutStoreId && renderStoreFooter(group.storeId)}
               </section>
             );
             })}
