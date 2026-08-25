@@ -335,7 +335,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`3064017`** — cart **`28c01b1`** · §7.37 HANDOFF |
+| **Git `main` HEAD** | **`38d09d5`** — AD-028 v1b 프로모·가챠 점주 탭 |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -716,7 +716,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **프로모·가챠 점주 탭 (AD-028 v1b)** · User 실기 · **§58 #8 P1** · PG=게이트 |
-| **Git 상태** | ⬜ **commit/push 전** — 로컬 구현 완료 · DB ✅ |
+| **Git 상태** | `main` **`38d09d5`** push ✅ |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~92% · P1·앱스토어 포함 **전체 ~63%** · **실결제·택배 API** = 사업자 + 계약 후 |
 | **User 실기** | **`1413647`** — 잘림·1버튼·문구 ✅ · **`28c01b1`** — 2매장 할인/가챠 **재확인 필요** |
@@ -870,7 +870,7 @@ npx expo start --tunnel --port 8082 --clear
 | **코드** | `OwnerPromotionPanel` · `StoreEditPage` **프로모션·가챠** 탭 · `packages/shared/src/promo.ts` · `CartView` 혜택 자동 분기 · `lib/promotions.ts` |
 | **DB** | migration `20260825_product_promo_line_discount.sql` ✅ Supabase 적용 — `products.promo_mode`/`promo_discount_percent` · `store_promotions.default_promo_mode` · `order_items.line_discount_percent` · `resolve_effective_promo()` · `place_order` 라인 할인 · `store_has_active_gacha_pool()` |
 | **손님 UX 규칙** | 혜택 **주문당 1번** · 할인=**라인별 %** · 선택형(`choice`) 있을 때만 할인 vs 가챠 · 전부 할인만/가챠만/없음 → **단계 스킵** |
-| **Git** | ⬜ commit/push 전 (User 요청 시) |
+| **Git** | **`38d09d5`** push ✅ |
 | **Expo** | **web-only ❌** 재시작 · Vercel push 후 탭 재진입 |
 | **User 실기** | ① GUCCI 점주 → **프로모션·가챠** 탭에서 기본·상품·풀 설정 ② 손님 혼합 장바구니(할인만+선택형+없음) 결제 ③ 2매장 통합 결제 |
 | **다음** | User 실기 → commit/push → §58 #8 P1 나머지 |
