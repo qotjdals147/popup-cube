@@ -266,8 +266,8 @@ BEGIN
     v_user_id,
     p_order_id,
     'order_on_hold',
-    '주문 보류 안내',
-    format('주문 %s-%s 보완이 필요해요. 앱에서 확인해 주세요.', v_store_code, v_order_number)
+    '주문 수정 요청',
+    format('주문 %s-%s 수정이 필요해요. 앱에서 확인해 주세요.', v_store_code, v_order_number)
   );
 END;
 $function$;
@@ -396,8 +396,8 @@ BEGIN
     v_owner_id,
     p_order_id,
     'order_supplement_submitted',
-    '보완 주문 접수',
-    format('주문 %s-%s 보완이 접수됐어요. 확인해 주세요.', v_store_code, v_order_number)
+    '수정 주문 접수',
+    format('주문 %s-%s 수정이 접수됐어요. 확인해 주세요.', v_store_code, v_order_number)
   );
 
   RETURN QUERY SELECT v_needs_roll;
@@ -652,6 +652,8 @@ END;
 $function$;
 
 -- ── 11) get_store_order_counts ──
+DROP FUNCTION IF EXISTS public.get_store_order_counts(character varying);
+
 CREATE OR REPLACE FUNCTION public.get_store_order_counts(p_store_id character varying)
 RETURNS TABLE(
   pending_accept integer,

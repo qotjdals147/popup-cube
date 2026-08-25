@@ -527,6 +527,24 @@ export function OwnerOrdersPanel({
                     </button>
                     <button
                       type="button"
+                      style={styles.warnBtn}
+                      disabled={actionId === order.id}
+                      onClick={() =>
+                        setReasonDialog({
+                          orderId: order.id,
+                          kind: 'hold',
+                          items: order.items.map((i) => ({
+                            id: i.id,
+                            product_name: i.product_name,
+                            quantity: i.quantity,
+                          })),
+                        })
+                      }
+                    >
+                      {t('ownerOrders.requestHold')}
+                    </button>
+                    <button
+                      type="button"
                       style={styles.dangerBtn}
                       disabled={actionId === order.id}
                       onClick={() =>
