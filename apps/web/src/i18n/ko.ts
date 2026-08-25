@@ -389,7 +389,7 @@ export const ko = {
     gachaStoreLabel: '{store} 당첨',
     linePromoDiscount: '{percent}% 할인',
     linePromoGacha: '가챠',
-    linePromoChoice: '선택형',
+    linePromoChoice: '할인·가챠 선택',
     linePromoNone: '혜택 없음',
     gachaBadgeProduct: '실제 상품 당첨',
     gachaBadgeExclusive: '가챠 전용 아이템',

@@ -707,7 +707,7 @@ popup_store/                          # Turborepo root
 | ISS-035 | ~~블록 에디터에서 블록 추가·저장마다 스크롤이 맨 위로 튐~~ | Resolved | `OwnerProductPanel.reload()`가 매번 `setLoading(true)` → 상품 목록 DOM 통째 교체가 원인 · **이미 목록 로드됐으면 loading UI 생략** (2026-08-12g) |
 | ISS-036 | ~~shop WebView 상단 ←·🛒 · 담기/상세 너비~~ | Resolved | `0d31f82` · User **2026-08-14 OK** |
 | ISS-037 | ~~다크모드 탭 전환 시 **흰 번쩍임**~~ | Resolved | **Tabs `(shopper)`** + `lazy:false` · `SystemUI`/`NavigationTheme` 배경 · WebView `webviewThemeInject` · User **2026-08-14 OK** |
-| ISS-038 | ~~장바구니 탭 sync · 행 정렬 · 쿠팡형 · 줄금액 · 통합 결제 UX~~ | **Resolved** | User **`1413647`** UI OK · **`28c01b1`** 줄금액 · **2매장 가챠·혼합 프로모** = §7.39 fix · **User 재실기 대기** |
+| ISS-038 | ~~장바구니 탭 sync · 행 정렬 · 쿠팡형 · 줄금액 · 통합 결제 UX~~ | **Resolved** | User **`1413647`** UI OK · **`ebd3648`** 서랍 뱃지·할인가 **✅ User 2026-08-25** · **`choice` 뱃지 카피** → §7.41 |
 | ISS-039 | Expo `--tunnel` ngrok **`body` 일시 오류** (2026-08~) | Open (외부·간헐) | **§0 4줄 `--tunnel` 유지** · User **2026-08-24 정상** · 에이전트 **`--lan` 선제안 ❌** · 지속 실패만 `start-remote-cloudflare.cmd` |
 
 ---
@@ -718,11 +718,10 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **서랍 장바구니 UI + 가챠 1회 규칙(AD-067)** · User 실기 · **§58 #8 P1** |
-| **Git 상태** | `main` **`f92feaa`** push ✅ |
-| **Supabase** | `place_order` discount_only on gacha ✅ · `roll_gacha` **주문당 1회** |
-| **User 실기** | §7.40 — 서랍 뱃지·할인가 줄바꿈 · §7.39 결제 시나리오 |
-| **다음 에이전트 1순위** | ① User **§7.40 실기** ② 손님 가챠 FAQ 카피(User 요청 시) ③ **§58 #8 P1** |
+| **한 줄 요약** | **§58 #8 P1** · 프로모 손님 카피 정리 · PG=게이트 |
+| **Git 상태** | push 후 **`§1` HEAD** |
+| **User 실기** | §7.40 서랍 UI **✅** · §7.39 결제·2매장 (잔여) |
+| **다음 에이전트 1순위** | ① **§58 #8 P1** ② 혜택 단계 가챠 1회 한 줄 카피(User 요청 시) |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
