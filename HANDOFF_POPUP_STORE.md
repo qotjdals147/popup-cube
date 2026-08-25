@@ -335,7 +335,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`c2e5fc5`** — cart promo badges · gacha UX · `place_order` discount_only fix |
+| **Git `main` HEAD** | **`ebd3648`** — drawer adaptive UI · AD-067 gacha FAQ |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -1539,7 +1539,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-08-25 — cart drawer adaptive UI · AD-067 gacha once per order FAQ
 - **Author:** Cursor Agent / User
 - **Changed:** `CartView` `--drawer` layout · `cart-drawer-shop.css` badge fit · §7.40 · **AD-067**
-- **Notes:** **Expo 재시작 ❌** (web-only) · Vercel 1~2min · 탭 재진입 · 손님 FAQ 카피는 User 요청 전 UI 미삽입
+- **Notes:** push **`ebd3648`** · **Expo 재시작 ❌** (web-only) · Vercel 1~2min · 탭 재진입 · 손님 FAQ 카피는 User 요청 전 UI 미삽입
 
 ### 2026-08-25 — cart promo badges · gacha UX · place_order discount_only (AD-028 v1b)
 - **Author:** Cursor Agent / User
