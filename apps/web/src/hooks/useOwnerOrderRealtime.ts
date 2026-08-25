@@ -6,6 +6,7 @@ import { t } from '../i18n';
 export interface OwnerOrderCounts {
   pendingAccept: number;
   awaitingShip: number;
+  onHold: number;
 }
 
 interface UseOwnerOrderRealtimeOptions {
@@ -28,6 +29,7 @@ export function useOwnerOrderRealtime(
   const [counts, setCounts] = useState<OwnerOrderCounts>({
     pendingAccept: 0,
     awaitingShip: 0,
+    onHold: 0,
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [refreshTick, setRefreshTick] = useState(0);
@@ -79,6 +81,7 @@ export function useOwnerOrderRealtime(
   return {
     pendingAccept: counts.pendingAccept,
     awaitingShip: counts.awaitingShip,
+    onHold: counts.onHold,
     toastMessage,
     dismissToast,
     refreshTick,

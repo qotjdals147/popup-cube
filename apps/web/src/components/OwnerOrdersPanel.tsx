@@ -3,13 +3,16 @@ import type { OwnerOrderView } from '@popup-cube/shared';
 import {
   acceptOrder,
   completeDelivery,
+  holdOrder,
   isFulfillmentOrderStatus,
+  isOnHoldOrderStatus,
   isPendingOrderStatus,
   listStoreOrders,
   rejectOrder,
   resolveOrderClaim,
   shipOrder,
 } from '../lib/orders';
+import { OrderReasonDialog, type OrderReasonDialogResult } from './OrderReasonDialog';
 import { formatOrderRef } from '../lib/orderRef';
 import {
   DEFAULT_OWNER_ORDER_FILTERS,
@@ -21,7 +24,7 @@ import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 
-export type OwnerOrderQueue = 'pending' | 'fulfillment';
+export type OwnerOrderQueue = 'pending' | 'fulfillment' | 'hold';
 
 interface OwnerOrdersPanelProps {
   storeId: string;
@@ -46,6 +49,11 @@ export function OwnerOrdersPanel({
   const [actionId, setActionId] = useState<string | null>(null);
   const [trackingDraft, setTrackingDraft] = useState<Record<string, string>>({});
   const [claimReplyDraft, setClaimReplyDraft] = useState<Record<string, string>>({});
+  const [reasonDialog, setReasonDialog] = useState<{
+    orderId: string;
+    kind: 'hold' | 'reject';
+    items: { id: string; product_name: string; quantity: number }[];
+  } | null>(null);
   const [internalQueue, setInternalQueue] = useState<OwnerOrderQueue>('pending');
   const [filters, setFilters] = useState<OwnerOrderFilters>(DEFAULT_OWNER_ORDER_FILTERS);
 
@@ -69,9 +77,11 @@ export function OwnerOrdersPanel({
   }, [reload, refreshTick]);
 
   const filtered = useMemo(() => {
-    const byQueue = orders.filter((o) =>
-      activeQueue === 'pending' ? isPendingOrderStatus(o.status) : isFulfillmentOrderStatus(o.status)
-    );
+    const byQueue = orders.filter((o) => {
+      if (activeQueue === 'hold') return isOnHoldOrderStatus(o.status);
+      if (activeQueue === 'pending') return isPendingOrderStatus(o.status);
+      return isFulfillmentOrderStatus(o.status);
+    });
     return filterAndSortOwnerOrders(byQueue, filters);
   }, [orders, activeQueue, filters]);
 
@@ -109,8 +119,25 @@ export function OwnerOrdersPanel({
     setClaimReplyDraft((prev) => ({ ...prev, [orderId]: '' }));
   }
 
+  async function handleReasonConfirm(result: OrderReasonDialogResult) {
+    if (!reasonDialog) return;
+    const { orderId, kind } = reasonDialog;
+    setReasonDialog(null);
+    await runAction(orderId, async () => {
+      if (kind === 'hold') {
+        await holdOrder(orderId, result.reasonCode, result.memo, result.affectedItemIds);
+      } else {
+        await rejectOrder(orderId, result.reasonCode, result.memo);
+      }
+    });
+  }
+
   const titleKey =
-    activeQueue === 'pending' ? 'ownerOrders.titlePending' : 'ownerOrders.titleFulfillment';
+    activeQueue === 'pending'
+      ? 'ownerOrders.titlePending'
+      : activeQueue === 'hold'
+        ? 'ownerOrders.titleHold'
+        : 'ownerOrders.titleFulfillment';
 
   const panelBody = (
     <>
@@ -143,6 +170,13 @@ export function OwnerOrdersPanel({
             onClick={() => setInternalQueue('fulfillment')}
           >
             {t('ownerOrders.tabFulfillment')}
+          </button>
+          <button
+            type="button"
+            style={{ ...styles.subNavBtn, ...(activeQueue === 'hold' ? styles.subNavActive : {}) }}
+            onClick={() => setInternalQueue('hold')}
+          >
+            {t('ownerOrders.tabHold')}
           </button>
         </div>
       )}
@@ -204,7 +238,9 @@ export function OwnerOrdersPanel({
               ? t('ownerOrders.emptyFiltered')
               : activeQueue === 'pending'
                 ? t('ownerOrders.emptyPending')
-                : t('ownerOrders.emptyFulfillment')}
+                : activeQueue === 'hold'
+                  ? t('ownerOrders.emptyHold')
+                  : t('ownerOrders.emptyFulfillment')}
           </p>
         )}
 
@@ -223,6 +259,9 @@ export function OwnerOrdersPanel({
                       </span>
                       {order.auto_accepted && (
                         <span style={styles.chipAuto}>{t('ownerOrders.autoAcceptedBadge')}</span>
+                      )}
+                      {order.supplement_submitted_at && isPendingOrderStatus(order.status) && (
+                        <span style={styles.chipSupplement}>{t('ownerOrders.supplementBadge')}</span>
                       )}
                       {order.status === 'purchase_confirmed' && order.purchase_confirm_auto && (
                         <span style={styles.chipAuto}>{t('ownerOrders.purchaseConfirmedAutoBadge')}</span>
@@ -377,6 +416,16 @@ export function OwnerOrdersPanel({
                   </div>
                 )}
 
+                {order.status === 'on_hold' && order.hold_reason_code && (
+                  <div style={styles.holdBox}>
+                    <div style={styles.holdLabel}>{t('ownerOrders.holdReasonLabel')}</div>
+                    <p style={styles.holdText}>
+                      {t(`orderReasons.hold.${order.hold_reason_code}`)}
+                      {order.hold_reason_text ? ` — ${order.hold_reason_text}` : ''}
+                    </p>
+                  </div>
+                )}
+
                 {activeQueue === 'pending' && isPendingOrderStatus(order.status) && (
                   <div style={styles.actionBar}>
                     <button
@@ -393,12 +442,60 @@ export function OwnerOrdersPanel({
                     </button>
                     <button
                       type="button"
+                      style={styles.warnBtn}
+                      disabled={actionId === order.id}
+                      onClick={() =>
+                        setReasonDialog({
+                          orderId: order.id,
+                          kind: 'hold',
+                          items: order.items.map((i) => ({
+                            id: i.id,
+                            product_name: i.product_name,
+                            quantity: i.quantity,
+                          })),
+                        })
+                      }
+                    >
+                      {t('ownerOrders.requestHold')}
+                    </button>
+                    <button
+                      type="button"
                       style={styles.dangerBtn}
                       disabled={actionId === order.id}
                       onClick={() =>
-                        void runActionWithConfirm(order.id, t('ownerOrders.confirmReject'), () =>
-                          rejectOrder(order.id)
-                        )
+                        setReasonDialog({
+                          orderId: order.id,
+                          kind: 'reject',
+                          items: order.items.map((i) => ({
+                            id: i.id,
+                            product_name: i.product_name,
+                            quantity: i.quantity,
+                          })),
+                        })
+                      }
+                    >
+                      {t('ownerOrders.reject')}
+                    </button>
+                  </div>
+                )}
+
+                {activeQueue === 'hold' && isOnHoldOrderStatus(order.status) && (
+                  <div style={styles.actionBar}>
+                    <p style={styles.holdWaiting}>{t('ownerOrders.holdWaitingShopper')}</p>
+                    <button
+                      type="button"
+                      style={styles.dangerBtn}
+                      disabled={actionId === order.id}
+                      onClick={() =>
+                        setReasonDialog({
+                          orderId: order.id,
+                          kind: 'reject',
+                          items: order.items.map((i) => ({
+                            id: i.id,
+                            product_name: i.product_name,
+                            quantity: i.quantity,
+                          })),
+                        })
                       }
                     >
                       {t('ownerOrders.reject')}
@@ -433,9 +530,15 @@ export function OwnerOrdersPanel({
                       style={styles.dangerBtn}
                       disabled={actionId === order.id}
                       onClick={() =>
-                        void runActionWithConfirm(order.id, t('ownerOrders.confirmCancelAccepted'), () =>
-                          rejectOrder(order.id)
-                        )
+                        setReasonDialog({
+                          orderId: order.id,
+                          kind: 'reject',
+                          items: order.items.map((i) => ({
+                            id: i.id,
+                            product_name: i.product_name,
+                            quantity: i.quantity,
+                          })),
+                        })
                       }
                     >
                       {t('ownerOrders.cancelAcceptedOrder')}
@@ -471,6 +574,21 @@ export function OwnerOrdersPanel({
     return (
       <section style={styles.embeddedPanel}>
         {panelBody}
+        {reasonDialog && (
+          <OrderReasonDialog
+            kind={reasonDialog.kind}
+            storeId={storeId}
+            orderItems={reasonDialog.items}
+            title={
+              reasonDialog.kind === 'hold' ? t('ownerOrders.holdDialogTitle') : t('ownerOrders.rejectDialogTitle')
+            }
+            confirmLabel={
+              reasonDialog.kind === 'hold' ? t('ownerOrders.confirmHold') : t('ownerOrders.confirmReject')
+            }
+            onConfirm={(r) => void handleReasonConfirm(r)}
+            onCancel={() => setReasonDialog(null)}
+          />
+        )}
       </section>
     );
   }
@@ -480,6 +598,21 @@ export function OwnerOrdersPanel({
       <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
         {panelBody}
       </div>
+      {reasonDialog && (
+        <OrderReasonDialog
+          kind={reasonDialog.kind}
+          storeId={storeId}
+          orderItems={reasonDialog.items}
+          title={
+            reasonDialog.kind === 'hold' ? t('ownerOrders.holdDialogTitle') : t('ownerOrders.rejectDialogTitle')
+          }
+          confirmLabel={
+            reasonDialog.kind === 'hold' ? t('ownerOrders.confirmHold') : t('ownerOrders.confirmReject')
+          }
+          onConfirm={(r) => void handleReasonConfirm(r)}
+          onCancel={() => setReasonDialog(null)}
+        />
+      )}
     </div>
   );
 }
@@ -606,13 +739,21 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 999,
     padding: '2px 8px',
   },
+  chipSupplement: {
+    fontSize: fs.xs,
+    color: '#6741d9',
+    background: '#f3f0ff',
+    border: '1px solid #d0bfff',
+    borderRadius: 999,
+    padding: '2px 8px',
+  },
   cardMeta: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, color: oc.textSecondary, fontSize: fs.sm },
   buyerName: { color: oc.text, fontWeight: 600 },
   metaSep: { color: oc.textMuted },
   dateInline: { color: oc.textMuted },
   totalHighlight: { color: oc.price, fontSize: fs.xl, fontWeight: 700, whiteSpace: 'nowrap' },
   amountBlock: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 },
-  amountLine: { display: 'flex', gap: 10, color: oc.muted, fontSize: fs.sm },
+  amountLine: { display: 'flex', gap: 10, color: oc.textMuted, fontSize: fs.sm },
   cardGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
@@ -704,6 +845,26 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: fs.sm,
     cursor: 'pointer',
   },
+  warnBtn: {
+    padding: '10px 14px',
+    borderRadius: 8,
+    border: `1px solid ${oc.warningBorder}`,
+    background: oc.warningBg,
+    color: oc.warningText,
+    fontSize: fs.sm,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  holdBox: {
+    marginTop: 12,
+    padding: 12,
+    borderRadius: 8,
+    background: '#fff9db',
+    border: `1px solid ${oc.warningBorder}`,
+  },
+  holdLabel: { color: oc.warningText, fontSize: fs.xs, fontWeight: 700, marginBottom: 4 },
+  holdText: { color: oc.textSecondary, fontSize: fs.sm, margin: 0, lineHeight: 1.5 },
+  holdWaiting: { flex: '1 1 100%', color: oc.textMuted, fontSize: fs.sm, margin: 0 },
   trackingInput: {
     flex: '1 1 180px',
     minWidth: 140,

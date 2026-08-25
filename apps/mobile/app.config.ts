@@ -60,6 +60,7 @@ const config: ExpoConfig = {
   },
   plugins: [
     'expo-router',
+    'expo-notifications',
     [
       'expo-screen-orientation',
       {

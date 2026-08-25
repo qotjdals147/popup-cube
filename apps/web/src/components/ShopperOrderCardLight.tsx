@@ -11,6 +11,8 @@ import {
 import { formatOrderRef } from '../lib/orderRef';
 import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
 import { reviewKey } from '../lib/reviews';
+import { OrderHoldSupplementSection } from './OrderHoldSupplementSection';
+import { rejectReasonLabelKey } from '@popup-cube/shared';
 import { t } from '../i18n';
 
 interface ShopperOrderCardLightProps {
@@ -25,6 +27,9 @@ interface ShopperOrderCardLightProps {
   onSubmitClaim: (orderId: string) => void;
   onOpenClaimForm: (orderId: string) => void;
   onClaimDraftChange: (orderId: string, text: string) => void;
+  onReload: () => Promise<void>;
+  onActionStart: (orderId: string) => void;
+  onActionEnd: () => void;
 }
 
 /** `/app/me` 구매 내역 — 배송지·결제 상세·배송 타임라인 (§60 · AD-054) */
@@ -40,6 +45,9 @@ export function ShopperOrderCardLight({
   onSubmitClaim,
   onOpenClaimForm,
   onClaimDraftChange,
+  onReload,
+  onActionStart,
+  onActionEnd,
 }: ShopperOrderCardLightProps) {
   const reviewEligible = canShowReviewButton(order.status);
   const showTimeline = orderHasDeliveryTimeline(order);
@@ -49,7 +57,7 @@ export function ShopperOrderCardLight({
 
   const hasActions =
     canConfirmPurchase(order.status) ||
-    isCancellableByShopper(order.status) ||
+    (isCancellableByShopper(order.status) && order.status !== 'on_hold') ||
     (canFileClaim(order.status) && order.claim_status !== 'open');
 
   return (
@@ -182,6 +190,22 @@ export function ShopperOrderCardLight({
           </div>
         </dl>
       </section>
+
+      <OrderHoldSupplementSection
+        order={order}
+        actionId={actionId}
+        onActionStart={onActionStart}
+        onActionEnd={onActionEnd}
+        onReload={onReload}
+        onCancelOrder={onCancelOrder}
+      />
+
+      {order.status === 'rejected' && order.reject_reason_code && (
+        <p className="oh-reject-reason">
+          {t('myOrders.rejectReasonLabel')}: {t(rejectReasonLabelKey(order.reject_reason_code))}
+          {order.reject_reason_text ? ` — ${order.reject_reason_text}` : ''}
+        </p>
+      )}
 
       {order.status === 'cancelled' && <p className="oh-cancelled-note">{t('myOrders.cancelledNote')}</p>}
 

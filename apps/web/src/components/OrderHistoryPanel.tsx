@@ -192,6 +192,9 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
                 onSubmitClaim={(id) => void handleSubmitClaim(id)}
                 onOpenClaimForm={setClaimFormId}
                 onClaimDraftChange={(id, text) => setClaimDraft((prev) => ({ ...prev, [id]: text }))}
+                onReload={reload}
+                onActionStart={setActionId}
+                onActionEnd={() => setActionId(null)}
               />
             ) : (
               <div key={order.id} style={styles.card}>

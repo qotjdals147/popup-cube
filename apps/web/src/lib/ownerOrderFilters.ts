@@ -66,8 +66,14 @@ export function filterAndSortOwnerOrders(
 
 /** 탭별 상태 필터 옵션 */
 export function ownerOrderStatusOptions(
-  queue: 'pending' | 'fulfillment'
+  queue: 'pending' | 'fulfillment' | 'hold'
 ): Array<{ value: 'all' | OrderStatus; labelKey: string }> {
+  if (queue === 'hold') {
+    return [
+      { value: 'all', labelKey: 'ownerOrders.filterStatusAll' },
+      { value: 'on_hold', labelKey: 'ownerOrders.status.on_hold' },
+    ];
+  }
   if (queue === 'pending') {
     return [
       { value: 'all', labelKey: 'ownerOrders.filterStatusAll' },

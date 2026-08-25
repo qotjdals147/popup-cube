@@ -664,3 +664,80 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+/* AD-069 — 보류 주문 보완 UI */
+.shopper-account-main .oh-hold-box {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #fff9db;
+  border: 1px solid #ffe066;
+}
+
+.shopper-account-main .oh-hold-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #e67700;
+  margin-bottom: 6px;
+}
+
+.shopper-account-main .oh-hold-reason,
+.shopper-account-main .oh-hold-hint {
+  font-size: 13px;
+  color: var(--acct-text-secondary);
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+
+.shopper-account-main .oh-hold-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.shopper-account-main .oh-hold-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--acct-muted);
+}
+
+.shopper-account-main .oh-hold-select,
+.shopper-account-main .oh-hold-qty-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--acct-border);
+  font-size: 14px;
+}
+
+.shopper-account-main .oh-hold-qty-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.shopper-account-main .oh-hold-qty-input {
+  width: 72px;
+}
+
+.shopper-account-main .oh-hold-gacha-actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.shopper-account-main .oh-hold-cancel {
+  margin-top: 8px;
+}
+
+.shopper-account-main .oh-reject-reason {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff5f5;
+  border: 1px solid #ffc9c9;
+  color: #c92a2a;
+  font-size: 13px;
+  line-height: 1.5;
+}

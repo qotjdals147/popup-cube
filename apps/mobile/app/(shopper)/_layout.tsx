@@ -1,7 +1,9 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Tabs } from 'expo-router';
 import { ShopperBottomNav, type ShopperTab } from '../../src/components/ShopperBottomNav';
+import { useAuth } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
+import { useOrderPushNotifications } from '../../src/hooks/useOrderPushNotifications';
 import { useShopperSystemBackground } from '../../src/hooks/useShopperSystemBackground';
 
 function routeToTab(routeName: string): ShopperTab {
@@ -29,7 +31,9 @@ function ShopperTabBar({ state, navigation }: BottomTabBarProps) {
  */
 export default function ShopperTabsLayout() {
   const { colors } = useTheme();
+  const { userId } = useAuth();
   useShopperSystemBackground();
+  useOrderPushNotifications(userId);
 
   return (
     <Tabs

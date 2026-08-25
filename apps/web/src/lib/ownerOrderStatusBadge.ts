@@ -17,6 +17,8 @@ export function orderStatusBadgeStyle(status: OrderStatus): React.CSSProperties 
     case 'pending':
     case 'paid':
       return { ...base, background: '#fff9db', color: '#e67700', border: '1px solid #ffe066' };
+    case 'on_hold':
+      return { ...base, background: '#fff4e6', color: '#d9480f', border: '1px solid #ffc078' };
     case 'accepted':
       return { ...base, background: '#eef4ff', color: '#2563eb', border: '1px solid #bfdbfe' };
     case 'shipped':

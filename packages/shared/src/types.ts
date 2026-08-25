@@ -203,6 +203,7 @@ export type OrderStatus =
   | 'pending'
   | 'paid'
   | 'awaiting_accept'
+  | 'on_hold'
   | 'accepted'
   | 'rejected'
   | 'shipped'
@@ -252,6 +253,15 @@ export interface Order {
   claim_reply: string | null;
   claim_created_at: string | null;
   claim_resolved_at: string | null;
+  /** AD-069 — 점주 보류(보완 요청) */
+  hold_reason_code: string | null;
+  hold_reason_text: string | null;
+  hold_requested_at: string | null;
+  hold_affected_item_ids: string[] | null;
+  supplement_submitted_at: string | null;
+  /** AD-069 — 점주 거절/취소 사유 (손님 노출) */
+  reject_reason_code: string | null;
+  reject_reason_text: string | null;
   created_at: string;
 }
 

@@ -228,13 +228,16 @@ export function CartView({
       .filter((kind): kind is LinePromoBadgeKind => kind !== null);
   }, [selectedItems, productPromoById, storePromoById]);
 
-  /** AD-067 — 줄 뱃지 여러 개여도 할인·가챠 **선택/뽑기**는 결제당 1번 */
+  /** AD-067 — 줄 뱃지 여러 개여도 할인·가챠 **선택/뽑기**는 매장·주문당 1번 */
   const showPromoOrderOnceHint = useMemo(() => {
     if (selectedPromoBadgeKinds.length === 0) return false;
+    if (storesWithSelection.length >= 2 && selectedPromoBadgeKinds.some((k) => k === 'gacha' || k === 'choice')) {
+      return true;
+    }
     if (selectedPromoBadgeKinds.includes('choice')) return true;
     const gachaOrChoice = selectedPromoBadgeKinds.filter((k) => k === 'gacha' || k === 'choice').length;
     return gachaOrChoice >= 2;
-  }, [selectedPromoBadgeKinds]);
+  }, [selectedPromoBadgeKinds, storesWithSelection.length]);
 
   useEffect(() => {
     const ids = [...new Set(items.map((item) => item.storeId))];

@@ -143,6 +143,15 @@ interface StoreOrderRow {
 
   claim_resolved_at: string | null;
 
+  hold_reason_code: string | null;
+  hold_reason_text: string | null;
+  hold_requested_at: string | null;
+  hold_affected_item_ids: string[] | null;
+  supplement_submitted_at: string | null;
+  reject_reason_code: string | null;
+  reject_reason_text: string | null;
+  shipping_address_id: string | null;
+
   created_at: string;
 
   buyer_nickname: string | null;
@@ -217,8 +226,6 @@ export async function listStoreOrders(storeId: string): Promise<OwnerOrderView[]
 
         user_id: '',
 
-        shipping_address_id: null,
-
         subtotal_amount: row.subtotal_amount,
 
         shipping_fee: row.shipping_fee,
@@ -258,6 +265,15 @@ export async function listStoreOrders(storeId: string): Promise<OwnerOrderView[]
         claim_created_at: row.claim_created_at,
 
         claim_resolved_at: row.claim_resolved_at,
+
+        hold_reason_code: row.hold_reason_code,
+        hold_reason_text: row.hold_reason_text,
+        hold_requested_at: row.hold_requested_at,
+        hold_affected_item_ids: row.hold_affected_item_ids,
+        supplement_submitted_at: row.supplement_submitted_at,
+        reject_reason_code: row.reject_reason_code,
+        reject_reason_text: row.reject_reason_text,
+        shipping_address_id: row.shipping_address_id,
 
         created_at: row.created_at,
 
@@ -323,12 +339,94 @@ export async function acceptOrder(orderId: string): Promise<void> {
 
 
 
-export async function rejectOrder(orderId: string): Promise<void> {
-
-  const { error } = await supabase.rpc('reject_order', { p_order_id: orderId });
-
+export async function rejectOrder(
+  orderId: string,
+  reasonCode?: string | null,
+  reasonMemo?: string | null,
+): Promise<void> {
+  const { error } = await supabase.rpc('reject_order', {
+    p_order_id: orderId,
+    p_reason_code: reasonCode ?? null,
+    p_reason_memo: reasonMemo ?? null,
+  });
   if (error) throw new OrderError(error.message);
+}
 
+/** AD-069 — 점주: 주문 보류(보완 요청) */
+export async function holdOrder(
+  orderId: string,
+  reasonCode: string,
+  reasonMemo?: string | null,
+  affectedItemIds?: string[] | null,
+): Promise<void> {
+  const { error } = await supabase.rpc('hold_order', {
+    p_order_id: orderId,
+    p_reason_code: reasonCode,
+    p_reason_memo: reasonMemo ?? null,
+    p_affected_item_ids: affectedItemIds?.length ? affectedItemIds : null,
+  });
+  if (error) throw new OrderError(error.message);
+}
+
+export interface SubmitSupplementResult {
+  needsGachaRoll: boolean;
+}
+
+/** AD-069 — 손님: 보류 주문 보완 제출 */
+export async function submitOrderSupplement(
+  orderId: string,
+  payload: Record<string, unknown>,
+): Promise<SubmitSupplementResult> {
+  const { data, error } = await supabase.rpc('submit_order_supplement', {
+    p_order_id: orderId,
+    p_payload: payload,
+  });
+  if (error) throw new OrderError(error.message);
+  const row = Array.isArray(data) ? data[0] : data;
+  return { needsGachaRoll: Boolean(row?.needs_gacha_roll) };
+}
+
+export interface StoreReasonTemplateRow {
+  id: string;
+  reason_code: string;
+  label: string;
+  sort_order: number;
+}
+
+export async function listStoreReasonTemplates(
+  storeId: string,
+  kind: 'hold' | 'reject',
+): Promise<StoreReasonTemplateRow[]> {
+  const { data, error } = await supabase.rpc('list_store_reason_templates', {
+    p_store_id: storeId,
+    p_kind: kind,
+  });
+  if (error) throw new OrderError(error.message);
+  return (data ?? []) as StoreReasonTemplateRow[];
+}
+
+export async function upsertStoreReasonTemplate(
+  storeId: string,
+  kind: 'hold' | 'reject',
+  reasonCode: string,
+  label: string,
+  templateId?: string | null,
+): Promise<void> {
+  const { error } = await supabase.rpc('upsert_store_reason_template', {
+    p_store_id: storeId,
+    p_kind: kind,
+    p_reason_code: reasonCode,
+    p_label: label,
+    p_template_id: templateId ?? null,
+  });
+  if (error) throw new OrderError(error.message);
+}
+
+export async function registerPushToken(expoPushToken: string): Promise<void> {
+  const { error } = await supabase.rpc('register_push_token', {
+    p_expo_push_token: expoPushToken,
+  });
+  if (error) throw new OrderError(error.message);
 }
 
 
@@ -410,6 +508,10 @@ export async function resolveOrderClaim(orderId: string, reply: string): Promise
 
 
 
+export function isOnHoldOrderStatus(status: OrderStatus): boolean {
+  return status === 'on_hold';
+}
+
 export function isPendingOrderStatus(status: OrderStatus): boolean {
 
   return status === 'awaiting_accept' || status === 'pending' || status === 'paid';
@@ -452,7 +554,7 @@ export function canConfirmPurchase(status: OrderStatus): boolean {
 /** §53 P0#8 — 손님이 지금 주문을 직접 취소할 수 있는 상태인지 (발송 전) */
 export function isCancellableByShopper(status: OrderStatus): boolean {
 
-  return status === 'awaiting_accept' || status === 'accepted';
+  return status === 'awaiting_accept' || status === 'accepted' || status === 'on_hold';
 
 }
 
@@ -507,6 +609,8 @@ export interface StoreOrderCounts {
 
   awaitingShip: number;
 
+  onHold: number;
+
 }
 
 
@@ -559,6 +663,15 @@ interface MyOrderRow {
   claim_created_at: string | null;
 
   claim_resolved_at: string | null;
+
+  hold_reason_code: string | null;
+  hold_reason_text: string | null;
+  hold_requested_at: string | null;
+  hold_affected_item_ids: string[] | null;
+  supplement_submitted_at: string | null;
+  reject_reason_code: string | null;
+  reject_reason_text: string | null;
+  shipping_address_id: string | null;
 
   created_at: string;
 
@@ -635,8 +748,6 @@ export async function listMyOrders(): Promise<ShopperOrderView[]> {
 
         user_id: '',
 
-        shipping_address_id: null,
-
         subtotal_amount: row.subtotal_amount,
 
         shipping_fee: row.shipping_fee,
@@ -676,6 +787,15 @@ export async function listMyOrders(): Promise<ShopperOrderView[]> {
         claim_created_at: row.claim_created_at,
 
         claim_resolved_at: row.claim_resolved_at,
+
+        hold_reason_code: row.hold_reason_code,
+        hold_reason_text: row.hold_reason_text,
+        hold_requested_at: row.hold_requested_at,
+        hold_affected_item_ids: row.hold_affected_item_ids,
+        supplement_submitted_at: row.supplement_submitted_at,
+        reject_reason_code: row.reject_reason_code,
+        reject_reason_text: row.reject_reason_text,
+        shipping_address_id: row.shipping_address_id,
 
         created_at: row.created_at,
 
@@ -743,6 +863,8 @@ export async function getStoreOrderCounts(storeId: string): Promise<StoreOrderCo
     pendingAccept: Number(row?.pending_accept ?? 0),
 
     awaitingShip: Number(row?.awaiting_ship ?? 0),
+
+    onHold: Number(row?.on_hold ?? 0),
 
   };
 
