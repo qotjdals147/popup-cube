@@ -368,19 +368,28 @@
   margin-top: 4px;
 }
 
-/** 쿠팡형 — stepper · 줄금액은 아래 행(전체 너비 우측) */
+/** 쿠팡형 — stepper · 줄금액(stepper 좌측 정렬) */
 .cart-drawer-item-footer {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
   width: 100%;
   margin-top: 4px;
 }
 
+.cart-drawer-item-qty-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 100%;
+}
+
 .cart-drawer-line-total-row {
   margin: 0;
-  width: 100%;
-  text-align: right;
+  width: auto;
+  max-width: 100%;
+  text-align: left;
   font-size: 15px;
   font-weight: 700;
   line-height: 1.3;

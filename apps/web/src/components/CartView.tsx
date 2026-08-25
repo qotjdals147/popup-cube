@@ -42,6 +42,41 @@ function formatPrice(price: number): string {
   return `${price.toLocaleString('ko-KR')}원`;
 }
 
+type CartLineItem = ReturnType<typeof useCart>['items'][number];
+
+/** AD-066 mock — 매장별 place_order (할인/가챠 없는 매장은 정가·roll 생략) */
+async function placeUnifiedStoreOrder(
+  storeId: string,
+  addressId: string,
+  ordering: CartLineItem[],
+  mode: 'discount' | 'gacha',
+): Promise<{ totalAmount: number; gachaResult: GachaRollResult | null }> {
+  if (mode === 'discount') {
+    const promo = await getActivePromotion(storeId);
+    const percent = promo?.discount_percent ?? 0;
+    if (percent > 0) {
+      const result = await placeOrder(storeId, addressId, ordering, 'discount', percent);
+      return { totalAmount: result.totalAmount, gachaResult: null };
+    }
+    const result = await placeOrder(storeId, addressId, ordering, 'gacha', null);
+    return { totalAmount: result.totalAmount, gachaResult: null };
+  }
+
+  const result = await placeOrder(storeId, addressId, ordering, 'gacha', null);
+  try {
+    const gachaResult = await rollGacha(storeId, result.orderId);
+    return { totalAmount: result.totalAmount, gachaResult };
+  } catch (err) {
+    if (
+      err instanceof GachaError &&
+      (err.message.includes('no_active_pool') || err.message.includes('empty_pool'))
+    ) {
+      return { totalAmount: result.totalAmount, gachaResult: null };
+    }
+    throw err;
+  }
+}
+
 function groupItemsByStore(items: ReturnType<typeof useCart>['items'], focusStoreId?: string) {
   const map = new Map<string, typeof items>();
   for (const item of items) {
@@ -262,10 +297,15 @@ export function CartView({
         if (ordering.length === 0) continue;
         const promo = await getActivePromotion(storeId);
         const percent = promo?.discount_percent ?? 0;
-        const result = await placeOrder(storeId, selectedAddressId, ordering, 'discount', percent);
+        const { totalAmount: storeTotal } = await placeUnifiedStoreOrder(
+          storeId,
+          selectedAddressId,
+          ordering,
+          'discount',
+        );
         orderedProductIds.push(...ordering.map((item) => item.productId));
-        totalAmount += result.totalAmount;
-        lastPercent = percent;
+        totalAmount += storeTotal;
+        if (percent > 0) lastPercent = percent;
       }
       setLastOrderedProductIds(orderedProductIds);
       setDiscountPercent(lastPercent);
@@ -288,9 +328,14 @@ export function CartView({
           (item) => item.storeId === storeId && selectedIds.has(item.productId),
         );
         if (ordering.length === 0) continue;
-        const orderResult = await placeOrder(storeId, selectedAddressId, ordering, 'gacha', null);
+        const { gachaResult } = await placeUnifiedStoreOrder(
+          storeId,
+          selectedAddressId,
+          ordering,
+          'gacha',
+        );
         orderedProductIds.push(...ordering.map((item) => item.productId));
-        lastGacha = await rollGacha(storeId, orderResult.orderId);
+        if (gachaResult) lastGacha = gachaResult;
       }
       setLastOrderedProductIds(orderedProductIds);
       setGachaResult(lastGacha);
@@ -399,17 +444,19 @@ export function CartView({
           </div>
           <p className="cart-drawer-item-unit">{formatPrice(item.price)}</p>
           <div className="cart-drawer-item-footer">
-            <div className="cart-drawer-stepper">
-              <button type="button" className="cart-drawer-qty-btn" onClick={() => decrementQuantity(item.productId)}>
-                −
-              </button>
-              <span className="cart-drawer-qty-value">{item.quantity}</span>
-              <button type="button" className="cart-drawer-qty-btn" onClick={() => incrementQuantity(item.productId)}>
-                +
-              </button>
+            <div className="cart-drawer-item-qty-col">
+              <div className="cart-drawer-stepper">
+                <button type="button" className="cart-drawer-qty-btn" onClick={() => decrementQuantity(item.productId)}>
+                  −
+                </button>
+                <span className="cart-drawer-qty-value">{item.quantity}</span>
+                <button type="button" className="cart-drawer-qty-btn" onClick={() => incrementQuantity(item.productId)}>
+                  +
+                </button>
+              </div>
+              <p className="cart-drawer-line-total-row">{formatPrice(item.price * item.quantity)}</p>
             </div>
           </div>
-          <p className="cart-drawer-line-total-row">{formatPrice(item.price * item.quantity)}</p>
         </div>
       </article>
     );

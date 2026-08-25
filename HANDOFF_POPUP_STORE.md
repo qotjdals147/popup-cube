@@ -335,7 +335,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`1413647`** — 장바구니 ISS-038 5차 · AD-066 mock UX push ✅ |
+| **Git `main` HEAD** | **`30ba6ff`** — HANDOFF Expo 규칙 · cart **`1413647`** |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -820,7 +820,7 @@ npx expo start --tunnel --port 8082 --clear
    - **하단 「장바구니」탭**
 
 5) **합격 기준 (쿠팡형 · AD-066)**
-   - ✅ 이름 · **✕** / 회색 단가 / `[− n +]` · **아래 줄** 빨간 줄금액 (**잘리지 않음** · `1,780,000원` 전체)
+   - ✅ 이름 · **✕** / 회색 단가 / `[− n +]` · **− 버튼 아래** 빨간 줄금액 (**좌측 정렬** · `1,780,000원` 전체)
    - ✅ 매장 내 **구분선** · 탭 🛒 **뱃지** = 수량 합
    - ✅ 하단 **결제하기 1버튼** · `multiStoreCheckoutHint`·매장별 footer **없음**
    - ❌ 가운데 「삭제」 · 금액 화면 밖 · 「매장별 결제」 안내
@@ -848,6 +848,18 @@ npx expo start --tunnel --port 8082 --clear
 **PG 착수 조건 (전부 충족 전 금지):** ① User **사업자 등록 완료** ② **PG 후보·계약 확정** ③ (권장) P1·실기 대부분 OK.
 
 ---
+
+### 7.36 세션 인수인계 — **2026-08-25** (줄금액 정렬 · 다매장 결제 fix)
+
+| | |
+|---|---|
+| **User** | ① ISS-038 5차 **OK** (잘림·1버튼·문구) ② 빨간 줄금액 **stepper(−) 아래** 정렬 ③ **2매장** 통합 결제 — 할인·가챠 **둘 다 실패** |
+| **원인 1** | `.cart-drawer-line-total-row` **`text-align:right`** → 금액만 화면 우측 쏠림 |
+| **조치 1** | `cart-drawer-item-qty-col` — stepper+줄금액 **좌측 세로 묶음** · `text-align:left` |
+| **원인 2** | 2번째 매장 **할인 프로모 없음** → `place_order` **`invalid_discount`(0%)** · **가챠 풀 없음** → `roll_gacha` **`no_active_pool`** |
+| **조치 2** | `placeUnifiedStoreOrder()` — 프로모 없으면 **정가 주문** · 가챠 풀 없으면 **roll 생략**(주문은 성공) |
+| **Git** | push 대기 |
+| **다음** | User 2매장 결제 재실기 |
 
 ### 7.35 세션 인수인계 — **2026-08-25** (Expo 재시작 규칙 · push `1413647`)
 
@@ -1418,6 +1430,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-25 — 장바구니 줄금액 정렬 · 다매장 결제 fix
+- **Author:** Cursor Agent / User
+- **Changed:** `CartView` `placeUnifiedStoreOrder` · `cart-drawer-item-qty-col` · §7.36
+- **Notes:** **Expo 재시작 ❌** (web-only) · Vercel 1~2min · **탭 재진입** · 2매장: 프로모/가챠 없는 매장 **정가·roll 생략**
 
 ### 2026-08-25 — §0 Expo 재시작 여부 규칙 (User 질문)
 - **Author:** Cursor Agent / User
