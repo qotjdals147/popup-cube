@@ -858,7 +858,7 @@ npx expo start --tunnel --port 8082 --clear
 | **조치 1** | `cart-drawer-item-qty-col` — stepper+줄금액 **좌측 세로 묶음** · `text-align:left` |
 | **원인 2** | 2번째 매장 **할인 프로모 없음** → `place_order` **`invalid_discount`(0%)** · **가챠 풀 없음** → `roll_gacha` **`no_active_pool`** |
 | **조치 2** | `placeUnifiedStoreOrder()` — 프로모 없으면 **정가 주문** · 가챠 풀 없으면 **roll 생략**(주문은 성공) |
-| **Git** | push 대기 |
+| **Git** | push **`28c01b1`** ✅ |
 | **다음** | User 2매장 결제 재실기 |
 
 ### 7.35 세션 인수인계 — **2026-08-25** (Expo 재시작 규칙 · push `1413647`)
