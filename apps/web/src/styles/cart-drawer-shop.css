@@ -1077,6 +1077,26 @@
   color: #4e5968;
 }
 
+.cart-drawer-promo-once-note {
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+  border-radius: 8px;
+  background: rgba(49, 130, 246, 0.08);
+  color: #1b64da;
+}
+
+.cart-drawer-promo-once-note--step {
+  margin: 0 0 12px;
+}
+
+.cart-drawer--dark .cart-drawer-promo-once-note {
+  background: rgba(49, 130, 246, 0.15);
+  color: #8ec5ff;
+}
+
 .cart-drawer-scope-note--muted {
   color: #8b95a1;
 }

@@ -335,7 +335,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`f92feaa`** — drawer adaptive UI · AD-067 gacha FAQ |
+| **Git `main` HEAD** | **`ca6a1be`** — §7.41 choice badge · **§7.42 pending push** |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -720,7 +720,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **§58 #8 P1** · 프로모 손님 카피 정리 · PG=게이트 |
-| **Git 상태** | push 후 **`§1` HEAD** |
+| **Git 상태** | `main` **`1610632`** push ✅ |
 | **User 실기** | §7.40 서랍 UI **✅** · §7.39 결제·2매장 (잔여) |
 | **다음 에이전트 1순위** | ① **§58 #8 P1** ② 혜택 단계 가챠 1회 한 줄 카피(User 요청 시) |
 
@@ -907,7 +907,20 @@ npx expo start --tunnel --port 8082 --clear
 | `discount_only` | `{percent}% 할인` |
 | `gacha_only` | `가챠` |
 | `choice` | **`할인·가챠 선택`** |
-| `none` | `혜택 없음` |
+| `none` | *(뱃지 없음)* |
+
+---
+
+### 7.42 세션 인수인계 — **2026-08-25** (혜택 없음 뱃지 제거 · 결제당 1혜택 안내)
+
+| | |
+|---|---|
+| **User** | ① 「**혜택 없음**」뱃지 **제거** ② 상품 여러 개여도 **주문 1건당 1혜택** — 손님에게 **직관적** 안내 |
+| **조치 1** | `none` 모드 → **뱃지 미표시** · `linePromoNone` i18n 삭제 |
+| **조치 2** | **`cart.promoOrderOnceHint`** — 장바구니(전체선택 아래) + 결제 sticky · 조건: `choice` 1개 이상 **또는** 가챠/선택형 뱃지 **2줄 이상** |
+| **조치 3** | **`cart.rewardPromoOnceHint`** — 할인·가챠 **둘 다** 버튼 있을 때 혜택 단계 |
+| **UX 원칙** | 줄 뱃지 = 「이 상품 프로모 **종류**」 · 파란 한 줄 = 「**결제당 1번**」 (AD-067) |
+| **미표시** | 할인만(`discount_only`) 여러 줄 — **자동 줄할인**이라 1혜택 문구 **안 띄움** (헷갈림 방지) |
 
 ---
 

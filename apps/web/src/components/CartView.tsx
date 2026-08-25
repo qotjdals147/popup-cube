@@ -60,6 +60,19 @@ function formatPrice(price: number): string {
 
 type CartLineItem = ReturnType<typeof useCart>['items'][number];
 
+type LinePromoBadgeKind = 'discount' | 'gacha' | 'choice';
+
+function getLinePromoBadgeKind(
+  productPromo: ProductPromoFields,
+  storePromo: StorePromotion | null,
+): LinePromoBadgeKind | null {
+  const resolved = resolveEffectivePromo(productPromo, storePromo);
+  if (resolved.mode === 'discount_only' && resolved.discountPercent > 0) return 'discount';
+  if (resolved.mode === 'gacha_only') return 'gacha';
+  if (resolved.mode === 'choice') return 'choice';
+  return null;
+}
+
 type GachaResultWithStore = { storeId: string; storeName: string; result: GachaRollResult };
 
 /** AD-066 mock — 매장별 place_order (서버가 라인 할인·혜택 검증) */
@@ -202,6 +215,26 @@ export function CartView({
     [checkoutItems],
   );
   const storeGroups = useMemo(() => groupItemsByStore(items, focusStoreId), [items, focusStoreId]);
+
+  const selectedPromoBadgeKinds = useMemo(() => {
+    return selectedItems
+      .map((item) => {
+        const productPromo = productPromoById[item.productId] ?? {
+          promo_mode: 'inherit' as const,
+          promo_discount_percent: null,
+        };
+        return getLinePromoBadgeKind(productPromo, storePromoById[item.storeId] ?? null);
+      })
+      .filter((kind): kind is LinePromoBadgeKind => kind !== null);
+  }, [selectedItems, productPromoById, storePromoById]);
+
+  /** AD-067 — 줄 뱃지 여러 개여도 할인·가챠 **선택/뽑기**는 결제당 1번 */
+  const showPromoOrderOnceHint = useMemo(() => {
+    if (selectedPromoBadgeKinds.length === 0) return false;
+    if (selectedPromoBadgeKinds.includes('choice')) return true;
+    const gachaOrChoice = selectedPromoBadgeKinds.filter((k) => k === 'gacha' || k === 'choice').length;
+    return gachaOrChoice >= 2;
+  }, [selectedPromoBadgeKinds]);
 
   useEffect(() => {
     const ids = [...new Set(items.map((item) => item.storeId))];
@@ -541,6 +574,9 @@ export function CartView({
           <strong className="cart-page-sticky-total">{formatPrice(selectedSubtotal)}</strong>
         </div>
         {stickyBlocked && <p className="cart-page-sticky-hint">{t('cart.popupEnded')}</p>}
+        {showPromoOrderOnceHint && !stickyBlocked && (
+          <p className="cart-drawer-promo-once-note">{t('cart.promoOrderOnceHint')}</p>
+        )}
         <button
           type="button"
           className="cart-drawer-primary-btn cart-page-sticky-btn"
@@ -565,6 +601,7 @@ export function CartView({
       promo_discount_percent: null,
     };
     const storePromo = storePromoById[item.storeId] ?? null;
+    const badgeKind = getLinePromoBadgeKind(productPromo, storePromo);
     const resolved = resolveEffectivePromo(productPromo, storePromo);
     const hasLineDiscount =
       resolved.mode === 'discount_only' && resolved.discountPercent > 0;
@@ -573,19 +610,16 @@ export function CartView({
       : null;
 
     let promoBadge: string | null = null;
-    let promoBadgeKind: 'discount' | 'gacha' | 'choice' | 'none' = 'none';
-    if (resolved.mode === 'discount_only' && resolved.discountPercent > 0) {
+    let promoBadgeKind: LinePromoBadgeKind = 'discount';
+    if (badgeKind === 'discount') {
       promoBadge = t('cart.linePromoDiscount', { percent: resolved.discountPercent });
       promoBadgeKind = 'discount';
-    } else if (resolved.mode === 'gacha_only') {
+    } else if (badgeKind === 'gacha') {
       promoBadge = t('cart.linePromoGacha');
       promoBadgeKind = 'gacha';
-    } else if (resolved.mode === 'choice') {
+    } else if (badgeKind === 'choice') {
       promoBadge = t('cart.linePromoChoice');
       promoBadgeKind = 'choice';
-    } else if (resolved.mode === 'none') {
-      promoBadge = t('cart.linePromoNone');
-      promoBadgeKind = 'none';
     }
 
     return (
@@ -746,6 +780,11 @@ export function CartView({
           <div className="cart-drawer-complete-icon">🎁</div>
           <p className="cart-drawer-step-title">{t('cart.rewardTitle')}</p>
           <p className="cart-drawer-step-hint">{t('cart.rewardHint')}</p>
+          {(benefitUi.showDiscountButton && benefitUi.showGachaButton) && (
+            <p className="cart-drawer-promo-once-note cart-drawer-promo-once-note--step">
+              {t('cart.rewardPromoOnceHint')}
+            </p>
+          )}
           {rewardError && <p className="cart-drawer-error">{rewardError}</p>}
           <div className="cart-drawer-reward-row">
             {benefitUi.showDiscountButton && (
@@ -842,6 +881,9 @@ export function CartView({
                 {t('cart.selectAll')} ({selectedIds.size}/{items.length})
               </span>
             </label>
+            {showPromoOrderOnceHint && (
+              <p className="cart-drawer-promo-once-note">{t('cart.promoOrderOnceHint')}</p>
+            )}
             {storeGroups.map((group) => {
               const storeProductIds = group.items.map((item) => item.productId);
               const storeAllSelected =
