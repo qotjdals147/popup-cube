@@ -335,7 +335,7 @@ npm run dev
 | **Launch status** | 대표님 마케팅비 전액 지원 확정 → **런칭 단계 진입** (2026-07-24) |
 | **Current Phase** | **v1 = 팝업 쇼핑몰 (AD-062·063)** — §58 Phase 1 착수 · PG = 게이트 · 월드 freeze |
 | **Version** | `0.2.13` (상품 상세 블록 에디터 AD-060 + 리뷰 §54) |
-| **Git `main` HEAD** | **`9c87f70`** — cart promo badges · gacha UX · `place_order` discount_only fix |
+| **Git `main` HEAD** | **`c2e5fc5`** — cart promo badges · gacha UX · `place_order` discount_only fix |
 | **Supabase Project** | `popup-platform` (`cvrtobxkvpcpcxrcspdp`) — ACTIVE, Seoul |
 | **Live Demo (웹)** | https://popup-cube-web.vercel.app — Vercel `popup-cube-web` |
 | **Vercel 팀** | `popup-cube` — **FC Zero** `fc-team-dashboard` · **FC Platform** `fc-team-platform` **동일 팀** (2026-07-29) · **`FC_Zero&FC_Platform/setup/VERCEL_MIGRATION.md`** |
@@ -717,7 +717,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **프로모 손님 UX (뱃지·가챠 fix)** · User 실기 · **§58 #8 P1** · PG=게이트 |
-| **Git 상태** | `main` **`9c87f70`** push ✅ |
+| **Git 상태** | `main` **`c2e5fc5`** push ✅ |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **discount_only on gacha** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~92% · P1·앱스토어 포함 **전체 ~63%** · **실결제·택배 API** = 사업자 + 계약 후 |
 | **User 실기** | §7.39 시나리오 ①~④ · **commit/push 후** Vercel 1~2min · **Expo ❌** · 탭 재진입 |
