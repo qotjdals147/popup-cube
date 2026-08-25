@@ -715,11 +715,11 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **ISS-038 5차 push `1413647`** · User §0 실기 · **§58 #8 P1** · **PG+AD-066 = 런칭 게이트** |
-| **Git 상태** | `main` **`1413647`** push ✅ · HANDOFF Expo 재시작 규칙 **미커밋** |
+| **Git 상태** | `main` **`30ba6ff`** push ✅ (`1413647` cart · HANDOFF Expo 규칙) |
 | **Supabase** | `cvrtobxkvpcpcxrcspdp` · GUCCI `popup_ends_at` ≈ **2026-09-04** · `place_order` **popup_ended** ✅ |
 | **런칭 진행률 (대략)** | **기능(mock 결제)** ~90% · P1·앱스토어 포함 **전체 ~63%** · **실결제** = P1 + 사업자 + PG |
 | **User 실기** | **ISS-038 5차** — 줄금액 · 결제 1버튼 · **Expo 재시작 ❌** (web-only) · §0 표 |
-| **다음 에이전트 1순위** | ① HANDOFF commit ② User §0 실기 ③ **§58 #8 P1** |
+| **다음 에이전트 1순위** | ① User §0 실기 ② **§58 #8 P1** |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
@@ -856,7 +856,7 @@ npx expo start --tunnel --port 8082 --clear
 | **User** | ① push **`1413647`** 후 QR 실기 ② **매번 Expo 껐다 켜야 하나?** |
 | **답** | **web-only(`apps/web`) = 재시작 ❌** · Vercel 1~2분 · **탭 재진입** · **mobile(`apps/mobile`) = `--clear` ✅** |
 | **조치** | §0 **「Expo 재시작 여부」표** 신설 · commit/push·테스트 안내 **필수 동반** 규칙 |
-| **Git** | 코드 **`1413647`** push ✅ · HANDOFF 규칙 **미커밋** |
+| **Git** | 코드 **`1413647`** · HANDOFF **`30ba6ff`** push ✅ |
 | **다음** | User ISS-038 5차 실기 → **§58 #8 P1** |
 
 ### 7.34 세션 인수인계 — **2026-08-25** (장바구니 줄금액·AD-066 mock UX)
