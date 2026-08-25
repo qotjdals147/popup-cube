@@ -1015,25 +1015,35 @@ awaiting_accept (다시 「주문」탭 · 수락/거절/보류 가능)
 
 ---
 
-#### G. 구현 범위 (착수 시)
+#### G. 구현 범위
 
-- migration: `20260825_order_hold_supplement_ad069.sql` — **⬜ Supabase SQL Editor / MCP 적용 대기**
-- RPC: `hold_order` · `submit_order_supplement` · `reject_order` 사유 · `register_push_token`
-- UI: `OwnerOrdersPanel` 보류 탭 · `OrderReasonDialog` · `OrderHoldSupplementSection`
-- push: `useOrderPushNotifications` (Expo Realtime → 로컬 알림)
+- migration: `20260825_order_hold_supplement_ad069.sql` — **✅ Supabase MCP (2026-08-25)**
+- RPC · UI · push — **✅** · 카피 **AD-070** · 발주·배송 수정 요청 **✅**
 
 ---
 
-### 7.44 세션 인수인계 — **2026-08-25** (AD-069 구현)
+### 7.45 세션 인수인계 — **2026-08-25** (AD-069 DB ✅ · AD-070 카피 · 발주·배송)
+
+| | |
+|---|---|
+| **User** | HANDOFF · SQL 적용 · **수락됨(자동수락) 발주·배송에도 수정 요청** · **보류 → 직관적 표현** |
+| **DB** | `hold_reason_code` · `hold_order` · `get_my_orders` · `get_store_order_counts(on_hold)` **원격 ✅** |
+| **카피 (AD-070)** | **「손님에게 수정 요청」** · 탭/상태 **「수정 대기」** · 알림 **「주문 수정 요청」** |
+| **발주·배송** | `accepted` + **배송 전** — **손님에게 수정 요청** 버튼 (`OwnerOrdersPanel` fulfillment) |
+| **Git** | **`8b781f7`** push ✅ |
+
+---
+
+### 7.44 세션 인수인계 — **2026-08-25** (AD-069 코드)
 
 | | |
 |---|---|
 | **User** | AD-069 구현 + commit/push |
-| **DB** | `supabase/migrations/20260825_order_hold_supplement_ad069.sql` — **`hold_reason_code` 원격 ⬜** · SQL Editor 붙여넣기 또는 MCP 승인 |
-| **점주** | 사이드바 **보류** 탭 · 주문 카드 **보류 요청** · 거절/취소 **사유 다이얼로그** · 템플릿 저장 |
-| **손님** | `on_hold` → 사유별 보완 UI (주소/수량/가챠 재뽑기·포기) · `rejected` 취소 사유 표시 |
-| **알림** | `order_notifications` + Expo **Realtime → 로컬 푸시** |
-| **Expo** | `expo-notifications` 추가 — **`npm install` 후 `--clear` 재시작** (mobile 변경) |
+| **DB** | migration 파일 — **원격 §7.45** |
+| **점주** | **수정 대기** 탭 · **손님에게 수정 요청** · 취소 **사유 다이얼로그** |
+| **손님** | `on_hold` → 사유별 수정 UI · `rejected` 취소 사유 |
+| **알림** | `order_notifications` + Expo Realtime → 로컬 푸시 |
+| **Git** | **`fcf7f37`** |
 
 ---
 
