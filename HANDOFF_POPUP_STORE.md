@@ -561,7 +561,8 @@ npm run dev
 - [x] **상품 등록/목록 + 장바구니 MVP (§10, AD-027 연속선)** — `products` 테이블+RLS, 점주 상품 등록/수정/숨기기 패널(`OwnerProductPanel`), 소비자 상품 보기 패널(`ShopPanel`, 수량 +/-), 장바구니(`CartContext` — client-only, `localStorage`)+장바구니 Drawer(`CartDrawer`, mock 결제)
 - [x] **구매 프로모션 점주 UI (AD-028 v1b, 2026-08-25)** — `OwnerPromotionPanel` · 매장 기본(`default_promo_mode`+할인%) · 상품별 inherit/none/discount/gacha/choice · 가챠 풀 CRUD · `place_order` 라인 할인 · `CartView` 혜택 단계 자동 skip
 - [x] **손님 장바구니 프로모 표시 + 가챠 결제 fix (AD-028 v1b, 2026-08-25)** — 라인 뱃지(할인/가챠/선택형/없음) · `discount_only` 취소선 · 가챠 경로에서도 `discount_only` 서버·클라 할인 · 다매장 가챠 roll 분리 · 빈 가챠 결과 UI · migration `20260825_place_order_discount_only_on_gacha.sql` ✅
-- [x] **매장 서랍 장바구니 적응형 UI (2026-08-25)** — `cart-drawer-item--drawer` · 뱃지 `fit-content` · 좁은 WebView 할인가 세로 쌓기 · §7.40
+- [x] **매장 서랍 장바구니 적응형 UI (2026-08-25)** — `cart-drawer-item--drawer` · 뱃지 `fit-content` · User 실기 **✅** · §7.40
+- [x] **손님 `choice` 뱃지 카피 (2026-08-25)** — `선택형` → **`할인·가챠 선택`** · §7.41
 - [x] **구매 완료 시 "할인 vs 가챠" 선택 (AD-028, §10)** — `store_promotions`(매장별 할인%), `gacha_pools`/`gacha_pool_entries`(실제 상품+가챠 전용 아이템 혼합, 매장 공용 풀)/`gacha_rolls` 테이블+RLS, `roll_gacha()` SECURITY DEFINER 함수(서버 측 가중치 랜덤, 클라이언트 조작 불가), GUCCI 데모 매장에 10% 할인 + 가챠 아이템 4종 시드, `CartDrawer`에 결제 완료 후 혜택 선택 단계 추가
 - [x] **주문 저장 + 소비자 배송지 관리 (AD-030, §10)** — `user_addresses`(여러 배송지+별명+기본 지정) + `orders`/`order_items`(실제 주문 저장) 테이블+RLS, `place_order()`(서버가 가격·할인 재검증 후 원자적 저장) + `get_store_orders()`(점주가 본인 매장 주문+구매자 닉네임+배송지 조회) SECURITY DEFINER/INVOKER 함수, 마이페이지(`/mypage`) 배송지 관리 UI, `CartDrawer`에 배송지 선택 단계 추가, 점주 툴바 "📊 주문 관리" 연동(`OwnerOrdersPanel`)
 - [x] **Phase 4 Sprint 0 — fixture DB + occupancy (2026-07-27)** — `fixture_templates`(§42.3 8종 시드) + `display_fixtures` + `display_slots` + RLS/GRANT; `packages/game-core/src/occupancyGrid.ts` (`buildOccupancyGrid`, `canWalk`, `canPlaceFixture`); `apps/web/src/lib/displayFixtures.ts` CRUD; `packages/shared` 타입; SQL `supabase/migrations/20260727_phase4_display_fixtures.sql`
@@ -875,6 +876,7 @@ npx expo start --tunnel --port 8082 --clear
 | **점주에게** | 공용 풀 1개 관리 · 가챠-only 상품 많아도 **주문당 roll 1회** → 풀 비용·남용 방지 |
 | **v2 (미착수)** | 줄당 roll · 상품별 풀(`linked_product_id`) — **User 확정 전 코드 금지** |
 | **손님 FAQ 카피 (User 요청 전 UI 삽입 ❌)** | 혜택 단계 한 줄: 「가챠는 **이번 주문당 1번** 뽑기예요」 · CS: §7.40 표 참고 |
+| **User 실기** | **✅ 2026-08-25** — 서랍 숫자 안 튀음 · 뱃지 길이 OK |
 | **Expo** | **web-only ❌** · Vercel 1~2min · **장바구니 탭 재진입** |
 
 #### 「왜 1번?」 — 내부 vs 손님 설명
@@ -885,6 +887,27 @@ npx expo start --tunnel --port 8082 --clear
 | **제품 (v1)** | AD-066 **결제 1번** · AD-028 **혜택 1번 선택** — 줄마다 roll이면 결제 UX 붕괴 |
 | **비유** | 오프라인 팝업 「3벌 사면 **영수증 1장**으로 뽑기 1번」— 3번 뽑기 아님 |
 | **장바구니 뱃지 의미** | `가챠` = 이 줄은 **가챠 프로모 포함 상품** (횟수 표시 ❌) |
+
+---
+
+### 7.41 세션 인수인계 — **2026-08-25** (손님 `choice` 뱃지 카피)
+
+| | |
+|---|---|
+| **User** | ① §7.40 서랍 UI **실기 OK** ② 「**선택형**」만 보면 손님이 **뭔지 모르지 않나?** |
+| **판단** | **맞음** — `선택형` = 점주·내부 용어 · §0 **라벨=무슨 기능인지** 규칙 |
+| **조치** | `cart.linePromoChoice` → **`할인·가챠 선택`** · push **`1610632`** |
+| **유지** | 점주 `OwnerPromotionPanel` — **`choice` = 「선택형」** (설정 UI) |
+| **검토만** | 「혜택 없음」뱃지 — TMI면 숨김 가능 · User 추가 요청 전 미변경 |
+
+#### 손님 장바구니 뱃지 카피 (2026-08-25)
+
+| 내부 mode | 손님 뱃지 |
+|---|---|
+| `discount_only` | `{percent}% 할인` |
+| `gacha_only` | `가챠` |
+| `choice` | **`할인·가챠 선택`** |
+| `none` | `혜택 없음` |
 
 ---
 
@@ -909,7 +932,7 @@ npx expo start --tunnel --port 8082 --clear
 | `none` | 혜택 없음 | 정가 | 정가 |
 | `discount_only` | N% 할인 뱃지 + 취소선 | **라인 %** | **라인 %** *(가챠 골라도 유지)* |
 | `gacha_only` | 가챠 | 정가 | 가챠 roll *(풀 있을 때)* |
-| `choice` | 선택형 | **라인 %** | 정가 *(가챠 소비)* |
+| `choice` | **할인·가챠 선택** | **라인 %** | 정가 *(가챠 소비)* |
 | `inherit` | 매장 `default_promo_mode` 따름 | 위와 동일 | 위와 동일 |
 
 **통합 2매장 (AD-066):** 결제 1버튼 · 혜택 선택 **1번** · 뒤에서 **`place_order` 매장별** · 가챠 roll = **풀+eligible 있는 매장만 · 매장당 1회 (AD-067)**
@@ -1534,6 +1557,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-25 — choice badge copy for shoppers · §7.40 User OK
+- **Author:** Cursor Agent / User
+- **Changed:** `ko.ts` `linePromoChoice` → 「할인·가챠 선택」 · §7.41 · ISS-038 User OK
+- **Notes:** **Expo 재시작 ❌** · Vercel 1~2min · 탭 재진입
 
 ### 2026-08-25 — cart drawer adaptive UI · AD-067 gacha once per order FAQ
 - **Author:** Cursor Agent / User
