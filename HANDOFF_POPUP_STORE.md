@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** (2026-08-13) → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.46` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -518,8 +518,9 @@ npm run dev
 | AD-066 | **(확정) 손님 결제 = 쿠팡형 통합 결제 (User 2026-08-24)** — 장바구니 **한 번 · 결제 버튼 한 번 · 카드 승인 한 번**. 손님 UX는 **매장별로 나눠 결제 ❌**. **뒤에서:** 선택 상품을 `store_id`로 묶어 **매장별 `orders` N건** 생성(할인/가챠·배송비·점주 알림은 **매장 단위 유지**) · PG **분할 정산**(토스 서브몰·포트원 split 등)은 **PG 계약 후** 설계. **지금(mock · 2026-08-25):** UX=**결제 1버튼** · 배송지·혜택 1번 · **뒤에서 `place_order` 매장별 for-loop** — PG·`place_checkout` 전 임시. 상세 **§7.0 · §61** | User 2026-08-24 · mock UX 2026-08-25 | 2026-08-24 |
 | AD-067 | **(확정) 가챠 = 주문(매장)당 1회 · 상품 개수 ≠ 뽑기 횟수 (User 2026-08-25)** — `roll_gacha` **주문 1건당 1번** · 매장 **공용 풀 1개** (`linked_product_id IS NULL`, `LIMIT 1`). 손님은 **상품마다 할인/가챠 고르지 않음** — **매장당 주문 1건 · 혜택 1번**(통합 결제여도 **매장 2개 = 가챠 최대 2번**). v1 **N번 roll UX ❌** (결제 지옥·풀 비용 폭주 방지). **손님 문의 대응·카피 = §7.40 · §7.42** · v2 검토: 줄당 roll / 상품별 풀 | User 2026-08-25 | 2026-08-25 |
 | AD-068 | **(확정) 손님 UX = 의문을 품을 상황 금지 (User 2026-08-25)** — 카피·뱃지·안내는 **실제 동작과 같은 단위**(매장·주문·혜택) · 내부 enum(`choice`·`결제당`) **그대로 노출 ❌** · 설계·카피 시 **다매장·다상품 반례 1개** 상상 필수 · §0 UI/UX 표 | User 2026-08-25 | 2026-08-25 |
-| AD-069 | **(구현 ✅ · User 2026-08-25) 주문 수정 요청 + 취소 사유 + 푸시** — migration **`20260825_order_hold_supplement_ad069.sql` 원격 ✅** · 카피 **「보류」→「손님에게 수정 요청」/「수정 대기」** (AD-070) · §7.45 | User 2026-08-25 | 2026-08-25 |
+| AD-069 | **(구현 ✅ · User 2026-08-25) 주문 수정 요청 + 취소 사유 + 푸시** — migration **`20260825_order_hold_supplement_ad069.sql` 원격 ✅** · 카피 **AD-070** · 다이얼로그 **AD-071** · §7.45~§7.46 | User 2026-08-25 | 2026-08-25 |
 | AD-070 | **(확정) AD-069 UX 카피 — 「보류」❌** — 점주 버튼 **「손님에게 수정 요청」** · 탭 **「수정 대기」** · 상태 `on_hold` = **「수정 대기」** · **발주·배송(수락됨·자동수락 포함)** 에도 동일 버튼 (배송 시작 전) | User 2026-08-25 | 2026-08-25 |
+| AD-071 | **(구현 ✅ · User 2026-08-26) 수정 요청 다이얼로그 UX 정리** — `OrderReasonDialog` textarea **`box-sizing` overflow fix** · **「자주 쓰는 문구 추가/템플릿 저장」UI 제거** (사유 코드 + **추가 설명**만 · 손님 행동 UI는 **`hold_reason_code` 고정**) · DB에 남은 예전 템플릿 = **삭제만** (`delete_store_reason_template` · migration `20260826_delete_reason_template.sql` **원격 ✅**) · §7.46 | User 2026-08-26 | 2026-08-26 |
 | AD-062 | **(확정) v1 = 팝업 쇼핑몰 런칭 · 픽셀 월드 v2 보존** — CEO(mr심) 2026-08-13: Google 실물=PG 확정 · 월드+PG UX 이질감 · **에이블리/룩핀형 쇼핑몰**로 v1 출시. **코드 삭제 금지** — `/play`·Phaser·WebView·fixture·socket = **`legacy/world-v1` 보관** · 손님 **기본 진입 = 상품 쇼핑**(ShopPanel·ProductDetailModal·CartDrawer). v2/이벤트 = **2D 픽셀 재활용 또는 그래픽 업grade(영상·360 등) 별도 판단**. 상세 **§57** | User·CEO 2026-08-13 | 2026-08-13 |
 | AD-063 | **(확정) v1 런칭 범위 · 점주센터 정리** — **팝업 점주 입점 → 팝업 상품만 판매** 플랫폼. 점주 PC **대부분 유지** · **「매장 꾸미기(layout)」탭 v1 숨김**(코드 유지) · 손님 **월드 우회→쇼핑** · P1=리뷰답글·KPI·팝업기간 UI. 실행 순서 **§58** | User 2026-08-13 | 2026-08-13 |
 | AD-064 | **(확정) 수익·월드 재포지셔닝 — B2B 마케팅 인벤토리** — 월드 = 손님 **기본 쇼핑 경로 ❌** · **유료 브랜드 홍보(배너·스폰서 팝업존·월드 체험)** = 플랫폼 **광고/마케팅 SKU** (에이블리형 배너 수익과 동급 축). v1 **커머스(몰→shop)** + v2+ **스폰서 월드**. 상세 **§59** | User 2026-08-13 | 2026-08-13 |
@@ -568,6 +569,8 @@ npm run dev
 - [x] **매장 서랍 장바구니 적응형 UI (2026-08-25)** — `cart-drawer-item--drawer` · 뱃지 `fit-content` · User 실기 **✅** · §7.40
 - [x] **손님 `choice` 뱃지 카피 (2026-08-25)** — `선택형` → **`할인·가챠 선택`** · §7.41
 - [x] **결제당 1혜택 손님 안내 (2026-08-25 · AD-067)** — `promoOrderOnceHint` · `rewardPromoOnceHint` · `none` 뱃지 제거 · §7.42
+- [x] **AD-069/070 주문 수정 요청 + 취소 사유 + 푸시 (2026-08-25~26)** — migration `20260825_order_hold_supplement_ad069.sql` **원격 ✅** · `OrderReasonDialog` · `OrderHoldSupplementSection` · `OwnerOrdersPanel` hold/fulfillment · mobile `useOrderPushNotifications` · §7.44~§7.45
+- [x] **AD-071 수정 요청 다이얼로그 (2026-08-26)** — textarea overflow fix · 템플릿 저장 UI 제거 · legacy 삭제 · migration `20260826_delete_reason_template.sql` **원격 ✅** · push **`451f435`** · User 실기 **✅** · §7.46
 - [x] **구매 완료 시 "할인 vs 가챠" 선택 (AD-028, §10)** — `store_promotions`(매장별 할인%), `gacha_pools`/`gacha_pool_entries`(실제 상품+가챠 전용 아이템 혼합, 매장 공용 풀)/`gacha_rolls` 테이블+RLS, `roll_gacha()` SECURITY DEFINER 함수(서버 측 가중치 랜덤, 클라이언트 조작 불가), GUCCI 데모 매장에 10% 할인 + 가챠 아이템 4종 시드, `CartDrawer`에 결제 완료 후 혜택 선택 단계 추가
 - [x] **주문 저장 + 소비자 배송지 관리 (AD-030, §10)** — `user_addresses`(여러 배송지+별명+기본 지정) + `orders`/`order_items`(실제 주문 저장) 테이블+RLS, `place_order()`(서버가 가격·할인 재검증 후 원자적 저장) + `get_store_orders()`(점주가 본인 매장 주문+구매자 닉네임+배송지 조회) SECURITY DEFINER/INVOKER 함수, 마이페이지(`/mypage`) 배송지 관리 UI, `CartDrawer`에 배송지 선택 단계 추가, 점주 툴바 "📊 주문 관리" 연동(`OwnerOrdersPanel`)
 - [x] **Phase 4 Sprint 0 — fixture DB + occupancy (2026-07-27)** — `fixture_templates`(§42.3 8종 시드) + `display_fixtures` + `display_slots` + RLS/GRANT; `packages/game-core/src/occupancyGrid.ts` (`buildOccupancyGrid`, `canWalk`, `canPlaceFixture`); `apps/web/src/lib/displayFixtures.ts` CRUD; `packages/shared` 타입; SQL `supabase/migrations/20260727_phase4_display_fixtures.sql`
@@ -795,13 +798,16 @@ popup_store/                          # Turborepo root
 
 > **점주센터 전체 리빌드 ❌** — §58: **80% 유지 · layout만 숨김 · P1만 추가**.
 
-**다음 에이전트가 4-D·shop 손볼 때 볼 파일:**
+**다음 에이전트가 주문·수정 요청 손볼 때 볼 파일:**
 
 | 파일 | 역할 |
 |---|---|
-| `apps/web/src/pages/ShopperCartPage.tsx` · `CartView.tsx` | **전체 장바구니** 쿠팡형 행(체크·썸네·수량·가격) |
-| `apps/web/src/styles/shopper-cart-page.css` | 장바구니 다크/라이트 토큰 |
-| `apps/web/src/components/ShopperOrderCardLight.tsx` | **주문 썸네일** join (`order_items` ↔ `products`) |
+| `apps/web/src/components/OrderReasonDialog.tsx` | 점주 **손님에게 수정 요청** / 거절 **사유 선택** · **추가 설명** · legacy 템플릿 삭제 |
+| `apps/web/src/components/OrderHoldSupplementSection.tsx` | 손님 **`on_hold`** — `hold_reason_code`별 수정 UI |
+| `apps/web/src/components/OwnerOrdersPanel.tsx` | 주문 · **수정 대기** · **발주·배송** 큐 |
+| `packages/shared/src/orderReasons.ts` | `HoldReasonCode` · 기본 사유 목록 |
+| `apps/web/src/lib/orders.ts` | `holdOrder` · `submitOrderSupplement` · `deleteStoreReasonTemplate` |
+| `apps/web/src/components/ShopperOrderCardLight.tsx` | **주문 썸네일** · 수정 대기 표시 |
 | `apps/mobile/app/(shopper)/_layout.tsx` | 홈·마이·장바구니 **Tabs** (4-C · 화면 유지) |
 | `apps/mobile/app/(shopper)/cart.tsx` | 장바구니 탭 → `CartWebViewScreen` |
 | `apps/web/src/components/StoreShopCatalog.tsx` | 카드 grid · stepper · **담기/상세 버튼** |
@@ -810,21 +816,26 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**2매장 통합 결제 재확인** — push **`28c01b1`** · **Vercel 1~2min**
-
-#### Expo 재시작 여부 (이번 변경 — **필수**)
+**AD-071 — 수정 요청 다이얼로그 정리** — push **`451f435`** · User **실기 ✅ (2026-08-26)**
 
 | | |
 |---|---|
-| **수정** | `apps/web`만 (`placeUnifiedStoreOrder` · 줄금액 정렬) |
-| **Expo 재시작** | ❌ **안 해도 됨** |
-| **User** | **1~2min** → **장바구니 탭 재진입** → **2매장** 담기 → 결제 → **할인·가챠** 각 1회 |
+| **다음 우선** | AD-069 전체 플로우 추가 실기 (손님 수정 → 점주 재수락 · 발주·배송 수정 요청) · **§58 #8 P1** |
+| **상세** | **§7.46** (이번 세션) · AD-069/070 전체 = **§7.45** |
 
-**(Metro가 꺼져 있을 때만)** §0 Expo 4줄:
+#### Expo 재시작 여부 (최신 `451f435` — **web-only**)
+
+| | |
+|---|---|
+| **수정** | `apps/web`만 — `OrderReasonDialog.tsx` · `ko.ts` · `orders.ts` |
+| **Expo 재시작** | ❌ **불필요** |
+| **User** | Vercel **1~2min** · 브라우저 **새로고침(Ctrl+F5)** · 점주 → **손님에게 수정 요청** 다이얼로그 |
+
+**(AD-069 푸시·손님 앱까지 테스트할 때만 — §7.45 A 참고)**
 
 0) 폰 **Expo Go SDK 52** (Play 54+ ❌)
 
-1) **Win → `cmd` → Enter** — **집 PC**에서 (회사 PC 원격 들어가도 **집 PC cmd**)
+1) **Win → `cmd` → Enter**
 
 2) **아래 한 줄씩 복붙** (각 줄 Enter):
 
@@ -835,18 +846,19 @@ cd apps\mobile
 npx expo start --tunnel --port 8082 --clear
 ```
 
-3) **`Tunnel connected.`** 확인 → QR → `demo@shopper.com` / `demo`
+3) **`Tunnel connected.`** → QR → `demo@shopper.com` / `demo`
 
-4) **클릭 순서**
-   - **홈** → GUCCI **쇼핑하기** → **담기**
-   - **하단 「장바구니」탭**
+4) **점주 PC (Expo 재시작 ❌)** — Win → cmd → **아래 한 줄씩 복붙:**
 
-5) **합격 기준**
-   - ✅ 줄금액 **− 버튼 아래 좌측** · 결제 **1버튼**
-   - ✅ **2매장** 선택 → 할인 **또는** 가챠 → **에러 없이 완료** (프로모/풀 없는 매장 = 정가·roll 생략)
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
 
-6) **안 되면**
-   - **예전 장바구니 UI** → Vercel **1~2분** 더 · **탭 재진입** (Expo 재시작 **먼저 아님** · §0 표)
+→ `http://localhost:5173` → `demo@owner.com` / `demo` → GUCCI **매장 관리** → **주문** / **발주·배송**
+
+5) **합격 기준 (AD-071)** — §7.46 · AD-069 전체 — §7.45
    - `body` 오류 → **2) 4줄 `--tunnel` 그대로 재시도** (§0 「tunnel 실패 시」)
    - `Port 8082` → 예전 Metro **Ctrl+C** → 2) **4줄 다시**
    - WebView만 → 장바구니 탭 **나갔다 다시** (Vercel 1~2min)
@@ -929,9 +941,9 @@ npx expo start --tunnel --port 8082 --clear
 
 ---
 
-### 7.43 설계 메모 — **주문 보류(보완) + 점주 취소 사유 (AD-069 · 미착수)**
+### 7.43 설계 메모 — **주문 수정 요청 + 점주 취소 사유 (AD-069 · 구현 ✅ · AD-071 UI 정리)**
 
-> **User 2026-08-25 — 작업 전 방향 합의용.** 구현 ❌ · 아래는 에이전트 이해 + 착수 시 체크리스트.
+> **User 2026-08-25 설계 합의 → 2026-08-25~26 구현 완료.** 아래는 **아카이브 + 다음 에이전트 참고용.**
 
 #### A. 점주 **주문 취소(거절)** — 사유
 
@@ -997,9 +1009,9 @@ awaiting_accept (다시 「주문」탭 · 수락/거절/보류 가능)
 
 | 층 | 역할 |
 |---|---|
-| **1. 사유 코드 (`hold_reason_code`)** | 플랫폼·매장 **템플릿** · 코드마다 **손님 화면·가능 조치가 고정** |
-| **2. 템플릿 문구** | 기본 제공 + 점주 **추가·수정** (드롭다운 라벨) |
-| **3. 점주 메모 (optional)** | 「제주는 배송 불가」 등 **보조 설명** — 행동 UI **대체 ❌** |
+| **1. 사유 코드 (`hold_reason_code`)** | 플랫폼 **고정 코드** · 코드마다 **손님 화면·가능 조치가 고정** |
+| **2. 추가 설명 (`hold_reason_memo`)** | 점주 **자유 메모** · 손님 **읽기 전용** (행동 UI와 별개) |
+| **3. ~~점주 커스텀 드롭다운 라벨~~** | **AD-071 제거** — 「자주 쓰는 문구」가 새 사유처럼 보여 혼란 · legacy DB row = **삭제만** |
 
 **v1 기본 템플릿 → 손님 UI (예시):**
 
@@ -1010,15 +1022,68 @@ awaiting_accept (다시 「주문」탭 · 수락/거절/보류 가능)
 | `gacha_prize_oos` | 가챠 당첨품 재고 없음 | **다시 뽑기** · **당첨 포기** (둘 다) |
 | `other` | 기타 (점주 메모 필수) | **주문 취소** + 점주 메모 읽기 (v1은 보완 UI 최소) |
 
-- **취소(거절) 사유**도 동일 패턴: 코드 + 템플릿 + optional 메모 → 손님 **읽기 전용** 표시 (보완 UI 없음).
-- 점주 커스텀 템플릿 = **기존 코드 중 하나에 매핑** (새 코드 invent ❌ v1).
+- **취소(거절) 사유**도 동일 패턴: **코드 + optional 메모** → 손님 **읽기 전용** (보완 UI 없음).
+- ~~점주 커스텀 템플릿 = 기존 코드 매핑~~ → **v1 UI에서는 제거** (테이블·RPC는 legacy 삭제용 유지).
 
 ---
 
 #### G. 구현 범위
 
 - migration: `20260825_order_hold_supplement_ad069.sql` — **✅ Supabase MCP (2026-08-25)**
-- RPC · UI · push — **✅** · 카피 **AD-070** · 발주·배송 수정 요청 **✅**
+- migration: `20260826_delete_reason_template.sql` — **✅ Supabase MCP (2026-08-26)**
+- RPC · UI · push — **✅** · 카피 **AD-070** · 발주·배송 수정 요청 **✅** · 다이얼로그 **AD-071** **✅**
+
+---
+
+### 7.46 세션 인수인계 — **2026-08-26** (AD-071 · 수정 요청 다이얼로그)
+
+| | |
+|---|---|
+| **User** | ① textarea **우측 삐져나옴** ② 「자주 쓰는 문구」 **필요한가?** — 손님 UI는 **사유 코드**로 이미 제공 ③ **삭제** 필요 ④ **commit/push** 누락 지적 → push 후 **실기 ✅** |
+| **원인 1** | `textarea` `width:100%` + padding/border → **`box-sizing` 미적용** overflow |
+| **조치 1** | `OrderReasonDialog` — `boxSizing:'border-box'` · panel `overflow:hidden` |
+| **원인 2** | 「자주 쓰는 문구 추가」= **같은 `reason_code`의 드롭다운 별칭**이었으나 UI상 **새 사유**처럼 보임 · **추가 설명**과 역할 중복 |
+| **조치 2** | **저장 UI 제거** · 사유 = **고정 4종** · 점주 메모 = **「추가 설명」** only · `OrderHoldSupplementSection`은 **`hold_reason_code`만** 보면 됨 |
+| **legacy** | 예전 저장분 → 다이얼로그 하단 **삭제** · RPC `delete_store_reason_template` |
+| **코드** | `OrderReasonDialog.tsx` · `orders.ts` · `ko.ts` · `20260826_delete_reason_template.sql` |
+| **Git** | **`451f435`** push ✅ |
+| **User 실기** | **✅** — 레이아웃 OK · 템플릿 입력칸 없음 |
+
+#### UX 정리 (다음 에이전트 필독)
+
+| 점주가 고르는 것 | DB | 손님이 보는 것 |
+|---|---|---|
+| **배송지 확인·수정 필요** | `address_issue` | 배송지 **선택/변경** UI |
+| **일부 상품 재고 부족** | `line_stock_short` | 해당 줄 **수량 조정** UI |
+| **가챠 당첨품 재고 없음** | `gacha_prize_oos` | **다시 뽑기 / 포기** |
+| **기타 (설명 필수)** | `other` | 메모 읽기 + **주문 취소** mainly |
+| **추가 설명** | `hold_reason_memo` | 점주 메모 **표시만** (행동 추가 ❌) |
+
+#### Expo 재시작 여부 (`451f435`)
+
+| | |
+|---|---|
+| **`apps/web`만** | ❌ Expo 재시작 **불필요** · Vercel **1~2min** · **Ctrl+F5** |
+| **`apps/mobile`** | (이번 커밋 **미포함**) |
+
+#### User 실기 (점주 PC — §0 PC 웹 3줄)
+
+1) **Win → `cmd` → Enter**
+
+2) **아래 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) `http://localhost:5173` → `demo@owner.com` / `demo` → **손님에게 수정 요청**
+
+4) **합격**
+   - ✅ **추가 설명** 박스가 패널 **안**에 맞음
+   - ✅ **「자주 쓰는 문구 추가」·「템플릿 저장」 없음**
+   - ✅ (있으면) 예전 저장 문구 **삭제** 버튼 동작
 
 ---
 
@@ -1030,7 +1095,72 @@ awaiting_accept (다시 「주문」탭 · 수락/거절/보류 가능)
 | **DB** | `hold_reason_code` · `hold_order` · `get_my_orders` · `get_store_order_counts(on_hold)` **원격 ✅** |
 | **카피 (AD-070)** | **「손님에게 수정 요청」** · 탭/상태 **「수정 대기」** · 알림 **「주문 수정 요청」** |
 | **발주·배송** | `accepted` + **배송 전** — **손님에게 수정 요청** 버튼 (`OwnerOrdersPanel` fulfillment) |
-| **Git** | **`8b781f7`** push ✅ |
+| **Git** | **`eb54311`** push ✅ |
+
+#### Expo 재시작 여부 (§0 표 — **commit/push·테스트 안내 필수 동반**)
+
+| | |
+|---|---|
+| **`apps/mobile`** — `expo-notifications` · 푸시 훅 · `(shopper)/_layout` | ✅ **Ctrl+C** 후 **§0 Expo 4줄 `--clear`** |
+| **`apps/web`만** — 점주 주문 UI · 손님 수정 UI (WebView) | ❌ Expo 재시작 **불필요** · Vercel **1~2min** · **탭 재진입** |
+| **네이티브 패키지 추가** (`expo-notifications`) | ✅ **`npm install --legacy-peer-deps` + `--clear` 필수** |
+
+#### User 실기 (§0 전체 — **축약·「`--clear` 후…」식 금지**)
+
+**A. 손님 앱 (Expo 재시작 ✅)**
+
+0) 폰 **Expo Go SDK 52** (Play 54+ ❌)
+
+1) **Win → `cmd` → Enter**
+
+2) **아래 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+3) **`Tunnel connected.`** → QR → `demo@shopper.com` / `demo`
+
+4) **클릭 순서**
+   - **마이** → **주문내역** (또는 WebView `/app/me`)
+   - 점주가 **수정 요청** 보낸 주문 → **「수정 대기」** · 사유별 수정 UI
+   - 수정 제출 → 점주 **「수정 대기」** 탭에서 재확인
+
+5) **합격 (손님)**
+   - ✅ 주문 상태 **「수정 대기」**
+   - ✅ 점주 **수정 요청** 시 **앱 알림**(Realtime → 로컬 푸시) 또는 주문 목록 갱신
+   - ✅ 수정 제출 후 **「수락 대기」** 복귀
+
+**B. 점주 PC (Expo 재시작 ❌)**
+
+1) **Win → `cmd` → Enter**
+
+2) **아래 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) 브라우저 → `http://localhost:5173` → `demo@owner.com` / `demo` → GUCCI **매장 관리**
+
+4) **클릭 순서**
+   - **주문** 탭 → 대기 주문 → **손님에게 수정 요청** (사유 선택)
+   - **수정 대기** 탭 → 손님 제출 후 재확인 · **수락**
+   - **발주·배송** 탭 → **수락됨(자동수락 포함)** · **배송 전** → **손님에게 수정 요청**
+
+5) **합격 (점주)**
+   - ✅ 버튼 문구 **「손님에게 수정 요청」** (「보류」❌)
+   - ✅ 사이드바 **「수정 대기」** 탭 + 빨간 뱃지
+   - ✅ **발주·배송**에서도 **배송 시작 전** 수정 요청 가능
+
+6) **안 되면**
+   - WebView 주문 UI만 예전 → Vercel **1~2min** · **탭 재진입** (Expo **먼저 아님** · §0 표)
+   - 푸시 안 옴 → Expo **4줄 `--clear` 재실행** · 앱 **완전 종료** 후 QR 재스캔
 
 ---
 
@@ -1694,15 +1824,20 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
-### 2026-08-25 — AD-069 DB applied · AD-070 copy · fulfillment modify request
+### 2026-08-26 — AD-071 OrderReasonDialog layout · remove template save · legacy delete
 - **Author:** Cursor Agent / User
-- **Changed:** Supabase migration applied · `OwnerOrdersPanel` accepted tab · `ko.ts` · §7.45 · AD-070
-- **Notes:** Web Vercel 1~2min · Expo `npm install` if mobile
+- **Changed:** `OrderReasonDialog.tsx` · `orders.ts` · `ko.ts` · migration `20260826_delete_reason_template.sql` · §7.46 · AD-071 · §7.43 F · §7.0
+- **Notes:** **`apps/web`만 = Expo 재시작 ❌** · Vercel 1~2min · **Ctrl+F5** · User **실기 ✅** · push **`451f435`**
 
-### 2026-08-25 — AD-069 order hold/supplement + cancel reasons + push (code; DB apply pending)
+### 2026-08-25 — AD-069 DB applied · AD-070 copy · fulfillment · HANDOFF §7.45 Expo cmd
+- **Author:** Cursor Agent / User
+- **Changed:** Supabase migration applied · `OwnerOrdersPanel` accepted tab · `ko.ts` · §7.45 · §7.0 · AD-070
+- **Notes:** **`apps/mobile` = Expo 재시작 ✅** · **`apps/web`만 = Expo ❌** · Vercel 1~2min · **§7.45 「User 실기」= §0 Expo 4줄 + PC 3줄 코드 블록 전체** (축약 금지)
+
+### 2026-08-25 — AD-069 order hold/supplement + cancel reasons + push (code)
 - **Author:** Cursor Agent / User
 - **Changed:** migration `20260825_order_hold_supplement_ad069.sql` · shared `orderReasons` · Owner/Shopper UI · mobile push hook · §7.44
-- **Notes:** **Supabase migration ⬜ SQL Editor** · Web Vercel 1~2min · **Expo `npm install` + `--clear` 재시작** (mobile)
+- **Notes:** DB 적용 = **§7.45** · **`apps/mobile` = §0 Expo 4줄 `--clear` 필수** · web = Vercel 1~2min
 
 ### 2026-08-25 — per-store promo copy · AD-068 no-customer-doubt · §7.43 hold design memo
 - **Author:** Cursor Agent / User
