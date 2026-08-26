@@ -5,7 +5,7 @@ import {
   DEFAULT_REJECT_REASON_OPTIONS,
   type OrderReasonTemplateOption,
 } from '@popup-cube/shared';
-import { listStoreReasonTemplates, upsertStoreReasonTemplate } from '../lib/orders';
+import { deleteStoreReasonTemplate, listStoreReasonTemplates } from '../lib/orders';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 
@@ -31,7 +31,7 @@ interface OrderReasonDialogProps {
   onCancel: () => void;
 }
 
-/** AD-069 — 점주 보류/거절 사유 선택 (템플릿 + 메모 + 재고 부족 시 품목 선택) */
+/** AD-069 — 점주 보류/거절 사유 선택 (코드 → 손님 UI + optional 메모) */
 export function OrderReasonDialog({
   kind,
   storeId,
@@ -42,42 +42,32 @@ export function OrderReasonDialog({
   onCancel,
 }: OrderReasonDialogProps) {
   const defaults = kind === 'hold' ? DEFAULT_HOLD_REASON_OPTIONS : DEFAULT_REJECT_REASON_OPTIONS;
-  const [customTemplates, setCustomTemplates] = useState<OrderReasonTemplateOption[]>([]);
+  const [legacyTemplates, setLegacyTemplates] = useState<
+    Array<{ id: string; reason_code: string; label: string }>
+  >([]);
   const [reasonCode, setReasonCode] = useState<string>(defaults[0]?.reasonCode ?? 'other');
   const [memo, setMemo] = useState('');
   const [affectedIds, setAffectedIds] = useState<string[]>([]);
-  const [customLabel, setCustomLabel] = useState('');
-  const [savingTemplate, setSavingTemplate] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     void listStoreReasonTemplates(storeId, kind)
-      .then((rows) =>
-        setCustomTemplates(
-          rows.map((r) => ({
-            reasonCode: r.reason_code as HoldReasonCode | RejectReasonCode,
-            labelKey: r.label,
-          })),
-        ),
-      )
-      .catch(() => setCustomTemplates([]));
+      .then((rows) => setLegacyTemplates(rows))
+      .catch(() => setLegacyTemplates([]));
   }, [storeId, kind]);
 
   const selectedDefault = defaults.find((o) => o.reasonCode === reasonCode);
   const needsItems = kind === 'hold' && selectedDefault?.requiresAffectedItems;
   const needsMemo = selectedDefault?.requiresMemo;
 
-  const options = useMemo(() => {
-    const merged: Array<{ value: string; label: string }> = defaults.map((o) => ({
-      value: o.reasonCode,
-      label: t(o.labelKey),
-    }));
-    for (const c of customTemplates) {
-      if (typeof c.labelKey === 'string' && !c.labelKey.startsWith('orderReasons.')) {
-        merged.push({ value: c.reasonCode, label: c.labelKey });
-      }
-    }
-    return merged;
-  }, [defaults, customTemplates]);
+  const options = useMemo(
+    () =>
+      defaults.map((o: OrderReasonTemplateOption) => ({
+        value: o.reasonCode,
+        label: t(o.labelKey),
+      })),
+    [defaults],
+  );
 
   function toggleAffected(id: string) {
     setAffectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -99,18 +89,15 @@ export function OrderReasonDialog({
     });
   }
 
-  async function handleSaveTemplate() {
-    const label = customLabel.trim();
-    if (!label) return;
-    setSavingTemplate(true);
+  async function handleDeleteLegacyTemplate(templateId: string) {
+    setDeletingId(templateId);
     try {
-      await upsertStoreReasonTemplate(storeId, kind, reasonCode, label);
-      setCustomTemplates((prev) => [...prev, { reasonCode: reasonCode as HoldReasonCode, labelKey: label }]);
-      setCustomLabel('');
+      await deleteStoreReasonTemplate(templateId);
+      setLegacyTemplates((prev) => prev.filter((row) => row.id !== templateId));
     } catch {
-      window.alert(t('orderReasons.templateSaveError'));
+      window.alert(t('orderReasons.templateDeleteError'));
     } finally {
-      setSavingTemplate(false);
+      setDeletingId(null);
     }
   }
 
@@ -128,7 +115,7 @@ export function OrderReasonDialog({
           }}
         >
           {options.map((o) => (
-            <option key={`${o.value}-${o.label}`} value={o.value}>
+            <option key={o.value} value={o.value}>
               {o.label}
             </option>
           ))}
@@ -160,17 +147,24 @@ export function OrderReasonDialog({
           placeholder={t('orderReasons.memoPlaceholder')}
         />
 
-        <div style={styles.templateRow}>
-          <input
-            style={styles.templateInput}
-            value={customLabel}
-            onChange={(e) => setCustomLabel(e.target.value)}
-            placeholder={t('orderReasons.addTemplatePlaceholder')}
-          />
-          <button type="button" style={styles.secondaryBtn} disabled={savingTemplate} onClick={() => void handleSaveTemplate()}>
-            {t('orderReasons.saveTemplate')}
-          </button>
-        </div>
+        {legacyTemplates.length > 0 && (
+          <div style={styles.legacyBox}>
+            <div style={styles.legacyHint}>{t('orderReasons.legacyTemplateHint')}</div>
+            {legacyTemplates.map((row) => (
+              <div key={row.id} style={styles.legacyRow}>
+                <span style={styles.legacyLabel}>{row.label}</span>
+                <button
+                  type="button"
+                  style={styles.deleteBtn}
+                  disabled={deletingId === row.id}
+                  onClick={() => void handleDeleteLegacyTemplate(row.id)}
+                >
+                  {t('orderReasons.deleteTemplate')}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div style={styles.actions}>
           <button type="button" style={styles.secondaryBtn} onClick={onCancel}>
@@ -184,6 +178,11 @@ export function OrderReasonDialog({
     </div>
   );
 }
+
+const fieldBase: React.CSSProperties = {
+  boxSizing: 'border-box',
+  maxWidth: '100%',
+};
 
 const styles: Record<string, React.CSSProperties> = {
   overlay: {
@@ -205,10 +204,13 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: oc.shadowMd,
     border: `1px solid ${oc.border}`,
     fontFamily: ownerFont,
+    boxSizing: 'border-box',
+    overflow: 'hidden',
   },
   title: { margin: '0 0 14px', fontSize: fs.lg, color: oc.text, fontWeight: 600 },
   label: { display: 'block', fontSize: fs.sm, color: oc.textMuted, marginBottom: 6, fontWeight: 600 },
   select: {
+    ...fieldBase,
     width: '100%',
     padding: '10px 12px',
     borderRadius: 8,
@@ -223,9 +225,11 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 8,
     background: oc.surfaceMuted,
     border: `1px solid ${oc.border}`,
+    boxSizing: 'border-box',
   },
   checkRow: { display: 'flex', alignItems: 'center', gap: 8, fontSize: fs.sm, marginBottom: 6, color: oc.text },
   textarea: {
+    ...fieldBase,
     width: '100%',
     minHeight: 72,
     padding: '10px 12px',
@@ -235,14 +239,34 @@ const styles: Record<string, React.CSSProperties> = {
     resize: 'vertical',
     fontFamily: ownerFont,
     marginBottom: 10,
+    display: 'block',
   },
-  templateRow: { display: 'flex', gap: 8, marginBottom: 16 },
-  templateInput: {
-    flex: 1,
-    padding: '8px 10px',
+  legacyBox: {
+    marginBottom: 14,
+    padding: 10,
     borderRadius: 8,
+    background: oc.surfaceMuted,
+    border: `1px solid ${oc.border}`,
+    boxSizing: 'border-box',
+  },
+  legacyHint: { fontSize: fs.xs, color: oc.textMuted, marginBottom: 8, lineHeight: 1.45 },
+  legacyRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginBottom: 6,
+  },
+  legacyLabel: { fontSize: fs.sm, color: oc.text, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' },
+  deleteBtn: {
+    flexShrink: 0,
+    padding: '6px 10px',
+    borderRadius: 6,
     border: `1px solid ${oc.borderStrong}`,
-    fontSize: fs.sm,
+    background: oc.surface,
+    color: oc.danger ?? '#b42318',
+    fontSize: fs.xs,
+    cursor: 'pointer',
   },
   actions: { display: 'flex', justifyContent: 'flex-end', gap: 8 },
   primaryBtn: {

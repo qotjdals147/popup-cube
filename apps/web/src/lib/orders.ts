@@ -422,6 +422,13 @@ export async function upsertStoreReasonTemplate(
   if (error) throw new OrderError(error.message);
 }
 
+export async function deleteStoreReasonTemplate(templateId: string): Promise<void> {
+  const { error } = await supabase.rpc('delete_store_reason_template', {
+    p_template_id: templateId,
+  });
+  if (error) throw new OrderError(error.message);
+}
+
 export async function registerPushToken(expoPushToken: string): Promise<void> {
   const { error } = await supabase.rpc('register_push_token', {
     p_expo_push_token: expoPushToken,

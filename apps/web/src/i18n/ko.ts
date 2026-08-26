@@ -689,9 +689,10 @@ export const ko = {
     memoRequired: '추가 설명을 입력해 주세요.',
     itemsRequired: '재고 부족 상품을 선택해 주세요.',
     selectAffectedItems: '재고 부족 상품 선택',
-    addTemplatePlaceholder: '자주 쓰는 문구 추가',
-    saveTemplate: '템플릿 저장',
-    templateSaveError: '템플릿 저장에 실패했어요.',
+    legacyTemplateHint:
+      '예전에 저장한 문구가 있어요. 사유는 위 목록에서 고르고, 손님께 더 전할 말은 「추가 설명」에 적어 주세요.',
+    deleteTemplate: '삭제',
+    templateDeleteError: '삭제에 실패했어요.',
     hold: {
       address_issue: '배송지 확인·수정 필요',
       line_stock_short: '일부 상품 재고 부족',
