@@ -64,10 +64,21 @@ export function filterAndSortOwnerOrders(
   return list;
 }
 
+export type OwnerOrderQueue = 'pending' | 'fulfillment' | 'hold' | 'claims';
+
 /** 탭별 상태 필터 옵션 */
 export function ownerOrderStatusOptions(
-  queue: 'pending' | 'fulfillment' | 'hold'
+  queue: OwnerOrderQueue
 ): Array<{ value: 'all' | OrderStatus; labelKey: string }> {
+  if (queue === 'claims') {
+    return [
+      { value: 'all', labelKey: 'ownerOrders.filterStatusAll' },
+      { value: 'shipped', labelKey: 'ownerOrders.status.shipped' },
+      { value: 'delivery_completed', labelKey: 'ownerOrders.status.delivery_completed' },
+      { value: 'purchase_confirmed', labelKey: 'ownerOrders.status.purchase_confirmed' },
+      { value: 'completed', labelKey: 'ownerOrders.status.completed' },
+    ];
+  }
   if (queue === 'hold') {
     return [
       { value: 'all', labelKey: 'ownerOrders.filterStatusAll' },

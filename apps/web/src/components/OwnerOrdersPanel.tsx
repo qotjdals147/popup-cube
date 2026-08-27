@@ -19,12 +19,13 @@ import {
   filterAndSortOwnerOrders,
   ownerOrderStatusOptions,
   type OwnerOrderFilters,
+  type OwnerOrderQueue,
 } from '../lib/ownerOrderFilters';
 import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 
-export type OwnerOrderQueue = 'pending' | 'fulfillment' | 'hold';
+export type { OwnerOrderQueue } from '../lib/ownerOrderFilters';
 
 interface OwnerOrdersPanelProps {
   storeId: string;
@@ -78,11 +79,20 @@ export function OwnerOrdersPanel({
 
   const filtered = useMemo(() => {
     const byQueue = orders.filter((o) => {
+      if (activeQueue === 'claims') return o.claim_status === 'open';
       if (activeQueue === 'hold') return isOnHoldOrderStatus(o.status);
       if (activeQueue === 'pending') return isPendingOrderStatus(o.status);
       return isFulfillmentOrderStatus(o.status);
     });
-    return filterAndSortOwnerOrders(byQueue, filters);
+    const list = filterAndSortOwnerOrders(byQueue, filters);
+    if (activeQueue === 'claims') {
+      return [...list].sort((a, b) => {
+        const ta = a.claim_created_at ? new Date(a.claim_created_at).getTime() : 0;
+        const tb = b.claim_created_at ? new Date(b.claim_created_at).getTime() : 0;
+        return filters.sort === 'oldest' ? ta - tb : tb - ta;
+      });
+    }
+    return list;
   }, [orders, activeQueue, filters]);
 
   const statusOptions = useMemo(() => ownerOrderStatusOptions(activeQueue), [activeQueue]);
@@ -137,7 +147,9 @@ export function OwnerOrdersPanel({
       ? 'ownerOrders.titlePending'
       : activeQueue === 'hold'
         ? 'ownerOrders.titleHold'
-        : 'ownerOrders.titleFulfillment';
+        : activeQueue === 'claims'
+          ? 'ownerOrders.titleClaims'
+          : 'ownerOrders.titleFulfillment';
 
   const panelBody = (
     <>
@@ -240,7 +252,9 @@ export function OwnerOrdersPanel({
                 ? t('ownerOrders.emptyPending')
                 : activeQueue === 'hold'
                   ? t('ownerOrders.emptyHold')
-                  : t('ownerOrders.emptyFulfillment')}
+                  : activeQueue === 'claims'
+                    ? t('ownerOrders.emptyClaims')
+                    : t('ownerOrders.emptyFulfillment')}
           </p>
         )}
 
@@ -348,7 +362,8 @@ export function OwnerOrdersPanel({
                   <p style={styles.cancelledNote}>{t('ownerOrders.cancelledByShopperNote')}</p>
                 )}
 
-                {order.claim_status !== 'none' && (
+                {order.claim_status !== 'none' &&
+                  (activeQueue === 'claims' || order.claim_status === 'resolved') && (
                   <div style={styles.claimBox}>
                     <div style={styles.claimHeader}>
                       <span style={styles.claimTitle}>{t('ownerOrders.claimTitle')}</span>

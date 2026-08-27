@@ -618,6 +618,8 @@ export interface StoreOrderCounts {
 
   onHold: number;
 
+  openClaims: number;
+
 }
 
 
@@ -872,6 +874,8 @@ export async function getStoreOrderCounts(storeId: string): Promise<StoreOrderCo
     awaitingShip: Number(row?.awaiting_ship ?? 0),
 
     onHold: Number(row?.on_hold ?? 0),
+
+    openClaims: Number(row?.open_claims ?? 0),
 
   };
 

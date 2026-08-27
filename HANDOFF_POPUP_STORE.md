@@ -912,7 +912,7 @@ npx expo start --tunnel --port 8082 --clear
 
 | Phase | 이름 | 범위 | 산출물 |
 |---|---|---|---|
-| **R1** | **탭·큐** | `StoreEditPage` **「반품·교환」** 탭 · `claim_status=open` 필터 · 사이드바 **뱃지** · Realtime(선택) | 기존 RPC **재사용** · UX만 분리 |
+| **R1** | **탭·큐** | `StoreEditPage` **「반품·교환」** 탭 · `claim_status=open` 필터 · 사이드바 **뱃지** · Realtime | ✅ **2026-08-27** · §7.51 |
 | **R2** | **구조화 신청** | `order_returns` 테이블 · 사유 코드(불량/오배송/단순변심…) · **일부/전체** · 손님 **반품지 안내** 자동 표시 | `request_return` · `approve_return` · `reject_return` |
 | **R3** | **물류·재고** | 손님 **반품 송장**(선택) · 점주 **입고 확인** → **재고 +** · 가챠/할인 **롤백 정책** | §52.2 구현 |
 | **R4** | **환불** | PG webhook **환불** · mock = **「환불 처리됨」** 상태만 | AD-061 **후** |
@@ -2133,6 +2133,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-27 — AD-073 R1 seller returns tab (implementation)
+- **Author:** Cursor Agent
+- **Changed:** `StoreEditPage` · `OwnerOrdersPanel` · `useOwnerOrderRealtime` · `orders.ts` · `ownerOrderFilters` · `ko.ts` · migration `20260827_get_store_order_counts_open_claims.sql` · §7.51
+- **Notes:** **Expo 재시작 ❌** · Vercel 1~2min · PC Ctrl+F5 · Supabase migration ✅
 
 ### 2026-08-27 — AD-076 shopper notifications tab · return address API (design)
 - **Author:** Cursor Agent / User

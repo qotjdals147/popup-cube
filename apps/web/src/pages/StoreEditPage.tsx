@@ -17,7 +17,7 @@ import { isWorldEnabled } from '../lib/featureFlags';
 import { t } from '../i18n';
 import type { StoreSummary } from '@popup-cube/shared';
 
-type EditTab = 'overview' | 'products' | 'orders' | 'hold' | 'fulfillment' | 'promotions' | 'layout' | 'policy';
+type EditTab = 'overview' | 'products' | 'orders' | 'hold' | 'fulfillment' | 'returns' | 'promotions' | 'layout' | 'policy';
 
 function formatBadgeCount(n: number): string {
   if (n <= 0) return '';
@@ -54,6 +54,7 @@ export function StoreEditPage() {
     pendingAccept,
     awaitingShip,
     onHold,
+    openClaims,
     toastMessage,
     dismissToast,
     refreshTick,
@@ -256,6 +257,7 @@ export function StoreEditPage() {
     { id: 'orders', label: t('ownerEdit.tabOrders'), badge: pendingAccept },
     { id: 'hold', label: t('ownerEdit.tabHold'), badge: onHold },
     { id: 'fulfillment', label: t('ownerEdit.tabFulfillment'), badge: awaitingShip },
+    { id: 'returns', label: t('ownerEdit.tabReturns'), badge: openClaims },
     { id: 'promotions', label: t('ownerEdit.tabPromotions') },
     { id: 'policy', label: t('ownerEdit.tabPolicy') },
     ...(worldEnabled ? [{ id: 'layout' as const, label: t('ownerEdit.tabLayout') }] : []),
@@ -508,6 +510,10 @@ export function StoreEditPage() {
               queue="fulfillment"
               refreshTick={refreshTick}
             />
+          )}
+
+          {!loading && !error && tab === 'returns' && storeId && (
+            <OwnerOrdersPanel storeId={storeId} embedded queue="claims" refreshTick={refreshTick} />
           )}
 
           {!loading && !error && tab === 'layout' && storeId && (
