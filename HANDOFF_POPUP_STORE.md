@@ -1151,6 +1151,7 @@ stores.default_return_address_id  -- FK, nullable
 | **Scope** | **R1.5** — `order_claim_messages` · 이력 모달 · 접수·답변 시각 |
 | **변경** | `OrderClaimSection` · `OrderClaimHistoryModal` · `ShopperOrderCardLight` · `OwnerOrdersPanel` · `orders.ts` · `ko.ts` |
 | **DB** | `20260827_order_claim_messages_ad077.sql` · Supabase POPUP **✅** |
+| **Git** | **`6e93c7f`** push ✅ |
 
 #### Expo 재시작 여부 — **web-only**
 
