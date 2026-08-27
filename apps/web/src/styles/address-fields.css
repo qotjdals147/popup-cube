@@ -1,0 +1,141 @@
+/* AD-076 — 주소 검색 · embed 모달 · 손님/점주 공통 */
+
+.address-input-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.address-input-block__section-label {
+  margin: 12px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.address-input-block--light .address-input-block__section-label {
+  color: #6b7684;
+}
+
+.address-input-block--dark .address-input-block__section-label {
+  color: #a0a0c0;
+}
+
+.address-input-block__postal-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.address-input-block__postal {
+  flex: 1;
+  min-width: 0;
+}
+
+.address-search-btn {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.address-search-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.address-search-btn--light {
+  border: 1px solid #3182f6;
+  background: #fff;
+  color: #3182f6;
+}
+
+.address-search-btn--dark {
+  border: 1px solid #4062a0;
+  background: #13284d;
+  color: #d8e6ff;
+}
+
+.address-input-block__input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.address-input-block--light .address-input-block__input {
+  border: 1px solid #e5e8eb;
+  background: #fff;
+  color: #191f28;
+}
+
+.address-input-block--light .address-input-block__postal {
+  background: #f9fafb;
+  color: #4e5968;
+}
+
+.address-input-block--dark .address-input-block__input {
+  border: 1px solid #2c4270;
+  background: #0f3460;
+  color: #fff;
+}
+
+.address-input-block--dark .address-input-block__postal {
+  background: #0a2548;
+  color: #c8d4e8;
+}
+
+/* 다음 우편 embed — WebView 전체화면 */
+.address-postcode-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.address-postcode-modal__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 12px;
+  border-bottom: 1px solid #e5e8eb;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.address-postcode-modal__close {
+  border: none;
+  background: transparent;
+  color: #191f28;
+  font-size: 20px;
+  line-height: 1;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.address-postcode-modal__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #191f28;
+}
+
+.address-postcode-modal__embed {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.address-postcode-modal__error {
+  padding: 24px 16px;
+  color: #f04452;
+  font-size: 14px;
+  text-align: center;
+}

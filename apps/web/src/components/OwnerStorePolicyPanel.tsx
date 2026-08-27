@@ -8,7 +8,7 @@ import {
   formatIntegerInputRaw,
   parseIntegerInput,
 } from '../lib/formatInteger';
-import { AddressSearch } from './AddressSearch';
+import { AddressInputBlock } from './AddressInputBlock';
 
 interface OwnerStorePolicyPanelProps {
   storeId: string;
@@ -123,35 +123,22 @@ export function OwnerStorePolicyPanel({ storeId }: OwnerStorePolicyPanelProps) {
           value={draft.return_phone ?? ''}
           onChange={(e) => patch({ return_phone: e.target.value })}
         />
-        <div style={styles.addressSearchWrap}>
-          <AddressSearch
-            appearance="light"
-            onSelect={(result) =>
-              patch({
-                return_postal_code: result.postal_code,
-                return_address_line1: result.address_line1,
-                return_address_line2: result.address_line2 ?? draft.return_address_line2 ?? '',
-              })
-            }
-          />
-        </div>
-        <label style={styles.label}>{t('ownerPolicy.returnPostalLabel')}</label>
-        <input
-          style={styles.input}
-          value={draft.return_postal_code ?? ''}
-          onChange={(e) => patch({ return_postal_code: e.target.value })}
-        />
-        <label style={styles.label}>{t('ownerPolicy.returnAddressLabel')}</label>
-        <input
-          style={styles.input}
-          value={draft.return_address_line1 ?? ''}
-          onChange={(e) => patch({ return_address_line1: e.target.value })}
-        />
-        <input
-          style={styles.input}
-          value={draft.return_address_line2 ?? ''}
-          onChange={(e) => patch({ return_address_line2: e.target.value })}
-          placeholder={t('ownerPolicy.returnAddressLine2Placeholder')}
+        <AddressInputBlock
+          appearance="light"
+          showSectionLabel
+          line2Placeholder={t('ownerPolicy.returnAddressLine2Placeholder')}
+          values={{
+            postal_code: draft.return_postal_code ?? '',
+            address_line1: draft.return_address_line1 ?? '',
+            address_line2: draft.return_address_line2 ?? '',
+          }}
+          onChange={(fields) =>
+            patch({
+              ...(fields.postal_code !== undefined ? { return_postal_code: fields.postal_code } : {}),
+              ...(fields.address_line1 !== undefined ? { return_address_line1: fields.address_line1 } : {}),
+              ...(fields.address_line2 !== undefined ? { return_address_line2: fields.address_line2 } : {}),
+            })
+          }
         />
       </div>
 
@@ -249,7 +236,6 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sectionTitle: { margin: '0 0 12px', fontSize: fs.lg, color: oc.text, fontWeight: 700 },
   label: { display: 'block', color: oc.textMuted, fontSize: fs.sm, margin: '10px 0 6px' },
-  addressSearchWrap: { margin: '12px 0 4px' },
   input: {
     width: '100%',
     padding: '10px 12px',

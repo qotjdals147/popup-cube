@@ -2382,6 +2382,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-08-27 — AD-076 AddressSearch UI + WebView embed modal
+- **Author:** Cursor Agent / User
+- **Changed:** `AddressPostcodeModal` · `AddressInputBlock` · `address-fields.css` · embed 방식 · 손님/점주 레이아웃
+- **Notes:** **Expo 재시작 ❌** · popup→**전체화면 embed**(WebView) · 우편번호+검색 **한 줄**
+
 ### 2026-08-27 — AD-076 owner return address AddressSearch
 - **Author:** Cursor Agent / User
 - **Changed:** `OwnerStorePolicyPanel.tsx` · §7.55

@@ -1,4 +1,4 @@
-/** Daum(카카오) 우편번호 embed — AD-076 AddressSearch */
+/** Daum(카카오) 우편번호 embed — AD-076 · WebView는 popup ❌ → embed 모달 */
 
 const SCRIPT_URL = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
 
@@ -23,7 +23,9 @@ declare global {
       Postcode: new (options: {
         oncomplete: (data: DaumPostcodeData) => void;
         onclose?: (state: 'FORCE_CLOSE' | 'COMPLETE_CLOSE') => void;
-      }) => { open: () => void };
+        width?: string | number;
+        height?: string | number;
+      }) => { embed: (element: HTMLElement) => void };
     };
   }
 }
@@ -66,26 +68,31 @@ function mapDaumResult(data: DaumPostcodeData): DaumPostcodeResult {
   };
 }
 
-/** 우편번호 검색 팝업. 취소 시 `null`. */
-export async function openDaumPostcodeSearch(): Promise<DaumPostcodeResult | null> {
+/** 페이지/모달 안에 embed (모바일 WebView·중첩 모달 OK). */
+export async function embedDaumPostcode(
+  container: HTMLElement,
+  callbacks: {
+    onComplete: (result: DaumPostcodeResult) => void;
+    onForceClose?: () => void;
+  },
+): Promise<void> {
   await loadDaumPostcodeScript();
   if (!window.daum?.Postcode) {
     throw new Error('Daum Postcode unavailable');
   }
 
-  return new Promise((resolve) => {
-    let completed = false;
+  container.replaceChildren();
 
-    new window.daum.Postcode({
-      oncomplete: (data) => {
-        completed = true;
-        resolve(mapDaumResult(data));
-      },
-      onclose: (state) => {
-        if (!completed && state === 'FORCE_CLOSE') {
-          resolve(null);
-        }
-      },
-    }).open();
-  });
+  new window.daum.Postcode({
+    oncomplete: (data) => {
+      callbacks.onComplete(mapDaumResult(data));
+    },
+    onclose: (state) => {
+      if (state === 'FORCE_CLOSE') {
+        callbacks.onForceClose?.();
+      }
+    },
+    width: '100%',
+    height: '100%',
+  }).embed(container);
 }

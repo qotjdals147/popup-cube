@@ -1,6 +1,5 @@
 import { t } from '../i18n';
-import { type DaumPostcodeResult } from '../lib/daumPostcode';
-import { AddressSearch } from './AddressSearch';
+import { AddressInputBlock } from './AddressInputBlock';
 
 export interface AddressFormValues {
   label: string;
@@ -41,69 +40,55 @@ interface AddressFormFieldsProps {
  */
 export function AddressFormFields({ values, onChange, appearance = 'dark' }: AddressFormFieldsProps) {
   const inputStyle = appearance === 'light' ? styles.inputLight : styles.input;
+
   function set<K extends keyof AddressFormValues>(key: K, value: string) {
     onChange({ ...values, [key]: value });
   }
 
-  function applySearchResult(result: DaumPostcodeResult) {
-    onChange({
-      ...values,
-      postal_code: result.postal_code,
-      address_line1: result.address_line1,
-      address_line2: result.address_line2 ?? values.address_line2,
-    });
-  }
-
   return (
-    <div style={styles.grid}>
-      <input
-        style={inputStyle}
-        value={values.label}
-        onChange={(e) => set('label', e.target.value)}
-        placeholder={t('mypage.labelPlaceholder')}
-        maxLength={40}
-      />
-      <input
-        style={inputStyle}
-        value={values.recipient_name}
-        onChange={(e) => set('recipient_name', e.target.value)}
-        placeholder={t('mypage.recipientPlaceholder')}
-        maxLength={60}
-      />
-      <input
-        style={{ ...inputStyle, gridColumn: '1 / -1' }}
-        value={values.phone}
-        onChange={(e) => set('phone', e.target.value)}
-        placeholder={t('mypage.phonePlaceholder')}
-        maxLength={20}
-      />
-      <AddressSearch appearance={appearance} onSelect={applySearchResult} />
-      <input
-        style={inputStyle}
-        value={values.postal_code}
-        onChange={(e) => set('postal_code', e.target.value)}
-        placeholder={t('mypage.postalCodePlaceholder')}
-        maxLength={10}
-      />
-      <input
-        style={{ ...inputStyle, gridColumn: '1 / -1' }}
-        value={values.address_line1}
-        onChange={(e) => set('address_line1', e.target.value)}
-        placeholder={t('mypage.addressLine1Placeholder')}
-        maxLength={200}
-      />
-      <input
-        style={{ ...inputStyle, gridColumn: '1 / -1' }}
-        value={values.address_line2}
-        onChange={(e) => set('address_line2', e.target.value)}
-        placeholder={t('mypage.addressLine2Placeholder')}
-        maxLength={200}
+    <div style={styles.root}>
+      <div style={styles.grid}>
+        <input
+          style={inputStyle}
+          value={values.label}
+          onChange={(e) => set('label', e.target.value)}
+          placeholder={t('mypage.labelPlaceholder')}
+          maxLength={40}
+        />
+        <input
+          style={inputStyle}
+          value={values.recipient_name}
+          onChange={(e) => set('recipient_name', e.target.value)}
+          placeholder={t('mypage.recipientPlaceholder')}
+          maxLength={60}
+        />
+        <input
+          style={{ ...inputStyle, gridColumn: '1 / -1' }}
+          value={values.phone}
+          onChange={(e) => set('phone', e.target.value)}
+          placeholder={t('mypage.phonePlaceholder')}
+          maxLength={20}
+        />
+      </div>
+      <AddressInputBlock
+        appearance={appearance}
+        values={{
+          postal_code: values.postal_code,
+          address_line1: values.address_line1,
+          address_line2: values.address_line2,
+        }}
+        onChange={(patch) => onChange({ ...values, ...patch })}
       />
     </div>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 0,
+  },
   grid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
