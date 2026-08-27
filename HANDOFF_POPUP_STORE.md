@@ -1129,6 +1129,37 @@ stores.default_return_address_id  -- FK, nullable
 
 ---
 
+### 7.51 세션 인수인계 — **2026-08-27** (AD-073 R1 · 반품·교환 탭 **구현**)
+
+| | |
+|---|---|
+| **Scope** | **R1** — AddressSearch · 반품지 · R2 = 다음 |
+| **변경** | `StoreEditPage` **「반품·교환」** 탭 + **open_claims 뱃지** · `OwnerOrdersPanel` `queue=claims` · 발주·배송 = **resolved 클레임만** 표시 |
+| **DB** | `20260827_get_store_order_counts_open_claims.sql` · **`open_claims`** · Supabase POPUP **✅** |
+| **Git** | **`b942e7e`** push ✅ |
+
+#### Expo 재시작 여부
+
+| 변경 | Expo 재시작 |
+|---|---|
+| `apps/web` only | **❌** · Ctrl+C 불필요 |
+| Vercel | push 후 **1~2min** · 점주 **Ctrl+F5** |
+
+#### PC 실기 (§0)
+
+```cmd
+cd C:\Users\qotjd\Downloads\Cursor\popup_store\apps\web
+npm run dev
+```
+
+→ demo@owner · GUCCI · **반품·교환** 탭 · 손님 **문의하기** → 뱃지 + 목록
+
+#### 다음
+
+1. **AddressSearch** + 배송지 (AD-076) 2. **store_return_addresses** 3. **R2**
+
+---
+
 #### 🚪 런칭 게이트 (AD-061 — User 2026-08-13 확정)
 
 > **전략:** PG **코드·가맹·사업자**를 **맨 마지막**에 묶는다. 그 전까지 mock으로 **주문·점주·배송·클레임·상세·리뷰** 전부 완성해 두면, 런칭 직전에는 아래만 하면 된다.
