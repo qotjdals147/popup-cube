@@ -707,11 +707,7 @@
 }
 
 .shopper-account-main .oh-hold-memo {
-  margin: 8px 0 0;
-  padding: 8px 10px;
-  border-radius: 6px;
-  background: #f8f9fa;
-  border-left: 3px solid #fab005;
+  margin: 6px 0 0;
   font-size: 13px;
   color: var(--acct-text-secondary);
   line-height: 1.5;

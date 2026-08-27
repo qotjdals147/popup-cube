@@ -711,7 +711,7 @@ export const ko = {
   orderHold: {
     title: '주문 수정이 필요해요',
     storeNoticeLabel: '매장 안내',
-    actionStepLabel: '해주실 일',
+    actionStepLabel: '요청사항',
     submitSupplement: '수정 내용 제출',
     supplementError: '보완 제출에 실패했어요. 다시 시도해 주세요.',
     pickAddress: '배송지 선택',
