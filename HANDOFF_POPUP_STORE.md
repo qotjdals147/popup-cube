@@ -214,6 +214,7 @@
 9. **commit/push·테스트 안내 = Expo 재시작 여부 표 필수 동반 (User 2026-08-25 — 절대 규칙)**
    - **❌ 금지:** 「push 했으니 `--clear` 재시작」만 단독 안내 · web-only 수정인데 **매번 Expo 껐다 켜라**고만 말하기
    - **✅ 필수:** 아래 **「Expo 재시작 여부」표**에서 **이번 커밋에 해당하는 행**을 **반드시** 같이 적는다 (Changelog · §7 「사용자가 지금 해야 할 것」 · 대화 답변 **전부**)
+   - **✅ 필수 (User 2026-08-27 재확인):** **Expo 재시작 ❌**여도 **Win→cmd · §0 Expo 4줄 / PC 3줄 코드 블록은 생략하지 않는다** — 차이는 **「Ctrl+C / `--clear` 재시작 불필요」** 문구만 추가 · **「Vercel 1~2min · 탭 재진입」만** 쓰고 cmd 블록 빼기 **❌**
    - **push:** WebView(`apps/web`) 수정 시 **「푸쉬해줘?」 묻지 말고 push** (기존 규칙 유지)
 10. **앱 실기 — 무엇을 바꿨는지에 따라 (User 2026-08-14 + 2026-08-25 정리)**
    - 상세 표 = **아래 「Expo 재시작 여부」** · **네이티브 UI**(`apps/mobile`) 변경 시에만 Metro **`--clear` 재시작** 필수
@@ -233,7 +234,7 @@
 **에이전트 체크 (매 commit/push·테스트 안내):**
 1. 변경 파일이 **`apps/web`만**인지 **`apps/mobile` 포함**인지 판별
 2. 위 표 **해당 1~2행**을 User 답변·§7·Changelog **Notes**에 **반드시** 포함
-3. Expo 4줄 블록은 **Metro가 꺼져 있을 때** 또는 **재시작 필요 행(✅)** 일 때 전체 제시 · web-only면 **「Expo 재시작 ❌ · Vercel 1~2min · 탭 재진입」**을 **먼저** 쓴다
+3. **§0 Expo 4줄 · PC 3줄 블록 = 항상 제시** (테스트 안내·§7·Changelog). **web-only**면 **먼저** 「Expo 재시작 ❌ · Metro **Ctrl+C 불필요** · Vercel 1~2min · 탭 재진입」 — **블록 생략 ❌** (User 2026-08-27)
 
 **적용 확인 (네이티브 변경 시만):** 하단 **홈·마이·장바구니 3탭** · 마이 **⚙️** · **주문내역/배송지** 퀵아이콘 — 안 바뀌면 `--clear` 재시작
 
@@ -818,28 +819,28 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**AD-072 — 손님 수정 대기 UI 계층** — push **`5c93654`** · User **AD-069 플로우 실기 ✅ (오류 없음)**
+**AD-072 — 손님 수정 대기 UI 계층** — push **`379042b`** · User **AD-069 플로우 실기 ✅**
 
 | | |
 |---|---|
-| **다음 우선** | push 후 Vercel **1~2min** → 손님 **주문내역** 노란 박스 **매장 안내 / 해주실 일** 구분 확인 · **§58 #8 P1** |
-| **상세** | **§7.47** · AD-069 전체 = **§7.45**
+| **다음 우선** | 아래 실기 → **매장 안내 / 해주실 일** 카드 구분 확인 · **§58 #8 P1** |
+| **상세** | **§7.47**
 
-#### Expo 재시작 여부 (최신 — **web-only**)
+#### Expo 재시작 여부 (최신 `379042b` — **web-only**)
 
 | | |
 |---|---|
 | **수정** | `apps/web` — `OrderHoldSupplementSection.tsx` · `shopper-account-panels.css` · `ko.ts` |
-| **Expo 재시작** | ❌ **불필요** |
-| **User** | Vercel **1~2min** · 앱 **마이 → 주문내역** 탭 **재진입** (WebView)
+| **Expo(Metro) 재시작** | ❌ **불필요** — **Ctrl+C / `--clear` 하지 말 것** (Metro 켜 둔 채 OK) |
+| **User** | **`main` push** → Vercel **1~2min** → **마이 → 주문내역** 탭 **나갔다 다시** |
 
-**(AD-069 푸시·손님 앱까지 테스트할 때만 — §7.45 A 참고)**
+#### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
 
 0) 폰 **Expo Go SDK 52** (Play 54+ ❌)
 
 1) **Win → `cmd` → Enter**
 
-2) **아래 한 줄씩 복붙** (각 줄 Enter):
+2) **Expo 재시작 ❌** — Metro **이미 켜져 있으면 3) 생략** · **꺼져 있을 때만** 아래 **한 줄씩 복붙:**
 
 ```
 cd C:\Users\qotjd\Downloads\Cursor\popup_store
@@ -850,7 +851,15 @@ npx expo start --tunnel --port 8082 --clear
 
 3) **`Tunnel connected.`** → QR → `demo@shopper.com` / `demo`
 
-4) **점주 PC (Expo 재시작 ❌)** — Win → cmd → **아래 한 줄씩 복붙:**
+4) **클릭 순서**
+   - **마이** → **주문내역**
+   - **수정 대기** 주문 → 노란 박스 **「매장 안내」** / **「해주실 일」** / 배송지 선택 구분
+
+5) **합격 (AD-072)**
+   - ✅ 사유·점주 메모·행동 안내가 **카드 2개**로 구분
+   - ✅ **배송지 선택** = 별도 흰 입력 박스
+
+6) **점주 PC만 볼 때 (선택)** — Win → cmd → **한 줄씩 복붙:**
 
 ```
 cd C:\Users\qotjd\Downloads\Cursor\popup_store
@@ -858,13 +867,11 @@ npm install --legacy-peer-deps
 npm run dev
 ```
 
-→ `http://localhost:5173` → `demo@owner.com` / `demo` → GUCCI **매장 관리** → **주문** / **발주·배송**
+→ `http://localhost:5173` → `demo@owner.com` / `demo`
 
-5) **합격 기준 (AD-071)** — §7.46 · AD-069 전체 — §7.45
-   - `body` 오류 → **2) 4줄 `--tunnel` 그대로 재시도** (§0 「tunnel 실패 시」)
-   - `Port 8082` → 예전 Metro **Ctrl+C** → 2) **4줄 다시**
-   - WebView만 → 장바구니 탭 **나갔다 다시** (Vercel 1~2min)
-   - `JWT issued at future` → 폰 **날짜·시간 자동** → 재로그인
+7) **안 되면**
+   - 예전 UI → Vercel **1~2min** 더 · **탭 재진입** (Expo **재시작 먼저 아님**)
+   - Metro 꺼져 있음 → **2) 4줄** 실행
 
 ---
 
@@ -1044,7 +1051,33 @@ awaiting_accept (다시 「주문」탭 · 수락/거절/보류 가능)
 | **User** | AD-069 수정 요청 **플로우 실기 OK** · 노란 박스 안 **사유 + 「배송지를…」** 문장이 **글자만 나열**돼 보기 불편 |
 | **조치** | `OrderHoldSupplementSection` — **「매장 안내」** 카드(사유 굵게 · 점주 메모 별도 인용) · **「해주실 일」** 카드(행동 안내) · **배송지 선택** = 흰 입력 박스 |
 | **코드** | `OrderHoldSupplementSection.tsx` · `shopper-account-panels.css` · `ko.ts` (`storeNoticeLabel` · `actionStepLabel`) |
-| **Expo** | **web-only ❌** · Vercel 1~2min · **마이 → 주문내역 탭 재진입** |
+| **Git** | **`379042b`** push ✅ |
+
+#### Expo 재시작 여부 (`379042b` — **web-only**)
+
+| | |
+|---|---|
+| **Expo(Metro) 재시작** | ❌ **Ctrl+C / `--clear` 불필요** |
+| **User** | Vercel **1~2min** · **마이 → 주문내역** 탭 재진입 |
+
+#### User 실기 (§0 — **cmd 블록 필수**)
+
+0) **Expo Go SDK 52**
+
+1) **Win → `cmd` → Enter**
+
+2) **Expo 재시작 ❌** — Metro 켜져 있으면 **3) 생략** · 꺼져 있으면 **한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+3) QR → `demo@shopper.com` / `demo` → **마이 → 주문내역** → **수정 대기** 주문
+
+4) **합격:** **매장 안내** / **해주실 일** / 입력 박스 **3단 구분**
 
 #### 손님 노란 박스 구조 (AD-072)
 
@@ -1227,7 +1260,7 @@ npm run dev
 
 > **손님 FAQ:** 가챠 뱃지 여러 개 ≠ 뽑기 여러 번. **§7.40 · AD-067**
 
-#### User 실기 체크 (§0 — web-only면 Expo 4줄 생략 · PC 브라우저/Vercel)
+#### User 실기 체크 (§0 — **Expo 재시작 여부 표 + cmd 블록 필수** · PC/Vercel 또는 앱 WebView)
 
 1. GUCCI 점주 → 프로모 탭에서 상품별 모드 섞기 (`discount_only` + `choice` + `none`)
 2. 손님 장바구니 — **줄마다 뱃지·할인 취소선** 확인
@@ -1846,10 +1879,10 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
-### 2026-08-27 — AD-072 shopper hold box visual hierarchy
+### 2026-08-27 — AD-072 shopper hold box visual hierarchy · §0 Expo cmd rule clarify
 - **Author:** Cursor Agent / User
-- **Changed:** `OrderHoldSupplementSection.tsx` · `shopper-account-panels.css` · `ko.ts` · §7.47 · AD-072 · §7.0
-- **Notes:** **`apps/web`만 = Expo 재시작 ❌** · Vercel 1~2min · **마이 → 주문내역 탭 재진입** · User AD-069 플로우 **OK**
+- **Changed:** `OrderHoldSupplementSection.tsx` · `shopper-account-panels.css` · `ko.ts` · §7.47 · §7.0 · §0 rule 9·236 · AD-072
+- **Notes:** **Expo 재시작 ❌** · **§0 Expo 4줄 블록 생략 금지** (User 2026-08-27) · Vercel 1~2min · 탭 재진입 · **§7.0 「User 실기」전체**
 
 ### 2026-08-26 — AD-071 OrderReasonDialog layout · remove template save · legacy delete
 - **Author:** Cursor Agent / User
