@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.58` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.59` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -540,7 +540,7 @@ npm run dev
 | AD-073 | **(설계 · User 2026-08-27) 반품·교환 v2 로드맵** — 지금 = **반품지·안내 + 클레임 v1** · v2 = **전용 탭·구조화 신청·입고·환불** · **문의 = AD-077 유지·병행** · §7.48~§7.49 · §7.52 | User 2026-08-27 | 2026-08-27 |
 | AD-074 | **(확정 · User 2026-08-27) 반품 정책·가챠 반납·판매자센터 확장** — **단순변심 = 점주 설정(ON/OFF·기간)** · **교환+반품 둘 다** · **가챠 반납 3상태**(반납 완료/예정/불가) · §7.49 · §53.9 | User 2026-08-27 | 2026-08-27 |
 | AD-075 | **(확정 · User 2026-08-27) 기능 구현 연관점 필수** — 주문번호·알림·재고·RPC·양쪽 UI·뱃지 등 **한 기능 = 연쇄 갱신** · 에이전트 **§62 체크리스트** 매번 · §0 | User 2026-08-27 | 2026-08-27 |
-| AD-076 | **(확정 · User 2026-08-27) 손님 알림 탭 + 반품지 주소 API** — **알림** = 마이 **「알림」** 탭 (`order_notifications`) · **반품지** = **배송지와 동일 CRUD + 우편 검색** (`AddressSearch` · `store_return_addresses`) · §7.50 | User 2026-08-27 | 2026-08-27 |
+| AD-076 | **(부분 ✅ · User 2026-08-28) 손님 알림 탭 + 반품지** — **반품지 ✅** `store_return_addresses` · `OwnerReturnAddressPanel` · AddressSearch · **알림 탭 UI ⬜** · §7.58~§7.59 | User 2026-08-27 | 2026-08-27 |
 | AD-077 | **(구현 ✅ · User实기 ✅ 2026-08-27) 문의 유지 + 이력·타임스탬프** — **「문의하기」유지** · **2회차+「문의 전체 기록」** · **접수·답변 시각 필수** · R2 **반품 신청 별도** · §7.52~§7.54 | User 2026-08-27 | 2026-08-27 |
 | AD-078 | **(계획 · User 2026-08-27) 소셜 로그인** — **카카오 · 네이버 · 구글** (+ iOS **Apple** if other social) · **Supabase Auth OAuth** · 손님 **앱 로그인** 우선 · **로그인 API 무료**(과금 ❌) · **AD-034 자동 로그인**과 함께 · §33.1 · §7.57 | User 2026-08-27 | 2026-08-27 |
 | AD-062 | **(확정) v1 = 팝업 쇼핑몰 런칭 · 픽셀 월드 v2 보존** — CEO(mr심) 2026-08-13: Google 실물=PG 확정 · 월드+PG UX 이질감 · **에이블리/룩핀형 쇼핑몰**로 v1 출시. **코드 삭제 금지** — `/play`·Phaser·WebView·fixture·socket = **`legacy/world-v1` 보관** · 손님 **기본 진입 = 상품 쇼핑**(ShopPanel·ProductDetailModal·CartDrawer). v2/이벤트 = **2D 픽셀 재활용 또는 그래픽 업grade(영상·360 등) 별도 판단**. 상세 **§57** | User·CEO 2026-08-13 | 2026-08-13 |
@@ -751,7 +751,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **store_return_addresses ✅** · 다음 = **AD-073 R2** |
-| **Git 상태** | push 후 **`§7.58`** |
+| **Git 상태** | `main` **`5148b7c`** push ✅ |
 | **User 실기** | 반품지 CRUD **⬜** |
 | **다음 에이전트 1순위** | ① **AD-073 R2** 반품·교환 신청 |
 
@@ -759,7 +759,7 @@ popup_store/                          # Turborepo root
 
 | 순 | 작업 | AD | 비고 |
 |---|---|---|---|
-| **1** | **R2** 반품·교환 신청 + `order_returns` | AD-073 | **「반품·교환 신청」** · **다음 착수** · §7.58 |
+| **1** | **R2** 반품·교환 신청 + `order_returns` | AD-073 | **「반품·교환 신청」** · **다음 착수** · §7.59 |
 | **2** | 손님 **알림 탭** + deep link | AD-076 | §7.50 |
 | **3** | **소셜 로그인** | AD-078 | PG 전 · §33.1 |
 | **4** | R3~R4 · **PG** | AD-061 | 게이트 |
@@ -854,7 +854,9 @@ popup_store/                          # Turborepo root
 | `apps/web/src/components/OwnerOrdersPanel.tsx` | 주문 · **수정 대기** · **발주·배송** 큐 |
 | `packages/shared/src/orderReasons.ts` | `HoldReasonCode` · 기본 사유 목록 |
 | `apps/web/src/lib/orders.ts` | `holdOrder` · `submitOrderSupplement` · `deleteStoreReasonTemplate` |
-| `apps/web/src/components/ShopperOrderCardLight.tsx` | **주문 썸네일** · 수정 대기 표시 |
+| `apps/web/src/components/ShopperOrderCardLight.tsx` | **주문 썸네일** · 수정 대기 표시 · **R2** 「반품·교환 신청」 착수 |
+| `apps/web/src/components/OwnerReturnAddressPanel.tsx` | **반품지 CRUD** (AD-076 · §7.58) |
+| `apps/web/src/lib/storeReturnAddresses.ts` | 반품지 REST |
 | `apps/mobile/app/(shopper)/_layout.tsx` | 홈·마이·장바구니 **Tabs** (4-C · 화면 유지) |
 | `apps/mobile/app/(shopper)/cart.tsx` | 장바구니 탭 → `CartWebViewScreen` |
 | `apps/web/src/components/StoreShopCatalog.tsx` | 카드 grid · stepper · **담기/상세 버튼** |
@@ -863,31 +865,40 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — **AddressSearch User实기 ✅** · **`cfd86d0`** · §7.56
+**최신** — **store_return_addresses 구현 ✅** · **`5148b7c`** · User实기 ⬜ · §7.58~§7.59
 
 | | |
 |---|---|
-| **다음 우선 (에이전트)** | ① **store_return_addresses** ② **R2** |
-| **AddressSearch** | ✅ 손님 배송지 · 점주 반품지 · **모바일 embed OK** · §7.56 |
+| **다음 우선 (에이전트)** | ① **AD-073 R2** 반품·교환 신청 |
+| **반품지 (AD-076)** | ✅ CRUD · **User实기 ⬜** · §7.58 |
+| **AddressSearch** | ✅ · §7.56 |
+| **문의 (AD-077)** | ✅ · §7.54 |
 | **소셜 로그인** | ⬜ **AD-078** · §33.1 · **PG 전 P1** |
-| **문의 (AD-077)** | **R1.5 ✅** · §7.54 |
-| **상세** | **§7.57** · §7.56 · §7.50 |
+| **상세** | **§7.59** · §7.48 |
 
-#### Expo 재시작 여부 (최신 `cfd86d0` — **web-only**)
+#### Expo 재시작 여부 (최신 `5148b7c` — **web-only**)
 
 | | |
 |---|---|
-| **수정** | `apps/web` — AddressSearch embed 모달 · `AddressInputBlock` |
+| **수정** | `apps/web` — `OwnerReturnAddressPanel` · `storeReturnAddresses.ts` |
 | **Expo(Metro) 재시작** | ❌ **불필요** |
-| **User** | Vercel **1~2min** · **User 2026-08-27 모바일 주소검색 ✅** |
+| **User** | Vercel **1~2min** · 점주 PC **Ctrl+F5** |
 
 #### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
 
-0) 폰 **Expo Go SDK 52** (Play 54+ ❌)
+0) 폰 **Expo Go SDK 52** (Play 54+ ❌) — **이번 PC 웹만**이면 2)부터
 
 1) **Win → `cmd` → Enter**
 
-2) **Expo 재시작 ❌** — Metro **이미 켜져 있으면 3) 생략** · **꺼져 있을 때만** 아래 **한 줄씩 복붙:**
+2) **PC 웹 — 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) **Expo — Metro 꺼져 있을 때만** 한 줄씩:
 
 ```
 cd C:\Users\qotjd\Downloads\Cursor\popup_store
@@ -896,14 +907,14 @@ cd apps\mobile
 npx expo start --tunnel --port 8082 --clear
 ```
 
-3) **`Tunnel connected.`** → QR → `demo@shopper.com` / `demo`
+4) **`demo@owner.com` / `demo`** → 매장 관리 → **운영·배송 안내**
 
-4) **클릭 순서**
-   - **마이** → **주문내역**
-   - **수정 대기** 주문 → 노란 박스 **「매장 안내」** / **「요청사항」** / 배송지 선택 구분
+5) **합격 (AD-076 반품지)**
+   - ✅ **+ 새 반품지** · **주소 검색** · 저장
+   - ✅ 2개+ → **기본 반품지** 지정
+   - ✅ **저장하기** = CS·배송비만 (반품지는 폼에서 즉시 저장)
 
-5) **합격 (AD-072)**
-   - ✅ **매장 안내** / **요청사항** · 메모 **주황 박스 없음**
+6) ⬜ **R2** — 손님 **「반품·교환 신청」** = **아직 없음**(정상)
 
 ---
 
@@ -958,7 +969,7 @@ npx expo start --tunnel --port 8082 --clear
 | | |
 |---|---|
 | RPC | `create_order_claim` · `resolve_order_claim` · `cancel_order_by_shopper` |
-| UI | `ShopperOrderCardLight` · `OwnerOrdersPanel` claimBox · `OwnerStorePolicyPanel` 반품지 |
+| UI | `ShopperOrderCardLight` · `OwnerOrdersPanel` claimBox · **`OwnerReturnAddressPanel`** 반품지 (§7.58) |
 | HANDOFF | §7.4 · §52.2 · §53.3 #6 · §53.7 step 4 |
 
 **Git (이번 세션 UI):** **`ef452c3`** · HANDOFF **`75205e2`** (AD-073 §7.48)
@@ -974,7 +985,7 @@ npx expo start --tunnel --port 8082 --clear
 
 #### 1) 점주 설정 — 반품·교환 정책 (R2 DB)
 
-| **위치:** `OwnerStorePolicyPanel` **「운영·배송 안내」** 탭 (기존 반품지·안내 문구 **아래**). **반품지 입력 = AD-076** → **`store_return_addresses` + AddressSearch** (수기 필드 대체 · §7.50).
+| **위치:** `OwnerStorePolicyPanel` **「운영·배송 안내」** 탭 — **반품지 = `OwnerReturnAddressPanel`** (§7.58 ✅) · CS·배송비·안내 문구는 동일 탭. **R2 정책 토글**은 이 탭 **아래** 추가 예정 (§7.49).
 
 | 설정 | UI | DB (안) | 손님 동작 |
 |---|---|---|---|
@@ -1274,19 +1285,119 @@ stores.default_return_address_id  -- FK, nullable
 
 | | |
 |---|---|
-| **Scope** | 점주 **반품·교환 수령지** CRUD |
-| **DB** | `20260828_store_return_addresses_ad076.sql` · Supabase **✅** |
-| **Git** | **`e34e3a2`** push ✅ |
+| **Scope** | 점주 **반품·교환 수령지** CRUD · 배송지와 동일 패턴 |
+| **DB** | `20260828_store_return_addresses_ad076.sql` · Supabase POPUP **✅** |
+| **Git** | **`e34e3a2`** feat · HANDOFF **`5148b7c`** |
 
-#### Expo 재시작 — **web-only** ❌
+#### 구현 요약
 
-#### User实기
+| | |
+|---|---|
+| **테이블** | `store_return_addresses` · `stores.default_return_address_id` |
+| **RLS** | 점주 본인 매장만 |
+| **캐시** | trigger `sync_store_return_address_cache` → `stores.return_*` (손님 R2 안내용) |
+| **UI** | `OwnerReturnAddressPanel` — CRUD · AddressSearch · 기본 반품지 |
+| **정책** | `OwnerStorePolicyPanel` — 반품지 필드 **제거** · CS·배송비만 저장 |
+| **코드** | `storeReturnAddresses.ts` · `packages/shared` types |
 
-점주 **운영·배송 안내** → **+ 새 반품지** · **주소 검색** · **기본 반품지**
+#### Expo 재시작 여부 — **web-only** ❌
+
+| | |
+|---|---|
+| **수정** | `apps/web` only |
+| **Expo(Metro) 재시작** | ❌ **불필요** |
+| **User** | Vercel **1~2min** · 점주 PC **Ctrl+F5** |
+
+#### User实기 (§0 — **cmd 블록 생략 금지**)
+
+0) 폰 **Expo Go SDK 52** (Play 54+ ❌) — **PC 웹만**이면 2)부터
+
+1) **Win → `cmd` → Enter**
+
+2) **PC 웹 — 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) **Expo — Metro 꺼져 있을 때만** 한 줄씩:
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+4) **`demo@owner.com` / `demo`** → 매장 관리 → **운영·배송 안내**
+
+5) **합격**
+   - ✅ **+ 새 반품지** · **주소 검색** · 저장
+   - ✅ 2개+ → **기본 반품지** 지정
+   - ✅ **저장하기** = CS·배송비만 (반품지는 폼에서 즉시 저장)
+
+6) ⬜ User实기 **미확인** — 확인 후 §7.59·Changelog 갱신
 
 #### 다음
 
-**AD-073 R2**
+**AD-073 R2** — §7.59
+
+---
+
+### 7.59 세션 인수인계 — **2026-08-28** (HANDOFF 정리 · **R2 착수 준비**)
+
+| | |
+|---|---|
+| **User** | 「인수인계 잘 하고 규칙 잘 읽고」 |
+| **상태** | AddressSearch ✅ · store_return_addresses ✅ · **다음 = R2** |
+| **Git** | `main` **`5148b7c`** (HANDOFF 갱신 후 push) |
+
+#### 잠금 순서 (User 2026-08-27 — **임의 앞당김 ❌**)
+
+| 순 | 작업 | 상태 |
+|---|---|---|
+| ~~1~~ | AddressSearch | ✅ §7.55~§7.56 |
+| ~~2~~ | store_return_addresses | ✅ §7.58 |
+| **3** | **R2** `order_returns` + 손님 **「반품·교환 신청」** | **다음** |
+| 4 | 손님 **알림 탭** (AD-076) | ⬜ |
+| 5 | **소셜 로그인** (AD-078) | ⬜ · PG 전 |
+| 6 | R3~R4 · PG | 게이트 |
+
+#### R2 착수 체크리스트 (AD-073 · §7.48~§7.49)
+
+| | |
+|---|---|
+| **DB** | `order_returns` · 사유 코드 · `kind` return/exchange · 가챠 3상태 |
+| **RPC** | `request_return` (안) · 점주 승인/거절/완료 |
+| **손님** | `ShopperOrderCardLight` — **「반품·교환 신청」** (**문의하기 유지** · 별도 버튼) |
+| **안내** | 기본 반품지 = `stores.return_*` (§7.58 sync) · `exchange_return_guide` |
+| **점주** | **반품·교환** 탭 · 구조화 건 필터 · open **문의**와 **분리** |
+| **정책** | §7.49 — 단순변심 ON/OFF · 기간 · 교환 허용 (R2 DB) |
+
+#### 착수 시 볼 파일
+
+| | |
+|---|---|
+| 손님 카드 | `ShopperOrderCardLight.tsx` · `OrderHistoryPanel.tsx` |
+| 점주 | `OwnerOrdersPanel.tsx` · 반품·교환 탭 (§7.51) |
+| 반품지 | `OwnerReturnAddressPanel.tsx` · `storeReturnAddresses.ts` |
+| 문의 (유지) | `OrderClaimDisplay` · `create_order_claim` |
+| 설계 | §7.48 · §7.49 · §52.2 · §62 |
+
+#### Expo 재시작 여부 — **설계·HANDOFF만**
+
+| | |
+|---|---|
+| **코드 변경** | ❌ (이번 세션) |
+| **Expo(Metro) 재시작** | ❌ |
+
+#### User实기 (§0 — **cmd 블록 생략 금지**)
+
+→ **§7.0 「사용자가 지금 해야 할 것」** 과 동일 (반품지 CRUD 실기)
+
+**Git:** HANDOFF만
 
 ---
 
@@ -1315,7 +1426,7 @@ stores.default_return_address_id  -- FK, nullable
 
 #### 로드맵 순서 (변경 없음 — 소셜은 **4번**)
 
-1. `store_return_addresses` 2. R2 3. 알림 탭 4. **AD-078** 5. PG
+1. ~~`store_return_addresses`~~ ✅ §7.58 2. **R2** 3. 알림 탭 4. **AD-078** 5. PG
 
 **Git:** HANDOFF만 · **구현 ❌**
 
@@ -2459,6 +2570,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-28 — HANDOFF §7.0·§7.58·§7.59 정리 (R2 착수 준비)
+- **Author:** Cursor Agent
+- **Changed:** §7.0 User实기 · §7.48·§7.49 · AD-076 상태 · §7.59 R2 체크리스트
+- **Notes:** **Expo 재시작 ❌** · 반품지 User实기 ⬜ · **다음 = AD-073 R2**
 
 ### 2026-08-28 — AD-076 store_return_addresses + OwnerReturnAddressPanel
 - **Author:** Cursor Agent
