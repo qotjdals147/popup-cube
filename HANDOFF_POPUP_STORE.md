@@ -749,9 +749,9 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **§58 #8 P1** · AD-069/072 ✅ · **AD-073~076 설계 (§7.48~§7.50 · §62)** · PG=게이트 |
-| **Git 상태** | `main` **`caeaf8b`** push ✅ · AD-074~076 본문 **`98872b2`**
+| **Git 상태** | `main` **`89be7ee`** · R1 **`b942e7e`** push ✅ |
 | **User 실기** | AD-069 수정 요청 **OK** · AD-072 UI **OK** |
-| **다음 에이전트 1순위** | ① **§58 #8 P1** ② User OK 시 **AD-073 Phase R1** (반품·교환 탭 + 클레임 큐) · 정책은 **AD-074 §7.49** |
+| **다음 에이전트 1순위** | ① **AddressSearch** (AD-076) ② **store_return_addresses** ③ **AD-073 R2** |
 
 #### v1 쇼핑몰 인프라 (User 질문 — **월드 Socket 서버 불필요**)
 
