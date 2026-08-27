@@ -49,6 +49,7 @@ export function AddressSearch({ appearance = 'dark', disabled, onSelect }: Addre
 const styles: Record<string, React.CSSProperties> = {
   wrap: {
     gridColumn: '1 / -1',
+    width: '100%',
   },
   buttonDark: {
     width: '100%',

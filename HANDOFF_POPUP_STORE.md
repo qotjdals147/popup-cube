@@ -1221,9 +1221,9 @@ stores.default_return_address_id  -- FK, nullable
 
 | | |
 |---|---|
-| **Scope** | 손님 배송지 **우편번호 검색** — 다음(카카오) embed |
-| **변경** | `AddressSearch.tsx` · `daumPostcode.ts` · `AddressFormFields.tsx` · `ko.ts` |
-| **연동** | `AddressManagementPanel` · `CartView` — **`AddressFormFields` 경유** (별도 수정 ❌) |
+| **Scope** | **우편번호 검색** — 손님 배송지 + **점주 반품·교환 수령지** (`OwnerStorePolicyPanel`) |
+| **변경** | `AddressSearch.tsx` · `daumPostcode.ts` · `AddressFormFields.tsx` · **`OwnerStorePolicyPanel.tsx`** · `ko.ts` |
+| **연동** | `AddressManagementPanel` · `CartView` · **`OwnerStorePolicyPanel`** (반품·교환 수령지) |
 | **DB** | **변경 없음** · `user_addresses` RPC 동일 |
 
 #### Expo 재시작 여부 — **web-only**
@@ -1235,7 +1235,7 @@ stores.default_return_address_id  -- FK, nullable
 
 #### User 실기 — §0 cmd (**생략 금지**)
 
-1) **Win → cmd** 2) **PC 3줄** + **Expo 4줄**(§0) 3) 마이 › **배송지** → **「주소 검색」** → 우편 팝업 → 우편번호·기본주소 자동 4) 장바구니 › 결제 › **새 배송지** 동일 5) **상세 주소** 수기 입력 후 저장
+1) **Win → cmd** 2) **PC 3줄** + **Expo 4줄**(§0) 3) **점주** › **운영·배송 안내** › 반품·교환 수령지 **「주소 검색」** 4) 손님 › 마이 **배송지** 동일 5) 장바구니 **신규 배송지** 동일
 
 #### 다음
 

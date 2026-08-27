@@ -8,6 +8,7 @@ import {
   formatIntegerInputRaw,
   parseIntegerInput,
 } from '../lib/formatInteger';
+import { AddressSearch } from './AddressSearch';
 
 interface OwnerStorePolicyPanelProps {
   storeId: string;
@@ -122,6 +123,18 @@ export function OwnerStorePolicyPanel({ storeId }: OwnerStorePolicyPanelProps) {
           value={draft.return_phone ?? ''}
           onChange={(e) => patch({ return_phone: e.target.value })}
         />
+        <div style={styles.addressSearchWrap}>
+          <AddressSearch
+            appearance="light"
+            onSelect={(result) =>
+              patch({
+                return_postal_code: result.postal_code,
+                return_address_line1: result.address_line1,
+                return_address_line2: result.address_line2 ?? draft.return_address_line2 ?? '',
+              })
+            }
+          />
+        </div>
         <label style={styles.label}>{t('ownerPolicy.returnPostalLabel')}</label>
         <input
           style={styles.input}
@@ -236,6 +249,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sectionTitle: { margin: '0 0 12px', fontSize: fs.lg, color: oc.text, fontWeight: 700 },
   label: { display: 'block', color: oc.textMuted, fontSize: fs.sm, margin: '10px 0 6px' },
+  addressSearchWrap: { margin: '12px 0 4px' },
   input: {
     width: '100%',
     padding: '10px 12px',
