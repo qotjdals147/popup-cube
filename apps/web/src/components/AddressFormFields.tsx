@@ -1,4 +1,6 @@
 import { t } from '../i18n';
+import { type DaumPostcodeResult } from '../lib/daumPostcode';
+import { AddressSearch } from './AddressSearch';
 
 export interface AddressFormValues {
   label: string;
@@ -43,6 +45,15 @@ export function AddressFormFields({ values, onChange, appearance = 'dark' }: Add
     onChange({ ...values, [key]: value });
   }
 
+  function applySearchResult(result: DaumPostcodeResult) {
+    onChange({
+      ...values,
+      postal_code: result.postal_code,
+      address_line1: result.address_line1,
+      address_line2: result.address_line2 ?? values.address_line2,
+    });
+  }
+
   return (
     <div style={styles.grid}>
       <input
@@ -60,12 +71,13 @@ export function AddressFormFields({ values, onChange, appearance = 'dark' }: Add
         maxLength={60}
       />
       <input
-        style={inputStyle}
+        style={{ ...inputStyle, gridColumn: '1 / -1' }}
         value={values.phone}
         onChange={(e) => set('phone', e.target.value)}
         placeholder={t('mypage.phonePlaceholder')}
         maxLength={20}
       />
+      <AddressSearch appearance={appearance} onSelect={applySearchResult} />
       <input
         style={inputStyle}
         value={values.postal_code}
