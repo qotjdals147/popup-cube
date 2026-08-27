@@ -13,6 +13,7 @@ import {
   shipOrder,
 } from '../lib/orders';
 import { OrderReasonDialog, type OrderReasonDialogResult } from './OrderReasonDialog';
+import { OrderClaimSection } from './OrderClaimSection';
 import { formatOrderRef } from '../lib/orderRef';
 import {
   DEFAULT_OWNER_ORDER_FILTERS,
@@ -373,34 +374,41 @@ export function OwnerOrdersPanel({
                           : t('ownerOrders.claimResolvedBadge')}
                       </span>
                     </div>
-                    <div style={styles.claimLabel}>{t('ownerOrders.claimMessageLabel')}</div>
-                    <p style={styles.claimText}>{order.claim_message}</p>
-
-                    {order.claim_status === 'open' ? (
-                      <div style={styles.claimReplyRow}>
-                        <textarea
-                          style={styles.claimTextarea}
-                          value={claimReplyDraft[order.id] ?? ''}
-                          onChange={(e) =>
-                            setClaimReplyDraft((prev) => ({ ...prev, [order.id]: e.target.value }))
-                          }
-                          placeholder={t('ownerOrders.claimReplyPlaceholder')}
-                        />
-                        <button
-                          type="button"
-                          style={styles.primaryBtn}
-                          disabled={actionId === order.id}
-                          onClick={() => void handleResolveClaim(order.id)}
-                        >
-                          {actionId === order.id ? t('ownerOrders.claimReplySaving') : t('ownerOrders.claimReplyButton')}
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <div style={styles.claimLabel}>{t('ownerOrders.claimReplyLabel')}</div>
-                        <p style={styles.claimText}>{order.claim_reply}</p>
-                      </>
-                    )}
+                    <OrderClaimSection
+                      orderId={order.id}
+                      orderRefLabel={formatOrderRef(order.store_code, order.order_number)}
+                      claimStatus={order.claim_status}
+                      claimMessage={order.claim_message}
+                      claimReply={order.claim_reply}
+                      claimCreatedAt={order.claim_created_at}
+                      claimResolvedAt={order.claim_resolved_at}
+                      claimRoundCount={order.claim_round_count ?? 0}
+                      variant="owner"
+                      embedded
+                      messageLabel={t('ownerOrders.claimMessageLabel')}
+                      replyLabel={t('ownerOrders.claimReplyLabel')}
+                    >
+                      {order.claim_status === 'open' ? (
+                        <div style={styles.claimReplyRow}>
+                          <textarea
+                            style={styles.claimTextarea}
+                            value={claimReplyDraft[order.id] ?? ''}
+                            onChange={(e) =>
+                              setClaimReplyDraft((prev) => ({ ...prev, [order.id]: e.target.value }))
+                            }
+                            placeholder={t('ownerOrders.claimReplyPlaceholder')}
+                          />
+                          <button
+                            type="button"
+                            style={styles.primaryBtn}
+                            disabled={actionId === order.id}
+                            onClick={() => void handleResolveClaim(order.id)}
+                          >
+                            {actionId === order.id ? t('ownerOrders.claimReplySaving') : t('ownerOrders.claimReplyButton')}
+                          </button>
+                        </div>
+                      ) : null}
+                    </OrderClaimSection>
                   </div>
                 )}
 

@@ -253,6 +253,8 @@ export interface Order {
   claim_reply: string | null;
   claim_created_at: string | null;
   claim_resolved_at: string | null;
+  /** AD-077 — 문의 라운드 수 (2+ 이면 이력 보기) */
+  claim_round_count: number;
   /** AD-069 — 점주 보류(보완 요청) */
   hold_reason_code: string | null;
   hold_reason_text: string | null;

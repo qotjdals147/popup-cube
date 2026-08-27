@@ -12,6 +12,7 @@ import { formatOrderRef } from '../lib/orderRef';
 import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
 import { reviewKey } from '../lib/reviews';
 import { OrderHoldSupplementSection } from './OrderHoldSupplementSection';
+import { OrderClaimSection } from './OrderClaimSection';
 import { rejectReasonLabelKey } from '@popup-cube/shared';
 import { t } from '../i18n';
 
@@ -231,18 +232,20 @@ export function ShopperOrderCardLight({
       )}
 
       {order.claim_status !== 'none' && (
-        <div className="oh-claim-box">
-          <div className="oh-claim-label">{t('myOrders.claimMessageLabel')}</div>
-          <p className="oh-claim-text">{order.claim_message}</p>
-          {order.claim_status === 'open' ? (
-            <p className="oh-claim-open-note">{t('myOrders.claimOpenNote')}</p>
-          ) : (
-            <>
-              <div className="oh-claim-label">{t('myOrders.claimReplyLabel')}</div>
-              <p className="oh-claim-text">{order.claim_reply}</p>
-            </>
-          )}
-        </div>
+        <OrderClaimSection
+          orderId={order.id}
+          orderRefLabel={order.store_code ? formatOrderRef(order.store_code, order.order_number) : undefined}
+          claimStatus={order.claim_status}
+          claimMessage={order.claim_message}
+          claimReply={order.claim_reply}
+          claimCreatedAt={order.claim_created_at}
+          claimResolvedAt={order.claim_resolved_at}
+          claimRoundCount={order.claim_round_count ?? 0}
+          variant="shopper"
+          messageLabel={t('myOrders.claimMessageLabel')}
+          replyLabel={t('myOrders.claimReplyLabel')}
+          openNote={order.claim_status === 'open' ? t('myOrders.claimOpenNote') : undefined}
+        />
       )}
 
       {hasActions && (

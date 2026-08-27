@@ -143,6 +143,8 @@ interface StoreOrderRow {
 
   claim_resolved_at: string | null;
 
+  claim_round_count: number;
+
   hold_reason_code: string | null;
   hold_reason_text: string | null;
   hold_requested_at: string | null;
@@ -265,6 +267,8 @@ export async function listStoreOrders(storeId: string): Promise<OwnerOrderView[]
         claim_created_at: row.claim_created_at,
 
         claim_resolved_at: row.claim_resolved_at,
+
+        claim_round_count: row.claim_round_count ?? 0,
 
         hold_reason_code: row.hold_reason_code,
         hold_reason_text: row.hold_reason_text,
@@ -513,7 +517,23 @@ export async function resolveOrderClaim(orderId: string, reply: string): Promise
 
 }
 
+export interface OrderClaimRound {
+  round_no: number;
+  shopper_message: string;
+  owner_reply: string | null;
+  shopper_created_at: string;
+  owner_replied_at: string | null;
+  status: 'open' | 'resolved';
+}
 
+/** AD-077 — 주문 문의 전체 이력 (손님·점주) */
+export async function listOrderClaimHistory(orderId: string): Promise<OrderClaimRound[]> {
+  const { data, error } = await supabase.rpc('list_order_claim_history', {
+    p_order_id: orderId,
+  });
+  if (error) throw new OrderError(error.message);
+  return (data ?? []) as OrderClaimRound[];
+}
 
 export function isOnHoldOrderStatus(status: OrderStatus): boolean {
   return status === 'on_hold';
@@ -673,6 +693,8 @@ interface MyOrderRow {
 
   claim_resolved_at: string | null;
 
+  claim_round_count: number;
+
   hold_reason_code: string | null;
   hold_reason_text: string | null;
   hold_requested_at: string | null;
@@ -796,6 +818,8 @@ export async function listMyOrders(): Promise<ShopperOrderView[]> {
         claim_created_at: row.claim_created_at,
 
         claim_resolved_at: row.claim_resolved_at,
+
+        claim_round_count: row.claim_round_count ?? 0,
 
         hold_reason_code: row.hold_reason_code,
         hold_reason_text: row.hold_reason_text,
