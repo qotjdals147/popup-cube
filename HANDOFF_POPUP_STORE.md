@@ -2382,6 +2382,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-08-27 — AD-076 owner return address AddressSearch
+- **Author:** Cursor Agent / User
+- **Changed:** `OwnerStorePolicyPanel.tsx` · §7.55
+- **Notes:** 운영·배송 안내 반품·교환 수령지 · **Expo 재시작 ❌**
+
 ### 2026-08-27 — AD-076 AddressSearch (Daum postcode embed)
 - **Author:** Cursor Agent
 - **Changed:** `AddressSearch.tsx` · `daumPostcode.ts` · `AddressFormFields.tsx` · `ko.ts` · §7.55 · §34
