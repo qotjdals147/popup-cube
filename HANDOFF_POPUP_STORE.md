@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.57` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.58` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -750,20 +750,20 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **AddressSearch ✅ User实기** · 다음 = **store_return_addresses** → R2 |
-| **Git 상태** | `main` **`cfd86d0`** push ✅ |
-| **User 실기** | AD-077 ✅ · **AddressSearch ✅** (모바일·PC · 2026-08-27) |
-| **다음 에이전트 1순위** | ① **`store_return_addresses`** ② **AD-073 R2** |
+| **한 줄 요약** | **store_return_addresses ✅** · 다음 = **AD-073 R2** |
+| **Git 상태** | push 후 **`§7.58`** |
+| **User 실기** | 반품지 CRUD **⬜** |
+| **다음 에이전트 1순위** | ① **AD-073 R2** 반품·교환 신청 |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
 
 | 순 | 작업 | AD | 비고 |
 |---|---|---|---|
-| **1** | **`store_return_addresses`** + `OwnerReturnAddressPanel` | AD-076 | AddressSearch **재사용** · **다음 착수** · §7.55 |
-| **2** | **R2** 반품·교환 신청 + `order_returns` | AD-073 | **「반품·교환 신청」** 버튼 |
-| **3** | 손님 **알림 탭** + deep link | AD-076 | §7.50 · **후순** |
-| **4** | **소셜 로그인** (카카오·네이버·구글) | AD-078 | **P1 · PG 전** · §33.1 · §7.57 |
-| **5** | R3~R4 · **PG** | AD-061 | 게이트 |
+| **1** | **R2** 반품·교환 신청 + `order_returns` | AD-073 | **「반품·교환 신청」** · **다음 착수** · §7.58 |
+| **2** | 손님 **알림 탭** + deep link | AD-076 | §7.50 |
+| **3** | **소셜 로그인** | AD-078 | PG 전 · §33.1 |
+| **4** | R3~R4 · **PG** | AD-061 | 게이트 |
+| ~~**1**~~ | ~~**store_return_addresses**~~ | AD-076 | ✅ **§7.58** |
 | ~~**1**~~ | ~~**AddressSearch**~~ | AD-076 | ✅ **§7.55** |
 
 **User:** 「항상 권장 순서대로」— **알림 탭만 먼저 ❌** (AddressSearch 선행 유지).
@@ -2439,6 +2439,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-28 — AD-076 store_return_addresses + OwnerReturnAddressPanel
+- **Author:** Cursor Agent
+- **Changed:** migration `20260828_store_return_addresses_ad076.sql` · `OwnerReturnAddressPanel` · `storeReturnAddresses.ts` · §7.58
+- **Notes:** **Expo 재시작 ❌** · 기본 반품지 → `stores.return_*` sync trigger · **다음 = R2**
 
 ### 2026-08-27 — AD-078 social login roadmap (plan)
 - **Author:** User / Cursor Agent
@@ -6574,7 +6579,7 @@ Sprint 4-2로 **기능**(진열·담기·장바구니·전체상품)은 됨. UX�
 
 ### 체크리스트
 - [x] **`AddressSearch`** — 다음 우편번호 · `AddressFormFields` 연동 (**AD-076 · §7.55**)
-- [ ] **`store_return_addresses`** + 점주 CRUD (**AD-076**)
+- [x] **`store_return_addresses`** + 점주 CRUD (**AD-076 · §7.58**)
 - [ ] **`NotificationsPanel`** + `me/notifications` (**AD-076**)
 - [ ] `stores` 지역 컬럼 + 마이그레이션 (AD-035)
 - [ ] `HomePage` 필터 + 구역 groupBy

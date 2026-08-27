@@ -198,6 +198,26 @@ export interface UserAddress {
 
 export type NewAddressInput = Omit<UserAddress, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
 
+/** 점주 반품·교환 수령지 (AD-076) — 매장별 여러 개 + 기본 반품지. */
+export interface StoreReturnAddress {
+  id: string;
+  store_id: string;
+  label: string;
+  recipient_name: string;
+  phone: string;
+  postal_code: string;
+  address_line1: string;
+  address_line2: string | null;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type NewStoreReturnAddressInput = Omit<
+  StoreReturnAddress,
+  'id' | 'store_id' | 'created_at' | 'updated_at'
+>;
+
 export type RewardType = 'discount' | 'gacha';
 export type OrderStatus =
   | 'pending'

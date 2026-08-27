@@ -8,7 +8,7 @@ import {
   formatIntegerInputRaw,
   parseIntegerInput,
 } from '../lib/formatInteger';
-import { AddressInputBlock } from './AddressInputBlock';
+import { OwnerReturnAddressPanel } from './OwnerReturnAddressPanel';
 
 interface OwnerStorePolicyPanelProps {
   storeId: string;
@@ -111,35 +111,7 @@ export function OwnerStorePolicyPanel({ storeId }: OwnerStorePolicyPanelProps) {
 
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>{t('ownerPolicy.returnSection')}</h3>
-        <label style={styles.label}>{t('ownerPolicy.returnNameLabel')}</label>
-        <input
-          style={styles.input}
-          value={draft.return_recipient_name ?? ''}
-          onChange={(e) => patch({ return_recipient_name: e.target.value })}
-        />
-        <label style={styles.label}>{t('ownerPolicy.returnPhoneLabel')}</label>
-        <input
-          style={styles.input}
-          value={draft.return_phone ?? ''}
-          onChange={(e) => patch({ return_phone: e.target.value })}
-        />
-        <AddressInputBlock
-          appearance="light"
-          showSectionLabel
-          line2Placeholder={t('ownerPolicy.returnAddressLine2Placeholder')}
-          values={{
-            postal_code: draft.return_postal_code ?? '',
-            address_line1: draft.return_address_line1 ?? '',
-            address_line2: draft.return_address_line2 ?? '',
-          }}
-          onChange={(fields) =>
-            patch({
-              ...(fields.postal_code !== undefined ? { return_postal_code: fields.postal_code } : {}),
-              ...(fields.address_line1 !== undefined ? { return_address_line1: fields.address_line1 } : {}),
-              ...(fields.address_line2 !== undefined ? { return_address_line2: fields.address_line2 } : {}),
-            })
-          }
-        />
+        <OwnerReturnAddressPanel storeId={storeId} />
       </div>
 
       <div style={styles.section}>

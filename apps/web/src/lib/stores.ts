@@ -95,11 +95,6 @@ export async function updateStorePolicy(storeId: string, policy: StorePolicy): P
     .update({
       cs_phone: policy.cs_phone?.trim() || null,
       cs_email: policy.cs_email?.trim() || null,
-      return_recipient_name: policy.return_recipient_name?.trim() || null,
-      return_phone: policy.return_phone?.trim() || null,
-      return_postal_code: policy.return_postal_code?.trim() || null,
-      return_address_line1: policy.return_address_line1?.trim() || null,
-      return_address_line2: policy.return_address_line2?.trim() || null,
       shipping_guide: policy.shipping_guide?.trim() || null,
       exchange_return_guide: policy.exchange_return_guide?.trim() || null,
       shipping_fee_type: policy.shipping_fee_type,
