@@ -750,7 +750,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **AddressSearch ✅** · 다음 = **store_return_addresses** → R2 |
-| **Git 상태** | push 후 **`§7.55`** 커밋 |
+| **Git 상태** | `main` **`291e47d`** push ✅ |
 | **User 실기** | AD-077 ✅ · **AddressSearch ⬜** |
 | **다음 에이전트 1순위** | ① **`store_return_addresses`** ② **AD-073 R2** |
 
