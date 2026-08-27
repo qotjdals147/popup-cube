@@ -751,7 +751,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **store_return_addresses ✅** · 다음 = **AD-073 R2** |
-| **Git 상태** | `main` **`5148b7c`** push ✅ |
+| **Git 상태** | `main` **`8371f4e`** push ✅ |
 | **User 실기** | 반품지 CRUD **⬜** |
 | **다음 에이전트 1순위** | ① **AD-073 R2** 반품·교환 신청 |
 
@@ -865,7 +865,7 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — **store_return_addresses 구현 ✅** · **`5148b7c`** · User实기 ⬜ · §7.58~§7.59
+**최신** — **store_return_addresses 구현 ✅** · **`8371f4e`** · User实기 ⬜ · §7.58~§7.59
 
 | | |
 |---|---|
@@ -876,7 +876,7 @@ popup_store/                          # Turborepo root
 | **소셜 로그인** | ⬜ **AD-078** · §33.1 · **PG 전 P1** |
 | **상세** | **§7.59** · §7.48 |
 
-#### Expo 재시작 여부 (최신 `5148b7c` — **web-only**)
+#### Expo 재시작 여부 (최신 `8371f4e` — **web-only**)
 
 | | |
 |---|---|
@@ -1352,7 +1352,7 @@ npx expo start --tunnel --port 8082 --clear
 |---|---|
 | **User** | 「인수인계 잘 하고 규칙 잘 읽고」 |
 | **상태** | AddressSearch ✅ · store_return_addresses ✅ · **다음 = R2** |
-| **Git** | `main` **`5148b7c`** (HANDOFF 갱신 후 push) |
+| **Git** | `main` **`8371f4e`** (HANDOFF) · feat **`e34e3a2`** |
 
 #### 잠금 순서 (User 2026-08-27 — **임의 앞당김 ❌**)
 
@@ -2574,7 +2574,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-08-28 — HANDOFF §7.0·§7.58·§7.59 정리 (R2 착수 준비)
 - **Author:** Cursor Agent
 - **Changed:** §7.0 User实기 · §7.48·§7.49 · AD-076 상태 · §7.59 R2 체크리스트
-- **Notes:** **Expo 재시작 ❌** · 반품지 User实기 ⬜ · **다음 = AD-073 R2**
+- **Notes:** **Expo 재시작 ❌** · 반품지 User实기 ⬜ · **다음 = AD-073 R2** · git **`8371f4e`**
 
 ### 2026-08-28 — AD-076 store_return_addresses + OwnerReturnAddressPanel
 - **Author:** Cursor Agent
