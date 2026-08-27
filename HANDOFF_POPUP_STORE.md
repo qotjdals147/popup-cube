@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.55` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.56` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -749,9 +749,9 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **AddressSearch ✅** · 다음 = **store_return_addresses** → R2 |
-| **Git 상태** | `main` **`291e47d`** push ✅ |
-| **User 실기** | AD-077 ✅ · **AddressSearch ⬜** |
+| **한 줄 요약** | **AddressSearch ✅ User实기** · 다음 = **store_return_addresses** → R2 |
+| **Git 상태** | `main` **`cfd86d0`** push ✅ |
+| **User 실기** | AD-077 ✅ · **AddressSearch ✅** (모바일·PC · 2026-08-27) |
 | **다음 에이전트 1순위** | ① **`store_return_addresses`** ② **AD-073 R2** |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
@@ -861,22 +861,22 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — **AddressSearch 구현 ✅** · User实기 ⬜ · §7.55
+**최신** — **AddressSearch User实기 ✅** · **`cfd86d0`** · §7.56
 
 | | |
 |---|---|
 | **다음 우선 (에이전트)** | ① **store_return_addresses** ② **R2** |
-| **AddressSearch** | ✅ 마이 배송지 · 결제 신규 주소 · §7.55 |
-| **문의 (AD-077)** | **R1.5 ✅ User 확인** · §7.54 |
-| **상세** | **§7.55** · §7.50 |
+| **AddressSearch** | ✅ 손님 배송지 · 점주 반품지 · **모바일 embed OK** · §7.56 |
+| **문의 (AD-077)** | **R1.5 ✅** · §7.54 |
+| **상세** | **§7.56** · §7.55 · §7.50 |
 
-#### Expo 재시작 여부 (최신 `ef452c3` — **web-only**)
+#### Expo 재시작 여부 (최신 `cfd86d0` — **web-only**)
 
 | | |
 |---|---|
-| **수정** | `apps/web` — `OrderHoldSupplementSection.tsx` · `shopper-account-panels.css` · `ko.ts` |
-| **Expo(Metro) 재시작** | ❌ **불필요** — **Ctrl+C / `--clear` 하지 말 것** (Metro 켜 둔 채 OK) |
-| **User** | **`main` push** → Vercel **1~2min** → **마이 → 주문내역** 탭 **나갔다 다시** |
+| **수정** | `apps/web` — AddressSearch embed 모달 · `AddressInputBlock` |
+| **Expo(Metro) 재시작** | ❌ **불필요** |
+| **User** | Vercel **1~2min** · **User 2026-08-27 모바일 주소검색 ✅** |
 
 #### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
 
@@ -1240,6 +1240,30 @@ stores.default_return_address_id  -- FK, nullable
 #### 다음
 
 **store_return_addresses** → **R2**
+
+---
+
+### 7.56 세션 인수인계 — **2026-08-27** (AD-076 · **AddressSearch User实기 ✅**)
+
+| | |
+|---|---|
+| **User** | ① **모바일** 배송지 **주소 검색 OK** (embed 전체화면) ② UI 개선 후 **점주·손님** 레이아웃 OK |
+| **Git** | **`cfd86d0`** push ✅ |
+| **다음** | **`store_return_addresses`** + `OwnerReturnAddressPanel` |
+
+#### User实기 합격
+
+| | |
+|---|---|
+| **손님(앱)** | 마이 › 배송지 · **「주소 검색」** → 다음 embed · 우편번호·기본주소 자동 |
+| **점주(PC)** | 운영·배송 안내 › 반품·교환 수령지 · **동일 UX** |
+| **기술 메모** | `.open()` popup = WebView ❌ → **`AddressPostcodeModal` embed** |
+
+#### 다음 착수
+
+1. **`store_return_addresses`** DB + CRUD 2. **R2** 반품·교환 신청
+
+**Git:** HANDOFF만
 
 ---
 
@@ -2381,6 +2405,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-27 — AD-076 AddressSearch User实기 OK (mobile embed)
+- **Author:** User / Cursor Agent
+- **Changed:** §7.56 · §7.0 User实기 ✅
+- **Notes:** **모바일 WebView 주소검색 ✅** · **`cfd86d0`** · **Expo 재시작 ❌** · 다음 **store_return_addresses**
 
 ### 2026-08-27 — AD-076 AddressSearch UI + WebView embed modal
 - **Author:** Cursor Agent / User
