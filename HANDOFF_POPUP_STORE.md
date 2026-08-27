@@ -1270,6 +1270,26 @@ stores.default_return_address_id  -- FK, nullable
 
 ---
 
+### 7.58 세션 인수인계 — **2026-08-28** (AD-076 · **store_return_addresses 구현**)
+
+| | |
+|---|---|
+| **Scope** | 점주 **반품·교환 수령지** CRUD |
+| **DB** | `20260828_store_return_addresses_ad076.sql` · Supabase **✅** |
+| **Git** | **`e34e3a2`** push ✅ |
+
+#### Expo 재시작 — **web-only** ❌
+
+#### User实기
+
+점주 **운영·배송 안내** → **+ 새 반품지** · **주소 검색** · **기본 반품지**
+
+#### 다음
+
+**AD-073 R2**
+
+---
+
 ### 7.57 세션 인수인계 — **2026-08-27** (AD-078 · **소셜 로그인 계획**)
 
 | | |
