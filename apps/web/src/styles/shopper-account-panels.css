@@ -678,22 +678,74 @@
   font-size: 14px;
   font-weight: 700;
   color: #e67700;
+  margin-bottom: 10px;
+}
+
+.shopper-account-main .oh-hold-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #868e96;
   margin-bottom: 6px;
 }
 
-.shopper-account-main .oh-hold-reason,
-.shopper-account-main .oh-hold-hint {
+.shopper-account-main .oh-hold-reason-card,
+.shopper-account-main .oh-hold-action-card {
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #ffe066;
+  margin-bottom: 8px;
+}
+
+.shopper-account-main .oh-hold-reason-main {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--acct-text);
+  line-height: 1.45;
+}
+
+.shopper-account-main .oh-hold-memo {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #f8f9fa;
+  border-left: 3px solid #fab005;
   font-size: 13px;
   color: var(--acct-text-secondary);
   line-height: 1.5;
+}
+
+.shopper-account-main .oh-hold-hint {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--acct-text);
+  line-height: 1.5;
+}
+
+.shopper-account-main .oh-hold-other-note {
   margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #ffe066;
+  font-size: 13px;
+  color: var(--acct-text-secondary);
+  line-height: 1.5;
 }
 
 .shopper-account-main .oh-hold-form {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 4px;
   margin-bottom: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #ffe066;
 }
 
 .shopper-account-main .oh-hold-label {

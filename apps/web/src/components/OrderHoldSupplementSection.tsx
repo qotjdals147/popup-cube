@@ -85,11 +85,19 @@ export function OrderHoldSupplementSection({
   return (
     <section className="oh-hold-box">
       <div className="oh-hold-title">{t('orderHold.title')}</div>
-      <p className="oh-hold-reason">
-        {t(holdReasonLabelKey(reason))}
-        {order.hold_reason_text ? ` — ${order.hold_reason_text}` : ''}
-      </p>
-      <p className="oh-hold-hint">{t(`orderHold.actionHint.${reason}`)}</p>
+
+      <div className="oh-hold-reason-card">
+        <div className="oh-hold-kicker">{t('orderHold.storeNoticeLabel')}</div>
+        <div className="oh-hold-reason-main">{t(holdReasonLabelKey(reason))}</div>
+        {order.hold_reason_text ? (
+          <p className="oh-hold-memo">{order.hold_reason_text}</p>
+        ) : null}
+      </div>
+
+      <div className="oh-hold-action-card">
+        <div className="oh-hold-kicker">{t('orderHold.actionStepLabel')}</div>
+        <p className="oh-hold-hint">{t(`orderHold.actionHint.${reason}`)}</p>
+      </div>
 
       {reason === 'address_issue' && (
         <div className="oh-hold-form">

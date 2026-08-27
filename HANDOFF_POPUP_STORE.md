@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.46` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.47` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -520,7 +520,8 @@ npm run dev
 | AD-068 | **(확정) 손님 UX = 의문을 품을 상황 금지 (User 2026-08-25)** — 카피·뱃지·안내는 **실제 동작과 같은 단위**(매장·주문·혜택) · 내부 enum(`choice`·`결제당`) **그대로 노출 ❌** · 설계·카피 시 **다매장·다상품 반례 1개** 상상 필수 · §0 UI/UX 표 | User 2026-08-25 | 2026-08-25 |
 | AD-069 | **(구현 ✅ · User 2026-08-25) 주문 수정 요청 + 취소 사유 + 푸시** — migration **`20260825_order_hold_supplement_ad069.sql` 원격 ✅** · 카피 **AD-070** · 다이얼로그 **AD-071** · §7.45~§7.46 | User 2026-08-25 | 2026-08-25 |
 | AD-070 | **(확정) AD-069 UX 카피 — 「보류」❌** — 점주 버튼 **「손님에게 수정 요청」** · 탭 **「수정 대기」** · 상태 `on_hold` = **「수정 대기」** · **발주·배송(수락됨·자동수락 포함)** 에도 동일 버튼 (배송 시작 전) | User 2026-08-25 | 2026-08-25 |
-| AD-071 | **(구현 ✅ · User 2026-08-26) 수정 요청 다이얼로그 UX 정리** — `OrderReasonDialog` textarea **`box-sizing` overflow fix** · **「자주 쓰는 문구 추가/템플릿 저장」UI 제거** (사유 코드 + **추가 설명**만 · 손님 행동 UI는 **`hold_reason_code` 고정**) · DB에 남은 예전 템플릿 = **삭제만** (`delete_store_reason_template` · migration `20260826_delete_reason_template.sql` **원격 ✅**) · §7.46 | User 2026-08-26 | 2026-08-26 |
+| AD-071 | **(구현 ✅ · User 2026-08-26) 수정 요청 다이얼로그 UX 정리** — textarea **`box-sizing` overflow fix** · **「자주 쓰는 문구 추가/템플릿 저장」UI 제거** · legacy **삭제만** · §7.46 | User 2026-08-26 | 2026-08-26 |
+| AD-072 | **(구현 ✅ · User 2026-08-27) 손님 수정 대기 UI 계층** — `OrderHoldSupplementSection` **「매장 안내」** 카드(사유+메모) · **「해주실 일」** 카드(행동 안내) · 입력 폼 흰 박스 분리 · §7.47 | User 2026-08-27 | 2026-08-27 |
 | AD-062 | **(확정) v1 = 팝업 쇼핑몰 런칭 · 픽셀 월드 v2 보존** — CEO(mr심) 2026-08-13: Google 실물=PG 확정 · 월드+PG UX 이질감 · **에이블리/룩핀형 쇼핑몰**로 v1 출시. **코드 삭제 금지** — `/play`·Phaser·WebView·fixture·socket = **`legacy/world-v1` 보관** · 손님 **기본 진입 = 상품 쇼핑**(ShopPanel·ProductDetailModal·CartDrawer). v2/이벤트 = **2D 픽셀 재활용 또는 그래픽 업grade(영상·360 등) 별도 판단**. 상세 **§57** | User·CEO 2026-08-13 | 2026-08-13 |
 | AD-063 | **(확정) v1 런칭 범위 · 점주센터 정리** — **팝업 점주 입점 → 팝업 상품만 판매** 플랫폼. 점주 PC **대부분 유지** · **「매장 꾸미기(layout)」탭 v1 숨김**(코드 유지) · 손님 **월드 우회→쇼핑** · P1=리뷰답글·KPI·팝업기간 UI. 실행 순서 **§58** | User 2026-08-13 | 2026-08-13 |
 | AD-064 | **(확정) 수익·월드 재포지셔닝 — B2B 마케팅 인벤토리** — 월드 = 손님 **기본 쇼핑 경로 ❌** · **유료 브랜드 홍보(배너·스폰서 팝업존·월드 체험)** = 플랫폼 **광고/마케팅 SKU** (에이블리형 배너 수익과 동급 축). v1 **커머스(몰→shop)** + v2+ **스폰서 월드**. 상세 **§59** | User 2026-08-13 | 2026-08-13 |
@@ -570,7 +571,8 @@ npm run dev
 - [x] **손님 `choice` 뱃지 카피 (2026-08-25)** — `선택형` → **`할인·가챠 선택`** · §7.41
 - [x] **결제당 1혜택 손님 안내 (2026-08-25 · AD-067)** — `promoOrderOnceHint` · `rewardPromoOnceHint` · `none` 뱃지 제거 · §7.42
 - [x] **AD-069/070 주문 수정 요청 + 취소 사유 + 푸시 (2026-08-25~26)** — migration `20260825_order_hold_supplement_ad069.sql` **원격 ✅** · `OrderReasonDialog` · `OrderHoldSupplementSection` · `OwnerOrdersPanel` hold/fulfillment · mobile `useOrderPushNotifications` · §7.44~§7.45
-- [x] **AD-071 수정 요청 다이얼로그 (2026-08-26)** — textarea overflow fix · 템플릿 저장 UI 제거 · legacy 삭제 · migration `20260826_delete_reason_template.sql` **원격 ✅** · push **`451f435`** · User 실기 **✅** · §7.46
+- [x] **AD-071 수정 요청 다이얼로그 (2026-08-26)** — textarea overflow fix · 템플릿 저장 UI 제거 · legacy 삭제 · push **`451f435`** · §7.46
+- [x] **AD-072 손님 수정 대기 UI 계층 (2026-08-27)** — 매장 안내 / 해주실 일 카드 분리 · User AD-069 플로우 **OK** · §7.47
 - [x] **구매 완료 시 "할인 vs 가챠" 선택 (AD-028, §10)** — `store_promotions`(매장별 할인%), `gacha_pools`/`gacha_pool_entries`(실제 상품+가챠 전용 아이템 혼합, 매장 공용 풀)/`gacha_rolls` 테이블+RLS, `roll_gacha()` SECURITY DEFINER 함수(서버 측 가중치 랜덤, 클라이언트 조작 불가), GUCCI 데모 매장에 10% 할인 + 가챠 아이템 4종 시드, `CartDrawer`에 결제 완료 후 혜택 선택 단계 추가
 - [x] **주문 저장 + 소비자 배송지 관리 (AD-030, §10)** — `user_addresses`(여러 배송지+별명+기본 지정) + `orders`/`order_items`(실제 주문 저장) 테이블+RLS, `place_order()`(서버가 가격·할인 재검증 후 원자적 저장) + `get_store_orders()`(점주가 본인 매장 주문+구매자 닉네임+배송지 조회) SECURITY DEFINER/INVOKER 함수, 마이페이지(`/mypage`) 배송지 관리 UI, `CartDrawer`에 배송지 선택 단계 추가, 점주 툴바 "📊 주문 관리" 연동(`OwnerOrdersPanel`)
 - [x] **Phase 4 Sprint 0 — fixture DB + occupancy (2026-07-27)** — `fixture_templates`(§42.3 8종 시드) + `display_fixtures` + `display_slots` + RLS/GRANT; `packages/game-core/src/occupancyGrid.ts` (`buildOccupancyGrid`, `canWalk`, `canPlaceFixture`); `apps/web/src/lib/displayFixtures.ts` CRUD; `packages/shared` 타입; SQL `supabase/migrations/20260727_phase4_display_fixtures.sql`
@@ -816,20 +818,20 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**AD-071 — 수정 요청 다이얼로그 정리** — push **`451f435`** · User **실기 ✅ (2026-08-26)**
+**AD-072 — 손님 수정 대기 UI 계층** — push 대기 · User **AD-069 플로우 실기 ✅ (오류 없음)**
 
 | | |
 |---|---|
-| **다음 우선** | AD-069 전체 플로우 추가 실기 (손님 수정 → 점주 재수락 · 발주·배송 수정 요청) · **§58 #8 P1** |
-| **상세** | **§7.46** (이번 세션) · AD-069/070 전체 = **§7.45** |
+| **다음 우선** | push 후 Vercel **1~2min** → 손님 **주문내역** 노란 박스 **매장 안내 / 해주실 일** 구분 확인 · **§58 #8 P1** |
+| **상세** | **§7.47** · AD-069 전체 = **§7.45**
 
-#### Expo 재시작 여부 (최신 `451f435` — **web-only**)
+#### Expo 재시작 여부 (최신 — **web-only**)
 
 | | |
 |---|---|
-| **수정** | `apps/web`만 — `OrderReasonDialog.tsx` · `ko.ts` · `orders.ts` |
+| **수정** | `apps/web` — `OrderHoldSupplementSection.tsx` · `shopper-account-panels.css` · `ko.ts` |
 | **Expo 재시작** | ❌ **불필요** |
-| **User** | Vercel **1~2min** · 브라우저 **새로고침(Ctrl+F5)** · 점주 → **손님에게 수정 요청** 다이얼로그 |
+| **User** | Vercel **1~2min** · 앱 **마이 → 주문내역** 탭 **재진입** (WebView)
 
 **(AD-069 푸시·손님 앱까지 테스트할 때만 — §7.45 A 참고)**
 
@@ -1032,6 +1034,26 @@ awaiting_accept (다시 「주문」탭 · 수락/거절/보류 가능)
 - migration: `20260825_order_hold_supplement_ad069.sql` — **✅ Supabase MCP (2026-08-25)**
 - migration: `20260826_delete_reason_template.sql` — **✅ Supabase MCP (2026-08-26)**
 - RPC · UI · push — **✅** · 카피 **AD-070** · 발주·배송 수정 요청 **✅** · 다이얼로그 **AD-071** **✅**
+
+---
+
+### 7.47 세션 인수인계 — **2026-08-27** (AD-072 · 손님 수정 대기 UI)
+
+| | |
+|---|---|
+| **User** | AD-069 수정 요청 **플로우 실기 OK** · 노란 박스 안 **사유 + 「배송지를…」** 문장이 **글자만 나열**돼 보기 불편 |
+| **조치** | `OrderHoldSupplementSection` — **「매장 안내」** 카드(사유 굵게 · 점주 메모 별도 인용) · **「해주실 일」** 카드(행동 안내) · **배송지 선택** = 흰 입력 박스 |
+| **코드** | `OrderHoldSupplementSection.tsx` · `shopper-account-panels.css` · `ko.ts` (`storeNoticeLabel` · `actionStepLabel`) |
+| **Expo** | **web-only ❌** · Vercel 1~2min · **마이 → 주문내역 탭 재진입** |
+
+#### 손님 노란 박스 구조 (AD-072)
+
+| 블록 | 내용 |
+|---|---|
+| **제목** | 주문 수정이 필요해요 |
+| **매장 안내** | 사유 (예: 배송지 확인·수정 필요) + 점주 **추가 설명** (있을 때) |
+| **해주실 일** | 행동 안내 (예: 다른 주소로 바꿔 주세요) |
+| **입력** | 배송지 선택 / 수량 / 가챠 버튼 등 |
 
 ---
 
@@ -1823,6 +1845,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-27 — AD-072 shopper hold box visual hierarchy
+- **Author:** Cursor Agent / User
+- **Changed:** `OrderHoldSupplementSection.tsx` · `shopper-account-panels.css` · `ko.ts` · §7.47 · AD-072 · §7.0
+- **Notes:** **`apps/web`만 = Expo 재시작 ❌** · Vercel 1~2min · **마이 → 주문내역 탭 재진입** · User AD-069 플로우 **OK**
 
 ### 2026-08-26 — AD-071 OrderReasonDialog layout · remove template save · legacy delete
 - **Author:** Cursor Agent / User
