@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.59` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.60` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -750,19 +750,19 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **store_return_addresses ✅** · 다음 = **AD-073 R2** |
-| **Git 상태** | `main` **`8371f4e`** push ✅ |
-| **User 실기** | 반품지 CRUD **⬜** |
-| **다음 에이전트 1순위** | ① **AD-073 R2** 반품·교환 신청 |
+| **한 줄 요약** | **AD-073 R2 ✅** · 다음 = **손님 알림 탭** |
+| **Git 상태** | R2 구현 · push 대기 |
+| **User 실기** | R2 **⬜** · §7.60 |
+| **다음 에이전트 1순위** | ① **AD-076 알림 탭** |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
 
 | 순 | 작업 | AD | 비고 |
 |---|---|---|---|
-| **1** | **R2** 반품·교환 신청 + `order_returns` | AD-073 | **「반품·교환 신청」** · **다음 착수** · §7.59 |
-| **2** | 손님 **알림 탭** + deep link | AD-076 | §7.50 |
-| **3** | **소셜 로그인** | AD-078 | PG 전 · §33.1 |
-| **4** | R3~R4 · **PG** | AD-061 | 게이트 |
+| **1** | 손님 **알림 탭** + deep link | AD-076 | §7.50 |
+| **2** | **소셜 로그인** | AD-078 | PG 전 · §33.1 |
+| **3** | R3~R4 · **PG** | AD-061 | 게이트 |
+| ~~**1**~~ | ~~**R2**~~ | AD-073 | ✅ **§7.60** |
 | ~~**1**~~ | ~~**store_return_addresses**~~ | AD-076 | ✅ **§7.58** |
 | ~~**1**~~ | ~~**AddressSearch**~~ | AD-076 | ✅ **§7.55** |
 
@@ -1343,6 +1343,64 @@ npx expo start --tunnel --port 8082 --clear
 #### 다음
 
 **AD-073 R2** — §7.59
+
+---
+
+### 7.60 세션 인수인계 — **2026-08-28** (AD-073 **R2 구현** · 반품·교환 신청)
+
+| | |
+|---|---|
+| **Scope** | `order_returns` · 손님 **「반품·교환 신청」** · 점주 승인/거절/완료 · 정책 토글 |
+| **DB** | `20260828_order_returns_ad073_r2.sql` · Supabase POPUP **✅** |
+| **Git** | push 대기 |
+
+#### 구현 요약
+
+| | |
+|---|---|
+| **손님** | `ShopperOrderCardLight` — **「반품·교환 신청」** (`OrderReturnRequestDialog`) · **문의하기 유지** |
+| **점주** | `OwnerReturnsTab` — **반품·교환 신청** / **손님 문의** 하위 탭 · `OwnerReturnsPanel` |
+| **정책** | `OwnerStorePolicyPanel` — 단순변심 ON/OFF · 기간 · 교환 허용 |
+| **RPC** | `request_return` · `approve_return` · `reject_return` · `complete_return` · `set_gacha_return_status` |
+
+#### Expo 재시작 여부 — **web-only** ❌
+
+| | |
+|---|---|
+| **수정** | `apps/web` only |
+| **Expo(Metro) 재시작** | ❌ **불필요** |
+| **User** | Vercel **1~2min** · PC **Ctrl+F5** |
+
+#### User实기 (§0 — **cmd 블록 생략 금지**)
+
+1) **Win → `cmd` → Enter**
+
+2) **PC 웹 — 한 줄씩:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) **Expo — Metro 꺼져 있을 때만** 한 줄씩:
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+4) **손님** `demo@shopper.com` / `demo` → **마이 › 구매 내역** → 배송완료/구매확정 주문 → **「반품·교환 신청」**
+
+5) **점주** `demo@owner.com` / `demo` → 매장 관리 → **반품·교환** 탭 → **반품·교환 신청** → 승인/거절
+
+6) ⬜ User实기 **미확인**
+
+#### 다음
+
+**AD-076** 손님 알림 탭
 
 ---
 
@@ -2570,6 +2628,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-28 — AD-073 R2 order_returns + shopper return request UI
+- **Author:** Cursor Agent
+- **Changed:** migration `20260828_order_returns_ad073_r2.sql` · `OrderReturnRequestDialog` · `OwnerReturnsPanel` · `OwnerReturnsTab` · §7.60
+- **Notes:** **Expo 재시작 ❌** · Supabase ✅ · **다음 = AD-076 알림 탭**
 
 ### 2026-08-28 — HANDOFF §7.0·§7.58·§7.59 정리 (R2 착수 준비)
 - **Author:** Cursor Agent

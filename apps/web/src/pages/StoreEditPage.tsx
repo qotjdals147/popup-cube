@@ -6,6 +6,7 @@ import { dateInputToPopupEndsAt, popupEndsAtToDateInput } from '../lib/popupPeri
 import { DEMO_STORE_ID } from '@popup-cube/shared';
 import { OwnerProductPanel } from '../components/OwnerProductPanel';
 import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
+import { OwnerReturnsTab } from '../components/OwnerReturnsTab';
 import { OwnerDisplayPanel } from '../components/OwnerDisplayPanel';
 import { OwnerStorePolicyPanel } from '../components/OwnerStorePolicyPanel';
 import { OwnerPromotionPanel } from '../components/OwnerPromotionPanel';
@@ -55,6 +56,7 @@ export function StoreEditPage() {
     awaitingShip,
     onHold,
     openClaims,
+    openReturns,
     toastMessage,
     dismissToast,
     refreshTick,
@@ -257,7 +259,7 @@ export function StoreEditPage() {
     { id: 'orders', label: t('ownerEdit.tabOrders'), badge: pendingAccept },
     { id: 'hold', label: t('ownerEdit.tabHold'), badge: onHold },
     { id: 'fulfillment', label: t('ownerEdit.tabFulfillment'), badge: awaitingShip },
-    { id: 'returns', label: t('ownerEdit.tabReturns'), badge: openClaims },
+    { id: 'returns', label: t('ownerEdit.tabReturns'), badge: openClaims + openReturns },
     { id: 'promotions', label: t('ownerEdit.tabPromotions') },
     { id: 'policy', label: t('ownerEdit.tabPolicy') },
     ...(worldEnabled ? [{ id: 'layout' as const, label: t('ownerEdit.tabLayout') }] : []),
@@ -513,7 +515,7 @@ export function StoreEditPage() {
           )}
 
           {!loading && !error && tab === 'returns' && storeId && (
-            <OwnerOrdersPanel storeId={storeId} embedded queue="claims" refreshTick={refreshTick} />
+            <OwnerReturnsTab storeId={storeId} refreshTick={refreshTick} />
           )}
 
           {!loading && !error && tab === 'layout' && storeId && (

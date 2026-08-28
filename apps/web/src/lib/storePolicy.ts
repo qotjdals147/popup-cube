@@ -35,13 +35,16 @@ export const DEFAULT_STORE_POLICY: StorePolicy = {
   return_address_line2: null,
   shipping_guide: null,
   exchange_return_guide: null,
+  return_change_of_mind_allowed: true,
+  return_change_of_mind_days: 7,
+  exchange_allowed: true,
   shipping_fee_type: 'free',
   shipping_fee_amount: 0,
   shipping_free_threshold: 0,
 };
 
 export const STORE_POLICY_SELECT =
-  'cs_phone, cs_email, return_recipient_name, return_phone, return_postal_code, return_address_line1, return_address_line2, shipping_guide, exchange_return_guide, shipping_fee_type, shipping_fee_amount, shipping_free_threshold';
+  'cs_phone, cs_email, return_recipient_name, return_phone, return_postal_code, return_address_line1, return_address_line2, shipping_guide, exchange_return_guide, return_change_of_mind_allowed, return_change_of_mind_days, exchange_allowed, shipping_fee_type, shipping_fee_amount, shipping_free_threshold';
 
 export function mapStorePolicyRow(row: Record<string, unknown> | null | undefined): StorePolicy {
   if (!row) return { ...DEFAULT_STORE_POLICY };
@@ -55,6 +58,9 @@ export function mapStorePolicyRow(row: Record<string, unknown> | null | undefine
     return_address_line2: (row.return_address_line2 as string | null) ?? null,
     shipping_guide: (row.shipping_guide as string | null) ?? null,
     exchange_return_guide: (row.exchange_return_guide as string | null) ?? null,
+    return_change_of_mind_allowed: row.return_change_of_mind_allowed !== false,
+    return_change_of_mind_days: Number(row.return_change_of_mind_days ?? 7),
+    exchange_allowed: row.exchange_allowed !== false,
     shipping_fee_type: normalizeShippingFeeType(String(row.shipping_fee_type ?? 'free')),
     shipping_fee_amount: Number(row.shipping_fee_amount ?? 0),
     shipping_free_threshold: Number(row.shipping_free_threshold ?? 0),

@@ -135,6 +135,42 @@ export function OwnerStorePolicyPanel({ storeId }: OwnerStorePolicyPanelProps) {
       </div>
 
       <div style={styles.section}>
+        <h3 style={styles.sectionTitle}>{t('ownerPolicy.returnRulesSection')}</h3>
+        <label style={styles.checkRow}>
+          <input
+            type="checkbox"
+            checked={draft.return_change_of_mind_allowed}
+            onChange={(e) => patch({ return_change_of_mind_allowed: e.target.checked })}
+          />
+          <span>{t('ownerPolicy.changeOfMindAllowedLabel')}</span>
+        </label>
+        {draft.return_change_of_mind_allowed && (
+          <>
+            <label style={styles.label}>{t('ownerPolicy.changeOfMindDaysLabel')}</label>
+            <input
+              style={styles.input}
+              value={formatIntegerDisplay(draft.return_change_of_mind_days)}
+              onChange={(e) =>
+                patch({
+                  return_change_of_mind_days: parseIntegerInput(formatIntegerInputRaw(e.target.value)) || 0,
+                })
+              }
+              inputMode="numeric"
+            />
+            <p style={styles.help}>{t('ownerPolicy.changeOfMindDaysHelp')}</p>
+          </>
+        )}
+        <label style={styles.checkRow}>
+          <input
+            type="checkbox"
+            checked={draft.exchange_allowed}
+            onChange={(e) => patch({ exchange_allowed: e.target.checked })}
+          />
+          <span>{t('ownerPolicy.exchangeAllowedLabel')}</span>
+        </label>
+      </div>
+
+      <div style={styles.section}>
         <h3 style={styles.sectionTitle}>{t('ownerPolicy.shippingFeeSection')}</h3>
         <div style={styles.feeTypeRow}>
           {(['free', 'flat', 'conditional_free'] as StoreShippingFeeType[]).map((type) => (
@@ -236,6 +272,15 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: 8,
+    color: oc.text,
+    fontSize: fs.base,
+    cursor: 'pointer',
+  },
+  checkRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    margin: '8px 0',
     color: oc.text,
     fontSize: fs.base,
     cursor: 'pointer',

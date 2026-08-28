@@ -1,4 +1,4 @@
-import type { CartItem, Order, OwnerOrderView, OrderStatus, RewardType, ShopperOrderView } from '@popup-cube/shared';
+import type { CartItem, Order, OrderReturnStatus, OwnerOrderView, OrderStatus, RewardType, ShopperOrderView } from '@popup-cube/shared';
 
 import { supabase } from './supabase';
 import { formatOrderRef } from './orderRef';
@@ -145,6 +145,15 @@ interface StoreOrderRow {
 
   claim_round_count: number;
 
+  return_status: OrderReturnStatus;
+  return_kind: 'return' | 'exchange' | null;
+  return_reason_code: string | null;
+  return_reason_detail: string | null;
+  return_requested_at: string | null;
+  return_resolved_at: string | null;
+  return_owner_reply: string | null;
+  active_return_id: string | null;
+
   hold_reason_code: string | null;
   hold_reason_text: string | null;
   hold_requested_at: string | null;
@@ -269,6 +278,15 @@ export async function listStoreOrders(storeId: string): Promise<OwnerOrderView[]
         claim_resolved_at: row.claim_resolved_at,
 
         claim_round_count: row.claim_round_count ?? 0,
+
+        return_status: (row.return_status ?? 'none') as OrderReturnStatus,
+        return_kind: row.return_kind as 'return' | 'exchange' | null,
+        return_reason_code: row.return_reason_code,
+        return_reason_detail: row.return_reason_detail,
+        return_requested_at: row.return_requested_at,
+        return_resolved_at: row.return_resolved_at,
+        return_owner_reply: row.return_owner_reply,
+        active_return_id: row.active_return_id,
 
         hold_reason_code: row.hold_reason_code,
         hold_reason_text: row.hold_reason_text,
@@ -597,6 +615,14 @@ export function canFileClaim(status: OrderStatus): boolean {
   );
 }
 
+/** AD-073 R2 — 손님이 반품·교환 신청 가능한지 */
+export function canRequestReturn(
+  status: OrderStatus,
+  returnStatus: OrderReturnStatus,
+): boolean {
+  return canFileClaim(status) && returnStatus !== 'requested' && returnStatus !== 'approved';
+}
+
 /** §54 — 리뷰 버튼 노출 (구매·배송 완료 후 · 미구매자/결제만=버튼 없음) */
 export function canShowReviewButton(status: OrderStatus): boolean {
   return canFileClaim(status);
@@ -639,6 +665,8 @@ export interface StoreOrderCounts {
   onHold: number;
 
   openClaims: number;
+
+  openReturns: number;
 
 }
 
@@ -694,6 +722,15 @@ interface MyOrderRow {
   claim_resolved_at: string | null;
 
   claim_round_count: number;
+
+  return_status: OrderReturnStatus;
+  return_kind: 'return' | 'exchange' | null;
+  return_reason_code: string | null;
+  return_reason_detail: string | null;
+  return_requested_at: string | null;
+  return_resolved_at: string | null;
+  return_owner_reply: string | null;
+  active_return_id: string | null;
 
   hold_reason_code: string | null;
   hold_reason_text: string | null;
@@ -821,6 +858,15 @@ export async function listMyOrders(): Promise<ShopperOrderView[]> {
 
         claim_round_count: row.claim_round_count ?? 0,
 
+        return_status: (row.return_status ?? 'none') as OrderReturnStatus,
+        return_kind: row.return_kind as 'return' | 'exchange' | null,
+        return_reason_code: row.return_reason_code,
+        return_reason_detail: row.return_reason_detail,
+        return_requested_at: row.return_requested_at,
+        return_resolved_at: row.return_resolved_at,
+        return_owner_reply: row.return_owner_reply,
+        active_return_id: row.active_return_id,
+
         hold_reason_code: row.hold_reason_code,
         hold_reason_text: row.hold_reason_text,
         hold_requested_at: row.hold_requested_at,
@@ -900,6 +946,8 @@ export async function getStoreOrderCounts(storeId: string): Promise<StoreOrderCo
     onHold: Number(row?.on_hold ?? 0),
 
     openClaims: Number(row?.open_claims ?? 0),
+
+    openReturns: Number(row?.open_returns ?? 0),
 
   };
 

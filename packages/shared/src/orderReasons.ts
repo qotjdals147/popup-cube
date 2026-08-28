@@ -45,3 +45,24 @@ export function rejectReasonLabelKey(code: RejectReasonCode | string | null | un
   if (!code) return '';
   return `orderReasons.reject.${code}`;
 }
+
+/** AD-073 R2 — 반품·교환 사유 */
+export type ReturnReasonCode = 'change_of_mind' | 'defective' | 'wrong_delivery' | 'other';
+
+export interface ReturnReasonOption {
+  reasonCode: ReturnReasonCode;
+  labelKey: string;
+  requiresMemo?: boolean;
+}
+
+export const DEFAULT_RETURN_REASON_OPTIONS: ReturnReasonOption[] = [
+  { reasonCode: 'change_of_mind', labelKey: 'orderReasons.return.change_of_mind' },
+  { reasonCode: 'defective', labelKey: 'orderReasons.return.defective' },
+  { reasonCode: 'wrong_delivery', labelKey: 'orderReasons.return.wrong_delivery' },
+  { reasonCode: 'other', labelKey: 'orderReasons.return.other', requiresMemo: true },
+];
+
+export function returnReasonLabelKey(code: ReturnReasonCode | string | null | undefined): string {
+  if (!code) return '';
+  return `orderReasons.return.${code}`;
+}

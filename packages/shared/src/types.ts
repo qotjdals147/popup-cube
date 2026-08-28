@@ -67,6 +67,12 @@ export interface StorePolicy {
   return_address_line2: string | null;
   shipping_guide: string | null;
   exchange_return_guide: string | null;
+  /** AD-073 R2 — 단순변심 반품 허용 */
+  return_change_of_mind_allowed: boolean;
+  /** AD-073 R2 — 구매확정(또는 배송완료) 후 N일 */
+  return_change_of_mind_days: number;
+  /** AD-073 R2 — 교환 허용 */
+  exchange_allowed: boolean;
   shipping_fee_type: StoreShippingFeeType;
   shipping_fee_amount: number;
   shipping_free_threshold: number;
@@ -238,6 +244,15 @@ export type OrderCancelledBy = 'owner' | 'shopper';
 /** §53 P0#8 — 배송중~구매확정 주문 클레임(문의) v1 뼈대: 주문당 활성 클레임 1건 */
 export type OrderClaimStatus = 'none' | 'open' | 'resolved';
 
+/** AD-073 R2 — 반품·교환 신청 상태 (orders.return_status 캐시) */
+export type OrderReturnStatus = 'none' | 'requested' | 'approved' | 'rejected' | 'completed';
+
+/** AD-073 R2 — 반품 vs 교환 */
+export type OrderReturnKind = 'return' | 'exchange';
+
+/** AD-073 R2 — 가챠 당첨품 반납 상태 (§7.49) */
+export type GachaReturnStatus = 'pending' | 'returned' | 'not_returnable';
+
 /** 주문 헤더 (AD-030, §10) — `place_order()` 서버 함수로만 생성 (가격 조작 방지). */
 export interface Order {
   id: string;
@@ -275,6 +290,15 @@ export interface Order {
   claim_resolved_at: string | null;
   /** AD-077 — 문의 라운드 수 (2+ 이면 이력 보기) */
   claim_round_count: number;
+  /** AD-073 R2 — 반품·교환 신청 캐시 */
+  return_status: OrderReturnStatus;
+  return_kind: OrderReturnKind | null;
+  return_reason_code: string | null;
+  return_reason_detail: string | null;
+  return_requested_at: string | null;
+  return_resolved_at: string | null;
+  return_owner_reply: string | null;
+  active_return_id: string | null;
   /** AD-069 — 점주 보류(보완 요청) */
   hold_reason_code: string | null;
   hold_reason_text: string | null;
@@ -328,15 +352,30 @@ export interface ShopperOrderView extends Order {
   store_name: string | null;
   /** 주문번호 접두어 (stores.store_code) */
   store_code: string | null;
-  shipping_recipient_name: string | null;
-  shipping_phone: string | null;
-  shipping_postal_code: string | null;
-  shipping_address_line1: string | null;
-  shipping_address_line2: string | null;
   items: OwnerOrderItemView[];
   gacha_prize_name: string | null;
   gacha_prize_image_url: string | null;
-  gacha_prize_is_product: boolean;
+}
+
+/** AD-073 R2 — 반품·교환 신청 1건 상세 */
+export interface OrderReturnDetail {
+  return_id: string;
+  order_id: string;
+  kind: OrderReturnKind;
+  reason_code: string;
+  reason_detail: string | null;
+  status: OrderReturnStatus;
+  items: { order_item_id: string; quantity: number }[];
+  exchange_memo: string | null;
+  return_recipient_name: string | null;
+  return_phone: string | null;
+  return_postal_code: string | null;
+  return_address_line1: string | null;
+  return_address_line2: string | null;
+  gacha_return_status: GachaReturnStatus | null;
+  owner_reply: string | null;
+  requested_at: string;
+  resolved_at: string | null;
 }
 
 export interface ChannelInfo {

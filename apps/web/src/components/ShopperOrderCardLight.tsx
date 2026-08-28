@@ -2,18 +2,23 @@ import type { ShopperOrderView } from '@popup-cube/shared';
 import {
   canConfirmPurchase,
   canFileClaim,
+  canRequestReturn,
   canShowReviewButton,
   isCancellableByShopper,
   orderDiscountAmount,
   orderHasDeliveryTimeline,
   sumOrderItemsSubtotal,
 } from '../lib/orders';
+import { getOrderReturn } from '../lib/orderReturns';
 import { formatOrderRef } from '../lib/orderRef';
 import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
 import { reviewKey } from '../lib/reviews';
 import { OrderHoldSupplementSection } from './OrderHoldSupplementSection';
 import { OrderClaimSection } from './OrderClaimSection';
+import { OrderReturnSection } from './OrderReturnSection';
+import { OrderReturnRequestDialog } from './OrderReturnRequestDialog';
 import { rejectReasonLabelKey } from '@popup-cube/shared';
+import { useEffect, useState } from 'react';
 import { t } from '../i18n';
 
 interface ShopperOrderCardLightProps {
@@ -50,6 +55,40 @@ export function ShopperOrderCardLight({
   onActionStart,
   onActionEnd,
 }: ShopperOrderCardLightProps) {
+  const [returnDialogOpen, setReturnDialogOpen] = useState(false);
+  const [returnAddress, setReturnAddress] = useState<{
+    recipient: string | null;
+    phone: string | null;
+    postal: string | null;
+    line1: string | null;
+    line2: string | null;
+  } | null>(null);
+
+  useEffect(() => {
+    if (order.return_status !== 'approved' && order.return_status !== 'completed') {
+      setReturnAddress(null);
+      return;
+    }
+    let active = true;
+    void getOrderReturn(order.id)
+      .then((detail) => {
+        if (!active || !detail) return;
+        setReturnAddress({
+          recipient: detail.return_recipient_name,
+          phone: detail.return_phone,
+          postal: detail.return_postal_code,
+          line1: detail.return_address_line1,
+          line2: detail.return_address_line2,
+        });
+      })
+      .catch(() => {
+        if (active) setReturnAddress(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [order.id, order.return_status]);
+
   const reviewEligible = canShowReviewButton(order.status);
   const showTimeline = orderHasDeliveryTimeline(order);
   const itemsSubtotal = sumOrderItemsSubtotal(order.items);
@@ -59,7 +98,8 @@ export function ShopperOrderCardLight({
   const hasActions =
     canConfirmPurchase(order.status) ||
     (isCancellableByShopper(order.status) && order.status !== 'on_hold') ||
-    (canFileClaim(order.status) && order.claim_status !== 'open');
+    (canFileClaim(order.status) && order.claim_status !== 'open') ||
+    canRequestReturn(order.status, order.return_status);
 
   return (
     <article className="oh-card">
@@ -248,6 +288,20 @@ export function ShopperOrderCardLight({
         />
       )}
 
+      {order.return_status !== 'none' && (
+        <OrderReturnSection
+          returnStatus={order.return_status}
+          returnKind={order.return_kind}
+          returnReasonCode={order.return_reason_code}
+          returnReasonDetail={order.return_reason_detail}
+          returnRequestedAt={order.return_requested_at}
+          returnResolvedAt={order.return_resolved_at}
+          returnOwnerReply={order.return_owner_reply}
+          returnAddress={returnAddress ?? undefined}
+          variant="shopper"
+        />
+      )}
+
       {hasActions && (
         <footer className="oh-action-bar">
           {canConfirmPurchase(order.status) && (
@@ -301,8 +355,21 @@ export function ShopperOrderCardLight({
               )}
             </>
           )}
+
+          {canRequestReturn(order.status, order.return_status) && (
+            <button type="button" className="oh-btn-secondary" onClick={() => setReturnDialogOpen(true)}>
+              {t('myOrders.returnRequestButton')}
+            </button>
+          )}
         </footer>
       )}
+
+      <OrderReturnRequestDialog
+        order={order}
+        open={returnDialogOpen}
+        onClose={() => setReturnDialogOpen(false)}
+        onSubmitted={() => void onReload()}
+      />
     </article>
   );
 }

@@ -8,6 +8,7 @@ export interface OwnerOrderCounts {
   awaitingShip: number;
   onHold: number;
   openClaims: number;
+  openReturns: number;
 }
 
 interface UseOwnerOrderRealtimeOptions {
@@ -32,6 +33,7 @@ export function useOwnerOrderRealtime(
     awaitingShip: 0,
     onHold: 0,
     openClaims: 0,
+    openReturns: 0,
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [refreshTick, setRefreshTick] = useState(0);
@@ -85,6 +87,7 @@ export function useOwnerOrderRealtime(
     awaitingShip: counts.awaitingShip,
     onHold: counts.onHold,
     openClaims: counts.openClaims,
+    openReturns: counts.openReturns,
     toastMessage,
     dismissToast,
     refreshTick,
