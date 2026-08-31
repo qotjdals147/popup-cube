@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GachaReturnStatus, OwnerOrderView } from '@popup-cube/shared';
 import { returnReasonLabelKey } from '@popup-cube/shared';
 import {
@@ -40,6 +40,7 @@ export function OwnerReturnsPanel({
   const [rejectDraft, setRejectDraft] = useState<Record<string, string>>({});
   const [rejectErrorId, setRejectErrorId] = useState<string | null>(null);
   const [gachaStatus, setGachaStatus] = useState<Record<string, GachaReturnStatus>>({});
+  const scrolledFocusKeyRef = useRef<string | null>(null);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -71,9 +72,17 @@ export function OwnerReturnsPanel({
   );
 
   useEffect(() => {
-    if (!focusOrder?.orderId || loading) return;
+    if (!focusOrder?.orderId) {
+      scrolledFocusKeyRef.current = null;
+      return;
+    }
+    if (loading) return;
+    if (scrolledFocusKeyRef.current === focusOrder.focusKey) return;
+
     const found = filtered.some((o) => o.id === focusOrder.orderId);
     if (!found) return;
+
+    scrolledFocusKeyRef.current = focusOrder.focusKey;
 
     const timer = window.setTimeout(() => {
       const el = document.querySelector(`[data-owner-order-id="${focusOrder.orderId}"]`);

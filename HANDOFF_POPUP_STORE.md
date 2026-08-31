@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.64` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.65` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -750,9 +750,9 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **R2 UX polish ✅** · 다음 = **손님 알림 탭** |
-| **Git 상태** | **`c5a119c`** push ✅ |
-| **User 실기** | R2 + §7.61 **⬜** · §7.60 |
+| **한 줄 요약** | **R2 UX + 연결 탭 포커스 ✅** · 다음 = **손님 알림 탭 (AD-076)** |
+| **Git 상태** | **§7.65 커밋 후 push** (이전 **`c738047`**) |
+| **User 실기** | §7.60~§7.65 **⬜** (연결 이동 · 검색 지우기 · 포커스 1회) |
 | **다음 에이전트 1순위** | ① **AD-076 알림 탭** |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
@@ -865,24 +865,22 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — **store_return_addresses 구현 ✅** · **`8371f4e`** · User实기 ⬜ · §7.58~§7.59
+**최신** — **§7.65 연결 포커스 스크롤 1회** · User实기 ⬜
 
 | | |
 |---|---|
-| **다음 우선 (에이전트)** | ① **AD-073 R2** 반품·교환 신청 |
-| **반품지 (AD-076)** | ✅ CRUD · **User实기 ⬜** · §7.58 |
-| **AddressSearch** | ✅ · §7.56 |
-| **문의 (AD-077)** | ✅ · §7.54 |
+| **다음 우선 (에이전트)** | ① **AD-076 손님 알림 탭** + deep link |
+| **점주 R2 UX** | ✅ §7.60~§7.65 · **User实기 ⬜** |
 | **소셜 로그인** | ⬜ **AD-078** · §33.1 · **PG 전 P1** |
-| **상세** | **§7.59** · §7.48 |
+| **상세** | **§7.65** (최신) · §7.62~§7.64 |
 
-#### Expo 재시작 여부 (최신 `8371f4e` — **web-only**)
+#### Expo 재시작 여부 (최신 §7.65 — **web-only**)
 
 | | |
 |---|---|
-| **수정** | `apps/web` — `OwnerReturnAddressPanel` · `storeReturnAddresses.ts` |
-| **Expo(Metro) 재시작** | ❌ **불필요** |
-| **User** | Vercel **1~2min** · 점주 PC **Ctrl+F5** |
+| **수정** | `apps/web` — `OwnerOrdersPanel` · `OwnerReturnsPanel` · 연결 포커스 스크롤 |
+| **Expo(Metro) 재시작** | ❌ **불필요** — **Ctrl+C / `--clear` 하지 말 것** |
+| **User** | **`main` push** → Vercel **1~2min** → 점주 PC **Ctrl+F5** |
 
 #### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
 
@@ -907,12 +905,20 @@ cd apps\mobile
 npx expo start --tunnel --port 8082 --clear
 ```
 
-4) **`demo@owner.com` / `demo`** → 매장 관리 → **운영·배송 안내**
+4) **`demo@owner.com` / `demo`** → GUCCI **편집** → 주문·발주·배송 또는 **반품·교환** 탭
 
-5) **합격 (AD-076 반품지)**
-   - ✅ **+ 새 반품지** · **주소 검색** · 저장
-   - ✅ 2개+ → **기본 반품지** 지정
-   - ✅ **저장하기** = CS·배송비만 (반품지는 폼에서 즉시 저장)
+5) **클릭 순서 (점주 · §7.65)**
+   - 카드 **「연결된 처리」** → 다른 탭으로 이동 → 해당 건 **스크롤+반짝임 1회**
+   - 검색창 **지우기** → 목록만 넓어짐 · **다시 스크롤 안 됨** ✅
+
+6) **합격**
+   - ✅ 연결 이동 후 포커스 **1회만**
+   - ✅ 검색어 지워도 **재스크롤 없음**
+   - ✅ 날짜 **A~오늘** 유지 (§7.64)
+
+#### 사용자가 지금 해야 할 것 (과거 — §7.58~§7.59)
+
+**store_return_addresses 구현 ✅** · **`8371f4e`** · §7.58~§7.59
 
 6) ⬜ **R2** — 손님 **「반품·교환 신청」** = **아직 없음**(정상)
 
@@ -1343,6 +1349,63 @@ npx expo start --tunnel --port 8082 --clear
 #### 다음
 
 **AD-073 R2** — §7.59
+
+---
+
+### 7.65 세션 인수인계 — **2026-08-31** (연결 포커스 스크롤 1회)
+
+| | |
+|---|---|
+| **Scope** | 연결된 처리 이동 후 **스크롤·하이라이트는 최초 1회만** — 검색어 지워도 재스크롤 안 함 |
+| **Fix** | `scrolledFocusKeyRef` — `focusKey`당 scroll 1회 · `filtered` 변경(검색 지우기) 시 skip |
+| **변경** | `OwnerOrdersPanel` · `OwnerReturnsPanel` |
+| **Git** | **§7.65 커밋 후 push** (이전 **`c738047`**) |
+
+#### Expo 재시작 여부 (§7.65 — **web-only**)
+
+| | |
+|---|---|
+| **수정** | `apps/web` only — `OwnerOrdersPanel` · `OwnerReturnsPanel` |
+| **Expo(Metro) 재시작** | ❌ **불필요** — **Ctrl+C / `--clear` 하지 말 것** (Metro 켜 둔 채 OK) |
+| **User** | **`main` push** → Vercel **1~2min** → 점주 PC **Ctrl+F5** · 또는 아래 **PC 3줄** 로컬 |
+
+#### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
+
+0) 폰 **Expo Go SDK 52** (Play 54+ ❌)
+
+1) **Win → `cmd` → Enter**
+
+2) **점주 PC 웹** — 아래 **한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) 브라우저 → `http://localhost:5173` (또는 Vercel `https://popup-cube-web.vercel.app` · push **1~2min** 후) → `demo@owner.com` / `demo` → GUCCI **편집**
+
+4) **Expo 재시작 ❌** — Metro **이미 켜져 있으면 5) 생략** · **꺼져 있을 때만** 아래 **한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+5) **클릭 순서 (점주)**
+   - **발주·배송** 또는 **반품·교환** — 카드 **「연결된 처리」** 클릭 → 다른 탭 이동
+   - 해당 주문 **스크롤 + 반짝임 1회** 확인
+   - 검색창 **비우기** → 목록 복구 · **재스크롤 없음** ✅
+
+6) **합격**
+   - ✅ 연결 이동 포커스 **1회만**
+   - ✅ 검색어 지워도 **같은 건으로 다시 안 감**
+
+#### 다음
+
+1. **AD-076 손님 알림 탭** + deep link (§7.50)
 
 ---
 
@@ -2790,6 +2853,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-31 — Focus scroll once per link navigation (no re-scroll on search clear)
+- **Author:** Cursor Agent
+- **Changed:** `OwnerOrdersPanel` · `OwnerReturnsPanel` · §7.65
+- **Notes:** 검색어 지우면 목록만 복구 · 재스크롤 없음 · **Expo ❌**
 
 ### 2026-08-31 — Related link date range A~today, search clear fix
 - **Author:** Cursor Agent

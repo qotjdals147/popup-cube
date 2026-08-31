@@ -76,6 +76,7 @@ export function OwnerOrdersPanel({
   const [filters, setFilters] = useState<OwnerOrderFilters>(() => defaultOwnerOrderFilters());
   const [autoOpenClaimHistory, setAutoOpenClaimHistory] = useState(false);
   const appliedFocusKeyRef = useRef<string | null>(null);
+  const scrolledFocusKeyRef = useRef<string | null>(null);
 
   const activeQueue = queue ?? internalQueue;
   const relatedContext: OwnerPanelContext | undefined =
@@ -150,9 +151,17 @@ export function OwnerOrdersPanel({
   }, [onFocusClear]);
 
   useEffect(() => {
-    if (!focusOrder?.orderId || loading) return;
+    if (!focusOrder?.orderId) {
+      scrolledFocusKeyRef.current = null;
+      return;
+    }
+    if (loading) return;
+    if (scrolledFocusKeyRef.current === focusOrder.focusKey) return;
+
     const found = filtered.some((o) => o.id === focusOrder.orderId);
     if (!found) return;
+
+    scrolledFocusKeyRef.current = focusOrder.focusKey;
 
     const timer = window.setTimeout(() => {
       const el = document.querySelector(`[data-owner-order-id="${focusOrder.orderId}"]`);
