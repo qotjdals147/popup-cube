@@ -11,6 +11,33 @@ export interface OwnerOrderFilters {
   sort: OwnerOrderSort;
 }
 
+function pad2(n: number): string {
+  return String(n).padStart(2, '0');
+}
+
+/** 오늘 기준 이번 달 1일 ~ 말일 (YYYY-MM-DD) */
+export function currentMonthDateRange(now = new Date()): { dateFrom: string; dateTo: string } {
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const lastDay = new Date(y, m + 1, 0).getDate();
+  return {
+    dateFrom: `${y}-${pad2(m + 1)}-01`,
+    dateTo: `${y}-${pad2(m + 1)}-${pad2(lastDay)}`,
+  };
+}
+
+export function defaultOwnerOrderFilters(now = new Date()): OwnerOrderFilters {
+  const { dateFrom, dateTo } = currentMonthDateRange(now);
+  return {
+    query: '',
+    status: 'all',
+    dateFrom,
+    dateTo,
+    sort: 'newest',
+  };
+}
+
+/** @deprecated — `defaultOwnerOrderFilters()` 사용 */
 export const DEFAULT_OWNER_ORDER_FILTERS: OwnerOrderFilters = {
   query: '',
   status: 'all',
@@ -18,6 +45,12 @@ export const DEFAULT_OWNER_ORDER_FILTERS: OwnerOrderFilters = {
   dateTo: '',
   sort: 'newest',
 };
+
+export type OwnerOrderQueue = 'pending' | 'fulfillment' | 'hold' | 'claims';
+
+export interface OwnerOrderFilterOptions {
+  queue?: OwnerOrderQueue;
+}
 
 function orderMatchesQuery(order: OwnerOrderView, rawQuery: string): boolean {
   const q = rawQuery.trim().toLowerCase();
@@ -30,29 +63,40 @@ function orderMatchesQuery(order: OwnerOrderView, rawQuery: string): boolean {
   return ref.includes(q) || buyer.includes(q) || num.includes(q);
 }
 
-function orderMatchesDate(order: OwnerOrderView, dateFrom: string, dateTo: string): boolean {
+function orderMatchesDate(
+  order: OwnerOrderView,
+  dateFrom: string,
+  dateTo: string,
+  queue?: OwnerOrderQueue,
+): boolean {
   if (!dateFrom && !dateTo) return true;
-  const created = new Date(order.created_at);
+  const anchorRaw =
+    queue === 'claims'
+      ? order.claim_created_at ?? order.claim_resolved_at ?? order.created_at
+      : order.created_at;
+  const anchor = new Date(anchorRaw);
   if (dateFrom) {
     const from = new Date(`${dateFrom}T00:00:00`);
-    if (created < from) return false;
+    if (anchor < from) return false;
   }
   if (dateTo) {
     const to = new Date(`${dateTo}T23:59:59.999`);
-    if (created > to) return false;
+    if (anchor > to) return false;
   }
   return true;
 }
 
 export function filterAndSortOwnerOrders(
   orders: OwnerOrderView[],
-  filters: OwnerOrderFilters
+  filters: OwnerOrderFilters,
+  options: OwnerOrderFilterOptions = {},
 ): OwnerOrderView[] {
+  const { queue } = options;
   let list = orders.filter(
     (o) =>
       orderMatchesQuery(o, filters.query) &&
-      orderMatchesDate(o, filters.dateFrom, filters.dateTo) &&
-      (filters.status === 'all' || o.status === filters.status)
+      orderMatchesDate(o, filters.dateFrom, filters.dateTo, queue) &&
+      (filters.status === 'all' || o.status === filters.status),
   );
 
   list = [...list].sort((a, b) => {
@@ -63,8 +107,6 @@ export function filterAndSortOwnerOrders(
 
   return list;
 }
-
-export type OwnerOrderQueue = 'pending' | 'fulfillment' | 'hold' | 'claims';
 
 /** 탭별 상태 필터 옵션 */
 export function ownerOrderStatusOptions(

@@ -8,6 +8,7 @@ import { OwnerProductPanel } from '../components/OwnerProductPanel';
 import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
 import { OwnerReturnsTab } from '../components/OwnerReturnsTab';
 import type { OwnerNavigateTarget } from '../components/OwnerOrderRelatedLinks';
+import type { OwnerOrderFocus } from '../lib/ownerOrderFocus';
 import { OwnerDisplayPanel } from '../components/OwnerDisplayPanel';
 import { OwnerStorePolicyPanel } from '../components/OwnerStorePolicyPanel';
 import { OwnerPromotionPanel } from '../components/OwnerPromotionPanel';
@@ -52,8 +53,18 @@ export function StoreEditPage() {
   const [ownershipChecked, setOwnershipChecked] = useState(false);
   const [ownsStore, setOwnsStore] = useState(false);
   const [returnsSubTab, setReturnsSubTab] = useState<'requests' | 'claims'>('requests');
+  const [focusOrder, setFocusOrder] = useState<OwnerOrderFocus | null>(null);
 
   const navigateOwnerRelated = useCallback((target: OwnerNavigateTarget) => {
+    const nextFocus =
+      target.orderId && target.orderQuery
+        ? {
+            orderId: target.orderId,
+            orderQuery: target.orderQuery,
+            openClaimHistory: target.openClaimHistory,
+          }
+        : null;
+    if (nextFocus) setFocusOrder(nextFocus);
     if (target.tab === 'returns') {
       setReturnsSubTab(target.returnsSubTab ?? 'requests');
       setTab('returns');
@@ -61,6 +72,8 @@ export function StoreEditPage() {
     }
     setTab(target.tab);
   }, []);
+
+  const clearFocusOrder = useCallback(() => setFocusOrder(null), []);
 
   const {
     pendingAccept,
@@ -512,6 +525,8 @@ export function StoreEditPage() {
               refreshTick={refreshTick}
               panelContext="pending"
               onNavigateRelated={navigateOwnerRelated}
+              focusOrder={focusOrder}
+              onFocusClear={clearFocusOrder}
             />
           )}
 
@@ -523,6 +538,8 @@ export function StoreEditPage() {
               refreshTick={refreshTick}
               panelContext="hold"
               onNavigateRelated={navigateOwnerRelated}
+              focusOrder={focusOrder}
+              onFocusClear={clearFocusOrder}
             />
           )}
 
@@ -534,6 +551,8 @@ export function StoreEditPage() {
               refreshTick={refreshTick}
               panelContext="fulfillment"
               onNavigateRelated={navigateOwnerRelated}
+              focusOrder={focusOrder}
+              onFocusClear={clearFocusOrder}
             />
           )}
 
@@ -544,6 +563,8 @@ export function StoreEditPage() {
               subTab={returnsSubTab}
               onSubTabChange={setReturnsSubTab}
               onNavigateRelated={navigateOwnerRelated}
+              focusOrder={focusOrder}
+              onFocusClear={clearFocusOrder}
             />
           )}
 

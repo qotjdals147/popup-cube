@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import type { OrderClaimStatus } from '@popup-cube/shared';
 import { formatClaimDateTime } from '../lib/claimFormat';
 import { OrderClaimHistoryModal } from './OrderClaimHistoryModal';
@@ -17,6 +17,7 @@ export interface OrderClaimSectionProps {
   messageLabel: string;
   replyLabel: string;
   openNote?: string;
+  autoOpenHistory?: boolean;
   /** 점주 claimBox 안에 삽입 시 true — 바깥 래퍼·제목 생략 */
   embedded?: boolean;
   children?: React.ReactNode;
@@ -36,11 +37,18 @@ export function OrderClaimSection({
   messageLabel,
   replyLabel,
   openNote,
+  autoOpenHistory = false,
   embedded = false,
   children,
 }: OrderClaimSectionProps) {
   const [historyOpen, setHistoryOpen] = useState(false);
   const isShopper = variant === 'shopper';
+
+  useEffect(() => {
+    if (autoOpenHistory && claimRoundCount >= 2) {
+      setHistoryOpen(true);
+    }
+  }, [autoOpenHistory, claimRoundCount]);
 
   if (claimStatus === 'none') return null;
 

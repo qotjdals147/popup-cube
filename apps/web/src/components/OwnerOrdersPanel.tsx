@@ -21,14 +21,16 @@ import {
 } from './OwnerOrderRelatedLinks';
 import { formatOrderRef } from '../lib/orderRef';
 import {
-  DEFAULT_OWNER_ORDER_FILTERS,
+  defaultOwnerOrderFilters,
   filterAndSortOwnerOrders,
   ownerOrderStatusOptions,
   type OwnerOrderFilters,
   type OwnerOrderQueue,
 } from '../lib/ownerOrderFilters';
+import type { OwnerOrderFocus } from '../lib/ownerOrderFocus';
 import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
+import '../styles/owner-order-focus.css';
 import { t } from '../i18n';
 
 export type { OwnerOrderQueue } from '../lib/ownerOrderFilters';
@@ -44,6 +46,8 @@ interface OwnerOrdersPanelProps {
   /** §7.62 — 다른 탭으로 이동 (같은 주문 연결) */
   panelContext?: OwnerPanelContext;
   onNavigateRelated?: (target: OwnerNavigateTarget) => void;
+  focusOrder?: OwnerOrderFocus | null;
+  onFocusClear?: () => void;
 }
 
 export function OwnerOrdersPanel({
@@ -54,6 +58,8 @@ export function OwnerOrdersPanel({
   refreshTick = 0,
   panelContext,
   onNavigateRelated,
+  focusOrder = null,
+  onFocusClear,
 }: OwnerOrdersPanelProps) {
   const [orders, setOrders] = useState<OwnerOrderView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +73,8 @@ export function OwnerOrdersPanel({
     items: { id: string; product_name: string; quantity: number }[];
   } | null>(null);
   const [internalQueue, setInternalQueue] = useState<OwnerOrderQueue>('pending');
-  const [filters, setFilters] = useState<OwnerOrderFilters>(DEFAULT_OWNER_ORDER_FILTERS);
+  const [filters, setFilters] = useState<OwnerOrderFilters>(() => defaultOwnerOrderFilters());
+  const [autoOpenClaimHistory, setAutoOpenClaimHistory] = useState(false);
 
   const activeQueue = queue ?? internalQueue;
   const relatedContext: OwnerPanelContext | undefined =
@@ -99,16 +106,30 @@ export function OwnerOrdersPanel({
     void reload();
   }, [reload, refreshTick]);
 
+  useEffect(() => {
+    if (!focusOrder) return;
+    setAutoOpenClaimHistory(Boolean(focusOrder.openClaimHistory));
+    setFilters((prev) => ({
+      ...prev,
+      query: focusOrder.orderQuery,
+      dateFrom: '',
+      dateTo: '',
+      status: 'all',
+    }));
+  }, [focusOrder]);
+
   const filtered = useMemo(() => {
     const byQueue = orders.filter((o) => {
-      if (activeQueue === 'claims') return o.claim_status === 'open';
+      if (activeQueue === 'claims') return o.claim_status !== 'none';
       if (activeQueue === 'hold') return isOnHoldOrderStatus(o.status);
       if (activeQueue === 'pending') return isPendingOrderStatus(o.status);
       return isFulfillmentOrderStatus(o.status);
     });
-    const list = filterAndSortOwnerOrders(byQueue, filters);
+    const list = filterAndSortOwnerOrders(byQueue, filters, { queue: activeQueue });
     if (activeQueue === 'claims') {
       return [...list].sort((a, b) => {
+        if (a.claim_status === 'open' && b.claim_status !== 'open') return -1;
+        if (a.claim_status !== 'open' && b.claim_status === 'open') return 1;
         const ta = a.claim_created_at ? new Date(a.claim_created_at).getTime() : 0;
         const tb = b.claim_created_at ? new Date(b.claim_created_at).getTime() : 0;
         return filters.sort === 'oldest' ? ta - tb : tb - ta;
@@ -116,6 +137,35 @@ export function OwnerOrdersPanel({
     }
     return list;
   }, [orders, activeQueue, filters]);
+
+  const finishFocus = useCallback(() => {
+    setAutoOpenClaimHistory(false);
+    onFocusClear?.();
+  }, [onFocusClear]);
+
+  useEffect(() => {
+    if (!focusOrder?.orderId || loading) return;
+    const found = filtered.some((o) => o.id === focusOrder.orderId);
+    if (!found) return;
+
+    const timer = window.setTimeout(() => {
+      const el = document.querySelector(`[data-owner-order-id="${focusOrder.orderId}"]`);
+      if (!el || !(el instanceof HTMLElement)) {
+        finishFocus();
+        return;
+      }
+      el.classList.remove('owner-order-card--focus');
+      void el.offsetWidth;
+      el.classList.add('owner-order-card--focus');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      window.setTimeout(() => {
+        el.classList.remove('owner-order-card--focus');
+        finishFocus();
+      }, 2200);
+    }, 120);
+
+    return () => window.clearTimeout(timer);
+  }, [focusOrder, loading, filtered, finishFocus]);
 
   const statusOptions = useMemo(() => ownerOrderStatusOptions(activeQueue), [activeQueue]);
 
@@ -261,6 +311,7 @@ export function OwnerOrdersPanel({
             <option value="oldest">{t('ownerOrders.sortOldest')}</option>
           </select>
         </div>
+        <p style={styles.filterMonthHint}>{t('ownerOrders.filterMonthHint')}</p>
         {activeQueue === 'fulfillment' && (
           <div style={styles.quickFilterRow}>
             <span style={styles.quickFilterHint}>{t('ownerOrders.fulfillmentHint')}</span>
@@ -319,7 +370,7 @@ export function OwnerOrdersPanel({
         {!loading && !error && filtered.length > 0 && (
           <div style={styles.list}>
             {filtered.map((order) => (
-              <div key={order.id} style={styles.card}>
+              <div key={order.id} data-owner-order-id={order.id} style={styles.card}>
                 <div style={styles.cardTop}>
                   <div style={styles.cardTopMain}>
                     <div style={styles.cardRefRow}>
@@ -442,6 +493,7 @@ export function OwnerOrdersPanel({
                       claimRoundCount={order.claim_round_count ?? 0}
                       variant="owner"
                       embedded
+                      autoOpenHistory={autoOpenClaimHistory && focusOrder?.orderId === order.id}
                       messageLabel={t('ownerOrders.claimMessageLabel')}
                       replyLabel={t('ownerOrders.claimReplyLabel')}
                     >
@@ -1053,5 +1105,11 @@ const styles: Record<string, React.CSSProperties> = {
     borderColor: oc.primary,
     background: oc.navActiveBg,
     color: oc.navActiveText,
+  },
+  filterMonthHint: {
+    margin: '8px 0 0',
+    fontSize: fs.xs,
+    color: oc.textMuted,
+    lineHeight: 1.45,
   },
 };

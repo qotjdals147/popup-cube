@@ -5,6 +5,7 @@ import {
   isOnHoldOrderStatus,
   isPendingOrderStatus,
 } from '../lib/orders';
+import { formatOrderRef } from '../lib/orderRef';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 
@@ -18,6 +19,9 @@ export type OwnerPanelContext =
 export type OwnerNavigateTarget = {
   tab: 'orders' | 'hold' | 'fulfillment' | 'returns';
   returnsSubTab?: 'requests' | 'claims';
+  orderId?: string;
+  orderQuery?: string;
+  openClaimHistory?: boolean;
 };
 
 interface OwnerOrderRelatedLinksProps {
@@ -30,6 +34,17 @@ function orderHomeTab(order: OwnerOrderView): OwnerNavigateTarget['tab'] {
   if (isPendingOrderStatus(order.status)) return 'orders';
   if (isOnHoldOrderStatus(order.status)) return 'hold';
   return 'fulfillment';
+}
+
+function buildFocusTarget(
+  order: OwnerOrderView,
+  target: Pick<OwnerNavigateTarget, 'tab' | 'returnsSubTab' | 'openClaimHistory'>,
+): OwnerNavigateTarget {
+  return {
+    ...target,
+    orderId: order.id,
+    orderQuery: formatOrderRef(order.store_code, order.order_number),
+  };
 }
 
 /** 같은 주문이 여러 탭에 걸쳐 있을 때 — 연결 안내 + 탭 이동 */
@@ -54,10 +69,14 @@ export function OwnerOrderRelatedLinks({ order, context, onNavigate }: OwnerOrde
       key: 'return',
       label: t('ownerOrders.relatedReturn', { kind, status }),
       detail: reason ?? undefined,
-      action: hasActiveReturn
-        ? () => onNavigate({ tab: 'returns', returnsSubTab: 'requests' })
-        : undefined,
-      actionLabel: hasActiveReturn ? t('ownerOrders.relatedGoReturns') : undefined,
+      action: () =>
+        onNavigate(
+          buildFocusTarget(order, {
+            tab: 'returns',
+            returnsSubTab: 'requests',
+          }),
+        ),
+      actionLabel: hasActiveReturn ? t('ownerOrders.relatedGoReturns') : t('ownerOrders.relatedViewReturns'),
     });
   }
 
@@ -71,7 +90,14 @@ export function OwnerOrderRelatedLinks({ order, context, onNavigate }: OwnerOrde
         ? t('ownerOrders.relatedClaimOpen')
         : t('ownerOrders.relatedClaimResolved', { count: order.claim_round_count }),
       detail: hasOpenClaim && order.claim_message ? order.claim_message : undefined,
-      action: () => onNavigate({ tab: 'returns', returnsSubTab: 'claims' }),
+      action: () =>
+        onNavigate(
+          buildFocusTarget(order, {
+            tab: 'returns',
+            returnsSubTab: 'claims',
+            openClaimHistory: !hasOpenClaim && order.claim_round_count >= 2,
+          }),
+        ),
       actionLabel: hasOpenClaim
         ? t('ownerOrders.relatedGoClaims')
         : t('ownerOrders.relatedViewClaims'),
@@ -91,7 +117,7 @@ export function OwnerOrderRelatedLinks({ order, context, onNavigate }: OwnerOrde
       label: t('ownerOrders.relatedOrderStatus', {
         status: t(`ownerOrders.status.${order.status}`),
       }),
-      action: () => onNavigate({ tab: homeTab }),
+      action: () => onNavigate(buildFocusTarget(order, { tab: homeTab })),
       actionLabel: t(homeKey),
     });
   }

@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.62` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.63` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -1343,6 +1343,35 @@ npx expo start --tunnel --port 8082 --clear
 #### 다음
 
 **AD-073 R2** — §7.59
+
+---
+
+### 7.63 세션 인수인계 — **2026-08-31** (연결 포커스 · 문의 탭 bugfix · 월별 날짜 기본값)
+
+| | |
+|---|---|
+| **Scope** | 「연결된 처리」클릭 → **스크롤+반짝임(3회)** · **문의 종료 이력** 탭 노출 · **이번 달** 날짜 기본 |
+| **Git** | push 대기 |
+
+#### 구현·버그
+
+| | |
+|---|---|
+| **포커스** | `focusOrder` · `data-owner-order-id` · `owner-order-focus.css` · 문의 2건+ 이력이면 **모달 자동 오픈** |
+| **문의 안 보임 (ISS)** | **원인:** 문의 탭이 `claim_status=open` **만** 필터 → GUCCI-3처럼 **종료(resolved)+이력 2건**은 목록 제외 · **수정:** `claim_status !== 'none'` 전부 표시 (open 우선 정렬) |
+| **AD-077 이전 데이터** | migration이 `claim_round_count=1` backfill · **2건+**는 AD-077 `order_claim_messages` 이후 · 이력 버튼 → `listOrderClaimHistory` |
+| **날짜 필터** | `defaultOwnerOrderFilters()` = **오늘 기준 이번 달 1일~말일** · 탭 진입마다 패널 remount로 갱신 · 연결 이동 시 해당 주문 찾기 위해 **일시적으로 날짜 해제+주문번호 검색** |
+| **문의 탭 날짜** | `claim_created_at` 기준 (주문 생성일 아님) |
+
+#### Expo 재시작 — **web-only** ❌
+
+#### User实기
+
+4) **점주** 발주·배송 → GUCCI-3 **문의 기록** → 문의 탭 이동 → **카드 반짝임** + **이력 모달**
+
+5) **점주** 주문 탭 들어가면 날짜 **2026-08-01 ~ 2026-08-31** 기본
+
+6) ⬜ User实기 **미확인**
 
 ---
 
@@ -2738,6 +2767,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-31 — Owner cross-tab focus pulse, claims history tab fix, month date default
+- **Author:** Cursor Agent
+- **Changed:** `OwnerOrderRelatedLinks` · `OwnerOrdersPanel` · `ownerOrderFilters` · `OrderClaimSection` · §7.63
+- **Notes:** 문의 탭 resolved 이력 bugfix · **Expo 재시작 ❌**
 
 ### 2026-08-31 — Shopper return copy + owner cross-tab links + fulfillment quick filters
 - **Author:** Cursor Agent

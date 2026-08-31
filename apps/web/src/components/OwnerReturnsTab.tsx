@@ -3,6 +3,7 @@ import { OwnerOrdersPanel } from './OwnerOrdersPanel';
 import { OwnerReturnsPanel } from './OwnerReturnsPanel';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import type { OwnerNavigateTarget } from './OwnerOrderRelatedLinks';
+import type { OwnerOrderFocus } from '../lib/ownerOrderFocus';
 import { t } from '../i18n';
 
 interface OwnerReturnsTabProps {
@@ -11,6 +12,8 @@ interface OwnerReturnsTabProps {
   subTab?: ReturnsSubTab;
   onSubTabChange?: (tab: ReturnsSubTab) => void;
   onNavigateRelated?: (target: OwnerNavigateTarget) => void;
+  focusOrder?: OwnerOrderFocus | null;
+  onFocusClear?: () => void;
 }
 
 type ReturnsSubTab = 'claims' | 'requests';
@@ -22,6 +25,8 @@ export function OwnerReturnsTab({
   subTab: controlledSubTab,
   onSubTabChange,
   onNavigateRelated,
+  focusOrder = null,
+  onFocusClear,
 }: OwnerReturnsTabProps) {
   const [internalSubTab, setInternalSubTab] = useState<ReturnsSubTab>('requests');
   const subTab = controlledSubTab ?? internalSubTab;
@@ -59,6 +64,8 @@ export function OwnerReturnsTab({
             storeId={storeId}
             refreshTick={refreshTick}
             onNavigateRelated={onNavigateRelated}
+            focusOrder={focusOrder}
+            onFocusClear={onFocusClear}
           />
         ) : (
           <OwnerOrdersPanel
@@ -68,6 +75,8 @@ export function OwnerReturnsTab({
             refreshTick={refreshTick}
             panelContext="returns-claims"
             onNavigateRelated={onNavigateRelated}
+            focusOrder={focusOrder}
+            onFocusClear={onFocusClear}
           />
         )}
       </div>

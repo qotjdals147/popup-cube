@@ -14,15 +14,25 @@ import { formatOrderRef } from '../lib/orderRef';
 import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { OwnerOrderRelatedLinks, type OwnerNavigateTarget } from './OwnerOrderRelatedLinks';
+import type { OwnerOrderFocus } from '../lib/ownerOrderFocus';
+import '../styles/owner-order-focus.css';
 import { t } from '../i18n';
 
 interface OwnerReturnsPanelProps {
   storeId: string;
   refreshTick?: number;
   onNavigateRelated?: (target: OwnerNavigateTarget) => void;
+  focusOrder?: OwnerOrderFocus | null;
+  onFocusClear?: () => void;
 }
 
-export function OwnerReturnsPanel({ storeId, refreshTick = 0, onNavigateRelated }: OwnerReturnsPanelProps) {
+export function OwnerReturnsPanel({
+  storeId,
+  refreshTick = 0,
+  onNavigateRelated,
+  focusOrder = null,
+  onFocusClear,
+}: OwnerReturnsPanelProps) {
   const [orders, setOrders] = useState<OwnerOrderView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -59,6 +69,30 @@ export function OwnerReturnsPanel({ storeId, refreshTick = 0, onNavigateRelated 
         }),
     [orders],
   );
+
+  useEffect(() => {
+    if (!focusOrder?.orderId || loading) return;
+    const found = filtered.some((o) => o.id === focusOrder.orderId);
+    if (!found) return;
+
+    const timer = window.setTimeout(() => {
+      const el = document.querySelector(`[data-owner-order-id="${focusOrder.orderId}"]`);
+      if (!el || !(el instanceof HTMLElement)) {
+        onFocusClear?.();
+        return;
+      }
+      el.classList.remove('owner-order-card--focus');
+      void el.offsetWidth;
+      el.classList.add('owner-order-card--focus');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      window.setTimeout(() => {
+        el.classList.remove('owner-order-card--focus');
+        onFocusClear?.();
+      }, 2200);
+    }, 120);
+
+    return () => window.clearTimeout(timer);
+  }, [focusOrder, loading, filtered, onFocusClear]);
 
   useEffect(() => {
     for (const order of filtered) {
@@ -106,7 +140,7 @@ export function OwnerReturnsPanel({ storeId, refreshTick = 0, onNavigateRelated 
             : t('myOrders.returnKindReturn');
 
         return (
-          <article key={order.id} style={styles.card}>
+          <article key={order.id} data-owner-order-id={order.id} style={styles.card}>
             <header style={styles.cardTop}>
               <div style={styles.cardTopMain}>
                 <div style={styles.cardRefRow}>
