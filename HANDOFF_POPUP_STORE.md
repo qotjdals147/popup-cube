@@ -1351,7 +1351,7 @@ npx expo start --tunnel --port 8082 --clear
 | | |
 |---|---|
 | **Scope** | 반품·교환 Realtime 토스트 · 사이드바 탭명 · 점주 카드 UI · 승인/거절 안전장치 · 수량 ± stepper |
-| **Git** | **`c5a119c`** push ✅ |
+| **Git** | **`acb6c0c`** push ✅ |
 | **User 결정** | 반품지 **A+C** — 신청 전 표시 + **주소 복사** 버튼 ✅ |
 
 #### 구현 요약
@@ -1362,6 +1362,8 @@ npx expo start --tunnel --port 8082 --clear
 | **탭명** | `ownerEdit.tabReturns` → **「반품·교환·문의」** (하위: 반품·교환 신청 / 손님 문의) |
 | **점주 UI** | `OwnerReturnsPanel` — 주문 탭과 동일 카드 레이아웃 · 거절(좌)·승인(우) 동일 크기 · 승인 confirm · 거절 사유 필수 하이라이트 |
 | **수량** | `QuantityStepper` — `OrderReturnRequestDialog` · `OrderHoldSupplementSection` |
+| **반품지 A+C** | 신청 팝업 수령지 + **주소 복사** · `returnAddressText.ts` |
+| **팝업 UX** | `createPortal(document.body)` · 배경 스크롤 잠금 · 본문만 scroll · `overscroll-behavior: contain` · 컴팩트 레이아웃 |
 
 #### Expo 재시작 여부 — **web-only** ❌
 
@@ -2689,10 +2691,15 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-08-31 — Return dialog A+C, scroll lock, compact layout
+- **Author:** Cursor Agent
+- **Changed:** `OrderReturnRequestDialog` · `returnAddressText.ts` · `shopper-account-panels.css` · i18n · §7.61
+- **Notes:** **Expo 재시작 ❌** · 반품지 복사 · 팝업 뒤 스크롤 누수 fix · git **`acb6c0c`**
+
 ### 2026-08-31 — R2 UX: Realtime CS toast, owner card UI, quantity stepper
 - **Author:** Cursor Agent
 - **Changed:** `useOwnerOrderRealtime` · `OwnerReturnsPanel` · `QuantityStepper` · `OrderReturnRequestDialog` · `OrderHoldSupplementSection` · `ko.ts` tabReturns · §7.61
-- **Notes:** **Expo 재시작 ❌** · 반품지 미리보기 = User 결정 대기 · **다음 = AD-076 알림 탭**
+- **Notes:** **Expo 재시작 ❌** · **다음 = AD-076 알림 탭**
 
 ### 2026-08-28 — AD-073 R2 order_returns + shopper return request UI
 - **Author:** Cursor Agent
