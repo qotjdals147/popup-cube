@@ -751,7 +751,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **R2 UX + 연결 탭 포커스 ✅** · 다음 = **손님 알림 탭 (AD-076)** |
-| **Git 상태** | **§7.65 커밋 후 push** (이전 **`c738047`**) |
+| **Git 상태** | **`c7732b9`** push ✅ |
 | **User 실기** | §7.60~§7.65 **⬜** (연결 이동 · 검색 지우기 · 포커스 1회) |
 | **다음 에이전트 1순위** | ① **AD-076 알림 탭** |
 
@@ -1359,9 +1359,9 @@ npx expo start --tunnel --port 8082 --clear
 | **Scope** | 연결된 처리 이동 후 **스크롤·하이라이트는 최초 1회만** — 검색어 지워도 재스크롤 안 함 |
 | **Fix** | `scrolledFocusKeyRef` — `focusKey`당 scroll 1회 · `filtered` 변경(검색 지우기) 시 skip |
 | **변경** | `OwnerOrdersPanel` · `OwnerReturnsPanel` |
-| **Git** | **§7.65 커밋 후 push** (이전 **`c738047`**) |
+| **Git** | **`c7732b9`** push ✅ |
 
-#### Expo 재시작 여부 (§7.65 — **web-only**)
+#### Expo 재시작 여부 (`c7732b9` — **web-only**)
 
 | | |
 |---|---|
@@ -2857,7 +2857,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-08-31 — Focus scroll once per link navigation (no re-scroll on search clear)
 - **Author:** Cursor Agent
 - **Changed:** `OwnerOrdersPanel` · `OwnerReturnsPanel` · §7.65
-- **Notes:** 검색어 지우면 목록만 복구 · 재스크롤 없음 · **Expo ❌**
+- **Notes:** git **`c7732b9`** · 검색어 지우면 목록만 복구 · **Expo ❌**
 
 ### 2026-08-31 — Related link date range A~today, search clear fix
 - **Author:** Cursor Agent
