@@ -2,18 +2,34 @@ import { useState } from 'react';
 import { OwnerOrdersPanel } from './OwnerOrdersPanel';
 import { OwnerReturnsPanel } from './OwnerReturnsPanel';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
+import type { OwnerNavigateTarget } from './OwnerOrderRelatedLinks';
 import { t } from '../i18n';
 
 interface OwnerReturnsTabProps {
   storeId: string;
   refreshTick?: number;
+  subTab?: ReturnsSubTab;
+  onSubTabChange?: (tab: ReturnsSubTab) => void;
+  onNavigateRelated?: (target: OwnerNavigateTarget) => void;
 }
 
 type ReturnsSubTab = 'claims' | 'requests';
 
 /** AD-073 R2 — 반품·교환 탭: 문의(cl R1) + 구조화 신청(R2) */
-export function OwnerReturnsTab({ storeId, refreshTick = 0 }: OwnerReturnsTabProps) {
-  const [subTab, setSubTab] = useState<ReturnsSubTab>('requests');
+export function OwnerReturnsTab({
+  storeId,
+  refreshTick = 0,
+  subTab: controlledSubTab,
+  onSubTabChange,
+  onNavigateRelated,
+}: OwnerReturnsTabProps) {
+  const [internalSubTab, setInternalSubTab] = useState<ReturnsSubTab>('requests');
+  const subTab = controlledSubTab ?? internalSubTab;
+
+  function setSubTab(next: ReturnsSubTab) {
+    if (onSubTabChange) onSubTabChange(next);
+    else setInternalSubTab(next);
+  }
 
   return (
     <div>
@@ -39,9 +55,20 @@ export function OwnerReturnsTab({ storeId, refreshTick = 0 }: OwnerReturnsTabPro
       </div>
       <div style={styles.panel}>
         {subTab === 'requests' ? (
-          <OwnerReturnsPanel storeId={storeId} refreshTick={refreshTick} />
+          <OwnerReturnsPanel
+            storeId={storeId}
+            refreshTick={refreshTick}
+            onNavigateRelated={onNavigateRelated}
+          />
         ) : (
-          <OwnerOrdersPanel storeId={storeId} embedded queue="claims" refreshTick={refreshTick} />
+          <OwnerOrdersPanel
+            storeId={storeId}
+            embedded
+            queue="claims"
+            refreshTick={refreshTick}
+            panelContext="returns-claims"
+            onNavigateRelated={onNavigateRelated}
+          />
         )}
       </div>
     </div>

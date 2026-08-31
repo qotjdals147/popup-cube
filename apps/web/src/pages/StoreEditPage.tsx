@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getMyStore, publishStore, updateStoreCode, updateStorePopupEndsAt, userOwnsStore, countActiveOrdersForStoreDelete, deleteOwnerStore, unpublishStore, StoreDeleteError } from '../lib/stores';
@@ -7,6 +7,7 @@ import { DEMO_STORE_ID } from '@popup-cube/shared';
 import { OwnerProductPanel } from '../components/OwnerProductPanel';
 import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
 import { OwnerReturnsTab } from '../components/OwnerReturnsTab';
+import type { OwnerNavigateTarget } from '../components/OwnerOrderRelatedLinks';
 import { OwnerDisplayPanel } from '../components/OwnerDisplayPanel';
 import { OwnerStorePolicyPanel } from '../components/OwnerStorePolicyPanel';
 import { OwnerPromotionPanel } from '../components/OwnerPromotionPanel';
@@ -50,6 +51,16 @@ export function StoreEditPage() {
   const [popupEndsErr, setPopupEndsErr] = useState(false);
   const [ownershipChecked, setOwnershipChecked] = useState(false);
   const [ownsStore, setOwnsStore] = useState(false);
+  const [returnsSubTab, setReturnsSubTab] = useState<'requests' | 'claims'>('requests');
+
+  const navigateOwnerRelated = useCallback((target: OwnerNavigateTarget) => {
+    if (target.tab === 'returns') {
+      setReturnsSubTab(target.returnsSubTab ?? 'requests');
+      setTab('returns');
+      return;
+    }
+    setTab(target.tab);
+  }, []);
 
   const {
     pendingAccept,
@@ -499,11 +510,20 @@ export function StoreEditPage() {
               embedded
               queue="pending"
               refreshTick={refreshTick}
+              panelContext="pending"
+              onNavigateRelated={navigateOwnerRelated}
             />
           )}
 
           {!loading && !error && tab === 'hold' && storeId && (
-            <OwnerOrdersPanel storeId={storeId} embedded queue="hold" refreshTick={refreshTick} />
+            <OwnerOrdersPanel
+              storeId={storeId}
+              embedded
+              queue="hold"
+              refreshTick={refreshTick}
+              panelContext="hold"
+              onNavigateRelated={navigateOwnerRelated}
+            />
           )}
 
           {!loading && !error && tab === 'fulfillment' && storeId && (
@@ -512,11 +532,19 @@ export function StoreEditPage() {
               embedded
               queue="fulfillment"
               refreshTick={refreshTick}
+              panelContext="fulfillment"
+              onNavigateRelated={navigateOwnerRelated}
             />
           )}
 
           {!loading && !error && tab === 'returns' && storeId && (
-            <OwnerReturnsTab storeId={storeId} refreshTick={refreshTick} />
+            <OwnerReturnsTab
+              storeId={storeId}
+              refreshTick={refreshTick}
+              subTab={returnsSubTab}
+              onSubTabChange={setReturnsSubTab}
+              onNavigateRelated={navigateOwnerRelated}
+            />
           )}
 
           {!loading && !error && tab === 'layout' && storeId && (

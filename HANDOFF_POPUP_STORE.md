@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.61` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.62` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -1343,6 +1343,54 @@ npx expo start --tunnel --port 8082 --clear
 #### 다음
 
 **AD-073 R2** — §7.59
+
+---
+
+### 7.62 세션 인수인계 — **2026-08-31** (승인 후 주소 복사 · 점주 탭 연결 · 배송완료/구매확정 안내)
+
+| | |
+|---|---|
+| **Scope** | 손님 승인 후 주문 카드 **주소 복사** · 점주 **「연결된 처리」** 배너 · 발주·배송 **빠른 필터** |
+| **Git** | push 대기 |
+
+#### 구현 요약
+
+| | |
+|---|---|
+| **손님** | `OrderReturnSection` — 승인/완료 후 반품지 **주소 복사** |
+| **점주 탭 연결** | `OwnerOrderRelatedLinks` — 같은 주문의 반품·문의·본문 탭 **원클릭 이동** (`StoreEditPage.navigateOwnerRelated`) |
+| **배송완료·구매확정** | **「발주·배송」** 탭 · 상태 필터 또는 **배송 완료만 / 구매확정만** 빠른 보기 |
+
+#### 탭별 주문 노출 (점주 — User FAQ)
+
+| 탭 | 보이는 주문 |
+|---|---|
+| **주문** | 수락 대기 (`awaiting_accept`, `paid`, `pending`) |
+| **수정 대기** | `on_hold` |
+| **발주·배송** | 수락됨~취소 포함 · **배송 완료·구매확정·완료** 여기 |
+| **반품·교환·문의** | 반품 신청(대기/승인) · 손님 문의(오픈) |
+
+#### Expo 재시작 여부 — **web-only** ❌
+
+| | |
+|---|---|
+| **수정** | `apps/web` only |
+| **Expo(Metro) 재시작** | ❌ **불필요** |
+| **User** | Vercel **1~2min** · PC **Ctrl+F5** |
+
+#### User实기
+
+4) **손님** 승인된 반품 건 → 구매 내역 카드 **주소 복사**
+
+5) **점주** 발주·배송 탭 → **배송 완료만** / **구매확정만** 버튼
+
+6) **점주** 발주·배송 카드에 반품/문의 있으면 **「연결된 처리」** → 반품·교환·문의 탭 이동
+
+7) ⬜ User实기 **미확인**
+
+#### 다음
+
+**AD-076** 손님 알림 탭
 
 ---
 
@@ -2690,6 +2738,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-31 — Shopper return copy + owner cross-tab links + fulfillment quick filters
+- **Author:** Cursor Agent
+- **Changed:** `OrderReturnSection` · `OwnerOrderRelatedLinks` · `OwnerOrdersPanel` · `StoreEditPage` · §7.62
+- **Notes:** **Expo 재시작 ❌** · 배송완료/구매확정 = **발주·배송** 탭
 
 ### 2026-08-31 — Return dialog A+C, scroll lock, compact layout
 - **Author:** Cursor Agent

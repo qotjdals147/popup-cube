@@ -9,13 +9,31 @@ export function formatReturnAddressText(policy: Pick<
   | 'return_address_line1'
   | 'return_address_line2'
 >): string {
+  return formatReturnAddressParts({
+    recipient: policy.return_recipient_name,
+    phone: policy.return_phone,
+    postal: policy.return_postal_code,
+    line1: policy.return_address_line1,
+    line2: policy.return_address_line2,
+  });
+}
+
+export interface ReturnAddressParts {
+  recipient: string | null;
+  phone: string | null;
+  postal: string | null;
+  line1: string | null;
+  line2: string | null;
+}
+
+export function formatReturnAddressParts(parts: ReturnAddressParts): string {
   const lines: string[] = [];
-  const nameLine = [policy.return_recipient_name, policy.return_phone].filter(Boolean).join(' · ');
+  const nameLine = [parts.recipient, parts.phone].filter(Boolean).join(' · ');
   if (nameLine) lines.push(nameLine);
   const addrParts = [
-    policy.return_postal_code ? `(${policy.return_postal_code})` : '',
-    policy.return_address_line1,
-    policy.return_address_line2,
+    parts.postal ? `(${parts.postal})` : '',
+    parts.line1,
+    parts.line2,
   ].filter(Boolean);
   if (addrParts.length) lines.push(addrParts.join(' '));
   return lines.join('\n');

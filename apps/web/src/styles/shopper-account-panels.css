@@ -1187,6 +1187,20 @@
   margin: 0;
 }
 
+.shopper-account-main .oh-shipping-block .oh-return-address-head,
+.shopper-account-main .oh-claim-section .oh-return-address-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.shopper-account-main .oh-shipping-block .oh-section-label,
+.shopper-account-main .oh-claim-section .oh-return-address-head .oh-section-label {
+  margin: 0;
+}
+
 .shopper-account-main .oh-return-guide,
 .oh-return-guide {
   margin: 6px 0 0;

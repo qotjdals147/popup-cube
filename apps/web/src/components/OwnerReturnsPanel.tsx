@@ -13,14 +13,16 @@ import { formatClaimDateTime } from '../lib/claimFormat';
 import { formatOrderRef } from '../lib/orderRef';
 import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
+import { OwnerOrderRelatedLinks, type OwnerNavigateTarget } from './OwnerOrderRelatedLinks';
 import { t } from '../i18n';
 
 interface OwnerReturnsPanelProps {
   storeId: string;
   refreshTick?: number;
+  onNavigateRelated?: (target: OwnerNavigateTarget) => void;
 }
 
-export function OwnerReturnsPanel({ storeId, refreshTick = 0 }: OwnerReturnsPanelProps) {
+export function OwnerReturnsPanel({ storeId, refreshTick = 0, onNavigateRelated }: OwnerReturnsPanelProps) {
   const [orders, setOrders] = useState<OwnerOrderView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -156,6 +158,14 @@ export function OwnerReturnsPanel({ storeId, refreshTick = 0 }: OwnerReturnsPane
                 )}
               </section>
             </div>
+
+            {onNavigateRelated && (
+              <OwnerOrderRelatedLinks
+                order={order}
+                context="returns-requests"
+                onNavigate={onNavigateRelated}
+              />
+            )}
 
             {order.gacha_prize_name && order.return_status === 'approved' && returnId && (
               <fieldset style={styles.gachaFieldset}>

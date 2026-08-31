@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import type { OrderReturnStatus } from '@popup-cube/shared';
 import { returnReasonLabelKey } from '@popup-cube/shared';
 import { formatClaimDateTime } from '../lib/claimFormat';
+import { copyTextToClipboard, formatReturnAddressParts } from '../lib/returnAddressText';
 import { t } from '../i18n';
 
 export interface OrderReturnSectionProps {
@@ -20,6 +22,51 @@ export interface OrderReturnSectionProps {
   };
   variant: 'shopper' | 'owner';
   embedded?: boolean;
+}
+
+function ReturnAddressBlock({
+  returnAddress,
+  variant,
+}: {
+  returnAddress: NonNullable<OrderReturnSectionProps['returnAddress']>;
+  variant: 'shopper' | 'owner';
+}) {
+  const [copyState, setCopyState] = useState<'idle' | 'ok' | 'fail'>('idle');
+  const isShopper = variant === 'shopper';
+
+  async function handleCopy() {
+    if (!returnAddress.line1) return;
+    const ok = await copyTextToClipboard(formatReturnAddressParts(returnAddress));
+    setCopyState(ok ? 'ok' : 'fail');
+    if (ok) window.setTimeout(() => setCopyState('idle'), 2000);
+  }
+
+  return (
+    <div className={isShopper ? 'oh-shipping-block' : undefined} style={isShopper ? { marginTop: 8 } : { marginTop: 8 }}>
+      <div className={isShopper ? 'oh-return-address-head' : undefined} style={isShopper ? undefined : { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+        <div className={isShopper ? 'oh-section-label' : undefined} style={isShopper ? undefined : { fontWeight: 600, fontSize: 13 }}>
+          {t('myOrders.returnAddressLabel')}
+        </div>
+        {isShopper && (
+          <button type="button" className="oh-return-copy-btn" onClick={() => void handleCopy()}>
+            {copyState === 'ok'
+              ? t('myOrders.returnAddressCopied')
+              : copyState === 'fail'
+                ? t('myOrders.returnAddressCopyFailed')
+                : t('myOrders.returnAddressCopy')}
+          </button>
+        )}
+      </div>
+      <p className={isShopper ? 'oh-shipping-name' : undefined}>
+        {returnAddress.recipient}
+        {returnAddress.phone ? ` · ${returnAddress.phone}` : ''}
+      </p>
+      <p className={isShopper ? 'oh-shipping-address' : undefined}>
+        ({returnAddress.postal}) {returnAddress.line1}
+        {returnAddress.line2 ? ` ${returnAddress.line2}` : ''}
+      </p>
+    </div>
+  );
 }
 
 /** AD-073 R2 — 반품·교환 신청 상태 블록 */
@@ -62,17 +109,7 @@ export function OrderReturnSection({
         <p className={isShopper ? 'oh-claim-open-note' : undefined}>{t('myOrders.returnOpenNote')}</p>
       )}
       {(returnStatus === 'approved' || returnStatus === 'completed') && returnAddress?.line1 && (
-        <div className={isShopper ? 'oh-shipping-block' : undefined} style={isShopper ? { marginTop: 8 } : undefined}>
-          <div className={isShopper ? 'oh-section-label' : undefined}>{t('myOrders.returnAddressLabel')}</div>
-          <p className={isShopper ? 'oh-shipping-name' : undefined}>
-            {returnAddress.recipient}
-            {returnAddress.phone ? ` · ${returnAddress.phone}` : ''}
-          </p>
-          <p className={isShopper ? 'oh-shipping-address' : undefined}>
-            ({returnAddress.postal}) {returnAddress.line1}
-            {returnAddress.line2 ? ` ${returnAddress.line2}` : ''}
-          </p>
-        </div>
+        <ReturnAddressBlock returnAddress={returnAddress} variant={variant} />
       )}
       {(returnStatus === 'rejected' || returnStatus === 'completed') && returnOwnerReply && (
         <>

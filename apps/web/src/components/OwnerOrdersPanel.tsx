@@ -14,6 +14,11 @@ import {
 } from '../lib/orders';
 import { OrderReasonDialog, type OrderReasonDialogResult } from './OrderReasonDialog';
 import { OrderClaimSection } from './OrderClaimSection';
+import {
+  OwnerOrderRelatedLinks,
+  type OwnerNavigateTarget,
+  type OwnerPanelContext,
+} from './OwnerOrderRelatedLinks';
 import { formatOrderRef } from '../lib/orderRef';
 import {
   DEFAULT_OWNER_ORDER_FILTERS,
@@ -36,6 +41,9 @@ interface OwnerOrdersPanelProps {
   queue?: OwnerOrderQueue;
   /** AD-055 — Realtime 등 외부 갱신 신호 (증가할 때마다 목록 reload) */
   refreshTick?: number;
+  /** §7.62 — 다른 탭으로 이동 (같은 주문 연결) */
+  panelContext?: OwnerPanelContext;
+  onNavigateRelated?: (target: OwnerNavigateTarget) => void;
 }
 
 export function OwnerOrdersPanel({
@@ -44,6 +52,8 @@ export function OwnerOrdersPanel({
   embedded = false,
   queue,
   refreshTick = 0,
+  panelContext,
+  onNavigateRelated,
 }: OwnerOrdersPanelProps) {
   const [orders, setOrders] = useState<OwnerOrderView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,6 +70,17 @@ export function OwnerOrdersPanel({
   const [filters, setFilters] = useState<OwnerOrderFilters>(DEFAULT_OWNER_ORDER_FILTERS);
 
   const activeQueue = queue ?? internalQueue;
+  const relatedContext: OwnerPanelContext | undefined =
+    panelContext ??
+    (activeQueue === 'pending'
+      ? 'pending'
+      : activeQueue === 'hold'
+        ? 'hold'
+        : activeQueue === 'fulfillment'
+          ? 'fulfillment'
+          : activeQueue === 'claims'
+            ? 'returns-claims'
+            : undefined);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -240,6 +261,42 @@ export function OwnerOrdersPanel({
             <option value="oldest">{t('ownerOrders.sortOldest')}</option>
           </select>
         </div>
+        {activeQueue === 'fulfillment' && (
+          <div style={styles.quickFilterRow}>
+            <span style={styles.quickFilterHint}>{t('ownerOrders.fulfillmentHint')}</span>
+            <div style={styles.quickFilterBtns}>
+              <button
+                type="button"
+                style={{
+                  ...styles.quickFilterBtn,
+                  ...(filters.status === 'delivery_completed' ? styles.quickFilterBtnActive : {}),
+                }}
+                onClick={() => setFilters((f) => ({ ...f, status: 'delivery_completed' }))}
+              >
+                {t('ownerOrders.quickFilterDeliveryDone')}
+              </button>
+              <button
+                type="button"
+                style={{
+                  ...styles.quickFilterBtn,
+                  ...(filters.status === 'purchase_confirmed' ? styles.quickFilterBtnActive : {}),
+                }}
+                onClick={() => setFilters((f) => ({ ...f, status: 'purchase_confirmed' }))}
+              >
+                {t('ownerOrders.quickFilterPurchaseConfirmed')}
+              </button>
+              {filters.status !== 'all' && (
+                <button
+                  type="button"
+                  style={styles.quickFilterBtn}
+                  onClick={() => setFilters((f) => ({ ...f, status: 'all' }))}
+                >
+                  {t('ownerOrders.quickFilterAll')}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <div style={styles.listArea}>
@@ -447,6 +504,14 @@ export function OwnerOrdersPanel({
                       {order.hold_reason_text ? ` — ${order.hold_reason_text}` : ''}
                     </p>
                   </div>
+                )}
+
+                {relatedContext && onNavigateRelated && (
+                  <OwnerOrderRelatedLinks
+                    order={order}
+                    context={relatedContext}
+                    onNavigate={onNavigateRelated}
+                  />
                 )}
 
                 {activeQueue === 'pending' && isPendingOrderStatus(order.status) && (
@@ -955,5 +1020,38 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: fs.sm,
     resize: 'vertical',
     fontFamily: ownerFont,
+  },
+  quickFilterRow: {
+    marginTop: 10,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+  },
+  quickFilterHint: {
+    margin: 0,
+    fontSize: fs.xs,
+    color: oc.textMuted,
+    lineHeight: 1.45,
+  },
+  quickFilterBtns: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  quickFilterBtn: {
+    padding: '6px 10px',
+    borderRadius: 999,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.textSecondary,
+    fontSize: fs.xs,
+    fontWeight: 600,
+    cursor: 'pointer',
+    fontFamily: ownerFont,
+  },
+  quickFilterBtnActive: {
+    borderColor: oc.primary,
+    background: oc.navActiveBg,
+    color: oc.navActiveText,
   },
 };
