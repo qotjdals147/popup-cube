@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { ReturnReasonCode, ShopperOrderView, StorePolicy } from '@popup-cube/shared';
 import { DEFAULT_RETURN_REASON_OPTIONS } from '@popup-cube/shared';
 import { getStoreSummary } from '../lib/stores';
 import { requestReturn, type RequestReturnInput } from '../lib/orderReturns';
 import { OrderError } from '../lib/orders';
+import { copyTextToClipboard, formatReturnAddressText } from '../lib/returnAddressText';
 import { QuantityStepper } from './QuantityStepper';
 import { t } from '../i18n';
 
@@ -39,10 +41,12 @@ export function OrderReturnRequestDialog({
   const [reasonDetail, setReasonDetail] = useState('');
   const [exchangeMemo, setExchangeMemo] = useState('');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [copyState, setCopyState] = useState<'idle' | 'ok' | 'fail'>('idle');
 
   useEffect(() => {
     if (!open) return;
     setError(null);
+    setCopyState('idle');
     setKind('return');
     setReasonCode('defective');
     setReasonDetail('');
@@ -59,6 +63,23 @@ export function OrderReturnRequestDialog({
       .finally(() => setLoading(false));
   }, [open, order]);
 
+  useEffect(() => {
+    if (!open) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    const prevBodyOverscroll = body.style.overscrollBehavior;
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    body.style.overscrollBehavior = 'none';
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+      body.style.overscrollBehavior = prevBodyOverscroll;
+    };
+  }, [open]);
+
   const reasonOptions = useMemo(() => {
     if (!policy) return DEFAULT_RETURN_REASON_OPTIONS;
     const allowMind = isChangeOfMindAllowed(order, policy);
@@ -74,6 +95,8 @@ export function OrderReturnRequestDialog({
   }, [reasonOptions, reasonCode]);
 
   if (!open) return null;
+
+  const requiresMemo = reasonOptions.find((o) => o.reasonCode === reasonCode)?.requiresMemo;
 
   async function handleSubmit() {
     if (!policy) {
@@ -117,7 +140,16 @@ export function OrderReturnRequestDialog({
     }
   }
 
-  return (
+  async function handleCopyAddress() {
+    if (!policy?.return_address_line1) return;
+    const ok = await copyTextToClipboard(formatReturnAddressText(policy));
+    setCopyState(ok ? 'ok' : 'fail');
+    if (ok) {
+      window.setTimeout(() => setCopyState('idle'), 2000);
+    }
+  }
+
+  return createPortal(
     <div className="oh-return-dialog-backdrop" role="presentation" onClick={onClose}>
       <div
         className="oh-return-dialog"
@@ -139,95 +171,113 @@ export function OrderReturnRequestDialog({
           <div className="oh-return-dialog-body">
             {policy && (
               <>
-                <fieldset className="oh-return-fieldset">
-                  <legend>{t('myOrders.returnKindLegend')}</legend>
-                  <label className="oh-return-radio">
-                    <input
-                      type="radio"
-                      name="return-kind"
-                      checked={kind === 'return'}
-                      onChange={() => setKind('return')}
-                    />
-                    {t('myOrders.returnKindReturn')}
+                <div className="oh-return-section">
+                  <div className="oh-return-label">{t('myOrders.returnKindLegend')}</div>
+                  <div className="oh-return-kind-row" role="radiogroup" aria-label={t('myOrders.returnKindLegend')}>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={kind === 'return'}
+                      className={`oh-return-kind-btn${kind === 'return' ? ' oh-return-kind-btn--active' : ''}`}
+                      onClick={() => setKind('return')}
+                    >
+                      {t('myOrders.returnKindReturn')}
+                    </button>
+                    {policy.exchange_allowed && (
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked={kind === 'exchange'}
+                        className={`oh-return-kind-btn${kind === 'exchange' ? ' oh-return-kind-btn--active' : ''}`}
+                        onClick={() => setKind('exchange')}
+                      >
+                        {t('myOrders.returnKindExchange')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="oh-return-section oh-return-inline-row">
+                  <label className="oh-return-label" htmlFor="oh-return-reason">
+                    {t('myOrders.returnReasonLegend')}
                   </label>
-                  {policy.exchange_allowed && (
-                    <label className="oh-return-radio">
-                      <input
-                        type="radio"
-                        name="return-kind"
-                        checked={kind === 'exchange'}
-                        onChange={() => setKind('exchange')}
-                      />
-                      {t('myOrders.returnKindExchange')}
-                    </label>
-                  )}
-                </fieldset>
+                  <select
+                    id="oh-return-reason"
+                    className="oh-return-select"
+                    value={reasonCode}
+                    onChange={(e) => setReasonCode(e.target.value as ReturnReasonCode)}
+                  >
+                    {reasonOptions.map((opt) => (
+                      <option key={opt.reasonCode} value={opt.reasonCode}>
+                        {t(opt.labelKey)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                <label className="oh-return-label">{t('myOrders.returnReasonLegend')}</label>
-                <select
-                  className="oh-return-select"
-                  value={reasonCode}
-                  onChange={(e) => setReasonCode(e.target.value as ReturnReasonCode)}
-                >
-                  {reasonOptions.map((opt) => (
-                    <option key={opt.reasonCode} value={opt.reasonCode}>
-                      {t(opt.labelKey)}
-                    </option>
-                  ))}
-                </select>
-
-                {reasonOptions.find((o) => o.reasonCode === reasonCode)?.requiresMemo && (
+                {requiresMemo && (
                   <textarea
-                    className="oh-return-textarea"
+                    className="oh-return-textarea oh-return-textarea--compact"
                     value={reasonDetail}
                     onChange={(e) => setReasonDetail(e.target.value)}
                     placeholder={t('orderReasons.memoPlaceholder')}
+                    rows={2}
                   />
                 )}
 
-                <div className="oh-return-label">{t('myOrders.returnItemsLegend')}</div>
-                <ul className="oh-return-item-list">
-                  {order.items.map((item) => (
-                    <li key={item.id} className="oh-return-item-row">
-                      <span>{item.product_name}</span>
-                      <QuantityStepper
-                        className="oh-return-qty-stepper"
-                        compact
-                        value={quantities[item.id] ?? item.quantity}
-                        min={0}
-                        max={item.quantity}
-                        maxLabel={item.quantity}
-                        onChange={(next) =>
-                          setQuantities((prev) => ({
-                            ...prev,
-                            [item.id]: next,
-                          }))
-                        }
-                      />
-                    </li>
-                  ))}
-                </ul>
+                <div className="oh-return-section">
+                  <div className="oh-return-label">{t('myOrders.returnItemsLegend')}</div>
+                  <ul className="oh-return-item-list">
+                    {order.items.map((item) => (
+                      <li key={item.id} className="oh-return-item-row">
+                        <span className="oh-return-item-name">{item.product_name}</span>
+                        <QuantityStepper
+                          className="oh-return-qty-stepper"
+                          compact
+                          value={quantities[item.id] ?? item.quantity}
+                          min={0}
+                          max={item.quantity}
+                          maxLabel={item.quantity}
+                          onChange={(next) =>
+                            setQuantities((prev) => ({
+                              ...prev,
+                              [item.id]: next,
+                            }))
+                          }
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
                 {kind === 'exchange' && (
-                  <>
-                    <label className="oh-return-label">{t('myOrders.returnExchangeMemoLabel')}</label>
-                    <textarea
-                      className="oh-return-textarea"
-                      value={exchangeMemo}
-                      onChange={(e) => setExchangeMemo(e.target.value)}
-                      placeholder={t('myOrders.returnExchangeMemoPlaceholder')}
-                    />
-                  </>
+                  <textarea
+                    className="oh-return-textarea oh-return-textarea--compact"
+                    value={exchangeMemo}
+                    onChange={(e) => setExchangeMemo(e.target.value)}
+                    placeholder={t('myOrders.returnExchangeMemoPlaceholder')}
+                    rows={2}
+                    aria-label={t('myOrders.returnExchangeMemoLabel')}
+                  />
                 )}
 
                 {policy.return_address_line1 && (
                   <div className="oh-return-address-box">
-                    <div className="oh-return-label">{t('myOrders.returnAddressLabel')}</div>
-                    <p>
+                    <div className="oh-return-address-head">
+                      <div className="oh-return-label">{t('myOrders.returnAddressLabel')}</div>
+                      <button type="button" className="oh-return-copy-btn" onClick={() => void handleCopyAddress()}>
+                        {copyState === 'ok'
+                          ? t('myOrders.returnAddressCopied')
+                          : copyState === 'fail'
+                            ? t('myOrders.returnAddressCopyFailed')
+                            : t('myOrders.returnAddressCopy')}
+                      </button>
+                    </div>
+                    <p className="oh-return-address-line">
                       {policy.return_recipient_name}
                       {policy.return_phone ? ` · ${policy.return_phone}` : ''}
                     </p>
-                    <p>
+                    <p className="oh-return-address-line">
                       ({policy.return_postal_code}) {policy.return_address_line1}
                       {policy.return_address_line2 ? ` ${policy.return_address_line2}` : ''}
                     </p>
@@ -252,6 +302,7 @@ export function OrderReturnRequestDialog({
           </button>
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
