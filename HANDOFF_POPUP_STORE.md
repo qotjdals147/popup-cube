@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.60` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.61` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -750,9 +750,9 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **AD-073 R2 ✅** · 다음 = **손님 알림 탭** |
-| **Git 상태** | R2 구현 · push 대기 |
-| **User 실기** | R2 **⬜** · §7.60 |
+| **한 줄 요약** | **R2 UX polish ✅** · 다음 = **손님 알림 탭** |
+| **Git 상태** | §7.61 push 대기 |
+| **User 실기** | R2 + §7.61 **⬜** · §7.60 |
 | **다음 에이전트 1순위** | ① **AD-076 알림 탭** |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
@@ -1343,6 +1343,65 @@ npx expo start --tunnel --port 8082 --clear
 #### 다음
 
 **AD-073 R2** — §7.59
+
+---
+
+### 7.61 세션 인수인계 — **2026-08-31** (R2 UX · Realtime CS 토스트 · 수량 stepper)
+
+| | |
+|---|---|
+| **Scope** | 반품·교환 Realtime 토스트 · 사이드바 탭명 · 점주 카드 UI · 승인/거절 안전장치 · 수량 ± stepper |
+| **User 결정 대기** | 손님 신청 화면 **반품지 미리보기** 유지 vs 승인 후만 — **미변경** |
+
+#### 구현 요약
+
+| | |
+|---|---|
+| **Realtime** | `useOwnerOrderRealtime` — `openReturns`/`openClaims` 증가 시 토스트 · `returns` 탭에서는 생략 |
+| **탭명** | `ownerEdit.tabReturns` → **「반품·교환·문의」** (하위: 반품·교환 신청 / 손님 문의) |
+| **점주 UI** | `OwnerReturnsPanel` — 주문 탭과 동일 카드 레이아웃 · 거절(좌)·승인(우) 동일 크기 · 승인 confirm · 거절 사유 필수 하이라이트 |
+| **수량** | `QuantityStepper` — `OrderReturnRequestDialog` · `OrderHoldSupplementSection` |
+
+#### Expo 재시작 여부 — **web-only** ❌
+
+| | |
+|---|---|
+| **수정** | `apps/web` only |
+| **Expo(Metro) 재시작** | ❌ **불필요** |
+| **User** | Vercel **1~2min** · PC **Ctrl+F5** |
+
+#### User实기 (§0 — **cmd 블록 생략 금지**)
+
+1) **Win → `cmd` → Enter**
+
+2) **PC 웹 — 한 줄씩:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) **Expo — Metro 꺼져 있을 때만** 한 줄씩:
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+4) **점주** `demo@owner.com` / `demo` → 다른 탭에 있는 상태에서 손님이 반품 신청 → **「새 반품·교환 신청이 들어왔습니다」** 토스트
+
+5) **점주** **반품·교환·문의** 탭 → 카드 UI · 거절 사유 없이 거절 → 빨간 테두리 · 승인 → 확인 팝업
+
+6) **손님** 반품 신청 다이얼로그 · 보류 주문 수량 — **± 버튼** 동작
+
+7) ⬜ User实기 **미확인**
+
+#### 다음
+
+**AD-076** 손님 알림 탭 · User **반품지 표시 방식** 답변 후 필요 시 조정
 
 ---
 
@@ -2628,6 +2687,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-31 — R2 UX: Realtime CS toast, owner card UI, quantity stepper
+- **Author:** Cursor Agent
+- **Changed:** `useOwnerOrderRealtime` · `OwnerReturnsPanel` · `QuantityStepper` · `OrderReturnRequestDialog` · `OrderHoldSupplementSection` · `ko.ts` tabReturns · §7.61
+- **Notes:** **Expo 재시작 ❌** · 반품지 미리보기 = User 결정 대기 · **다음 = AD-076 알림 탭**
 
 ### 2026-08-28 — AD-073 R2 order_returns + shopper return request UI
 - **Author:** Cursor Agent

@@ -62,6 +62,7 @@ export function StoreEditPage() {
     refreshTick,
   } = useOwnerOrderRealtime(ownershipChecked && ownsStore ? storeId : undefined, {
     suppressNewOrderToast: tab === 'orders',
+    suppressCsToast: tab === 'returns',
   });
 
   const worldEnabled = isWorldEnabled();

@@ -4,6 +4,7 @@ import { DEFAULT_RETURN_REASON_OPTIONS } from '@popup-cube/shared';
 import { getStoreSummary } from '../lib/stores';
 import { requestReturn, type RequestReturnInput } from '../lib/orderReturns';
 import { OrderError } from '../lib/orders';
+import { QuantityStepper } from './QuantityStepper';
 import { t } from '../i18n';
 
 interface OrderReturnRequestDialogProps {
@@ -189,20 +190,20 @@ export function OrderReturnRequestDialog({
                   {order.items.map((item) => (
                     <li key={item.id} className="oh-return-item-row">
                       <span>{item.product_name}</span>
-                      <input
-                        type="number"
+                      <QuantityStepper
+                        className="oh-return-qty-stepper"
+                        compact
+                        value={quantities[item.id] ?? item.quantity}
                         min={0}
                         max={item.quantity}
-                        value={quantities[item.id] ?? item.quantity}
-                        onChange={(e) =>
+                        maxLabel={item.quantity}
+                        onChange={(next) =>
                           setQuantities((prev) => ({
                             ...prev,
-                            [item.id]: Math.min(item.quantity, Math.max(0, Number(e.target.value) || 0)),
+                            [item.id]: next,
                           }))
                         }
-                        className="oh-return-qty"
                       />
-                      <span className="oh-return-qty-max">/ {item.quantity}</span>
                     </li>
                   ))}
                 </ul>

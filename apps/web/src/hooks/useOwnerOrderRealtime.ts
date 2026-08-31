@@ -14,6 +14,8 @@ export interface OwnerOrderCounts {
 interface UseOwnerOrderRealtimeOptions {
   /** 「주문」탭을 보고 있을 때는 토스트 생략 (목록이 바로 보임) */
   suppressNewOrderToast?: boolean;
+  /** 「반품·교환·문의」탭 — 반품·문의 토스트 생략 */
+  suppressCsToast?: boolean;
 }
 
 /**
@@ -24,9 +26,11 @@ export function useOwnerOrderRealtime(
   storeId: string | undefined,
   options: UseOwnerOrderRealtimeOptions = {}
 ) {
-  const { suppressNewOrderToast = false } = options;
-  const suppressRef = useRef(suppressNewOrderToast);
-  suppressRef.current = suppressNewOrderToast;
+  const { suppressNewOrderToast = false, suppressCsToast = false } = options;
+  const suppressOrderRef = useRef(suppressNewOrderToast);
+  const suppressCsRef = useRef(suppressCsToast);
+  suppressOrderRef.current = suppressNewOrderToast;
+  suppressCsRef.current = suppressCsToast;
 
   const [counts, setCounts] = useState<OwnerOrderCounts>({
     pendingAccept: 0,
@@ -37,12 +41,23 @@ export function useOwnerOrderRealtime(
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [refreshTick, setRefreshTick] = useState(0);
+  const countsInitializedRef = useRef(false);
 
   const refreshCounts = useCallback(async () => {
     if (!storeId) return;
     try {
       const next = await getStoreOrderCounts(storeId);
-      setCounts(next);
+      setCounts((prev) => {
+        if (countsInitializedRef.current && !suppressCsRef.current) {
+          if (next.openReturns > prev.openReturns) {
+            setToastMessage(t('ownerOrders.toastNewReturn'));
+          } else if (next.openClaims > prev.openClaims) {
+            setToastMessage(t('ownerOrders.toastNewClaim'));
+          }
+        }
+        countsInitializedRef.current = true;
+        return next;
+      });
     } catch {
       // 뱃지 실패는 화면 전체를 막지 않음
     }
@@ -68,7 +83,7 @@ export function useOwnerOrderRealtime(
         (payload) => {
           setRefreshTick((n) => n + 1);
           void refreshCounts();
-          if (payload.eventType === 'INSERT' && !suppressRef.current) {
+          if (payload.eventType === 'INSERT' && !suppressOrderRef.current) {
             setToastMessage(t('ownerOrders.toastNewOrder'));
           }
         }

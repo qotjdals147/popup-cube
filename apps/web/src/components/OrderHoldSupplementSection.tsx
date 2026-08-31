@@ -4,6 +4,7 @@ import { holdReasonLabelKey } from '@popup-cube/shared';
 import { listMyAddresses } from '../lib/addresses';
 import { submitOrderSupplement, OrderError } from '../lib/orders';
 import { rollGacha } from '../lib/gacha';
+import { QuantityStepper } from './QuantityStepper';
 import { t } from '../i18n';
 
 interface OrderHoldSupplementSectionProps {
@@ -129,20 +130,20 @@ export function OrderHoldSupplementSection({
           {affectedItems.map((item) => (
             <div key={item.id} className="oh-hold-qty-row">
               <span>{item.product_name}</span>
-              <input
-                type="number"
-                className="oh-hold-qty-input"
+              <QuantityStepper
+                className="oh-hold-qty-stepper"
+                compact
+                value={qtyDraft[item.id] ?? 0}
                 min={0}
                 max={item.quantity - 1}
-                value={qtyDraft[item.id] ?? 0}
-                onChange={(e) =>
+                maxLabel={item.quantity}
+                onChange={(next) =>
                   setQtyDraft((prev) => ({
                     ...prev,
-                    [item.id]: Math.min(item.quantity - 1, Math.max(0, Number(e.target.value) || 0)),
+                    [item.id]: next,
                   }))
                 }
               />
-              <span className="oh-hold-qty-max">/ {item.quantity}</span>
             </div>
           ))}
           <button
