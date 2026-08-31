@@ -6,6 +6,7 @@ import {
   isPendingOrderStatus,
 } from '../lib/orders';
 import { formatOrderRef } from '../lib/orderRef';
+import { focusDateRangeForRelatedLink } from '../lib/ownerOrderFocusDates';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 
@@ -21,6 +22,9 @@ export type OwnerNavigateTarget = {
   returnsSubTab?: 'requests' | 'claims';
   orderId?: string;
   orderQuery?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  focusKey?: string;
   openClaimHistory?: boolean;
 };
 
@@ -36,15 +40,21 @@ function orderHomeTab(order: OwnerOrderView): OwnerNavigateTarget['tab'] {
   return 'fulfillment';
 }
 
-function buildFocusTarget(
+async function navigateWithFocusDates(
   order: OwnerOrderView,
+  onNavigate: (target: OwnerNavigateTarget) => void,
   target: Pick<OwnerNavigateTarget, 'tab' | 'returnsSubTab' | 'openClaimHistory'>,
-): OwnerNavigateTarget {
-  return {
+  kind: 'claim' | 'return' | 'orderHome',
+) {
+  const { dateFrom, dateTo } = await focusDateRangeForRelatedLink(order, kind);
+  onNavigate({
     ...target,
     orderId: order.id,
     orderQuery: formatOrderRef(order.store_code, order.order_number),
-  };
+    dateFrom,
+    dateTo,
+    focusKey: `${order.id}:${kind}:${Date.now()}`,
+  });
 }
 
 /** 같은 주문이 여러 탭에 걸쳐 있을 때 — 연결 안내 + 탭 이동 */
@@ -69,13 +79,14 @@ export function OwnerOrderRelatedLinks({ order, context, onNavigate }: OwnerOrde
       key: 'return',
       label: t('ownerOrders.relatedReturn', { kind, status }),
       detail: reason ?? undefined,
-      action: () =>
-        onNavigate(
-          buildFocusTarget(order, {
-            tab: 'returns',
-            returnsSubTab: 'requests',
-          }),
-        ),
+      action: () => {
+        void navigateWithFocusDates(
+          order,
+          onNavigate,
+          { tab: 'returns', returnsSubTab: 'requests' },
+          'return',
+        );
+      },
       actionLabel: hasActiveReturn ? t('ownerOrders.relatedGoReturns') : t('ownerOrders.relatedViewReturns'),
     });
   }
@@ -90,14 +101,18 @@ export function OwnerOrderRelatedLinks({ order, context, onNavigate }: OwnerOrde
         ? t('ownerOrders.relatedClaimOpen')
         : t('ownerOrders.relatedClaimResolved', { count: order.claim_round_count }),
       detail: hasOpenClaim && order.claim_message ? order.claim_message : undefined,
-      action: () =>
-        onNavigate(
-          buildFocusTarget(order, {
+      action: () => {
+        void navigateWithFocusDates(
+          order,
+          onNavigate,
+          {
             tab: 'returns',
             returnsSubTab: 'claims',
             openClaimHistory: !hasOpenClaim && order.claim_round_count >= 2,
-          }),
-        ),
+          },
+          'claim',
+        );
+      },
       actionLabel: hasOpenClaim
         ? t('ownerOrders.relatedGoClaims')
         : t('ownerOrders.relatedViewClaims'),
@@ -117,7 +132,9 @@ export function OwnerOrderRelatedLinks({ order, context, onNavigate }: OwnerOrde
       label: t('ownerOrders.relatedOrderStatus', {
         status: t(`ownerOrders.status.${order.status}`),
       }),
-      action: () => onNavigate(buildFocusTarget(order, { tab: homeTab })),
+      action: () => {
+        void navigateWithFocusDates(order, onNavigate, { tab: homeTab }, 'orderHome');
+      },
       actionLabel: t(homeKey),
     });
   }

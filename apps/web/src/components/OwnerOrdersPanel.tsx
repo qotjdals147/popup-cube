@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { OwnerOrderView } from '@popup-cube/shared';
 import {
   acceptOrder,
@@ -75,6 +75,7 @@ export function OwnerOrdersPanel({
   const [internalQueue, setInternalQueue] = useState<OwnerOrderQueue>('pending');
   const [filters, setFilters] = useState<OwnerOrderFilters>(() => defaultOwnerOrderFilters());
   const [autoOpenClaimHistory, setAutoOpenClaimHistory] = useState(false);
+  const appliedFocusKeyRef = useRef<string | null>(null);
 
   const activeQueue = queue ?? internalQueue;
   const relatedContext: OwnerPanelContext | undefined =
@@ -107,13 +108,18 @@ export function OwnerOrdersPanel({
   }, [reload, refreshTick]);
 
   useEffect(() => {
-    if (!focusOrder) return;
+    if (!focusOrder) {
+      appliedFocusKeyRef.current = null;
+      return;
+    }
+    if (appliedFocusKeyRef.current === focusOrder.focusKey) return;
+    appliedFocusKeyRef.current = focusOrder.focusKey;
     setAutoOpenClaimHistory(Boolean(focusOrder.openClaimHistory));
     setFilters((prev) => ({
       ...prev,
       query: focusOrder.orderQuery,
-      dateFrom: '',
-      dateTo: '',
+      dateFrom: focusOrder.dateFrom,
+      dateTo: focusOrder.dateTo,
       status: 'all',
     }));
   }, [focusOrder]);

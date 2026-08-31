@@ -656,7 +656,7 @@ export const ko = {
     relatedGoHold: '수정 대기 탭',
     relatedGoFulfillment: '발주·배송 탭',
     relatedViewReturns: '반품·교환 탭',
-    filterMonthHint: '날짜 기본값: 오늘 기준 이번 달(1일~말일). 월이 바뀌면 자동으로 해당 월로 맞춰져요.',
+    filterMonthHint: '날짜 기본값: 이번 달 1일 ~ 오늘. 연결된 처리 이동 시에는 해당 이슈 첫 날 ~ 오늘로 맞춰져요.',
     quickFilterDeliveryDone: '배송 완료만',
     quickFilterPurchaseConfirmed: '구매확정만',
     quickFilterAll: '전체 보기',

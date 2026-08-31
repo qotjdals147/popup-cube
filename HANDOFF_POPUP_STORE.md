@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.63` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.64` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -1343,6 +1343,29 @@ npx expo start --tunnel --port 8082 --clear
 #### 다음
 
 **AD-073 R2** — §7.59
+
+---
+
+### 7.64 세션 인수인계 — **2026-08-31** (연결 이동 날짜 A~B · 검색 복구)
+
+| | |
+|---|---|
+| **Scope** | 연결된 처리 → **A=이슈 첫 날 · B=오늘** (문의/반품/발주·배송/주문/수정대기 **공통**) · 검색 지우면 목록 복구 |
+| **Git** | push 대기 |
+
+#### 날짜 규칙 (전 탭 공통)
+
+| 연결 종류 | A (시작) | B (종료) |
+|---|---|---|
+| **문의** | `order_claim_messages` 1차 `shopper_created_at` → fallback `claim_created_at` → `created_at` | **오늘** |
+| **반품·교환** | `return_requested_at` | **오늘** |
+| **주문·수정대기·발주·배송** | `created_at` | **오늘** |
+
+#### 기본 필터 (탭 진입)
+
+- **이번 달 1일 ~ 오늘** (`defaultOwnerOrderFilters`)
+
+#### Expo — **web-only** ❌
 
 ---
 
@@ -2767,6 +2790,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-08-31 — Related link date range A~today, search clear fix
+- **Author:** Cursor Agent
+- **Changed:** `ownerOrderFocusDates.ts` · `OwnerOrderRelatedLinks` · `OwnerOrdersPanel` · §7.64
+- **Notes:** 연결 이동 시 날짜 비우지 않음 · **Expo ❌**
 
 ### 2026-08-31 — Owner cross-tab focus pulse, claims history tab fix, month date default
 - **Author:** Cursor Agent

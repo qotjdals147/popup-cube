@@ -2,18 +2,9 @@
 export type OwnerOrderFocus = {
   orderId: string;
   orderQuery: string;
+  dateFrom: string;
+  dateTo: string;
+  /** 동일 orderId 재적용 방지 */
+  focusKey: string;
   openClaimHistory?: boolean;
 };
-
-export function ownerOrderFocusFromNavigate(target: {
-  orderId?: string;
-  orderQuery?: string;
-  openClaimHistory?: boolean;
-}): OwnerOrderFocus | null {
-  if (!target.orderId || !target.orderQuery) return null;
-  return {
-    orderId: target.orderId,
-    orderQuery: target.orderQuery,
-    openClaimHistory: target.openClaimHistory,
-  };
-}

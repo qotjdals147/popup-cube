@@ -1,5 +1,6 @@
 import type { OwnerOrderView, OrderStatus } from '@popup-cube/shared';
 import { formatOrderRef } from './orderRef';
+import { todayDateInput } from './ownerOrderFocusDates';
 
 export type OwnerOrderSort = 'newest' | 'oldest';
 
@@ -27,12 +28,12 @@ export function currentMonthDateRange(now = new Date()): { dateFrom: string; dat
 }
 
 export function defaultOwnerOrderFilters(now = new Date()): OwnerOrderFilters {
-  const { dateFrom, dateTo } = currentMonthDateRange(now);
+  const { dateFrom } = currentMonthDateRange(now);
   return {
     query: '',
     status: 'all',
     dateFrom,
-    dateTo,
+    dateTo: todayDateInput(now),
     sort: 'newest',
   };
 }

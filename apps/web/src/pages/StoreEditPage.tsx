@@ -56,15 +56,22 @@ export function StoreEditPage() {
   const [focusOrder, setFocusOrder] = useState<OwnerOrderFocus | null>(null);
 
   const navigateOwnerRelated = useCallback((target: OwnerNavigateTarget) => {
-    const nextFocus =
-      target.orderId && target.orderQuery
-        ? {
-            orderId: target.orderId,
-            orderQuery: target.orderQuery,
-            openClaimHistory: target.openClaimHistory,
-          }
-        : null;
-    if (nextFocus) setFocusOrder(nextFocus);
+    if (
+      target.orderId &&
+      target.orderQuery &&
+      target.dateFrom &&
+      target.dateTo &&
+      target.focusKey
+    ) {
+      setFocusOrder({
+        orderId: target.orderId,
+        orderQuery: target.orderQuery,
+        dateFrom: target.dateFrom,
+        dateTo: target.dateTo,
+        focusKey: target.focusKey,
+        openClaimHistory: target.openClaimHistory,
+      });
+    }
     if (target.tab === 'returns') {
       setReturnsSubTab(target.returnsSubTab ?? 'requests');
       setTab('returns');
