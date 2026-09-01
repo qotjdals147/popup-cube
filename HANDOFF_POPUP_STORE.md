@@ -752,7 +752,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **R2 UX + 연결 탭 포커스 ✅** · 다음 = **손님 알림 탭 (AD-076)** |
-| **Git 상태** | **`98738ee`** push ✅ |
+| **Git 상태** | **`ffa614f`** push ✅ |
 | **User 실기** | §7.60~§7.66 **✅** (2026-09-01 User 확인) |
 | **다음 에이전트 1순위** | ① **AD-076 알림 탭** |
 
@@ -1365,6 +1365,7 @@ npx expo start --tunnel --port 8082 --clear
 | **5·6 가시성** | `OrderReturnSection` **카드형** (점주·손님) · §0 **상태 블록 나열 금지** 규칙 |
 | **손님 Realtime** | `useShopperOrderRealtime` + 구매내역 **새로고침** 버튼 |
 | **DB** | `20260901_return_evidence_urls.sql` · POPUP **✅** |
+| **Git** | **`ffa614f`** push ✅ |
 
 #### Expo 재시작 여부 — **web-only** ❌
 
@@ -2889,7 +2890,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-09-01 — Owner/shopper return UX, store-open date filter, purchase confirm flow
 - **Author:** Cursor Agent
 - **Changed:** `OwnerProductPanel` · `OrderReturnSection` · `OrderReturnRequestDialog` · `ownerOrderFilters` · `useShopperOrderRealtime` · migration `20260901_return_evidence_urls.sql` · §7.66 · §0
-- **Notes:** User §7.60~§7.65实기 ✅ · **Expo ❌**
+- **Notes:** git **`ffa614f`** · User §7.60~§7.65实기 ✅ · **Expo ❌**
 
 ### 2026-08-31 — Focus scroll once per link navigation (no re-scroll on search clear)
 - **Author:** Cursor Agent
