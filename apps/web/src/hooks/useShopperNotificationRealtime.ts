@@ -48,6 +48,16 @@ export function useShopperNotificationRealtime(userId: string | null | undefined
         },
         () => setRefreshTick((n) => n + 1),
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'order_notifications',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => setRefreshTick((n) => n + 1),
+      )
       .subscribe();
 
     return () => {

@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.70` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.71` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -622,6 +622,7 @@ npm run dev
 - [x] **§7.68 손님 주문내역 에이블리형 + 반품 거절 찾기 (2026-09-01)** — 행 탭 · 필터 · 아코디언 · User实기 **⬜**
 - [x] **§7.69 점주 반품 이력 + 손님 알림 탭 AD-076 (2026-09-01)** — `OwnerReturnsPanel` 이력 · `NotificationsPanel` · RPC · User实기 **⬜**
 - [x] **§7.70 홈 알림 종 + 마이 탭 뱃지 (2026-09-01)** — 쿠팡형 접근성 · User实기 **⬜**
+- [x] **§7.71 알림 삭제 + Realtime 중복 구독 fix (2026-09-01)** — × · 읽은/전체 삭제 · User实기 **⬜**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -756,9 +757,9 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§7.70 홈 🔔 + 마이 탭 뱃지 ✅** · User实기 ⬜ · 다음 = **AD-078 소셜 로그인** |
-| **Git 상태** | **`8aec67d`** (main pushed) |
-| **User 실기** | §7.70 **⬜** (홈 우측 알림 · 하단 마이 뱃지) |
+| **한 줄 요약** | **§7.71 알림 삭제 + Realtime fix ✅** · User实기 ⬜ · 다음 = **AD-078 소셜 로그인** |
+| **Git 상태** | commit/push 후 갱신 |
+| **User 실기** | §7.71 **⬜** (알림 × · 읽은/전체 삭제 · 홈 🔔 크래시 없음) |
 | **다음 에이전트 1순위** | ① **AD-078 소셜 로그인** |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
@@ -871,21 +872,22 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — **§7.70 홈 🔔 + 마이 탭 뱃지** · User实기 **⬜**
+**최신** — **§7.71 알림 삭제 + Realtime fix** · User实기 **⬜**
 
 | | |
 |---|---|
 | **다음 우선 (에이전트)** | ① **AD-078 소셜 로그인** (§33.1) |
-| **손님 알림 UX** | §7.70 · **User实기 ⬜** |
-| **상세** | **§7.70** (최신) · §7.69 |
+| **손님 알림 UX** | §7.71 · **User实기 ⬜** |
+| **상세** | **§7.71** (최신) · §7.70 · §7.69 |
 
-#### Expo 재시작 여부 (최신 §7.70)
+#### Expo 재시작 여부 (최신 §7.71)
 
 | | |
 |---|---|
-| **수정** | `apps/mobile` only |
-| **Expo(Metro) 재시작** | ❌ **불필요** — Metro 켜져 있으면 **`r` 리로드** |
-| **User** | **홈** 우측 🔔 · **마이** 탭 숫자 뱃지 |
+| **수정** | `apps/mobile` (Realtime Context) + `apps/web` (알림 삭제 UI) |
+| **Expo(Metro) 재시작** | ✅ **mobile Context 추가** — Metro **Ctrl+C** 후 §0 **4줄 `--clear`** · QR 재연결 |
+| **WebView 알림 UI** | Vercel **1~2분** 후 **알림 탭 재진입** (web-only 변경) |
+| **User** | 알림 **×** · **읽은 알림 삭제** · **전체 삭제** · 홈 🔔 **크래시 없음** |
 
 #### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
 
@@ -913,8 +915,9 @@ npx expo start --tunnel --port 8082 --clear
 ```
 
 5) **손님** `demo@shopper.com` / `demo`
-   - **홈 우측 상단 🔔** — 미읽음 숫자 · 탭 → 알림 목록
-   - **하단 마이 탭** — 미읽음 있으면 **숫자 뱃지** (장바구니와 동일)
+   - **홈 🔔** — 크래시 없이 진입 · 미읽음 뱃지
+   - **알림 탭** — 행 **×** · **읽은 알림 삭제** · **전체 삭제** (Vercel 배포 후)
+   - **하단 마이 탭** — 미읽음 숫자 뱃지
    - 알림 탭 → 주문 상세 (§7.69)
 
 6) **합격**
@@ -1354,6 +1357,64 @@ npx expo start --tunnel --port 8082 --clear
 #### 다음
 
 **AD-073 R2** — §7.59
+
+---
+
+### 7.71 세션 인수인계 — **2026-09-01** (알림 삭제 · Realtime 중복 구독 fix)
+
+| | |
+|---|---|
+| **Scope** | User — 알림 **삭제 UX** (쿠팡·배민 벤치) + §7.70 **Render Error** fix |
+| **삭제 UI** | 행 **×** · **읽은 알림 삭제** · **전체 삭제**(confirm) · **전체 읽음**(기존) |
+| **RPC** | `delete_my_notification` · `delete_read_notifications` · `delete_all_my_notifications` |
+| **Realtime fix** | `ShopperNotificationBadgeProvider` — 동일 channel name **1회 구독** (홈+하단탭+마이 중복 ❌) |
+| **AD** | AD-076 후속 · §62 (삭제 → 뱃지 갱신) |
+| **Git** | commit/push 후 hash 갱신 |
+| **POPUP DB** | migration `20260901_shopper_notification_delete.sql` **✅** |
+
+#### 벤치마킹 (쿠팡·배민)
+
+| 기능 | 구현 |
+|---|---|
+| 개별 삭제 | 알림 행 우측 **×** |
+| 읽은 알림 정리 | **읽은 알림 삭제** (confirm) |
+| 전체 비우기 | **전체 삭제** (confirm · 미읽음 포함) |
+| 전체 읽음 | **전체 읽음** (미읽음 있을 때만 표시) |
+
+#### Expo 재시작 여부 — **mobile Context + web UI**
+
+| | |
+|---|---|
+| **mobile** | ✅ **`--clear` 재시작** — `ShopperNotificationBadgeProvider` |
+| **web** | ❌ Expo 재시작 불필요 · **Vercel 1~2min** · 알림 탭 재진입 |
+| **User** | × · 읽은/전체 삭제 · 홈 🔔 크래시 없음 |
+
+#### User实기 (§0 — **cmd 블록 생략 금지**)
+
+0) Metro **꺼져 있거나** QR 연결 끊김 → §0 **Expo 4줄 `--clear`**
+
+1) **Win → `cmd` → Enter**
+
+2) **Expo 4줄** (Metro 꺼져 있을 때):
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+3) QR → `demo@shopper.com` / `demo`
+
+4) **합격**
+   - ✅ 홈 🔔 **Render Error 없음**
+   - ✅ 알림 탭 — **×** 로 1건 삭제
+   - ✅ **읽은 알림 삭제** / **전체 삭제**
+   - ⬜ User实기
+
+#### 다음
+
+**AD-078** 소셜 로그인
 
 ---
 
@@ -3138,6 +3199,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-09-01 — Shopper notification delete + Realtime duplicate channel fix
+- **Author:** Cursor Agent
+- **Changed:** `NotificationsPanel` · delete RPCs · `ShopperNotificationBadgeContext` · §7.71
+- **Notes:** POPUP RPC **✅** · **Expo ✅ `--clear`** (mobile Context) · web **Vercel 1~2min** · User实기 ⬜
 
 ### 2026-09-01 — Home notification bell + My tab unread badge (Coupang-style)
 - **Author:** Cursor Agent

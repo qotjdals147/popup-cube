@@ -1,7 +1,6 @@
 import { useRouter, type Href } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useShopperNotificationBadge } from '../hooks/useShopperNotificationBadge';
 import { t } from '../i18n/ko';
@@ -14,8 +13,7 @@ interface ShopperNotificationBellProps {
 /** AD-076 — 쿠팡형 홈 우측 상단 알림 종 */
 export function ShopperNotificationBell({ size = 'header' }: ShopperNotificationBellProps) {
   const router = useRouter();
-  const { userId } = useAuth();
-  const unreadCount = useShopperNotificationBadge(userId);
+  const unreadCount = useShopperNotificationBadge();
   const { colors } = useTheme();
 
   const styles = useMemo(

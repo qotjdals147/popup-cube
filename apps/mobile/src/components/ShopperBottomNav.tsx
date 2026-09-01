@@ -2,7 +2,6 @@ import { useRouter, type Href } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '../context/AuthContext';
 import { useCartCount } from '../context/CartCountContext';
 import { useTheme } from '../context/ThemeContext';
 import { useShopperNotificationBadge } from '../hooks/useShopperNotificationBadge';
@@ -26,8 +25,7 @@ export function ShopperBottomNav({
 }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { userId } = useAuth();
-  const unreadNotifications = useShopperNotificationBadge(userId);
+  const unreadNotifications = useShopperNotificationBadge();
   const { count: cartCount } = useCartCount();
   const { colors } = useTheme();
 

@@ -1911,10 +1911,13 @@
 /* AD-076 — 손님 알림 목록 */
 .shopper-account-main .oh-notifications-toolbar {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  gap: 8px;
   margin-bottom: 10px;
 }
 
+.shopper-account-main .oh-notifications-toolbar-btn,
 .shopper-account-main .oh-notifications-mark-all {
   min-height: 36px;
   padding: 6px 12px;
@@ -1927,6 +1930,12 @@
   cursor: pointer;
 }
 
+.shopper-account-main .oh-notifications-toolbar-btn--danger {
+  color: #e03131;
+  border-color: #ffc9c9;
+  background: #fff5f5;
+}
+
 .shopper-account-main .oh-notification-list {
   list-style: none;
   margin: 0;
@@ -1936,15 +1945,48 @@
   gap: 10px;
 }
 
+.shopper-account-main .oh-notification-item {
+  list-style: none;
+}
+
 .shopper-account-main .oh-notification-row {
-  width: 100%;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
   text-align: left;
   border: 1.5px solid #e5e8eb;
   border-radius: 12px;
   background: var(--acct-surface, #fff);
-  padding: 12px 14px;
-  cursor: pointer;
+  overflow: hidden;
   min-height: 44px;
+}
+
+.shopper-account-main .oh-notification-row-main {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  padding: 12px 10px 12px 14px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.shopper-account-main .oh-notification-delete {
+  flex-shrink: 0;
+  width: 44px;
+  min-height: 44px;
+  border: none;
+  border-left: 1px solid #e5e8eb;
+  background: transparent;
+  color: var(--acct-muted, #868e96);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.shopper-account-main .oh-notification-delete:active {
+  background: #f1f3f5;
+  color: #e03131;
 }
 
 .shopper-account-main .oh-notification-row--unread {

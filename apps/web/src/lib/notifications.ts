@@ -45,6 +45,25 @@ export async function markAllNotificationsRead(): Promise<void> {
   if (error) throw error;
 }
 
+export async function deleteMyNotification(notificationId: string): Promise<void> {
+  const { error } = await supabase.rpc('delete_my_notification', {
+    p_notification_id: notificationId,
+  });
+  if (error) throw error;
+}
+
+export async function deleteReadNotifications(): Promise<number> {
+  const { data, error } = await supabase.rpc('delete_read_notifications');
+  if (error) throw error;
+  return typeof data === 'number' ? data : 0;
+}
+
+export async function deleteAllMyNotifications(): Promise<number> {
+  const { data, error } = await supabase.rpc('delete_all_my_notifications');
+  if (error) throw error;
+  return typeof data === 'number' ? data : 0;
+}
+
 export async function countUnreadNotifications(): Promise<number> {
   const { data, error } = await supabase.rpc('count_my_unread_notifications');
   if (error) throw error;

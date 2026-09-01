@@ -9,6 +9,7 @@ import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '../src/context/AuthContext';
 import { CartCountProvider } from '../src/context/CartCountContext';
+import { ShopperNotificationBadgeProvider } from '../src/context/ShopperNotificationBadgeContext';
 import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
 import { shopperDark } from '../src/theme/shopperTheme';
 
@@ -19,7 +20,9 @@ export default function RootLayout() {
       <AuthProvider>
         <ThemeProvider>
           <CartCountProvider>
-            <ThemedStack />
+            <ShopperNotificationBadgeProvider>
+              <ThemedStack />
+            </ShopperNotificationBadgeProvider>
           </CartCountProvider>
         </ThemeProvider>
       </AuthProvider>

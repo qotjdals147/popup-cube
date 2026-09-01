@@ -19,7 +19,7 @@ const QUICK_ACTIONS = [
 export default function MeHubScreen() {
   const router = useRouter();
   const { userId, email, nickname, loading: authLoading } = useAuth();
-  const unreadNotifications = useShopperNotificationBadge(userId);
+  const unreadNotifications = useShopperNotificationBadge();
   const { colors, isDark } = useTheme();
   useRestoreSystemChromeOnFocus();
 
