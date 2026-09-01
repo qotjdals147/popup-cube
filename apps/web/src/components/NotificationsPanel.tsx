@@ -12,6 +12,7 @@ import {
 } from '../lib/notifications';
 import { useShopperNotificationRealtime } from '../hooks/useShopperNotificationRealtime';
 import { useAuth } from '../context/AuthContext';
+import { ShopperConfirmDialog } from './ShopperConfirmDialog';
 import { t } from '../i18n';
 
 declare global {
@@ -29,6 +30,8 @@ function postOpenOrder(orderId: string) {
   window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'navigate_order', orderId }));
 }
 
+type ConfirmKind = 'delete-read' | 'delete-all';
+
 /** AD-076 — 손님 알림 목록 (쿠팡·배민형 · 삭제) */
 export function NotificationsPanel({ embedded = false, appearance = 'light' }: NotificationsPanelProps) {
   const { userId } = useAuth();
@@ -38,6 +41,7 @@ export function NotificationsPanel({ embedded = false, appearance = 'light' }: N
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [confirmKind, setConfirmKind] = useState<ConfirmKind | null>(null);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -108,7 +112,6 @@ export function NotificationsPanel({ embedded = false, appearance = 'light' }: N
   }
 
   async function handleDeleteRead() {
-    if (!window.confirm(t('notifications.confirmDeleteRead'))) return;
     setActionId('delete-read');
     try {
       await deleteReadNotifications();
@@ -118,11 +121,11 @@ export function NotificationsPanel({ embedded = false, appearance = 'light' }: N
       setError(true);
     } finally {
       setActionId(null);
+      setConfirmKind(null);
     }
   }
 
   async function handleDeleteAll() {
-    if (!window.confirm(t('notifications.confirmDeleteAll'))) return;
     setActionId('delete-all');
     try {
       await deleteAllMyNotifications();
@@ -132,7 +135,13 @@ export function NotificationsPanel({ embedded = false, appearance = 'light' }: N
       setError(true);
     } finally {
       setActionId(null);
+      setConfirmKind(null);
     }
+  }
+
+  async function handleConfirmDialog() {
+    if (confirmKind === 'delete-read') await handleDeleteRead();
+    else if (confirmKind === 'delete-all') await handleDeleteAll();
   }
 
   const hasUnread = items.some((item) => !item.read_at);
@@ -158,7 +167,7 @@ export function NotificationsPanel({ embedded = false, appearance = 'light' }: N
               type="button"
               className="oh-notifications-toolbar-btn"
               disabled={actionId === 'delete-read'}
-              onClick={() => void handleDeleteRead()}
+              onClick={() => setConfirmKind('delete-read')}
             >
               {t('notifications.deleteRead')}
             </button>
@@ -167,7 +176,7 @@ export function NotificationsPanel({ embedded = false, appearance = 'light' }: N
             type="button"
             className="oh-notifications-toolbar-btn oh-notifications-toolbar-btn--danger"
             disabled={actionId === 'delete-all'}
-            onClick={() => void handleDeleteAll()}
+            onClick={() => setConfirmKind('delete-all')}
           >
             {t('notifications.deleteAll')}
           </button>
@@ -228,6 +237,19 @@ export function NotificationsPanel({ embedded = false, appearance = 'light' }: N
           })}
         </ul>
       )}
+
+      <ShopperConfirmDialog
+        open={confirmKind !== null}
+        message={
+          confirmKind === 'delete-all'
+            ? t('notifications.confirmDeleteAll')
+            : t('notifications.confirmDeleteRead')
+        }
+        danger={confirmKind === 'delete-all'}
+        busy={actionId === 'delete-read' || actionId === 'delete-all'}
+        onCancel={() => setConfirmKind(null)}
+        onConfirm={() => void handleConfirmDialog()}
+      />
     </div>
   );
 }

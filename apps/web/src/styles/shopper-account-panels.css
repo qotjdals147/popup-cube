@@ -2033,3 +2033,23 @@
   font-weight: 700;
   color: #b45309;
 }
+
+.shopper-account-main .oh-confirm-dialog,
+.oh-confirm-dialog {
+  width: 100%;
+  max-width: 320px;
+  background: var(--acct-surface, #fff);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.shopper-account-main .oh-confirm-dialog-message,
+.oh-confirm-dialog-message {
+  margin: 0;
+  padding: 20px 16px 8px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--acct-text, #212529);
+  white-space: pre-wrap;
+}
