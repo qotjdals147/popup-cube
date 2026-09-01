@@ -754,7 +754,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **§7.67 손님 주문내역 쿠팡형 목록/상세 ✅** · User实기 ⬜ · 다음 = **AD-076 알림 탭** |
-| **Git 상태** | push 후 §7.67 git ref 갱신 |
+| **Git 상태** | **`ccacbf7`** push ✅ |
 | **User 실기** | §7.67 **⬜** (컴팩트 목록 · 주문 상세 시트) |
 | **다음 에이전트 1순위** | ① **AD-076 알림 탭** |
 
@@ -1365,7 +1365,7 @@ npx expo start --tunnel --port 8082 --clear
 | **목록 뱃지** | 수정 요청 · 문의 답변 대기 · 반품·교환 (§0 카드형) |
 | **목록 CTA** | **구매확정** (배송완료만) · **주문 상세** |
 | **AD** | AD-065 후속 (§60 쿠팡형 주문내역) |
-| **Git** | push 후 갱신 |
+| **Git** | **`ccacbf7`** push ✅ |
 
 #### Expo 재시작 여부 — **web-only** ❌
 
@@ -2977,7 +2977,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-09-01 — Shopper order history Coupang-style compact list + detail sheet
 - **Author:** Cursor Agent
 - **Changed:** `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · `shopperOrderListUtils` · `OrderHistoryPanel` · CSS · §7.67
-- **Notes:** 목록=썸네·상태·주문번호·매장 · **주문 상세**=기존 전체 · **Expo ❌** · User实기 ⬜
+- **Notes:** git **`ccacbf7`** · **Expo ❌** · User实기 ⬜
 
 ### 2026-09-01 — HANDOFF §7.66 session close (cmd blocks · §7.0 · User实기)
 - **Author:** Cursor Agent
