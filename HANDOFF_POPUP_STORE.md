@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.71` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.72` 최신 (AD-078 콘솔)** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -622,7 +622,8 @@ npm run dev
 - [x] **§7.68 손님 주문내역 에이블리형 + 반품 거절 찾기 (2026-09-01)** — 행 탭 · 필터 · 아코디언 · User实기 **⬜**
 - [x] **§7.69 점주 반품 이력 + 손님 알림 탭 AD-076 (2026-09-01)** — `OwnerReturnsPanel` 이력 · `NotificationsPanel` · RPC · User实기 **⬜**
 - [x] **§7.70 홈 알림 종 + 마이 탭 뱃지 (2026-09-01)** — 쿠팡형 접근성 · User实기 **⬜**
-- [x] **§7.71 알림 삭제 + Realtime 중복 구독 fix (2026-09-01)** — × · 읽은/전체 삭제 · User实기 **⬜**
+- [x] **§7.71 알림 삭제 + Realtime 중복 구독 fix (2026-09-01)** — × · 읽은/전체 삭제 · User实기 **✅**
+- [ ] **§7.72 AD-078 OAuth 개발자 콘솔 등록 (2026-09-01)** — Google · Kakao · Naver · User **진행 중**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -757,10 +758,10 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§7.71 알림 삭제 + Realtime fix ✅** · User实기 ⬜ · 다음 = **AD-078 소셜 로그인** |
-| **Git 상태** | **`7143e13`** (main pushed) |
-| **User 실기** | §7.71 **⬜** (알림 × · 읽은/전체 삭제 · 홈 🔔 크래시 없음) |
-| **다음 에이전트 1순위** | ① **AD-078 소셜 로그인** |
+| **한 줄 요약** | **§7.72 AD-078 OAuth 콘솔 등록** 진행 중 · §7.71 ✅ · 다음 = **콘솔 → Supabase → 앱 UI** |
+| **Git 상태** | **`404b325`** (§7.71) · §7.72 **콘솔 작업 (코드 ❌)** |
+| **User 실기** | §7.71 **✅** · AD-078 **⬜** |
+| **다음 에이전트 1순위** | ① **AD-078 Phase 0** — 개발자 콘솔 등록 (§7.72) |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
 
@@ -1357,6 +1358,114 @@ npx expo start --tunnel --port 8082 --clear
 #### 다음
 
 **AD-073 R2** — §7.59
+
+---
+
+### 7.72 세션 인수인계 — **2026-09-01** (AD-078 Phase 0 · **OAuth 개발자 콘솔 등록**)
+
+| | |
+|---|---|
+| **Scope** | User — **콘솔 등록부터** · 구현 전 키·Redirect URI 확보 |
+| **POPUP Supabase** | `cvrtobxkvpcpcxrcspdp` |
+| **OAuth Callback (공통)** | `https://cvrtobxkvpcpcxrcspdp.supabase.co/auth/v1/callback` |
+| **앱 deep link (예정)** | `popupcube://login-callback` · scheme `popupcube` (`app.config.ts`) |
+| **Android package** | `com.popupcube.app` |
+| **iOS bundle** | `com.popupcube.app` |
+| **구현 순서** | ① **Google**(테스트용) ② **Kakao**(Supabase 기본) ③ **Naver**(Custom+Edge Fn) |
+
+#### 0) Supabase Dashboard — **먼저** (User·에이전트)
+
+[Supabase → Authentication → URL Configuration](https://supabase.com/dashboard/project/cvrtobxkvpcpcxrcspdp/auth/url-configuration)
+
+| 필드 | 값 |
+|---|---|
+| **Site URL** | `popupcube://login-callback` (앱 우선 · 나중에 조정 가능) |
+| **Redirect URLs 추가** | `popupcube://**` · `https://popup-cube-web.vercel.app/**` · (개발) `exp://**` |
+
+> Provider별 Client ID/Secret은 **Dashboard → Authentication → Providers**에 입력 (`.env.local`·HANDOFF에 **Secret 붙여넣기 ❌**).
+
+#### 1) Google Cloud — **가장 먼저** (스모크 테스트용)
+
+1. [Google Cloud Console](https://console.cloud.google.com/) → 프로젝트 생성 `popup-cube` (또는 기존)
+2. **APIs & Services → OAuth consent screen** → External · 앱 이름 `POP-UP CUBE`
+3. **Credentials → Create OAuth client ID → Web application**
+4. **Authorized redirect URIs** (복붙):
+
+```
+https://cvrtobxkvpcpcxrcspdp.supabase.co/auth/v1/callback
+```
+
+5. **Client ID** · **Client Secret** 복사 → Supabase **Providers → Google** ON
+
+| 수집 | ⬜ |
+|---|---|
+| Client ID | |
+| Client Secret | |
+| Supabase Google ON | ⬜ |
+
+#### 2) Kakao Developers — **Supabase 기본 지원**
+
+1. [Kakao Developers](https://developers.kakao.com/) → **앱 추가** · 이름 `POP-UP CUBE`
+2. **앱 설정 → 플랫폼** — Android `com.popupcube.app` · iOS `com.popupcube.app` (번들 ID)
+3. **앱 설정 → 플랫폼 키 → REST API 키** → Client ID
+4. 같은 키 편집 → **Redirect URI**:
+
+```
+https://cvrtobxkvpcpcxrcspdp.supabase.co/auth/v1/callback
+```
+
+5. **카카오 로그인 Client Secret** 발급 · **사용 ON**
+6. **제품 설정 → 카카오 로그인 → 활성화 ON**
+7. **동의항목** — `profile_nickname` · `profile_image` (이메일은 Biz App 전환 후 `account_email`)
+8. Supabase **Providers → Kakao** ON · 이메일 없으면 **Allow users without an email** ON
+
+| 수집 | ⬜ |
+|---|---|
+| REST API key (Client ID) | |
+| Kakao Login Client Secret | |
+| Supabase Kakao ON | ⬜ |
+
+#### 3) Naver Developers — **앱 등록만 먼저** (연동은 Phase 1)
+
+> Supabase **네이티브 ❌** → Custom Provider + **Edge Function userinfo 프록시** 필요 (§33.1 · Phase 1).
+
+1. [Naver Developers](https://developers.naver.com/apps) → **애플리케이션 등록**
+2. **사용 API** — **네아로(네이버 아이디로 로그인)** 체크
+3. **PC/모바일 웹** — 서비스 URL `https://popup-cube-web.vercel.app`
+4. **Callback URL** (복붙):
+
+```
+https://cvrtobxkvpcpcxrcspdp.supabase.co/auth/v1/callback
+```
+
+5. **Client ID** · **Client Secret** 확보 (Phase 1 Supabase Custom `custom:naver` + Edge Fn)
+
+| 수집 | ⬜ |
+|---|---|
+| Client ID | |
+| Client Secret | |
+| Edge Fn + Custom Provider | ⬜ Phase 1 |
+
+#### 4) Apple (iOS 출시 시)
+
+- [Apple Developer](https://developer.apple.com/) · Sign in with Apple · Service ID
+- **다른 소셜 3종 쓰면 iOS에서 Apple 필수** — 출시 직전
+
+#### User가 채팅에 줄 것 (Secret **전체 붙여넣기 ❌**)
+
+- 「Google 등록 완료」+ Client ID **앞 8자**만 (확인용)
+- 또는 「Kakao Redirect URI까지 설정함」처럼 **단계 완료**만 알려주면 됨
+- 키는 **Supabase Dashboard**에 직접 입력 (에이전트가 `.env`에 Secret 저장 ❌)
+
+#### Phase 1 (콘솔 다음)
+
+- `apps/mobile` 로그인 UI · `signInWithOAuth` · deep link callback route
+- Naver Edge Function
+- **AD-034** 자동 로그인 연동 · `profiles.role=shopper` 회귀
+
+#### Git
+
+**콘솔만** — 코드 변경 없음 · HANDOFF §7.72만
 
 ---
 
