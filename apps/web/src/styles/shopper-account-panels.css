@@ -1950,43 +1950,46 @@
 }
 
 .shopper-account-main .oh-notification-row {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
+  position: relative;
   text-align: left;
   border: 1.5px solid #e5e8eb;
   border-radius: 12px;
   background: var(--acct-surface, #fff);
-  overflow: hidden;
   min-height: 44px;
 }
 
 .shopper-account-main .oh-notification-row-main {
-  flex: 1;
+  display: block;
+  width: 100%;
   min-width: 0;
   border: none;
   background: transparent;
-  padding: 12px 10px 12px 14px;
+  padding: 12px 34px 12px 14px;
   cursor: pointer;
   text-align: left;
 }
 
 .shopper-account-main .oh-notification-delete {
-  flex-shrink: 0;
-  width: 44px;
-  min-height: 44px;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border: none;
-  border-left: 1px solid #e5e8eb;
   background: transparent;
-  color: var(--acct-muted, #868e96);
-  font-size: 22px;
+  color: var(--acct-muted, #adb5bd);
+  font-size: 17px;
   line-height: 1;
   cursor: pointer;
 }
 
 .shopper-account-main .oh-notification-delete:active {
-  background: #f1f3f5;
-  color: #e03131;
+  color: #868e96;
 }
 
 .shopper-account-main .oh-notification-row--unread {

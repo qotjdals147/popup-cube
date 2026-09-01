@@ -1365,7 +1365,7 @@ npx expo start --tunnel --port 8082 --clear
 | | |
 |---|---|
 | **Scope** | User — 알림 **삭제 UX** (쿠팡·배민 벤치) + §7.70 **Render Error** fix |
-| **삭제 UI** | 행 **×** · **읽은 알림 삭제** · **전체 삭제**(confirm) · **전체 읽음**(기존) · confirm = **앱 내 모달** (URL 노출 ❌) |
+| **삭제 UI** | 카드 **우측 상단 작은 ×** (구분선 ❌) · **읽은 알림 삭제** · **전체 삭제** · **앱 내 confirm** |
 | **RPC** | `delete_my_notification` · `delete_read_notifications` · `delete_all_my_notifications` |
 | **Realtime fix** | `ShopperNotificationBadgeProvider` — 동일 channel name **1회 구독** (홈+하단탭+마이 중복 ❌) |
 | **AD** | AD-076 후속 · §62 (삭제 → 뱃지 갱신) |
@@ -3199,6 +3199,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-09-01 — Notification row dismiss: corner × (no divider column)
+- **Author:** Cursor Agent
+- **Changed:** `NotificationsPanel` CSS · §7.71
+- **Notes:** **Expo ❌** · **Vercel 1~2min** · User实기 ⬜
 
 ### 2026-09-01 — Notification delete confirm: in-app modal (no WebView URL leak)
 - **Author:** Cursor Agent

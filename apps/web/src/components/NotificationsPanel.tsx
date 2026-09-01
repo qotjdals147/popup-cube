@@ -205,6 +205,18 @@ export function NotificationsPanel({ embedded = false, appearance = 'light' }: N
                 >
                   <button
                     type="button"
+                    className="oh-notification-delete"
+                    disabled={busy}
+                    aria-label={t('notifications.deleteOne')}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void handleDeleteOne(item);
+                    }}
+                  >
+                    ×
+                  </button>
+                  <button
+                    type="button"
                     className="oh-notification-row-main"
                     disabled={busy}
                     onClick={() => void handleOpen(item)}
@@ -221,15 +233,6 @@ export function NotificationsPanel({ embedded = false, appearance = 'light' }: N
                         {t('myOrders.orderRef')}: {orderRef}
                       </span>
                     )}
-                  </button>
-                  <button
-                    type="button"
-                    className="oh-notification-delete"
-                    disabled={busy}
-                    aria-label={t('notifications.deleteOne')}
-                    onClick={() => void handleDeleteOne(item)}
-                  >
-                    ×
                   </button>
                 </div>
               </li>
