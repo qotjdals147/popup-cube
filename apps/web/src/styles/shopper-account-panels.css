@@ -1484,6 +1484,151 @@
   border: 1px solid #bac8ff;
 }
 
+.shopper-account-main .oh-row-badge--rejected {
+  color: #c92a2a;
+  background: #fff5f5;
+  border: 1px solid #ffc9c9;
+}
+
+.shopper-account-main .oh-row-badge--done {
+  color: #2b8a3e;
+  background: #ebfbee;
+  border: 1px solid #b2f2bb;
+}
+
+.shopper-account-main .oh-row--return-rejected {
+  border-left: 4px solid #fa5252;
+  background: #fff5f5;
+}
+
+.shopper-account-main .oh-row--return-pending {
+  border-left: 4px solid #748ffc;
+}
+
+.shopper-account-main .oh-row--return-approved {
+  border-left: 4px solid #51cf66;
+}
+
+.shopper-account-main .oh-row--claim-open {
+  border-left: 4px solid #9775fa;
+}
+
+.shopper-account-main .oh-row-tap {
+  cursor: pointer;
+  margin: -12px -14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+}
+
+.shopper-account-main .oh-row-tap:focus-visible {
+  outline: 2px solid #3182f6;
+  outline-offset: 2px;
+}
+
+.shopper-account-main .oh-row-chevron {
+  align-self: center;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--acct-muted, #868e96);
+  font-weight: 300;
+  padding-left: 4px;
+}
+
+.shopper-account-main .oh-row-price-sep {
+  color: var(--acct-muted, #868e96);
+}
+
+.shopper-account-main .oh-row-price-total {
+  font-weight: 700;
+  color: #e94560;
+}
+
+.shopper-account-main .oh-list-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.shopper-account-main .oh-list-filter-chip {
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1.5px solid #e5e8eb;
+  background: var(--acct-surface, #fff);
+  color: var(--acct-text-secondary, #4e5968);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shopper-account-main .oh-list-filter-chip--active {
+  border-color: #3182f6;
+  background: #edf2ff;
+  color: #1c7ed6;
+  font-weight: 700;
+}
+
+.shopper-account-main .oh-acc {
+  margin-top: 10px;
+  border: 1.5px solid #e5e8eb;
+  border-radius: 12px;
+  background: var(--acct-surface, #fff);
+  overflow: hidden;
+}
+
+.shopper-account-main .oh-acc-head {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.shopper-account-main .oh-acc-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--acct-text);
+  white-space: nowrap;
+}
+
+.shopper-account-main .oh-acc-summary {
+  font-size: 13px;
+  color: var(--acct-text-secondary, #4e5968);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.shopper-account-main .oh-acc-chevron {
+  font-size: 12px;
+  color: var(--acct-muted, #868e96);
+}
+
+.shopper-account-main .oh-acc-body {
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--acct-border, #e5e8eb);
+}
+
+.shopper-account-main .oh-acc-body .oh-section-label {
+  display: none;
+}
+
+.shopper-account-main .oh-policy-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--acct-text-secondary, #4e5968);
+  white-space: pre-wrap;
+}
+
 .shopper-account-main .oh-row-main {
   display: grid;
   grid-template-columns: 64px minmax(0, 1fr) auto;

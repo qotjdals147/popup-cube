@@ -82,6 +82,7 @@ export function ShopperOrderDetailSheet({
 
           <div className="oh-detail-sheet-body shopper-account-main">
             <ShopperOrderCardLight
+              layout="accordion"
               order={order}
               reviewKeys={reviewKeys}
               actionId={actionId}

@@ -19,6 +19,7 @@ import { ReviewFormModal } from './ReviewFormModal';
 import { ShopperOrderRowCompact } from './ShopperOrderRowCompact';
 import { ShopperOrderDetailSheet } from './ShopperOrderDetailSheet';
 import { groupOrdersByDate } from '../lib/shopperOrderListUtils';
+import { filterShopperOrders, type ShopperOrderListFilter } from '../lib/shopperOrderListFilters';
 import { t } from '../i18n';
 
 interface OrderHistoryPanelProps {
@@ -53,8 +54,10 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
     productName: string;
   } | null>(null);
   const [detailOrderId, setDetailOrderId] = useState<string | null>(null);
+  const [listFilter, setListFilter] = useState<ShopperOrderListFilter>('all');
 
   const detailOrder = detailOrderId ? orders.find((o) => o.id === detailOrderId) ?? null : null;
+  const filteredOrders = filterShopperOrders(orders, listFilter);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -201,10 +204,31 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
         </p>
       )}
 
+      {!loading && !error && orders.length > 0 && useAccountTokens && (
+        <div className="oh-list-filters" role="tablist" aria-label={t('myOrders.filterLabel')}>
+          {(['all', 'returns', 'claims'] as const).map((key) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={listFilter === key}
+              className={`oh-list-filter-chip${listFilter === key ? ' oh-list-filter-chip--active' : ''}`}
+              onClick={() => setListFilter(key)}
+            >
+              {t(`myOrders.filter${key.charAt(0).toUpperCase()}${key.slice(1)}`)}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {!loading && !error && orders.length > 0 && filteredOrders.length === 0 && useAccountTokens && (
+        <p className="oh-hint">{t('myOrders.filterEmpty')}</p>
+      )}
+
       {!loading && !error && orders.length > 0 && (
         <div className={useAccountTokens ? 'oh-list' : undefined} style={useAccountTokens ? undefined : styles.list}>
           {useAccountTokens
-            ? groupOrdersByDate(orders).map(({ dateKey, orders: dayOrders }) => (
+            ? groupOrdersByDate(filteredOrders).map(({ dateKey, orders: dayOrders }) => (
                 <section key={dateKey} className="oh-date-group">
                   <h3 className="oh-date-group-title">{dateKey}</h3>
                   <div className="oh-date-group-list">

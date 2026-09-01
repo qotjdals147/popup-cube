@@ -21,7 +21,11 @@ import { OrderHoldSupplementSection } from './OrderHoldSupplementSection';
 import { OrderClaimSection } from './OrderClaimSection';
 import { OrderReturnSection } from './OrderReturnSection';
 import { OrderReturnRequestDialog } from './OrderReturnRequestDialog';
+import { ShopperAccordionSection } from './ShopperAccordionSection';
+import { getStoreSummary } from '../lib/stores';
 import { t } from '../i18n';
+
+export type ShopperOrderDetailLayout = 'flat' | 'accordion';
 
 export interface ShopperOrderDetailContentProps {
   order: ShopperOrderView;
@@ -29,6 +33,7 @@ export interface ShopperOrderDetailContentProps {
   actionId: string | null;
   claimFormId: string | null;
   claimDraft: Record<string, string>;
+  layout?: ShopperOrderDetailLayout;
   onWriteReview: (order: ShopperOrderView, productId: string, productName: string) => void;
   onConfirmPurchase: (orderId: string) => void;
   onCancelOrder: (orderId: string) => void;
@@ -46,15 +51,16 @@ export function ShopperOrderDetailContent(props: ShopperOrderDetailContentProps)
 }
 
 /** 레거시 — 전체 카드 한 장 (상세 시트·목록 이전) */
-export function ShopperOrderCardLight(props: ShopperOrderDetailContentProps) {
+export function ShopperOrderCardLight({ layout = 'flat', ...props }: ShopperOrderDetailContentProps) {
   return (
     <article className="oh-card">
-      <ShopperOrderDetailBody {...props} />
+      <ShopperOrderDetailBody layout={layout} {...props} />
     </article>
   );
 }
 
 function ShopperOrderDetailBody({
+  layout = 'flat',
   order,
   reviewKeys,
   actionId,
@@ -79,6 +85,22 @@ function ShopperOrderDetailBody({
     line2: string | null;
   } | null>(null);
   const [returnEvidenceUrls, setReturnEvidenceUrls] = useState<string[]>([]);
+  const [storeGuide, setStoreGuide] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (layout !== 'accordion') return;
+    let active = true;
+    void getStoreSummary(order.store_id)
+      .then((store) => {
+        if (active) setStoreGuide(store.exchange_return_guide ?? null);
+      })
+      .catch(() => {
+        if (active) setStoreGuide(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [layout, order.store_id]);
 
   useEffect(() => {
     if (order.return_status === 'none') {
@@ -125,50 +147,23 @@ function ShopperOrderDetailBody({
     (canFileClaim(order.status) && order.claim_status !== 'open') ||
     canRequestReturn(order.status, order.return_status);
 
-  return (
-    <>
-      <header className="oh-card-top">
-        <div className="oh-card-top-main">
-          <div className="oh-card-ref-row">
-            {order.store_code && (
-              <span className="oh-order-ref">{formatOrderRef(order.store_code, order.order_number)}</span>
-            )}
-            <span style={orderStatusBadgeStyle(order.status)}>{t(`ownerOrders.status.${order.status}`)}</span>
-            {order.status === 'purchase_confirmed' && order.purchase_confirm_auto && (
-              <span className="oh-chip-auto">{t('ownerOrders.purchaseConfirmedAutoBadge')}</span>
-            )}
-          </div>
-          <div className="oh-card-meta">
-            <span className="oh-store-name">{order.store_name ?? '-'}</span>
-            <span className="oh-meta-sep" aria-hidden="true">
-              ·
-            </span>
-            <time className="oh-date-inline">{formatOrderDateTime(order.created_at)}</time>
-          </div>
-        </div>
-        <div className="oh-amount-block">
-          <span className="oh-total-label">{t('myOrders.orderTotal')}</span>
-          <strong className="oh-total">{formatOrderPrice(order.total_amount)}</strong>
-        </div>
-      </header>
+  const shippingSummary = hasShippingAddress
+    ? [order.shipping_recipient_name, order.shipping_address_line1].filter(Boolean).join(' · ')
+    : '';
+  const returnClaimOpen =
+    order.return_status === 'requested' ||
+    order.return_status === 'rejected' ||
+    order.return_status === 'approved' ||
+    order.claim_status === 'open';
+  const returnClaimSummary =
+    order.return_status !== 'none'
+      ? t(`myOrders.returnRowSummary.${order.return_status}`)
+      : order.claim_status !== 'none'
+        ? t(`myOrders.claimRowSummary.${order.claim_status}`)
+        : '';
 
-      {hasShippingAddress && (
-        <section className="oh-shipping-section" aria-label={t('myOrders.shippingTo')}>
-          <div className="oh-section-label">{t('myOrders.shippingTo')}</div>
-          <div className="oh-shipping-block">
-            <p className="oh-shipping-name">
-              {order.shipping_recipient_name}
-              {order.shipping_phone ? ` · ${order.shipping_phone}` : ''}
-            </p>
-            <p className="oh-shipping-address">
-              ({order.shipping_postal_code}) {order.shipping_address_line1}
-              {order.shipping_address_line2 ? ` ${order.shipping_address_line2}` : ''}
-            </p>
-          </div>
-        </section>
-      )}
-
-      <section className="oh-items-section" aria-label={t('myOrders.itemsCount', { count: order.items.length })}>
+  const itemsSection = (
+    <section className="oh-items-section" aria-label={t('myOrders.itemsCount', { count: order.items.length })}>
         <div className="oh-section-label">{t('myOrders.itemsCount', { count: order.items.length })}</div>
         <ul className="oh-item-list">
           {order.items.map((item) => {
@@ -228,52 +223,6 @@ function ShopperOrderDetailBody({
             </div>
           </div>
         )}
-      </section>
-
-      <section className="oh-price-detail" aria-label={t('myOrders.priceDetailTitle')}>
-        <div className="oh-section-label">{t('myOrders.priceDetailTitle')}</div>
-        <dl className="oh-price-lines">
-          <div className="oh-price-row">
-            <dt>{t('myOrders.productSubtotal')}</dt>
-            <dd>{formatOrderPrice(itemsSubtotal)}</dd>
-          </div>
-          {discountAmount > 0 && order.discount_percent != null && (
-            <div className="oh-price-row oh-price-row--discount">
-              <dt>{t('myOrders.discountLine', { percent: order.discount_percent })}</dt>
-              <dd>−{formatOrderPrice(discountAmount)}</dd>
-            </div>
-          )}
-          <div className="oh-price-row">
-            <dt>{t('myOrders.shippingFee')}</dt>
-            <dd>
-              {(order.shipping_fee ?? 0) > 0 ? formatOrderPrice(order.shipping_fee ?? 0) : t('myOrders.shippingFree')}
-            </dd>
-          </div>
-          <div className="oh-price-row oh-price-row--total">
-            <dt>{t('myOrders.orderTotal')}</dt>
-            <dd>{formatOrderPrice(order.total_amount)}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <OrderHoldSupplementSection
-        order={order}
-        actionId={actionId}
-        onActionStart={onActionStart}
-        onActionEnd={onActionEnd}
-        onReload={onReload}
-        onCancelOrder={onCancelOrder}
-      />
-
-      {order.status === 'rejected' && order.reject_reason_code && (
-        <p className="oh-reject-reason">
-          {t('myOrders.rejectReasonLabel')}: {t(rejectReasonLabelKey(order.reject_reason_code))}
-          {order.reject_reason_text ? ` — ${order.reject_reason_text}` : ''}
-        </p>
-      )}
-
-      {order.status === 'cancelled' && <p className="oh-cancelled-note">{t('myOrders.cancelledNote')}</p>}
-
       {showTimeline && (
         <div className="oh-timeline-row" aria-label={t('myOrders.timelineTitle')}>
           {order.shipped_at && (
@@ -294,7 +243,55 @@ function ShopperOrderDetailBody({
           )}
         </div>
       )}
+    </section>
+  );
 
+  const shippingSection = hasShippingAddress ? (
+    <section className="oh-shipping-section" aria-label={t('myOrders.shippingTo')}>
+      <div className="oh-section-label">{t('myOrders.shippingTo')}</div>
+      <div className="oh-shipping-block">
+        <p className="oh-shipping-name">
+          {order.shipping_recipient_name}
+          {order.shipping_phone ? ` · ${order.shipping_phone}` : ''}
+        </p>
+        <p className="oh-shipping-address">
+          ({order.shipping_postal_code}) {order.shipping_address_line1}
+          {order.shipping_address_line2 ? ` ${order.shipping_address_line2}` : ''}
+        </p>
+      </div>
+    </section>
+  ) : null;
+
+  const priceSection = (
+    <section className="oh-price-detail" aria-label={t('myOrders.priceDetailTitle')}>
+      <div className="oh-section-label">{t('myOrders.priceDetailTitle')}</div>
+      <dl className="oh-price-lines">
+        <div className="oh-price-row">
+          <dt>{t('myOrders.productSubtotal')}</dt>
+          <dd>{formatOrderPrice(itemsSubtotal)}</dd>
+        </div>
+        {discountAmount > 0 && order.discount_percent != null && (
+          <div className="oh-price-row oh-price-row--discount">
+            <dt>{t('myOrders.discountLine', { percent: order.discount_percent })}</dt>
+            <dd>−{formatOrderPrice(discountAmount)}</dd>
+          </div>
+        )}
+        <div className="oh-price-row">
+          <dt>{t('myOrders.shippingFee')}</dt>
+          <dd>
+            {(order.shipping_fee ?? 0) > 0 ? formatOrderPrice(order.shipping_fee ?? 0) : t('myOrders.shippingFree')}
+          </dd>
+        </div>
+        <div className="oh-price-row oh-price-row--total">
+          <dt>{t('myOrders.orderTotal')}</dt>
+          <dd>{formatOrderPrice(order.total_amount)}</dd>
+        </div>
+      </dl>
+    </section>
+  );
+
+  const claimReturnSection = (
+    <>
       {order.claim_status !== 'none' && (
         <OrderClaimSection
           orderId={order.id}
@@ -311,7 +308,6 @@ function ShopperOrderDetailBody({
           openNote={order.claim_status === 'open' ? t('myOrders.claimOpenNote') : undefined}
         />
       )}
-
       {order.return_status !== 'none' && (
         <OrderReturnSection
           returnStatus={order.return_status}
@@ -325,6 +321,104 @@ function ShopperOrderDetailBody({
           returnAddress={returnAddress ?? undefined}
           variant="shopper"
         />
+      )}
+    </>
+  );
+
+  const statusNotes = (
+    <>
+      {order.status === 'rejected' && order.reject_reason_code && (
+        <p className="oh-reject-reason">
+          {t('myOrders.rejectReasonLabel')}: {t(rejectReasonLabelKey(order.reject_reason_code))}
+          {order.reject_reason_text ? ` — ${order.reject_reason_text}` : ''}
+        </p>
+      )}
+      {order.status === 'cancelled' && <p className="oh-cancelled-note">{t('myOrders.cancelledNote')}</p>}
+    </>
+  );
+
+  return (
+    <>
+      <header className="oh-card-top">
+        <div className="oh-card-top-main">
+          <div className="oh-card-ref-row">
+            {order.store_code && (
+              <span className="oh-order-ref">{formatOrderRef(order.store_code, order.order_number)}</span>
+            )}
+            <span style={orderStatusBadgeStyle(order.status)}>{t(`ownerOrders.status.${order.status}`)}</span>
+            {order.status === 'purchase_confirmed' && order.purchase_confirm_auto && (
+              <span className="oh-chip-auto">{t('ownerOrders.purchaseConfirmedAutoBadge')}</span>
+            )}
+          </div>
+          <div className="oh-card-meta">
+            <span className="oh-store-name">{order.store_name ?? '-'}</span>
+            <span className="oh-meta-sep" aria-hidden="true">
+              ·
+            </span>
+            <time className="oh-date-inline">{formatOrderDateTime(order.created_at)}</time>
+          </div>
+        </div>
+        <div className="oh-amount-block">
+          <span className="oh-total-label">{t('myOrders.orderTotal')}</span>
+          <strong className="oh-total">{formatOrderPrice(order.total_amount)}</strong>
+        </div>
+      </header>
+
+      {layout === 'accordion' ? (
+        <>
+          {order.status === 'on_hold' && (
+            <OrderHoldSupplementSection
+              order={order}
+              actionId={actionId}
+              onActionStart={onActionStart}
+              onActionEnd={onActionEnd}
+              onReload={onReload}
+              onCancelOrder={onCancelOrder}
+            />
+          )}
+          <ShopperAccordionSection title={t('myOrders.accItems')} defaultOpen>
+            {itemsSection}
+          </ShopperAccordionSection>
+          {hasShippingAddress && (
+            <ShopperAccordionSection title={t('myOrders.shippingTo')} summary={shippingSummary}>
+              {shippingSection}
+            </ShopperAccordionSection>
+          )}
+          <ShopperAccordionSection title={t('myOrders.priceDetailTitle')} summary={formatOrderPrice(order.total_amount)}>
+            {priceSection}
+          </ShopperAccordionSection>
+          {(order.claim_status !== 'none' || order.return_status !== 'none') && (
+            <ShopperAccordionSection
+              title={t('myOrders.accClaimReturn')}
+              summary={returnClaimSummary}
+              defaultOpen={returnClaimOpen}
+            >
+              {claimReturnSection}
+            </ShopperAccordionSection>
+          )}
+          {storeGuide && (
+            <ShopperAccordionSection title={t('myOrders.accStorePolicy')} summary={order.store_name ?? undefined}>
+              <p className="oh-policy-text">{storeGuide}</p>
+            </ShopperAccordionSection>
+          )}
+          {statusNotes}
+        </>
+      ) : (
+        <>
+          {shippingSection}
+          {itemsSection}
+          {priceSection}
+          <OrderHoldSupplementSection
+            order={order}
+            actionId={actionId}
+            onActionStart={onActionStart}
+            onActionEnd={onActionEnd}
+            onReload={onReload}
+            onCancelOrder={onCancelOrder}
+          />
+          {statusNotes}
+          {claimReturnSection}
+        </>
       )}
 
       {hasActions && (

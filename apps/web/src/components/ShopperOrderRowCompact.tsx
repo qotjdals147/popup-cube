@@ -1,7 +1,9 @@
+import type { KeyboardEvent } from 'react';
 import type { ShopperOrderView } from '@popup-cube/shared';
 import { canConfirmPurchase } from '../lib/orders';
 import { formatOrderRef } from '../lib/orderRef';
 import { formatOrderPrice } from '../lib/shopperOrderListUtils';
+import { shopperOrderRowAccentClass } from '../lib/shopperOrderListFilters';
 import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
 import { t } from '../i18n';
 
@@ -22,6 +24,7 @@ export function ShopperOrderRowCompact({
   const extraCount = Math.max(0, order.items.length - 1);
   const showConfirm = canConfirmPurchase(order.status);
   const attentionBadges = getAttentionBadges(order);
+  const accentClass = shopperOrderRowAccentClass(order);
 
   const productLabel =
     firstItem != null
@@ -38,62 +41,85 @@ export function ShopperOrderRowCompact({
         })
       : formatOrderPrice(order.total_amount);
 
+  function openDetail() {
+    onOpenDetail(order.id);
+  }
+
+  function onTapKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openDetail();
+    }
+  }
+
   return (
-    <article className="oh-row">
-      <div className="oh-row-status-line">
-        <span style={orderStatusBadgeStyle(order.status)}>{t(`ownerOrders.status.${order.status}`)}</span>
-        {order.status === 'purchase_confirmed' && order.purchase_confirm_auto && (
-          <span className="oh-chip-auto">{t('ownerOrders.purchaseConfirmedAutoBadge')}</span>
-        )}
-        {attentionBadges.map((badge) => (
-          <span key={badge.key} className={`oh-row-badge ${badge.className}`}>
-            {badge.label}
-          </span>
-        ))}
-      </div>
-
-      <div className="oh-row-main">
-        <div className="oh-row-thumb" aria-hidden="true">
-          {firstItem?.product_image_url ? (
-            <img src={firstItem.product_image_url} alt="" className="oh-row-thumb-img" />
-          ) : (
-            <span className="oh-row-thumb-placeholder">🛍️</span>
+    <article className={`oh-row${accentClass ? ` ${accentClass}` : ''}`}>
+      <div
+        className="oh-row-tap"
+        role="button"
+        tabIndex={0}
+        onClick={openDetail}
+        onKeyDown={onTapKeyDown}
+        aria-label={t('myOrders.openOrderDetail')}
+      >
+        <div className="oh-row-status-line">
+          <span style={orderStatusBadgeStyle(order.status)}>{t(`ownerOrders.status.${order.status}`)}</span>
+          {order.status === 'purchase_confirmed' && order.purchase_confirm_auto && (
+            <span className="oh-chip-auto">{t('ownerOrders.purchaseConfirmedAutoBadge')}</span>
           )}
-          {extraCount > 0 && <span className="oh-row-thumb-more">+{extraCount}</span>}
+          {attentionBadges.map((badge) => (
+            <span key={badge.key} className={`oh-row-badge ${badge.className}`}>
+              {badge.label}
+            </span>
+          ))}
         </div>
 
-        <div className="oh-row-info">
-          <p className="oh-row-name">{productLabel}</p>
-          <p className="oh-row-price-qty">{priceQty}</p>
-          <div className="oh-row-meta">
-            <span className="oh-row-store">{order.store_name ?? '-'}</span>
-            {order.store_code && (
-              <span className="oh-row-ref">{formatOrderRef(order.store_code, order.order_number)}</span>
+        <div className="oh-row-main">
+          <div className="oh-row-thumb" aria-hidden="true">
+            {firstItem?.product_image_url ? (
+              <img src={firstItem.product_image_url} alt="" className="oh-row-thumb-img" />
+            ) : (
+              <span className="oh-row-thumb-placeholder">🛍️</span>
             )}
+            {extraCount > 0 && <span className="oh-row-thumb-more">+{extraCount}</span>}
           </div>
-        </div>
 
-        <div className="oh-row-amount">
-          <span className="oh-row-amount-label">{t('myOrders.orderTotal')}</span>
-          <strong className="oh-row-amount-value">{formatOrderPrice(order.total_amount)}</strong>
+          <div className="oh-row-info">
+            <p className="oh-row-name">{productLabel}</p>
+            <p className="oh-row-price-qty">
+              {priceQty}
+              <span className="oh-row-price-sep"> · </span>
+              <span className="oh-row-price-total">{formatOrderPrice(order.total_amount)}</span>
+            </p>
+            <div className="oh-row-meta">
+              <span className="oh-row-store">{order.store_name ?? '-'}</span>
+              {order.store_code && (
+                <span className="oh-row-ref">{formatOrderRef(order.store_code, order.order_number)}</span>
+              )}
+            </div>
+          </div>
+
+          <span className="oh-row-chevron" aria-hidden="true">
+            ›
+          </span>
         </div>
       </div>
 
-      <div className="oh-row-actions">
-        {showConfirm && (
+      {showConfirm && (
+        <div className="oh-row-actions">
           <button
             type="button"
             className="oh-btn-primary oh-row-confirm-btn"
             disabled={actionId === order.id}
-            onClick={() => onConfirmPurchase(order.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onConfirmPurchase(order.id);
+            }}
           >
             {t('myOrders.confirmPurchase')}
           </button>
-        )}
-        <button type="button" className="oh-row-detail-btn" onClick={() => onOpenDetail(order.id)}>
-          {t('myOrders.orderDetail')}
-        </button>
-      </div>
+        </div>
+      )}
     </article>
   );
 }
@@ -110,6 +136,10 @@ function getAttentionBadges(order: ShopperOrderView): Array<{ key: string; label
     badges.push({ key: 'return', label: t('myOrders.badgeReturnRequested'), className: 'oh-row-badge--return' });
   } else if (order.return_status === 'approved') {
     badges.push({ key: 'return', label: t('myOrders.badgeReturnApproved'), className: 'oh-row-badge--return' });
+  } else if (order.return_status === 'rejected') {
+    badges.push({ key: 'return', label: t('myOrders.badgeReturnRejected'), className: 'oh-row-badge--rejected' });
+  } else if (order.return_status === 'completed') {
+    badges.push({ key: 'return', label: t('myOrders.badgeReturnCompleted'), className: 'oh-row-badge--done' });
   }
   return badges;
 }

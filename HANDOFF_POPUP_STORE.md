@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.67` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.68` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -619,6 +619,7 @@ npm run dev
 - [x] **블록 추가 시 스크롤 튐 (2026-08-12g, ISS-035)** — `OwnerProductPanel.reload()` fix · **⬜ commit/push**
 - [x] **§7.66 R2 UX polish (2026-09-01)** — 신규 상품 **재고** · 구매확정 **배송완료 후** · 날짜 **오픈일~오늘** · 반품 **카드 UI** · 사진 첨부 · `useShopperOrderRealtime` · migration `20260901_return_evidence_urls.sql` · User实기 **✅** · git **`ffa614f`**
 - [x] **§7.67 손님 주문내역 쿠팡형 (2026-09-01)** — `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · 날짜 묶음 · User实기 **⬜**
+- [x] **§7.68 손님 주문내역 에이블리형 + 반품 거절 찾기 (2026-09-01)** — 행 탭 · `›` · 필터 칩 · 거절/완료 뱃지 · 아코디언 상세 · User实기 **⬜**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -753,9 +754,9 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§7.67 손님 주문내역 쿠팡형 목록/상세 ✅** · User实기 ⬜ · 다음 = **AD-076 알림 탭** |
-| **Git 상태** | **`ccacbf7`** push ✅ |
-| **User 실기** | §7.67 **⬜** (컴팩트 목록 · 주문 상세 시트) |
+| **한 줄 요약** | **§7.68 에이블리형 주문내역 + 반품 거절 찾기 ✅** · User实기 ⬜ · 다음 = **AD-076 알림 탭** |
+| **Git 상태** | §7.68 commit/push 후 갱신 |
+| **User 실기** | §7.68 **⬜** (반품 거절 뱃지 · 필터 · 행 탭 · 아코디언 상세) |
 | **다음 에이전트 1순위** | ① **AD-076 알림 탭** |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
@@ -868,20 +869,20 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — **§7.67 손님 주문내역 쿠팡형** · User实기 **⬜**
+**최신** — **§7.68 에이블리형 주문내역 + 반품 거절 찾기** · User实기 **⬜**
 
 | | |
 |---|---|
 | **다음 우선 (에이전트)** | ① **AD-076 손님 알림 탭** + deep link (§7.50) |
-| **손님 구매내역 UX** | §7.67 push · **User实기 ⬜** |
+| **손님 구매내역 UX** | §7.68 push · **User实기 ⬜** |
 | **점주 R2 UX** | ✅ §7.60~§7.66 |
-| **상세** | **§7.67** (최신) · §7.66 |
+| **상세** | **§7.68** (최신) · §7.67 |
 
-#### Expo 재시작 여부 (최신 §7.67 — **web-only**)
+#### Expo 재시작 여부 (최신 §7.68 — **web-only**)
 
 | | |
 |---|---|
-| **수정** | `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · `OrderHistoryPanel` · CSS |
+| **수정** | `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · `ShopperOrderCardLight` · `ShopperAccordionSection` · `shopperOrderListFilters` · `OrderHistoryPanel` · CSS · i18n |
 | **Expo(Metro) 재시작** | ❌ **불필요** — **Ctrl+C / `--clear` 하지 말 것** |
 | **User** | **`main` push** → Vercel **1~2min** → **`demo@shopper.com`** · 마이 › 구매 내역 · **Ctrl+F5** |
 
@@ -911,13 +912,15 @@ npx expo start --tunnel --port 8082 --clear
 ```
 
 5) **손님** `demo@shopper.com` / `demo` → **마이 › 구매 내역**
-   - 목록 = **작은 카드** (썸네·상품명·가격·상태·주문번호·매장)
-   - **「주문 상세」** → 시트에 배송지·결제·문의·반품·버튼 **전부**
-   - **구매확정** 가능 주문 = 목록에 버튼 · 배송완료 건 상세에서도 가능
+   - 목록 **행 전체 탭** + **`›`** → 상세 시트
+   - 상단 필터: **전체** · **반품·교환** · **문의**
+   - 반품 **거절** 건 = **`반품·교환 거절`** 빨간 뱃지 + **왼쪽 빨간 줄**
+   - 상세 = **아코디언** (주문상품 · 배송 · 결제 · 문의·반품·교환 · 매장 안내)
 
 6) **합격**
-   - ✅ 목록 **짧고 한눈에** · 상세에서 **기존 기능 유지**
-   - ✅ 날짜별 묶음 · 다품목 **+N** 썸네
+   - ✅ **상세 열기 전에** 거절/신청/완료 건 구분 가능
+   - ✅ 필터 **반품·교환**만 보면 해당 주문만
+   - ✅ 상세에서 거절 건 **문의·반품·교환** 섹션 **펼쳐진 상태**
 
 #### 사용자가 지금 해야 할 것 (과거 — §7.66)
 
@@ -1352,6 +1355,66 @@ npx expo start --tunnel --port 8082 --clear
 #### 다음
 
 **AD-073 R2** — §7.59
+
+---
+
+### 7.68 세션 인수인계 — **2026-09-01** (에이블리형 주문내역 · 반품 거절 찾기)
+
+| | |
+|---|---|
+| **Scope** | User — 상세 열기 전 **반품 거절** 건 찾기 어려움 → 목록 가시성 + 필터 + 상세 아코디언 |
+| **목록 UX** | **행 전체 탭** + **`›`** (「주문 상세」 버튼 제거) · 에이블리형 |
+| **뱃지** | `반품·교환 거절`(빨강) · `반품·교환 완료`(초록) 추가 — 기존 신청/승인 유지 |
+| **행 강조** | `shopperOrderRowAccentClass` — 거절=빨간 왼쪽 줄 · 신청=파랑 · 승인=초록 · 문의=보라 |
+| **필터** | `OrderHistoryPanel` 칩 — **전체** / **반품·교환** / **문의** (`shopperOrderListFilters.ts`) |
+| **상세** | `ShopperOrderDetailSheet` → `ShopperOrderCardLight layout="accordion"` · `ShopperAccordionSection` |
+| **아코디언** | 주문상품(기본 펼침) · 배송 · 결제 · 문의·반품·교환(**거절/진행 중 자동 펼침**) · 매장 안내 |
+| **Fix** | `ShopperOrderCardLight` broken `useEffect` 복구 |
+| **AD** | AD-065 후속 · §0 **상태 블록 나열 금지** |
+| **Git** | commit/push 후 hash 갱신 |
+
+#### Expo 재시작 여부 — **web-only** ❌
+
+| | |
+|---|---|
+| **수정** | `apps/web` only |
+| **Expo(Metro) 재시작** | ❌ **불필요** |
+| **User** | Vercel **1~2min** · WebView **Ctrl+F5** (앱 `/app/me` 구매 내역) |
+
+#### User实기 (§0 — **cmd 블록 생략 금지**)
+
+0) **PC 웹만**이면 2)부터 · 앱 실기면 4)까지
+
+1) **Win → `cmd` → Enter**
+
+2) **PC 3줄 — 한 줄씩:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) `demo@shopper.com` / `demo` → **마이 › 구매 내역** (또는 Vercel push 후)
+
+4) **Expo 4줄** — Metro **꺼져 있을 때만**:
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+5) **합격**
+   - ✅ **반품·교환 거절** 뱃지 + 빨간 줄 — 상세 안 열어도 보임
+   - ✅ **반품·교환** 필터만 해당 주문
+   - ✅ 행 탭 → 아코디언 상세 · 거절 건 **문의·반품·교환** 펼침
+   - ⬜ User实기
+
+#### 다음
+
+**AD-076** 손님 알림 탭 (권장 순서 유지)
 
 ---
 
@@ -2973,6 +3036,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-09-01 — Shopper order history Ably-style UX + return-rejected findability
+- **Author:** Cursor Agent
+- **Changed:** `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · `ShopperOrderCardLight` · `ShopperAccordionSection` · `shopperOrderListFilters` · `OrderHistoryPanel` · CSS · i18n · §7.68
+- **Notes:** 목록 **거절/완료 뱃지** · **반품·교환 필터** · 행 탭+`›` · 상세 **아코디언** · **Expo ❌** · User实기 ⬜
 
 ### 2026-09-01 — Shopper order history Coupang-style compact list + detail sheet
 - **Author:** Cursor Agent
