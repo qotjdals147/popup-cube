@@ -755,7 +755,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **§7.68 에이블리형 주문내역 + 반품 거절 찾기 ✅** · User实기 ⬜ · 다음 = **AD-076 알림 탭** |
-| **Git 상태** | §7.68 commit/push 후 갱신 |
+| **Git 상태** | **`65b29f7`** push ✅ |
 | **User 실기** | §7.68 **⬜** (반품 거절 뱃지 · 필터 · 행 탭 · 아코디언 상세) |
 | **다음 에이전트 1순위** | ① **AD-076 알림 탭** |
 
@@ -1371,7 +1371,7 @@ npx expo start --tunnel --port 8082 --clear
 | **아코디언** | 주문상품(기본 펼침) · 배송 · 결제 · 문의·반품·교환(**거절/진행 중 자동 펼침**) · 매장 안내 |
 | **Fix** | `ShopperOrderCardLight` broken `useEffect` 복구 |
 | **AD** | AD-065 후속 · §0 **상태 블록 나열 금지** |
-| **Git** | commit/push 후 hash 갱신 |
+| **Git** | **`65b29f7`** push ✅ |
 
 #### Expo 재시작 여부 — **web-only** ❌
 
@@ -3040,7 +3040,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-09-01 — Shopper order history Ably-style UX + return-rejected findability
 - **Author:** Cursor Agent
 - **Changed:** `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · `ShopperOrderCardLight` · `ShopperAccordionSection` · `shopperOrderListFilters` · `OrderHistoryPanel` · CSS · i18n · §7.68
-- **Notes:** 목록 **거절/완료 뱃지** · **반품·교환 필터** · 행 탭+`›` · 상세 **아코디언** · **Expo ❌** · User实기 ⬜
+- **Notes:** git **`65b29f7`** · **Expo ❌** · User实기 ⬜
 
 ### 2026-09-01 — Shopper order history Coupang-style compact list + detail sheet
 - **Author:** Cursor Agent
