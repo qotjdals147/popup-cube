@@ -757,7 +757,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **§7.70 홈 🔔 + 마이 탭 뱃지 ✅** · User实기 ⬜ · 다음 = **AD-078 소셜 로그인** |
-| **Git 상태** | commit/push 후 갱신 |
+| **Git 상태** | **`8aec67d`** (main pushed) |
 | **User 실기** | §7.70 **⬜** (홈 우측 알림 · 하단 마이 뱃지) |
 | **다음 에이전트 1순위** | ① **AD-078 소셜 로그인** |
 
@@ -1366,7 +1366,7 @@ npx expo start --tunnel --port 8082 --clear
 | **하단 탭** | `ShopperBottomNav` — **마이** 탭에 미읽음 숫자 (장바구니와 동일 패턴) |
 | **공통** | `useShopperNotificationBadge` · Realtime `order_notifications` |
 | **AD** | AD-076 후속 · §60 쿠팡형 |
-| **Git** | commit/push 후 hash 갱신 |
+| **Git** | **`8aec67d`** |
 
 #### Expo 재시작 여부 — **mobile-only** ❌
 
@@ -3142,7 +3142,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-09-01 — Home notification bell + My tab unread badge (Coupang-style)
 - **Author:** Cursor Agent
 - **Changed:** `ShopperNotificationBell` · `home.tsx` · `ShopperBottomNav` · §7.70
-- **Notes:** **Expo ❌** (`r` 리로드) · User实기 ⬜
+- **Notes:** git **`8aec67d`** · **Expo ❌** (`r` 리로드) · User实기 ⬜
 
 ### 2026-09-01 — Owner return history filter + shopper notifications tab (AD-076)
 - **Author:** Cursor Agent
