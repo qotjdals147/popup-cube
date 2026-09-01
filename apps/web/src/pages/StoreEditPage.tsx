@@ -534,6 +534,7 @@ export function StoreEditPage() {
               onNavigateRelated={navigateOwnerRelated}
               focusOrder={focusOrder}
               onFocusClear={clearFocusOrder}
+              storeOpenDate={store?.created_at}
             />
           )}
 
@@ -547,6 +548,7 @@ export function StoreEditPage() {
               onNavigateRelated={navigateOwnerRelated}
               focusOrder={focusOrder}
               onFocusClear={clearFocusOrder}
+              storeOpenDate={store?.created_at}
             />
           )}
 
@@ -560,6 +562,7 @@ export function StoreEditPage() {
               onNavigateRelated={navigateOwnerRelated}
               focusOrder={focusOrder}
               onFocusClear={clearFocusOrder}
+              storeOpenDate={store?.created_at}
             />
           )}
 
@@ -572,6 +575,7 @@ export function StoreEditPage() {
               onNavigateRelated={navigateOwnerRelated}
               focusOrder={focusOrder}
               onFocusClear={clearFocusOrder}
+              storeOpenDate={store?.created_at}
             />
           )}
 

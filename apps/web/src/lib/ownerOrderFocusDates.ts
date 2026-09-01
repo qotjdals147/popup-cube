@@ -17,25 +17,39 @@ export function todayDateInput(now = new Date()): string {
   return dateInputFromIso(now.toISOString());
 }
 
-/** 주문 본문(주문·수정대기·발주·배송) — 주문 생성일 */
+/** 점주 주문 필터 · 연결 이동 공통 — A=매장 오픈일 · B=오늘 */
+export function storeOrderDateRange(
+  storeCreatedAt: string | null | undefined,
+  now = new Date(),
+): { dateFrom: string; dateTo: string } {
+  return {
+    dateFrom: storeCreatedAt ? dateInputFromIso(storeCreatedAt) : '',
+    dateTo: todayDateInput(now),
+  };
+}
+
+/** @deprecated — `storeOrderDateRange()` 사용 */
 export function focusDateFromForOrderHome(order: OwnerOrderView): string {
   return dateInputFromIso(order.created_at);
 }
 
-/** 반품·교환 — 첫 신청일 */
+/** @deprecated — `storeOrderDateRange()` 사용 */
 export function focusDateFromForReturn(order: OwnerOrderView): string {
   return dateInputFromIso(order.return_requested_at ?? order.created_at);
 }
 
-/** 문의 — 1차 문의일 (이력 API → fallback claim_created_at → 주문일) */
+/** @deprecated — `storeOrderDateRange()` 사용 */
 export async function focusDateFromForClaim(order: OwnerOrderView): Promise<string> {
   try {
     const rounds = await listOrderClaimHistory(order.id);
     if (rounds.length > 0) {
-      const earliest = rounds.reduce((min, row) => {
-        const t = new Date(row.shopper_created_at).getTime();
-        return t < min.t ? { t, iso: row.shopper_created_at } : min;
-      }, { t: new Date(rounds[0].shopper_created_at).getTime(), iso: rounds[0].shopper_created_at });
+      const earliest = rounds.reduce(
+        (min, row) => {
+          const t = new Date(row.shopper_created_at).getTime();
+          return t < min.t ? { t, iso: row.shopper_created_at } : min;
+        },
+        { t: new Date(rounds[0].shopper_created_at).getTime(), iso: rounds[0].shopper_created_at },
+      );
       const fromHistory = dateInputFromIso(earliest.iso);
       if (fromHistory) return fromHistory;
     }
@@ -47,19 +61,10 @@ export async function focusDateFromForClaim(order: OwnerOrderView): Promise<stri
 
 export type RelatedFocusKind = 'claim' | 'return' | 'orderHome';
 
-export async function focusDateRangeForRelatedLink(
-  order: OwnerOrderView,
-  kind: RelatedFocusKind,
-): Promise<{ dateFrom: string; dateTo: string }> {
-  const dateTo = todayDateInput();
-  let dateFrom: string;
-  if (kind === 'claim') {
-    dateFrom = await focusDateFromForClaim(order);
-  } else if (kind === 'return') {
-    dateFrom = focusDateFromForReturn(order);
-  } else {
-    dateFrom = focusDateFromForOrderHome(order);
-  }
-  if (!dateFrom) dateFrom = dateInputFromIso(order.created_at);
-  return { dateFrom, dateTo };
+/** 연결 이동 — 매장 오픈일~오늘 (전 탭 동일) */
+export function focusDateRangeForRelatedLink(
+  storeCreatedAt: string | null | undefined,
+  now = new Date(),
+): { dateFrom: string; dateTo: string } {
+  return storeOrderDateRange(storeCreatedAt, now);
 }

@@ -2,7 +2,7 @@ import type { StorePolicy, StoreSummary } from '@popup-cube/shared';
 import { supabase } from './supabase';
 import { mapStorePolicyRow, STORE_POLICY_SELECT } from './storePolicy';
 
-const STORE_SUMMARY_SELECT = `id, name, store_code, description, thumbnail_url, status, popup_ends_at, ${STORE_POLICY_SELECT}`;
+const STORE_SUMMARY_SELECT = `id, name, store_code, description, thumbnail_url, status, popup_ends_at, created_at, ${STORE_POLICY_SELECT}`;
 
 function mapStoreSummary(row: Record<string, unknown>): StoreSummary {
   return {
@@ -13,6 +13,7 @@ function mapStoreSummary(row: Record<string, unknown>): StoreSummary {
     thumbnail_url: (row.thumbnail_url as string | null) ?? null,
     status: row.status as StoreSummary['status'],
     popup_ends_at: (row.popup_ends_at as string | null) ?? null,
+    created_at: (row.created_at as string | null) ?? null,
     ...mapStorePolicyRow(row),
   };
 }

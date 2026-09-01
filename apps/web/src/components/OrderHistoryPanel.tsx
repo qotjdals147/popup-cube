@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ShopperOrderView } from '@popup-cube/shared';
+import { useAuth } from '../context/AuthContext';
+import { useShopperOrderRealtime } from '../hooks/useShopperOrderRealtime';
 import {
   canConfirmPurchase,
   canFileClaim,
+  isAwaitingPurchaseConfirm,
   cancelOrderByShopper,
   confirmPurchase,
   createOrderClaim,
@@ -30,6 +33,8 @@ interface OrderHistoryPanelProps {
  * 배송 완료 이후 「구매확정」을 직접 누르거나, 누르지 않으면 주문일+7일 후 자동 확정됨.
  */
 export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dark' }: OrderHistoryPanelProps) {
+  const { userId } = useAuth();
+  const { refreshTick, bumpRefresh } = useShopperOrderRealtime(userId);
   /** 앱 `/app/me` WebView — CSS 변수(`--acct-*`) · 라이트·다크 모두 차콜/화이트 토큰 */
   const useAccountTokens = appearance === 'light' || embedded;
   const [orders, setOrders] = useState<ShopperOrderView[]>([]);
@@ -62,7 +67,7 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
 
   useEffect(() => {
     void reload();
-  }, [reload]);
+  }, [reload, refreshTick]);
 
   async function handleConfirmPurchase(orderId: string) {
     if (!window.confirm(t('myOrders.confirmPurchaseConfirm'))) return;
@@ -151,6 +156,22 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
         <h2 className={useAccountTokens ? 'oh-title' : undefined} style={useAccountTokens ? undefined : styles.embeddedTitle}>
           {t('myOrders.title')}
         </h2>
+      )}
+
+      {!loading && (
+        <div className={useAccountTokens ? 'oh-history-refresh-row' : undefined} style={useAccountTokens ? undefined : styles.refreshRow}>
+          <button
+            type="button"
+            className={useAccountTokens ? 'oh-history-refresh-btn' : undefined}
+            style={useAccountTokens ? undefined : styles.refreshBtn}
+            onClick={() => {
+              bumpRefresh();
+              void reload();
+            }}
+          >
+            {t('myOrders.refreshOrders')}
+          </button>
+        </div>
       )}
 
       {loading && (
@@ -295,6 +316,10 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
                   </div>
                 )}
 
+                {isAwaitingPurchaseConfirm(order.status) && (
+                  <p style={styles.awaitConfirmBanner}>{t('myOrders.awaitPurchaseConfirm')}</p>
+                )}
+
                 {isCancellableByShopper(order.status) && (
                   <div style={styles.actions}>
                     <button
@@ -423,6 +448,28 @@ function formatDate(iso: string): string {
 const styles: Record<string, React.CSSProperties> = {
   embeddedRoot: { width: '100%' },
   embeddedTitle: { color: '#fff', fontSize: 16, margin: '0 0 14px', fontWeight: 600 },
+  refreshRow: { display: 'flex', justifyContent: 'flex-end', marginBottom: 8 },
+  refreshBtn: {
+    padding: '8px 14px',
+    borderRadius: 8,
+    border: '1px solid #495057',
+    background: '#343a40',
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  awaitConfirmBanner: {
+    margin: '8px 0 0',
+    padding: '10px 12px',
+    borderRadius: 8,
+    background: '#edf2ff',
+    border: '1.5px solid #748ffc',
+    color: '#364fc7',
+    fontSize: 13,
+    fontWeight: 600,
+    lineHeight: 1.45,
+  },
   overlay: {
     position: 'fixed',
     inset: 0,

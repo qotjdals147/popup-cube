@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GachaReturnStatus, OwnerOrderView } from '@popup-cube/shared';
-import { returnReasonLabelKey } from '@popup-cube/shared';
 import {
   approveReturn,
   completeReturn,
@@ -14,6 +13,7 @@ import { formatOrderRef } from '../lib/orderRef';
 import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { OwnerOrderRelatedLinks, type OwnerNavigateTarget } from './OwnerOrderRelatedLinks';
+import { OrderReturnSection } from './OrderReturnSection';
 import type { OwnerOrderFocus } from '../lib/ownerOrderFocus';
 import '../styles/owner-order-focus.css';
 import { t } from '../i18n';
@@ -24,6 +24,7 @@ interface OwnerReturnsPanelProps {
   onNavigateRelated?: (target: OwnerNavigateTarget) => void;
   focusOrder?: OwnerOrderFocus | null;
   onFocusClear?: () => void;
+  storeOpenDate?: string | null;
 }
 
 export function OwnerReturnsPanel({
@@ -32,6 +33,7 @@ export function OwnerReturnsPanel({
   onNavigateRelated,
   focusOrder = null,
   onFocusClear,
+  storeOpenDate = null,
 }: OwnerReturnsPanelProps) {
   const [orders, setOrders] = useState<OwnerOrderView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +42,7 @@ export function OwnerReturnsPanel({
   const [rejectDraft, setRejectDraft] = useState<Record<string, string>>({});
   const [rejectErrorId, setRejectErrorId] = useState<string | null>(null);
   const [gachaStatus, setGachaStatus] = useState<Record<string, GachaReturnStatus>>({});
+  const [returnEvidence, setReturnEvidence] = useState<Record<string, string[]>>({});
   const scrolledFocusKeyRef = useRef<string | null>(null);
 
   const reload = useCallback(async () => {
@@ -105,14 +108,19 @@ export function OwnerReturnsPanel({
 
   useEffect(() => {
     for (const order of filtered) {
-      if (!order.active_return_id || gachaStatus[order.id]) continue;
+      if (order.return_status === 'none') continue;
+      if (returnEvidence[order.id]) continue;
       void getOrderReturn(order.id).then((detail) => {
-        if (detail?.gacha_return_status) {
+        if (!detail) return;
+        if (detail.gacha_return_status) {
           setGachaStatus((prev) => ({ ...prev, [order.id]: detail.gacha_return_status! }));
+        }
+        if (detail.evidence_urls?.length) {
+          setReturnEvidence((prev) => ({ ...prev, [order.id]: detail.evidence_urls! }));
         }
       });
     }
-  }, [filtered, gachaStatus]);
+  }, [filtered, returnEvidence]);
 
   async function runAction(orderId: string, returnId: string | null, fn: () => Promise<void>) {
     if (!returnId) return;
@@ -172,7 +180,6 @@ export function OwnerReturnsPanel({
                   )}
                 </div>
               </div>
-              <span style={styles.returnBadge}>{t(`myOrders.returnStatus.${order.return_status}`)}</span>
             </header>
 
             <div style={styles.cardGrid}>
@@ -187,25 +194,25 @@ export function OwnerReturnsPanel({
                   ))}
                 </ul>
               </section>
-
-              <section style={styles.cardSection}>
-                <div style={styles.sectionLabel}>{kindLabel}</div>
-                {order.return_reason_code && (
-                  <p style={styles.reasonText}>
-                    {t(returnReasonLabelKey(order.return_reason_code))}
-                    {order.return_reason_detail ? ` — ${order.return_reason_detail}` : ''}
-                  </p>
-                )}
-                {order.return_status === 'requested' && (
-                  <p style={styles.openNote}>{t('myOrders.returnOpenNote')}</p>
-                )}
-              </section>
             </div>
+
+            <OrderReturnSection
+              returnStatus={order.return_status}
+              returnKind={order.return_kind}
+              returnReasonCode={order.return_reason_code}
+              returnReasonDetail={order.return_reason_detail}
+              returnRequestedAt={order.return_requested_at}
+              returnResolvedAt={order.return_resolved_at}
+              returnOwnerReply={order.return_owner_reply}
+              evidenceUrls={returnEvidence[order.id] ?? []}
+              variant="owner"
+            />
 
             {onNavigateRelated && (
               <OwnerOrderRelatedLinks
                 order={order}
                 context="returns-requests"
+                storeOpenDate={storeOpenDate}
                 onNavigate={onNavigateRelated}
               />
             )}

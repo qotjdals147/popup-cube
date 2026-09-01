@@ -58,6 +58,7 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
   const [editPreviewUrl, setEditPreviewUrl] = useState<string | null>(null);
   const [editSaving, setEditSaving] = useState(false);
   const [createFormOpen, setCreateFormOpen] = useState(false);
+  const [createStock, setCreateStock] = useState('');
   const [previewProductId, setPreviewProductId] = useState<string | null>(null);
 
   async function reload() {
@@ -120,6 +121,8 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
     setName('');
     setPrice('');
     setDescription('');
+    setCreateStock('');
+    setCreateStock('');
     setImageFile(null);
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
@@ -140,8 +143,13 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const priceNumber = parseIntegerInput(price);
+    const stockNumber = parseIntegerInput(createStock);
 
     if (!name.trim() || !price.trim() || !Number.isFinite(priceNumber) || priceNumber < 0) {
+      setFormError(t('ownerProducts.errorRequired'));
+      return;
+    }
+    if (createStock.trim() && (!Number.isFinite(stockNumber) || stockNumber < 0)) {
       setFormError(t('ownerProducts.errorRequired'));
       return;
     }
@@ -150,16 +158,24 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
     setFormError(null);
 
     try {
-      await createProduct(userId, {
+      const created = await createProduct(userId, {
         storeId,
         name,
         description,
         price: Math.round(priceNumber),
         imageFile,
       });
+      if (createStock.trim() && Number.isFinite(stockNumber) && stockNumber >= 0) {
+        await updateProductFulfillment(created.id, {
+          stockQuantity: Math.round(stockNumber),
+          autoAcceptEnabled: false,
+          autoAcceptLimit: 0,
+        });
+      }
       setName('');
       setPrice('');
       setDescription('');
+      setCreateStock('');
       setImageFile(null);
       setPreviewUrl((prev) => {
         if (prev) URL.revokeObjectURL(prev);
@@ -298,6 +314,16 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
             placeholder={t('ownerProducts.descriptionPlaceholder')}
             maxLength={300}
             rows={2}
+          />
+          <label style={styles.fieldLabel}>{t('ownerProducts.stockLabel')}</label>
+          <input
+            style={styles.inputFull}
+            value={createStock}
+            onChange={(e) => setCreateStock(formatIntegerInputRaw(e.target.value))}
+            onBlur={() => blurFormatInteger(createStock, setCreateStock)}
+            placeholder={t('ownerProducts.stockPlaceholder')}
+            inputMode="numeric"
+            maxLength={16}
           />
           <label style={styles.fieldLabel}>{t('ownerProducts.editImageLabel')}</label>
           <div style={styles.formRow}>

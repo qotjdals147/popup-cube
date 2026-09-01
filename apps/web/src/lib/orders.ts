@@ -587,11 +587,14 @@ export function isFulfillmentOrderStatus(status: OrderStatus): boolean {
 
 
 
-/** AD-054 — 손님이 지금 「구매확정」을 누를 수 있는 상태인지 */
+/** AD-054 — 손님이 지금 「구매확정」을 누를 수 있는 상태인지 (배송 완료 후만) */
 export function canConfirmPurchase(status: OrderStatus): boolean {
+  return status === 'delivery_completed';
+}
 
-  return status === 'shipped' || status === 'delivery_completed';
-
+/** 배송 중 — 구매확정 대기 */
+export function isAwaitingPurchaseConfirm(status: OrderStatus): boolean {
+  return status === 'shipped';
 }
 
 

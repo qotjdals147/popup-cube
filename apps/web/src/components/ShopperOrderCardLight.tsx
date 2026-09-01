@@ -2,6 +2,7 @@ import type { ShopperOrderView } from '@popup-cube/shared';
 import {
   canConfirmPurchase,
   canFileClaim,
+  isAwaitingPurchaseConfirm,
   canRequestReturn,
   canShowReviewButton,
   isCancellableByShopper,
@@ -63,26 +64,34 @@ export function ShopperOrderCardLight({
     line1: string | null;
     line2: string | null;
   } | null>(null);
+  const [returnEvidenceUrls, setReturnEvidenceUrls] = useState<string[]>([]);
 
   useEffect(() => {
-    if (order.return_status !== 'approved' && order.return_status !== 'completed') {
+    if (order.return_status === 'none') {
       setReturnAddress(null);
+      setReturnEvidenceUrls([]);
       return;
     }
     let active = true;
     void getOrderReturn(order.id)
       .then((detail) => {
         if (!active || !detail) return;
-        setReturnAddress({
-          recipient: detail.return_recipient_name,
-          phone: detail.return_phone,
-          postal: detail.return_postal_code,
-          line1: detail.return_address_line1,
-          line2: detail.return_address_line2,
-        });
+        setReturnEvidenceUrls(detail.evidence_urls ?? []);
+        if (order.return_status === 'approved' || order.return_status === 'completed') {
+          setReturnAddress({
+            recipient: detail.return_recipient_name,
+            phone: detail.return_phone,
+            postal: detail.return_postal_code,
+            line1: detail.return_address_line1,
+            line2: detail.return_address_line2,
+          });
+        }
       })
       .catch(() => {
-        if (active) setReturnAddress(null);
+        if (active) {
+          setReturnAddress(null);
+          setReturnEvidenceUrls([]);
+        }
       });
     return () => {
       active = false;
@@ -97,6 +106,7 @@ export function ShopperOrderCardLight({
 
   const hasActions =
     canConfirmPurchase(order.status) ||
+    isAwaitingPurchaseConfirm(order.status) ||
     (isCancellableByShopper(order.status) && order.status !== 'on_hold') ||
     (canFileClaim(order.status) && order.claim_status !== 'open') ||
     canRequestReturn(order.status, order.return_status);
@@ -297,6 +307,7 @@ export function ShopperOrderCardLight({
           returnRequestedAt={order.return_requested_at}
           returnResolvedAt={order.return_resolved_at}
           returnOwnerReply={order.return_owner_reply}
+          evidenceUrls={returnEvidenceUrls}
           returnAddress={returnAddress ?? undefined}
           variant="shopper"
         />
@@ -316,6 +327,12 @@ export function ShopperOrderCardLight({
               </button>
               <p className="oh-auto-hint">{t('cart.purchaseConfirmAutoRule')}</p>
             </div>
+          )}
+
+          {isAwaitingPurchaseConfirm(order.status) && (
+            <p className="oh-await-confirm-banner" role="status">
+              {t('myOrders.awaitPurchaseConfirm')}
+            </p>
           )}
 
           {isCancellableByShopper(order.status) && (

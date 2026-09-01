@@ -92,6 +92,8 @@ export interface StoreSummary extends StorePolicy {
   status: StoreStatus;
   /** §58 — 팝업 종료 시각 (null = 기간 뱃지 없음) */
   popup_ends_at: string | null;
+  /** 매장 개설일 — 점주 주문 필터 A(시작) 기준 */
+  created_at?: string | null;
 }
 
 /**
@@ -374,6 +376,7 @@ export interface OrderReturnDetail {
   return_address_line2: string | null;
   gacha_return_status: GachaReturnStatus | null;
   owner_reply: string | null;
+  evidence_urls?: string[];
   requested_at: string;
   resolved_at: string | null;
 }

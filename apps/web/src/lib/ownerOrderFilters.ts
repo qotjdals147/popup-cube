@@ -1,6 +1,6 @@
 import type { OwnerOrderView, OrderStatus } from '@popup-cube/shared';
 import { formatOrderRef } from './orderRef';
-import { todayDateInput } from './ownerOrderFocusDates';
+import { storeOrderDateRange } from './ownerOrderFocusDates';
 
 export type OwnerOrderSort = 'newest' | 'oldest';
 
@@ -16,7 +16,7 @@ function pad2(n: number): string {
   return String(n).padStart(2, '0');
 }
 
-/** 오늘 기준 이번 달 1일 ~ 말일 (YYYY-MM-DD) */
+/** 오늘 기준 이번 달 1일 ~ 말일 (YYYY-MM-DD) — @deprecated */
 export function currentMonthDateRange(now = new Date()): { dateFrom: string; dateTo: string } {
   const y = now.getFullYear();
   const m = now.getMonth();
@@ -27,13 +27,16 @@ export function currentMonthDateRange(now = new Date()): { dateFrom: string; dat
   };
 }
 
-export function defaultOwnerOrderFilters(now = new Date()): OwnerOrderFilters {
-  const { dateFrom } = currentMonthDateRange(now);
+export function defaultOwnerOrderFilters(
+  storeCreatedAt?: string | null,
+  now = new Date(),
+): OwnerOrderFilters {
+  const { dateFrom, dateTo } = storeOrderDateRange(storeCreatedAt, now);
   return {
     query: '',
     status: 'all',
     dateFrom,
-    dateTo: todayDateInput(now),
+    dateTo,
     sort: 'newest',
   };
 }

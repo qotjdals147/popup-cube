@@ -1,9 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ReturnReasonCode, ShopperOrderView, StorePolicy } from '@popup-cube/shared';
 import { DEFAULT_RETURN_REASON_OPTIONS } from '@popup-cube/shared';
+import { useAuth } from '../context/AuthContext';
 import { getStoreSummary } from '../lib/stores';
-import { requestReturn, type RequestReturnInput } from '../lib/orderReturns';
+import {
+  requestReturn,
+  uploadReturnEvidenceFiles,
+  MAX_RETURN_EVIDENCE_IMAGES,
+  type RequestReturnInput,
+} from '../lib/orderReturns';
 import { OrderError } from '../lib/orders';
 import { copyTextToClipboard, formatReturnAddressText } from '../lib/returnAddressText';
 import { QuantityStepper } from './QuantityStepper';
@@ -32,6 +38,8 @@ export function OrderReturnRequestDialog({
   onClose,
   onSubmitted,
 }: OrderReturnRequestDialogProps) {
+  const { userId } = useAuth();
+  const evidenceInputRef = useRef<HTMLInputElement>(null);
   const [policy, setPolicy] = useState<StorePolicy | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -40,6 +48,8 @@ export function OrderReturnRequestDialog({
   const [reasonCode, setReasonCode] = useState<ReturnReasonCode>('defective');
   const [reasonDetail, setReasonDetail] = useState('');
   const [exchangeMemo, setExchangeMemo] = useState('');
+  const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
+  const [evidencePreviews, setEvidencePreviews] = useState<string[]>([]);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [copyState, setCopyState] = useState<'idle' | 'ok' | 'fail'>('idle');
 
@@ -51,6 +61,11 @@ export function OrderReturnRequestDialog({
     setReasonCode('defective');
     setReasonDetail('');
     setExchangeMemo('');
+    setEvidenceFiles([]);
+    setEvidencePreviews((prev) => {
+      prev.forEach((url) => URL.revokeObjectURL(url));
+      return [];
+    });
     const initial: Record<string, number> = {};
     for (const item of order.items) {
       initial[item.id] = item.quantity;
@@ -96,15 +111,25 @@ export function OrderReturnRequestDialog({
 
   if (!open) return null;
 
-  const requiresMemo = reasonOptions.find((o) => o.reasonCode === reasonCode)?.requiresMemo;
+  const requiresDetail = reasonCode === 'other';
+  const detailPlaceholderKey = `myOrders.returnDetailPlaceholder.${reasonCode}` as const;
+
+  function handleEvidenceChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const picked = Array.from(e.target.files ?? []).slice(0, MAX_RETURN_EVIDENCE_IMAGES);
+    setEvidenceFiles(picked);
+    setEvidencePreviews((prev) => {
+      prev.forEach((url) => URL.revokeObjectURL(url));
+      return picked.map((f) => URL.createObjectURL(f));
+    });
+    e.target.value = '';
+  }
 
   async function handleSubmit() {
     if (!policy) {
       setError(t('myOrders.returnPolicyLoadError'));
       return;
     }
-    const selected = reasonOptions.find((o) => o.reasonCode === reasonCode);
-    if (selected?.requiresMemo && !reasonDetail.trim()) {
+    if (requiresDetail && !reasonDetail.trim()) {
       setError(t('orderReasons.memoRequired'));
       return;
     }
@@ -124,10 +149,14 @@ export function OrderReturnRequestDialog({
       reasonDetail: reasonDetail.trim() || null,
       items,
       exchangeMemo: kind === 'exchange' ? exchangeMemo.trim() || null : null,
+      evidenceUrls: [],
     };
     setSubmitting(true);
     setError(null);
     try {
+      if (userId && evidenceFiles.length > 0) {
+        input.evidenceUrls = await uploadReturnEvidenceFiles(userId, evidenceFiles);
+      }
       await requestReturn(order.id, input);
       onSubmitted();
       onClose();
@@ -215,15 +244,63 @@ export function OrderReturnRequestDialog({
                   </select>
                 </div>
 
-                {requiresMemo && (
+                <div className="oh-return-section">
+                  <label className="oh-return-label" htmlFor="oh-return-detail">
+                    {requiresDetail ? t('myOrders.returnDetailRequired') : t('myOrders.returnDetailOptional')}
+                  </label>
                   <textarea
+                    id="oh-return-detail"
                     className="oh-return-textarea oh-return-textarea--compact"
                     value={reasonDetail}
                     onChange={(e) => setReasonDetail(e.target.value)}
-                    placeholder={t('orderReasons.memoPlaceholder')}
-                    rows={2}
+                    placeholder={t(detailPlaceholderKey)}
+                    rows={3}
                   />
-                )}
+                </div>
+
+                <div className="oh-return-section">
+                  <div className="oh-return-label">{t('myOrders.returnEvidenceAdd')}</div>
+                  <p className="oh-return-dialog-hint">{t('myOrders.returnEvidenceHint')}</p>
+                  <input
+                    ref={evidenceInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    hidden
+                    onChange={handleEvidenceChange}
+                  />
+                  <button
+                    type="button"
+                    className="oh-btn-secondary oh-return-evidence-add-btn"
+                    onClick={() => evidenceInputRef.current?.click()}
+                    disabled={evidenceFiles.length >= MAX_RETURN_EVIDENCE_IMAGES}
+                  >
+                    {t('myOrders.returnEvidenceAdd')}
+                  </button>
+                  {evidencePreviews.length > 0 && (
+                    <div className="oh-return-evidence-grid oh-return-evidence-grid--dialog">
+                      {evidencePreviews.map((url, idx) => (
+                        <div key={url} className="oh-return-evidence-thumb">
+                          <img src={url} alt="" />
+                          <button
+                            type="button"
+                            className="oh-return-evidence-remove"
+                            aria-label={t('myOrders.returnEvidenceRemove')}
+                            onClick={() => {
+                              setEvidenceFiles((prev) => prev.filter((_, i) => i !== idx));
+                              setEvidencePreviews((prev) => {
+                                URL.revokeObjectURL(prev[idx]);
+                                return prev.filter((_, i) => i !== idx);
+                              });
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 <div className="oh-return-section">
                   <div className="oh-return-label">{t('myOrders.returnItemsLegend')}</div>

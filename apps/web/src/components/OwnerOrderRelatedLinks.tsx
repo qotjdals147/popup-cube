@@ -31,6 +31,7 @@ export type OwnerNavigateTarget = {
 interface OwnerOrderRelatedLinksProps {
   order: OwnerOrderView;
   context: OwnerPanelContext;
+  storeOpenDate?: string | null;
   onNavigate: (target: OwnerNavigateTarget) => void;
 }
 
@@ -40,13 +41,14 @@ function orderHomeTab(order: OwnerOrderView): OwnerNavigateTarget['tab'] {
   return 'fulfillment';
 }
 
-async function navigateWithFocusDates(
+function navigateWithFocusDates(
   order: OwnerOrderView,
+  storeOpenDate: string | null | undefined,
   onNavigate: (target: OwnerNavigateTarget) => void,
   target: Pick<OwnerNavigateTarget, 'tab' | 'returnsSubTab' | 'openClaimHistory'>,
   kind: 'claim' | 'return' | 'orderHome',
 ) {
-  const { dateFrom, dateTo } = await focusDateRangeForRelatedLink(order, kind);
+  const { dateFrom, dateTo } = focusDateRangeForRelatedLink(storeOpenDate);
   onNavigate({
     ...target,
     orderId: order.id,
@@ -58,7 +60,12 @@ async function navigateWithFocusDates(
 }
 
 /** 같은 주문이 여러 탭에 걸쳐 있을 때 — 연결 안내 + 탭 이동 */
-export function OwnerOrderRelatedLinks({ order, context, onNavigate }: OwnerOrderRelatedLinksProps) {
+export function OwnerOrderRelatedLinks({
+  order,
+  context,
+  storeOpenDate,
+  onNavigate,
+}: OwnerOrderRelatedLinksProps) {
   const items: Array<{ key: string; label: string; detail?: string; action?: () => void; actionLabel?: string }> =
     [];
 
@@ -80,8 +87,9 @@ export function OwnerOrderRelatedLinks({ order, context, onNavigate }: OwnerOrde
       label: t('ownerOrders.relatedReturn', { kind, status }),
       detail: reason ?? undefined,
       action: () => {
-        void navigateWithFocusDates(
+        navigateWithFocusDates(
           order,
+          storeOpenDate,
           onNavigate,
           { tab: 'returns', returnsSubTab: 'requests' },
           'return',
@@ -102,8 +110,9 @@ export function OwnerOrderRelatedLinks({ order, context, onNavigate }: OwnerOrde
         : t('ownerOrders.relatedClaimResolved', { count: order.claim_round_count }),
       detail: hasOpenClaim && order.claim_message ? order.claim_message : undefined,
       action: () => {
-        void navigateWithFocusDates(
+        navigateWithFocusDates(
           order,
+          storeOpenDate,
           onNavigate,
           {
             tab: 'returns',
@@ -133,7 +142,7 @@ export function OwnerOrderRelatedLinks({ order, context, onNavigate }: OwnerOrde
         status: t(`ownerOrders.status.${order.status}`),
       }),
       action: () => {
-        void navigateWithFocusDates(order, onNavigate, { tab: homeTab }, 'orderHome');
+        navigateWithFocusDates(order, storeOpenDate, onNavigate, { tab: homeTab }, 'orderHome');
       },
       actionLabel: t(homeKey),
     });

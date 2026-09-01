@@ -14,6 +14,7 @@ interface OwnerReturnsTabProps {
   onNavigateRelated?: (target: OwnerNavigateTarget) => void;
   focusOrder?: OwnerOrderFocus | null;
   onFocusClear?: () => void;
+  storeOpenDate?: string | null;
 }
 
 type ReturnsSubTab = 'claims' | 'requests';
@@ -27,6 +28,7 @@ export function OwnerReturnsTab({
   onNavigateRelated,
   focusOrder = null,
   onFocusClear,
+  storeOpenDate = null,
 }: OwnerReturnsTabProps) {
   const [internalSubTab, setInternalSubTab] = useState<ReturnsSubTab>('requests');
   const subTab = controlledSubTab ?? internalSubTab;
@@ -66,6 +68,7 @@ export function OwnerReturnsTab({
             onNavigateRelated={onNavigateRelated}
             focusOrder={focusOrder}
             onFocusClear={onFocusClear}
+            storeOpenDate={storeOpenDate}
           />
         ) : (
           <OwnerOrdersPanel
@@ -77,6 +80,7 @@ export function OwnerReturnsTab({
             onNavigateRelated={onNavigateRelated}
             focusOrder={focusOrder}
             onFocusClear={onFocusClear}
+            storeOpenDate={storeOpenDate}
           />
         )}
       </div>

@@ -1207,3 +1207,250 @@
   color: var(--acct-text-secondary, #4e5968);
   font-size: 12px;
 }
+
+/* AD-073 R2 — 반품·교환 카드 (손님 · 가시성) */
+.shopper-account-main .oh-return-card {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 2px solid var(--acct-border);
+  background: var(--acct-surface, #fff);
+}
+
+.shopper-account-main .oh-return-card--pending {
+  border-color: #f59f00;
+  background: #fffbf0;
+}
+
+.shopper-account-main .oh-return-card--approved {
+  border-color: #4263eb;
+  background: #f8faff;
+}
+
+.shopper-account-main .oh-return-card--rejected {
+  border-color: #fa5252;
+  background: #fff5f5;
+}
+
+.shopper-account-main .oh-return-card--done {
+  border-color: #40c057;
+  background: #f4fce3;
+}
+
+.shopper-account-main .oh-return-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.shopper-account-main .oh-return-kind-badge,
+.shopper-account-main .oh-return-status-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.shopper-account-main .oh-return-kind-badge--pending {
+  background: #fff;
+  border: 1.5px solid #f59f00;
+  color: #e67700;
+}
+
+.shopper-account-main .oh-return-status-badge--pending {
+  background: #e67700;
+  color: #fff;
+}
+
+.shopper-account-main .oh-return-kind-badge--approved,
+.shopper-account-main .oh-return-kind-badge--done {
+  background: #fff;
+  border: 1.5px solid #4263eb;
+  color: #364fc7;
+}
+
+.shopper-account-main .oh-return-status-badge--approved {
+  background: #364fc7;
+  color: #fff;
+}
+
+.shopper-account-main .oh-return-kind-badge--rejected {
+  background: #fff;
+  border: 1.5px solid #fa5252;
+  color: #c92a2a;
+}
+
+.shopper-account-main .oh-return-status-badge--rejected {
+  background: #c92a2a;
+  color: #fff;
+}
+
+.shopper-account-main .oh-return-status-badge--done {
+  background: #2b8a3e;
+  color: #fff;
+}
+
+.shopper-account-main .oh-return-time-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--acct-muted);
+  margin-bottom: 8px;
+}
+
+.shopper-account-main .oh-return-reason-box {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--acct-border);
+  margin-bottom: 8px;
+}
+
+.shopper-account-main .oh-return-reason-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--acct-muted);
+  margin-bottom: 4px;
+}
+
+.shopper-account-main .oh-return-reason-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--acct-text);
+}
+
+.shopper-account-main .oh-return-reason-detail {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--acct-text-secondary, #4e5968);
+  white-space: pre-wrap;
+}
+
+.shopper-account-main .oh-return-open-banner {
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff3bf;
+  color: #e67700;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.shopper-account-main .oh-return-reply-box {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--acct-border);
+}
+
+.shopper-account-main .oh-return-reply-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--acct-muted);
+  margin-bottom: 4px;
+}
+
+.shopper-account-main .oh-return-reply-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  color: var(--acct-text);
+}
+
+.shopper-account-main .oh-return-evidence-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--acct-muted);
+  margin-bottom: 6px;
+}
+
+.shopper-account-main .oh-return-evidence-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.shopper-account-main .oh-return-evidence-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--acct-border);
+  display: block;
+}
+
+.shopper-account-main .oh-return-evidence-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shopper-account-main .oh-await-confirm-banner {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #edf2ff;
+  border: 1.5px solid #748ffc;
+  color: #364fc7;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.shopper-account-main .oh-history-refresh-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.shopper-account-main .oh-history-refresh-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--acct-border);
+  background: var(--acct-surface, #fff);
+  color: var(--acct-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.oh-return-evidence-grid--dialog {
+  margin-top: 10px;
+}
+
+.oh-return-evidence-add-btn {
+  margin-top: 6px;
+}
+
+.oh-return-evidence-thumb {
+  position: relative;
+}
+
+.oh-return-evidence-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.oh-return-evidence-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}

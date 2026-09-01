@@ -48,6 +48,8 @@ interface OwnerOrdersPanelProps {
   onNavigateRelated?: (target: OwnerNavigateTarget) => void;
   focusOrder?: OwnerOrderFocus | null;
   onFocusClear?: () => void;
+  /** 매장 오픈일 — 주문 날짜 필터 A */
+  storeOpenDate?: string | null;
 }
 
 export function OwnerOrdersPanel({
@@ -60,6 +62,7 @@ export function OwnerOrdersPanel({
   onNavigateRelated,
   focusOrder = null,
   onFocusClear,
+  storeOpenDate = null,
 }: OwnerOrdersPanelProps) {
   const [orders, setOrders] = useState<OwnerOrderView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,7 +76,7 @@ export function OwnerOrdersPanel({
     items: { id: string; product_name: string; quantity: number }[];
   } | null>(null);
   const [internalQueue, setInternalQueue] = useState<OwnerOrderQueue>('pending');
-  const [filters, setFilters] = useState<OwnerOrderFilters>(() => defaultOwnerOrderFilters());
+  const [filters, setFilters] = useState<OwnerOrderFilters>(() => defaultOwnerOrderFilters(storeOpenDate));
   const [autoOpenClaimHistory, setAutoOpenClaimHistory] = useState(false);
   const appliedFocusKeyRef = useRef<string | null>(null);
   const scrolledFocusKeyRef = useRef<string | null>(null);
@@ -124,6 +127,11 @@ export function OwnerOrdersPanel({
       status: 'all',
     }));
   }, [focusOrder]);
+
+  useEffect(() => {
+    if (!storeOpenDate || focusOrder) return;
+    setFilters(defaultOwnerOrderFilters(storeOpenDate));
+  }, [storeOpenDate, focusOrder]);
 
   const filtered = useMemo(() => {
     const byQueue = orders.filter((o) => {
@@ -577,6 +585,7 @@ export function OwnerOrdersPanel({
                   <OwnerOrderRelatedLinks
                     order={order}
                     context={relatedContext}
+                    storeOpenDate={storeOpenDate}
                     onNavigate={onNavigateRelated}
                   />
                 )}
