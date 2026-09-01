@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.72` 최신 (AD-078 콘솔)** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.73` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -623,7 +623,8 @@ npm run dev
 - [x] **§7.69 점주 반품 이력 + 손님 알림 탭 AD-076 (2026-09-01)** — `OwnerReturnsPanel` 이력 · `NotificationsPanel` · RPC · User实기 **⬜**
 - [x] **§7.70 홈 알림 종 + 마이 탭 뱃지 (2026-09-01)** — 쿠팡형 접근성 · User实기 **⬜**
 - [x] **§7.71 알림 삭제 + Realtime 중복 구독 fix (2026-09-01)** — × · 읽은/전체 삭제 · User实기 **✅**
-- [ ] **§7.72 AD-078 OAuth 개발자 콘솔 등록 (2026-09-01)** — Google · Kakao · Naver · User **진행 중**
+- [ ] **§7.72 AD-078 OAuth 개발자 콘솔 (2026-09-01)** — Google ✅ · Kakao/Naver ⏸️ 사업자 |
+- [ ] **§7.73 Google 로그인 버튼 + OAuth (2026-09-01)** — `login.tsx` · `googleSignIn.ts` · User实기 **⬜**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -758,10 +759,10 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§7.72 AD-078 OAuth 콘솔 등록** 진행 중 · §7.71 ✅ · 다음 = **콘솔 → Supabase → 앱 UI** |
-| **Git 상태** | **`404b325`** (§7.71) · §7.72 **콘솔 작업 (코드 ❌)** |
-| **User 실기** | §7.71 **✅** · AD-078 **⬜** |
-| **다음 에이전트 1순위** | ① **AD-078 Phase 0** — 개발자 콘솔 등록 (§7.72) |
+| **한 줄 요약** | **§7.73 Google 로그인 버튼 ✅** · Kakao/Naver ⏸️ · User实기 ⬜ |
+| **Git 상태** | commit/push 후 갱신 |
+| **User 실기** | §7.73 **⬜** (Google OAuth · Expo `--clear`) |
+| **다음 에이전트 1순위** | ① Google 실기 확인 · ② Kakao(사업자 후) · ③ AD-034 |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
 
@@ -1358,6 +1359,69 @@ npx expo start --tunnel --port 8082 --clear
 #### 다음
 
 **AD-073 R2** — §7.59
+
+---
+
+### 7.73 세션 인수인계 — **2026-09-01** (AD-078 Phase 1 · **Google 로그인**)
+
+| | |
+|---|---|
+| **Scope** | 손님 앱 **Google로 시작하기** · Supabase OAuth + deep link |
+| **콘솔** | **Google ✅** (Supabase Provider ON) · **Kakao/Naver ⏸️** (사업자·회사명 없음) |
+| **코드** | `googleSignIn.ts` · `oauthRedirect.ts` · `login-callback.tsx` · `AuthContext.signInWithGoogle` · `login.tsx` |
+| **deep link** | `popupcube://login-callback` |
+| **deps** | `expo-web-browser` · `expo-auth-session` |
+| **AD** | AD-078 · AD-034(자동 로그인) 후속 |
+
+#### OAuth 콘솔 상태 (§7.72 갱신)
+
+| Provider | 상태 | 비고 |
+|---|---|---|
+| **Supabase URL** | ✅ Step 0 | Site `popupcube://login-callback` · Redirect `popupcube://**` |
+| **Google** | ✅ | Cloud OAuth Web client · Supabase Google ON |
+| **Kakao** | ⏸️ | 앱 등록 시 **사업자/회사명** 필수 — User 보류 |
+| **Naver** | ⏸️ | 사업자·검수 — Kakao 후 |
+
+#### Google Cloud 실기 주의
+
+- OAuth consent **Testing** 모드 → **테스트 사용자**에 본인 Gmail 추가 필수
+- Redirect URI = `https://cvrtobxkvpcpcxrcspdp.supabase.co/auth/v1/callback`
+
+#### Expo 재시작 여부 — **✅ `--clear` 필수**
+
+| | |
+|---|---|
+| **수정** | `apps/mobile` · 신규 route `login-callback` · native modules |
+| **Expo** | ✅ **Ctrl+C** → §0 **4줄 `--clear`** · QR 재연결 |
+| **User** | 일반 회원 로그인 → **Google로 시작하기** |
+
+#### User实기 (§0 — **cmd 블록 생략 금지**)
+
+0) Metro **꺼져 있거나** QR 끊김 → §0 Expo 4줄
+
+1) **Win → `cmd` → Enter**
+
+2) **Expo 4줄**:
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+3) QR → **일반 회원 로그인** → **Google로 시작하기**
+
+4) **합격**
+   - ✅ Google 계정 선택 → **홈** 진입
+   - ✅ 프로필/주문 등 기존 플로우
+   - ⬜ User实기
+
+#### 다음
+
+- Kakao/Naver — **사업자 등록 후** §7.72 재개
+- **AD-034** 자동 로그인 체크박스
+- OAuth 가입 시 **닉네임** (`handle_new_user` · Google name)
 
 ---
 
@@ -3308,6 +3372,16 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-09-01 — Google sign-in button + OAuth flow (AD-078 Phase 1)
+- **Author:** Cursor Agent
+- **Changed:** `googleSignIn.ts` · `login-callback.tsx` · `login.tsx` · `AuthContext` · §7.73
+- **Notes:** Google console **✅** · Kakao **⏸️** · **Expo ✅ `--clear`** · User实기 ⬜
+
+### 2026-09-01 — AD-078 Phase 0 OAuth developer console registration guide
+- **Author:** Cursor Agent
+- **Changed:** HANDOFF §7.72 · §7.0 · §33.1 cross-ref
+- **Notes:** **구현 ❌** · Google→Kakao→Naver 순 · User 콘솔 진행 중
 
 ### 2026-09-01 — Notification row dismiss: corner × (no divider column)
 - **Author:** Cursor Agent

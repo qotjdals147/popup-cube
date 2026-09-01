@@ -67,6 +67,7 @@ function ThemedStack() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ title: '로그인' }} />
+        <Stack.Screen name="login-callback" options={{ headerShown: false }} />
         <Stack.Screen name="(shopper)" options={{ headerShown: false, animation: 'none' }} />
         <Stack.Screen name="settings" options={{ headerShown: false, presentation: 'card' }} />
         <Stack.Screen

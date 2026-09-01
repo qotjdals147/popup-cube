@@ -28,7 +28,7 @@ export default function LoginScreen() {
   const { role: roleParam } = useLocalSearchParams<{ role?: string }>();
   useRestoreSystemChromeOnFocus();
   const isOwner = roleParam === 'owner';
-  const { signInWithPassword, signUp, loading: authLoading } = useAuth();
+  const { signInWithPassword, signUp, signInWithGoogle, loading: authLoading } = useAuth();
 
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
@@ -38,6 +38,9 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [googleSubmitting, setGoogleSubmitting] = useState(false);
+
+  const showGoogleLogin = !isOwner && mode === 'login';
 
   function toggleMode() {
     setMode((m) => (m === 'login' ? 'signup' : 'login'));
@@ -63,6 +66,21 @@ export default function LoginScreen() {
     } catch {
       setNicknameStatus('error');
       setError(t.signup.needCheck);
+    }
+  }
+
+  async function handleGoogleLogin() {
+    setGoogleSubmitting(true);
+    setError(null);
+    setInfo(null);
+    const { error: googleError, ok } = await signInWithGoogle();
+    setGoogleSubmitting(false);
+    if (googleError) {
+      setError(googleError);
+      return;
+    }
+    if (ok) {
+      router.replace('/home');
     }
   }
 
@@ -115,6 +133,29 @@ export default function LoginScreen() {
         <Text style={styles.subtitle}>{subtitle}</Text>
         {isOwner && <Text style={styles.hint}>{t.login.ownerPcHint}</Text>}
 
+        {isOwner && <Text style={styles.hint}>{t.login.ownerPcHint}</Text>}
+
+        {showGoogleLogin && (
+          <>
+            <Pressable
+              style={[styles.googleButton, (googleSubmitting || authLoading) && styles.submitDisabled]}
+              disabled={googleSubmitting || authLoading || submitting}
+              onPress={() => void handleGoogleLogin()}
+            >
+              {googleSubmitting ? (
+                <ActivityIndicator color={colors.text} />
+              ) : (
+                <Text style={styles.googleButtonText}>{t.login.google}</Text>
+              )}
+            </Pressable>
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>{t.login.orDivider}</Text>
+              <View style={styles.dividerLine} />
+            </View>
+          </>
+        )}
+
         {mode === 'signup' && (
           <>
             <Text style={styles.label}>{t.signup.nickname}</Text>
@@ -165,8 +206,8 @@ export default function LoginScreen() {
         {info && <Text style={styles.info}>{info}</Text>}
 
         <Pressable
-          style={[styles.submit, (submitting || authLoading) && styles.submitDisabled]}
-          disabled={submitting || authLoading}
+          style={[styles.submit, (submitting || authLoading || googleSubmitting) && styles.submitDisabled]}
+          disabled={submitting || authLoading || googleSubmitting}
           onPress={mode === 'login' ? handleLogin : handleSignup}
         >
           {submitting || authLoading ? (
@@ -194,6 +235,25 @@ const styles = StyleSheet.create({
   title: { color: colors.text, fontSize: 22, fontWeight: '700', marginBottom: 8 },
   subtitle: { color: colors.textSoft, fontSize: 14, lineHeight: 20, marginBottom: 8 },
   hint: { color: colors.textMuted, fontSize: 12, marginBottom: 16 },
+  googleButton: {
+    marginTop: 4,
+    marginBottom: 4,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  googleButtonText: { color: '#1f1f1f', fontSize: 16, fontWeight: '600' },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginVertical: 16,
+  },
+  dividerLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
+  dividerText: { color: colors.textMuted, fontSize: 13 },
   label: { color: colors.textMuted, fontSize: 13, marginTop: 12, marginBottom: 6 },
   input: {
     backgroundColor: colors.bgCard,

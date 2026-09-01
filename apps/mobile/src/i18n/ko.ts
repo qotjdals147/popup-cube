@@ -20,6 +20,9 @@ export const t = {
     submitting: '로그인 중...',
     toggleSignup: '계정이 없으신가요? 회원가입',
     toggleLogin: '이미 계정이 있으신가요? 로그인',
+    orDivider: '또는',
+    google: 'Google로 시작하기',
+    googleLoading: 'Google 로그인 중...',
   },
   signup: {
     nickname: '닉네임',

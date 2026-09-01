@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { UserRole } from '../types/domain';
+import { signInWithGoogleOAuth } from '../lib/googleSignIn';
 import { getSupabase, isSupabaseConfigured, formatSupabaseAuthError, isJwtClockSkewError } from '../lib/supabase';
 
 interface AuthState {
@@ -20,6 +21,7 @@ interface AuthContextValue extends AuthState {
     password: string,
     nickname: string
   ) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>;
+  signInWithGoogle: () => Promise<{ error: string | null; ok: boolean }>;
   signOut: () => Promise<void>;
 }
 
@@ -224,12 +226,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null, needsEmailConfirmation };
   }
 
+  async function signInWithGoogle() {
+    setState((s) => ({ ...s, loading: true, initError: null }));
+    try {
+      const { error, cancelled } = await signInWithGoogleOAuth();
+      if (cancelled) {
+        setState((s) => ({ ...s, loading: false }));
+        return { error: null, ok: false };
+      }
+      if (error) {
+        setState((s) => ({ ...s, loading: false }));
+        return { error, ok: false };
+      }
+      const { data } = await getSupabase().auth.getSession();
+      const user = data.session?.user;
+      if (user) {
+        await loadProfile(user.id, user.email ?? null);
+        return { error: null, ok: true };
+      }
+      setState((s) => ({ ...s, loading: false }));
+      return { error: null, ok: false };
+    } catch {
+      setState((s) => ({
+        ...s,
+        loading: false,
+        initError: 'Google 로그인 요청에 실패했어요.',
+      }));
+      return { error: 'Google 로그인 요청에 실패했어요.', ok: false };
+    }
+  }
+
   async function signOut() {
     await getSupabase().auth.signOut();
   }
 
   return (
-    <AuthContext.Provider value={{ ...state, signInWithPassword, signUp, signOut }}>
+    <AuthContext.Provider value={{ ...state, signInWithPassword, signUp, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );
