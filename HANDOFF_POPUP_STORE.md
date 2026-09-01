@@ -1377,10 +1377,26 @@ npx expo start --tunnel --port 8082 --clear
 
 | Provider | 상태 | 비고 |
 |---|---|---|
-| **Supabase URL** | ✅ Step 0 | Site `popupcube://login-callback` · Redirect `popupcube://**` |
+| **Supabase URL** | ✅ Step 0 | Site `popupcube://login-callback` · Redirect **`popupcube://**` + `exp://**`** |
 | **Google** | ✅ | Cloud OAuth Web client · Supabase Google ON |
 | **Kakao** | ⏸️ | 앱 등록 시 **사업자/회사명** 필수 — User 보류 |
 | **Naver** | ⏸️ | 사업자·검수 — Kakao 후 |
+
+#### 「계속」 눌러도 안 넘어감 — **Expo Go redirect**
+
+| 원인 | Expo Go는 `popupcube://`가 아니라 **`exp://…/login-callback`** 으로 복귀 |
+|---|---|
+| **User 조치** | Supabase → URL Configuration → Redirect URLs → **`exp://**` 추가** → Save |
+| **코드** | `makeRedirectUri` (Expo Go / 스토어 빌드 자동 분기) |
+
+#### Google consent `cvrtobxk…supabase.co` — **스팸처럼 보임**
+
+| **User 조치 (Google Cloud)** | **OAuth consent screen** → 앱 이름 **`POP-UP CUBE`** · 로고 · 홈 `https://popup-cube-web.vercel.app` |
+
+#### 하단 계정 선택 sheet (네이티브)
+
+| **지금** | 브라우저 OAuth — Expo Go ✅ |
+| **나중** | Google Sign-In SDK + Dev Client/EAS → Android bottom sheet |
 
 #### Google Cloud 실기 주의
 

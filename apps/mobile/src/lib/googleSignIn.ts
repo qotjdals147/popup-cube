@@ -53,6 +53,7 @@ export async function signInWithGoogleOAuth(): Promise<{ error: string | null; c
 
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo, {
     showInRecents: true,
+    createTask: false,
   });
 
   if (result.type === 'cancel' || result.type === 'dismiss') {
