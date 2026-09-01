@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.66` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.67` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -617,6 +617,8 @@ npm run dev
 - [x] **상품 상세 UX 1차 (2026-08-12d, §55 AD-059)** — **⬜ commit/push · ⬜ 실기**
 - [x] **상품 상세 블록 에디터 (2026-08-12f, §56 AD-060)** — migration `20260812c` **원격 ✅** · **⬜ commit/push · ⬜ 실기**
 - [x] **블록 추가 시 스크롤 튐 (2026-08-12g, ISS-035)** — `OwnerProductPanel.reload()` fix · **⬜ commit/push**
+- [x] **§7.66 R2 UX polish (2026-09-01)** — 신규 상품 **재고** · 구매확정 **배송완료 후** · 날짜 **오픈일~오늘** · 반품 **카드 UI** · 사진 첨부 · `useShopperOrderRealtime` · migration `20260901_return_evidence_urls.sql` · User实기 **✅** · git **`ffa614f`**
+- [x] **§7.67 손님 주문내역 쿠팡형 (2026-09-01)** — `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · 날짜 묶음 · User实기 **⬜**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -751,9 +753,9 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **R2 UX + 연결 탭 포커스 ✅** · 다음 = **손님 알림 탭 (AD-076)** |
-| **Git 상태** | **`ffa614f`** push ✅ |
-| **User 실기** | §7.60~§7.66 **✅** (2026-09-01 User 확인) |
+| **한 줄 요약** | **§7.67 손님 주문내역 쿠팡형 목록/상세 ✅** · User实기 ⬜ · 다음 = **AD-076 알림 탭** |
+| **Git 상태** | push 후 §7.67 git ref 갱신 |
+| **User 실기** | §7.67 **⬜** (컴팩트 목록 · 주문 상세 시트) |
 | **다음 에이전트 1순위** | ① **AD-076 알림 탭** |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
@@ -866,26 +868,26 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — **§7.66 UX·필터·반품 카드** · §7.60~§7.65 User实기 **✅**
+**최신** — **§7.67 손님 주문내역 쿠팡형** · User实기 **⬜**
 
 | | |
 |---|---|
-| **다음 우선 (에이전트)** | ① **AD-076 손님 알림 탭** + deep link |
-| **점주 R2 UX** | ✅ §7.60~§7.66 · User实기 **✅** |
-| **소셜 로그인** | ⬜ **AD-078** · §33.1 · **PG 전 P1** |
-| **상세** | **§7.65** (최신) · §7.62~§7.64 |
+| **다음 우선 (에이전트)** | ① **AD-076 손님 알림 탭** + deep link (§7.50) |
+| **손님 구매내역 UX** | §7.67 push · **User实기 ⬜** |
+| **점주 R2 UX** | ✅ §7.60~§7.66 |
+| **상세** | **§7.67** (최신) · §7.66 |
 
-#### Expo 재시작 여부 (최신 §7.65 — **web-only**)
+#### Expo 재시작 여부 (최신 §7.67 — **web-only**)
 
 | | |
 |---|---|
-| **수정** | `apps/web` — `OwnerOrdersPanel` · `OwnerReturnsPanel` · 연결 포커스 스크롤 |
+| **수정** | `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · `OrderHistoryPanel` · CSS |
 | **Expo(Metro) 재시작** | ❌ **불필요** — **Ctrl+C / `--clear` 하지 말 것** |
-| **User** | **`main` push** → Vercel **1~2min** → 점주 PC **Ctrl+F5** |
+| **User** | **`main` push** → Vercel **1~2min** → **`demo@shopper.com`** · 마이 › 구매 내역 · **Ctrl+F5** |
 
 #### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
 
-0) 폰 **Expo Go SDK 52** (Play 54+ ❌) — **이번 PC 웹만**이면 2)부터
+0) 폰 **Expo Go SDK 52** (Play 54+ ❌) — **PC 웹만**이면 2)부터
 
 1) **Win → `cmd` → Enter**
 
@@ -897,7 +899,9 @@ npm install --legacy-peer-deps
 npm run dev
 ```
 
-3) **Expo — Metro 꺼져 있을 때만** 한 줄씩:
+3) 브라우저 → Vercel 또는 `localhost:5173` · **`Ctrl+F5`**
+
+4) **Expo 재시작 ❌** — Metro **이미 켜져 있으면 5) 생략** · **꺼져 있을 때만**:
 
 ```
 cd C:\Users\qotjd\Downloads\Cursor\popup_store
@@ -906,18 +910,16 @@ cd apps\mobile
 npx expo start --tunnel --port 8082 --clear
 ```
 
-4) **`demo@owner.com` / `demo`** → GUCCI **편집** → 주문·발주·배송 또는 **반품·교환** 탭
-
-5) **클릭 순서 (점주 · §7.65)**
-   - 카드 **「연결된 처리」** → 다른 탭으로 이동 → 해당 건 **스크롤+반짝임 1회**
-   - 검색창 **지우기** → 목록만 넓어짐 · **다시 스크롤 안 됨** ✅
+5) **손님** `demo@shopper.com` / `demo` → **마이 › 구매 내역**
+   - 목록 = **작은 카드** (썸네·상품명·가격·상태·주문번호·매장)
+   - **「주문 상세」** → 시트에 배송지·결제·문의·반품·버튼 **전부**
+   - **구매확정** 가능 주문 = 목록에 버튼 · 배송완료 건 상세에서도 가능
 
 6) **합격**
-   - ✅ 연결 이동 후 포커스 **1회만**
-   - ✅ 검색어 지워도 **재스크롤 없음**
-   - ✅ 날짜 **A~오늘** 유지 (§7.64)
+   - ✅ 목록 **짧고 한눈에** · 상세에서 **기존 기능 유지**
+   - ✅ 날짜별 묶음 · 다품목 **+N** 썸네
 
-#### 사용자가 지금 해야 할 것 (과거 — §7.58~§7.59)
+#### 사용자가 지금 해야 할 것 (과거 — §7.66)
 
 **store_return_addresses 구현 ✅** · **`8371f4e`** · §7.58~§7.59
 
@@ -1353,6 +1355,61 @@ npx expo start --tunnel --port 8082 --clear
 
 ---
 
+### 7.67 세션 인수인계 — **2026-09-01** (손님 주문내역 쿠팡형 · 목록/상세 분리)
+
+| | |
+|---|---|
+| **Scope** | User 제안 — 목록 **컴팩트** · **「주문 상세」** 시트에 기존 전체 UI |
+| **목록** | `ShopperOrderRowCompact` — 썸네·상품명·가격·수량·상태·주문번호·매장 · 날짜별 묶음 |
+| **상세** | `ShopperOrderDetailSheet` + `ShopperOrderDetailContent` (기존 `ShopperOrderCardLight` 본문) |
+| **목록 뱃지** | 수정 요청 · 문의 답변 대기 · 반품·교환 (§0 카드형) |
+| **목록 CTA** | **구매확정** (배송완료만) · **주문 상세** |
+| **AD** | AD-065 후속 (§60 쿠팡형 주문내역) |
+| **Git** | push 후 갱신 |
+
+#### Expo 재시작 여부 — **web-only** ❌
+
+| | |
+|---|---|
+| **수정** | `apps/web` only |
+| **Expo(Metro) 재시작** | ❌ **불필요** |
+| **User** | Vercel **1~2min** · WebView **Ctrl+F5** (앱 `/app/me` 구매 내역) |
+
+#### User实기 (§0 — **cmd 블록 생략 금지**)
+
+0) **PC 웹만**이면 2)부터 · 앱 실기면 4)까지
+
+1) **Win → `cmd` → Enter**
+
+2) **PC 3줄 — 한 줄씩:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) `demo@shopper.com` / `demo` → **마이 › 구매 내역** (또는 Vercel push 후)
+
+4) **Expo 4줄** — Metro **꺼져 있을 때만**:
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+5) **합격**
+   - ✅ 목록 **짧음** · **주문 상세**에 배송·결제·문의·반품·버튼
+   - ⬜ User实기
+
+#### 다음
+
+**AD-076** 손님 알림 탭 (권장 순서 유지)
+
+---
+
 ### 7.66 세션 인수인계 — **2026-09-01** (UX·필터·반품 카드 · User实기 ✅)
 
 | | |
@@ -1365,23 +1422,53 @@ npx expo start --tunnel --port 8082 --clear
 | **5·6 가시성** | `OrderReturnSection` **카드형** (점주·손님) · §0 **상태 블록 나열 금지** 규칙 |
 | **손님 Realtime** | `useShopperOrderRealtime` + 구매내역 **새로고침** 버튼 |
 | **DB** | `20260901_return_evidence_urls.sql` · POPUP **✅** |
-| **Git** | **`ffa614f`** push ✅ |
+| **Git** | feat **`ffa614f`** · HANDOFF **`33a3de6`** push ✅ |
 
-#### Expo 재시작 여부 — **web-only** ❌
+#### Expo 재시작 여부 (`ffa614f` — **web-only**)
 
 | | |
 |---|---|
-| **Expo(Metro)** | ❌ 불필요 |
-| **User** | Vercel **1~2min** · **Ctrl+F5** |
+| **수정** | `apps/web` only — §7.66 표 Scope 참고 |
+| **Expo(Metro) 재시작** | ❌ **불필요** — **Ctrl+C / `--clear` 하지 말 것** (Metro 켜 둔 채 OK) |
+| **User** | **`main` push** → Vercel **1~2min** → PC **Ctrl+F5** · 또는 아래 **PC 3줄** 로컬 |
 
-#### User实기 ✅ (2026-09-01)
+#### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
 
-- §7.60~§7.65 체크리스트 **전부 OK**
-- §7.66 신규 항목 **⬜** (재고·구매확정 순서·오픈일 필터·반품 카드·사진)
+0) 폰 **Expo Go SDK 52** (Play 54+ ❌) — **PC 웹만**이면 2)부터
+
+1) **Win → `cmd` → Enter**
+
+2) **PC 웹 — 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) 브라우저 → `http://localhost:5173` (또는 Vercel · push **1~2min** 후 **`Ctrl+F5`**)
+
+4) **Expo 재시작 ❌** — Metro **이미 켜져 있으면 5) 생략** · **꺼져 있을 때만** 아래 **한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+5) **클릭 순서**
+   - **점주** `demo@owner.com` / `demo` → GUCCI **편집** → **상품** **+ 새 상품** → **재고** 칸 · 저장
+   - **발주·배송** / **반품·교환** — 날짜 **오픈일~오늘** · 카드 **연결된 처리** → 포커스 **1회** · 검색 지우기 → 재스크롤 **없음**
+   - **손님** `demo@shopper.com` / `demo` → **구매 내역** → 배송중 **구매확정 없음** · 배송완료 **구매확정 있음**
+   - **반품·교환 신청** — 사유·**직접 입력**·**사진** · 점주 탭 **카드+뱃지**
+
+6) **합격 ✅** (2026-09-01 User — 「느낌 좋음」)
+   - ✅ 재고 등록 · 구매확정 순서 · 오픈일 필터 · 반품 카드 · 사진 첨부 · 손님 새로고침/Realtime
 
 #### 다음
 
-**AD-076** 손님 알림 탭
+1. **AD-076** 손님 **알림 탭** + deep link (§7.50)
 
 ---
 
@@ -2887,10 +2974,20 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-09-01 — Shopper order history Coupang-style compact list + detail sheet
+- **Author:** Cursor Agent
+- **Changed:** `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · `shopperOrderListUtils` · `OrderHistoryPanel` · CSS · §7.67
+- **Notes:** 목록=썸네·상태·주문번호·매장 · **주문 상세**=기존 전체 · **Expo ❌** · User实기 ⬜
+
+### 2026-09-01 — HANDOFF §7.66 session close (cmd blocks · §7.0 · User实기)
+- **Author:** Cursor Agent
+- **Changed:** HANDOFF §7.0 · §7 「사용자가 지금 해야 할 것」 · §7.66 User实기 cmd · §5
+- **Notes:** §7.66 full §0 cmd · User **「느낌 좋음」** ✅ · **Expo ❌** · 다음 **AD-076**
+
 ### 2026-09-01 — Owner/shopper return UX, store-open date filter, purchase confirm flow
 - **Author:** Cursor Agent
 - **Changed:** `OwnerProductPanel` · `OrderReturnSection` · `OrderReturnRequestDialog` · `ownerOrderFilters` · `useShopperOrderRealtime` · migration `20260901_return_evidence_urls.sql` · §7.66 · §0
-- **Notes:** git **`ffa614f`** · User §7.60~§7.65实기 ✅ · **Expo ❌**
+- **Notes:** git **`ffa614f`** · HANDOFF **`33a3de6`** · User §7.60~§7.66实기 ✅ · **Expo ❌**
 
 ### 2026-08-31 — Focus scroll once per link navigation (no re-scroll on search clear)
 - **Author:** Cursor Agent

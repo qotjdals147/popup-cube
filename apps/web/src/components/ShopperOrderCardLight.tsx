@@ -1,4 +1,6 @@
 import type { ShopperOrderView } from '@popup-cube/shared';
+import { rejectReasonLabelKey } from '@popup-cube/shared';
+import { useEffect, useState } from 'react';
 import {
   canConfirmPurchase,
   canFileClaim,
@@ -12,17 +14,16 @@ import {
 } from '../lib/orders';
 import { getOrderReturn } from '../lib/orderReturns';
 import { formatOrderRef } from '../lib/orderRef';
+import { formatOrderPrice, formatOrderDateTime } from '../lib/shopperOrderListUtils';
 import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
 import { reviewKey } from '../lib/reviews';
 import { OrderHoldSupplementSection } from './OrderHoldSupplementSection';
 import { OrderClaimSection } from './OrderClaimSection';
 import { OrderReturnSection } from './OrderReturnSection';
 import { OrderReturnRequestDialog } from './OrderReturnRequestDialog';
-import { rejectReasonLabelKey } from '@popup-cube/shared';
-import { useEffect, useState } from 'react';
 import { t } from '../i18n';
 
-interface ShopperOrderCardLightProps {
+export interface ShopperOrderDetailContentProps {
   order: ShopperOrderView;
   reviewKeys: Set<string>;
   actionId: string | null;
@@ -39,8 +40,25 @@ interface ShopperOrderCardLightProps {
   onActionEnd: () => void;
 }
 
-/** `/app/me` 구매 내역 — 배송지·결제 상세·배송 타임라인 (§60 · AD-054) */
-export function ShopperOrderCardLight({
+/** 주문 상세 본문 — 상세 시트용 (카드 테두리 없음) */
+export function ShopperOrderDetailContent(props: ShopperOrderDetailContentProps) {
+  return (
+    <div className="oh-detail-inner">
+      <ShopperOrderDetailBody {...props} />
+    </div>
+  );
+}
+
+/** 레거시 — 전체 카드 한 장 (목록에서는 `ShopperOrderRowCompact` 사용) */
+export function ShopperOrderCardLight(props: ShopperOrderDetailContentProps) {
+  return (
+    <article className="oh-card">
+      <ShopperOrderDetailBody {...props} />
+    </article>
+  );
+}
+
+function ShopperOrderDetailBody({
   order,
   reviewKeys,
   actionId,
@@ -55,7 +73,7 @@ export function ShopperOrderCardLight({
   onReload,
   onActionStart,
   onActionEnd,
-}: ShopperOrderCardLightProps) {
+}: ShopperOrderDetailContentProps) {
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [returnAddress, setReturnAddress] = useState<{
     recipient: string | null;
@@ -112,7 +130,7 @@ export function ShopperOrderCardLight({
     canRequestReturn(order.status, order.return_status);
 
   return (
-    <article className="oh-card">
+    <>
       <header className="oh-card-top">
         <div className="oh-card-top-main">
           <div className="oh-card-ref-row">
@@ -129,12 +147,12 @@ export function ShopperOrderCardLight({
             <span className="oh-meta-sep" aria-hidden="true">
               ·
             </span>
-            <time className="oh-date-inline">{formatDate(order.created_at)}</time>
+            <time className="oh-date-inline">{formatOrderDateTime(order.created_at)}</time>
           </div>
         </div>
         <div className="oh-amount-block">
           <span className="oh-total-label">{t('myOrders.orderTotal')}</span>
-          <strong className="oh-total">{formatPrice(order.total_amount)}</strong>
+          <strong className="oh-total">{formatOrderPrice(order.total_amount)}</strong>
         </div>
       </header>
 
@@ -193,7 +211,7 @@ export function ShopperOrderCardLight({
                       </button>
                     ))}
                 </div>
-                <span className="oh-item-line-total">{formatPrice(lineTotal)}</span>
+                <span className="oh-item-line-total">{formatOrderPrice(lineTotal)}</span>
               </li>
             );
           })}
@@ -221,23 +239,23 @@ export function ShopperOrderCardLight({
         <dl className="oh-price-lines">
           <div className="oh-price-row">
             <dt>{t('myOrders.productSubtotal')}</dt>
-            <dd>{formatPrice(itemsSubtotal)}</dd>
+            <dd>{formatOrderPrice(itemsSubtotal)}</dd>
           </div>
           {discountAmount > 0 && order.discount_percent != null && (
             <div className="oh-price-row oh-price-row--discount">
               <dt>{t('myOrders.discountLine', { percent: order.discount_percent })}</dt>
-              <dd>−{formatPrice(discountAmount)}</dd>
+              <dd>−{formatOrderPrice(discountAmount)}</dd>
             </div>
           )}
           <div className="oh-price-row">
             <dt>{t('myOrders.shippingFee')}</dt>
             <dd>
-              {(order.shipping_fee ?? 0) > 0 ? formatPrice(order.shipping_fee ?? 0) : t('myOrders.shippingFree')}
+              {(order.shipping_fee ?? 0) > 0 ? formatOrderPrice(order.shipping_fee ?? 0) : t('myOrders.shippingFree')}
             </dd>
           </div>
           <div className="oh-price-row oh-price-row--total">
             <dt>{t('myOrders.orderTotal')}</dt>
-            <dd>{formatPrice(order.total_amount)}</dd>
+            <dd>{formatOrderPrice(order.total_amount)}</dd>
           </div>
         </dl>
       </section>
@@ -264,18 +282,18 @@ export function ShopperOrderCardLight({
         <div className="oh-timeline-row" aria-label={t('myOrders.timelineTitle')}>
           {order.shipped_at && (
             <span className="oh-timeline-chip">
-              {t('ownerOrders.shippedAt')} {formatDate(order.shipped_at)}
+              {t('ownerOrders.shippedAt')} {formatOrderDateTime(order.shipped_at)}
               {order.tracking_number ? ` · ${order.tracking_number}` : ''}
             </span>
           )}
           {order.delivery_completed_at && (
             <span className="oh-timeline-chip oh-timeline-chip--success">
-              {t('ownerOrders.deliveryCompletedAt')} {formatDate(order.delivery_completed_at)}
+              {t('ownerOrders.deliveryCompletedAt')} {formatOrderDateTime(order.delivery_completed_at)}
             </span>
           )}
           {order.purchase_confirmed_at && (
             <span className="oh-timeline-chip oh-timeline-chip--success">
-              {t('ownerOrders.purchaseConfirmedAt')} {formatDate(order.purchase_confirmed_at)}
+              {t('ownerOrders.purchaseConfirmedAt')} {formatOrderDateTime(order.purchase_confirmed_at)}
             </span>
           )}
         </div>
@@ -387,15 +405,6 @@ export function ShopperOrderCardLight({
         onClose={() => setReturnDialogOpen(false)}
         onSubmitted={() => void onReload()}
       />
-    </article>
+    </>
   );
-}
-
-function formatPrice(price: number): string {
-  return `${price.toLocaleString('ko-KR')}원`;
-}
-
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 }

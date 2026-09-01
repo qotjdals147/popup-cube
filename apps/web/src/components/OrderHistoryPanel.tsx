@@ -16,7 +16,9 @@ import {
 import { formatOrderRef } from '../lib/orderRef';
 import { getMyReviewKeys, reviewKey } from '../lib/reviews';
 import { ReviewFormModal } from './ReviewFormModal';
-import { ShopperOrderCardLight } from './ShopperOrderCardLight';
+import { ShopperOrderRowCompact } from './ShopperOrderRowCompact';
+import { ShopperOrderDetailSheet } from './ShopperOrderDetailSheet';
+import { groupOrdersByDate } from '../lib/shopperOrderListUtils';
 import { t } from '../i18n';
 
 interface OrderHistoryPanelProps {
@@ -50,6 +52,9 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
     productId: string;
     productName: string;
   } | null>(null);
+  const [detailOrderId, setDetailOrderId] = useState<string | null>(null);
+
+  const detailOrder = detailOrderId ? orders.find((o) => o.id === detailOrderId) ?? null : null;
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -198,26 +203,24 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
 
       {!loading && !error && orders.length > 0 && (
         <div className={useAccountTokens ? 'oh-list' : undefined} style={useAccountTokens ? undefined : styles.list}>
-          {orders.map((order) =>
-            useAccountTokens ? (
-              <ShopperOrderCardLight
-                key={order.id}
-                order={order}
-                reviewKeys={reviewKeys}
-                actionId={actionId}
-                claimFormId={claimFormId}
-                claimDraft={claimDraft}
-                onWriteReview={(o, pid, pname) => void handleWriteReviewClick(o, pid, pname)}
-                onConfirmPurchase={(id) => void handleConfirmPurchase(id)}
-                onCancelOrder={(id) => void handleCancelOrder(id)}
-                onSubmitClaim={(id) => void handleSubmitClaim(id)}
-                onOpenClaimForm={setClaimFormId}
-                onClaimDraftChange={(id, text) => setClaimDraft((prev) => ({ ...prev, [id]: text }))}
-                onReload={reload}
-                onActionStart={setActionId}
-                onActionEnd={() => setActionId(null)}
-              />
-            ) : (
+          {useAccountTokens
+            ? groupOrdersByDate(orders).map(({ dateKey, orders: dayOrders }) => (
+                <section key={dateKey} className="oh-date-group">
+                  <h3 className="oh-date-group-title">{dateKey}</h3>
+                  <div className="oh-date-group-list">
+                    {dayOrders.map((order) => (
+                      <ShopperOrderRowCompact
+                        key={order.id}
+                        order={order}
+                        actionId={actionId}
+                        onOpenDetail={setDetailOrderId}
+                        onConfirmPurchase={(id) => void handleConfirmPurchase(id)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ))
+            : orders.map((order) => (
               <div key={order.id} style={styles.card}>
                 <div style={styles.cardHeader}>
                   <div style={styles.cardHeaderLeft}>
@@ -396,8 +399,7 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
                   </div>
                 </div>
               </div>
-            ),
-          )}
+            ))}
         </div>
       )}
     </>
@@ -417,10 +419,33 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
     />
   );
 
+  const detailSheet =
+    useAccountTokens &&
+    detailOrder && (
+      <ShopperOrderDetailSheet
+        order={detailOrder}
+        reviewKeys={reviewKeys}
+        actionId={actionId}
+        claimFormId={claimFormId}
+        claimDraft={claimDraft}
+        onClose={() => setDetailOrderId(null)}
+        onWriteReview={(o, pid, pname) => void handleWriteReviewClick(o, pid, pname)}
+        onConfirmPurchase={(id) => void handleConfirmPurchase(id)}
+        onCancelOrder={(id) => void handleCancelOrder(id)}
+        onSubmitClaim={(id) => void handleSubmitClaim(id)}
+        onOpenClaimForm={setClaimFormId}
+        onClaimDraftChange={(id, text) => setClaimDraft((prev) => ({ ...prev, [id]: text }))}
+        onReload={reload}
+        onActionStart={setActionId}
+        onActionEnd={() => setActionId(null)}
+      />
+    );
+
   if (embedded) {
     return (
       <div className={useAccountTokens ? 'oh-root' : undefined} style={useAccountTokens ? undefined : styles.embeddedRoot}>
         {listBody}
+        {detailSheet}
         {reviewModal}
       </div>
     );
@@ -431,6 +456,7 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
       <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
         {listBody}
       </div>
+      {detailSheet}
       {reviewModal}
     </div>
   );
