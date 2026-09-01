@@ -65,17 +65,12 @@ export function ShopperOrderRowCompact({
         <div className="oh-row-info">
           <p className="oh-row-name">{productLabel}</p>
           <p className="oh-row-price-qty">{priceQty}</p>
-          <p className="oh-row-meta">
+          <div className="oh-row-meta">
             <span className="oh-row-store">{order.store_name ?? '-'}</span>
             {order.store_code && (
-              <>
-                <span className="oh-meta-sep" aria-hidden="true">
-                  ·
-                </span>
-                <span className="oh-row-ref">{formatOrderRef(order.store_code, order.order_number)}</span>
-              </>
+              <span className="oh-row-ref">{formatOrderRef(order.store_code, order.order_number)}</span>
             )}
-          </p>
+          </div>
         </div>
 
         <div className="oh-row-amount">

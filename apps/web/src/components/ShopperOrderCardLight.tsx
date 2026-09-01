@@ -40,16 +40,12 @@ export interface ShopperOrderDetailContentProps {
   onActionEnd: () => void;
 }
 
-/** 주문 상세 본문 — 상세 시트용 (카드 테두리 없음) */
+/** @deprecated — 상세 시트는 `ShopperOrderCardLight` 직접 사용 */
 export function ShopperOrderDetailContent(props: ShopperOrderDetailContentProps) {
-  return (
-    <div className="oh-detail-inner">
-      <ShopperOrderDetailBody {...props} />
-    </div>
-  );
+  return <ShopperOrderCardLight {...props} />;
 }
 
-/** 레거시 — 전체 카드 한 장 (목록에서는 `ShopperOrderRowCompact` 사용) */
+/** 레거시 — 전체 카드 한 장 (상세 시트·목록 이전) */
 export function ShopperOrderCardLight(props: ShopperOrderDetailContentProps) {
   return (
     <article className="oh-card">

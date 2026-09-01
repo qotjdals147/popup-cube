@@ -1,8 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ShopperOrderView } from '@popup-cube/shared';
-import { ShopperOrderDetailContent } from './ShopperOrderCardLight';
-import { formatOrderRef } from '../lib/orderRef';
+import { ShopperOrderCardLight } from './ShopperOrderCardLight';
 import { t } from '../i18n';
 
 interface ShopperOrderDetailSheetProps {
@@ -40,6 +39,12 @@ export function ShopperOrderDetailSheet({
   onActionStart,
   onActionEnd,
 }: ShopperOrderDetailSheetProps) {
+  const [theme, setTheme] = useState<string | null>(null);
+
+  useEffect(() => {
+    setTheme(document.querySelector('.shopper-account-page')?.getAttribute('data-theme') ?? null);
+  }, []);
+
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -48,52 +53,51 @@ export function ShopperOrderDetailSheet({
     };
   }, []);
 
-  const refLabel =
-    order.store_code != null ? formatOrderRef(order.store_code, order.order_number) : undefined;
-
   return createPortal(
     <div
-      className="oh-detail-sheet-backdrop"
-      role="presentation"
-      onClick={onClose}
-      onWheel={(e) => e.stopPropagation()}
+      className="shopper-account-page oh-detail-sheet-portal"
+      {...(theme ? { 'data-theme': theme } : {})}
     >
       <div
-        className="oh-detail-sheet"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="oh-detail-sheet-title"
-        onClick={(e) => e.stopPropagation()}
+        className="oh-detail-sheet-backdrop"
+        role="presentation"
+        onClick={onClose}
+        onWheel={(e) => e.stopPropagation()}
       >
-        <header className="oh-detail-sheet-header">
-          <div className="oh-detail-sheet-head-text">
+        <div
+          className="oh-detail-sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="oh-detail-sheet-title"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <header className="oh-detail-sheet-header">
             <h2 id="oh-detail-sheet-title" className="oh-detail-sheet-title">
               {t('myOrders.orderDetailTitle')}
             </h2>
-            {refLabel && <p className="oh-detail-sheet-sub">{refLabel}</p>}
-          </div>
-          <button type="button" className="oh-detail-sheet-close" onClick={onClose} aria-label={t('common.close')}>
-            ✕
-          </button>
-        </header>
+            <button type="button" className="oh-detail-sheet-close" onClick={onClose} aria-label={t('common.close')}>
+              ✕
+            </button>
+          </header>
 
-        <div className="oh-detail-sheet-body">
-          <ShopperOrderDetailContent
-            order={order}
-            reviewKeys={reviewKeys}
-            actionId={actionId}
-            claimFormId={claimFormId}
-            claimDraft={claimDraft}
-            onWriteReview={onWriteReview}
-            onConfirmPurchase={onConfirmPurchase}
-            onCancelOrder={onCancelOrder}
-            onSubmitClaim={onSubmitClaim}
-            onOpenClaimForm={onOpenClaimForm}
-            onClaimDraftChange={onClaimDraftChange}
-            onReload={onReload}
-            onActionStart={onActionStart}
-            onActionEnd={onActionEnd}
-          />
+          <div className="oh-detail-sheet-body shopper-account-main">
+            <ShopperOrderCardLight
+              order={order}
+              reviewKeys={reviewKeys}
+              actionId={actionId}
+              claimFormId={claimFormId}
+              claimDraft={claimDraft}
+              onWriteReview={onWriteReview}
+              onConfirmPurchase={onConfirmPurchase}
+              onCancelOrder={onCancelOrder}
+              onSubmitClaim={onSubmitClaim}
+              onOpenClaimForm={onOpenClaimForm}
+              onClaimDraftChange={onClaimDraftChange}
+              onReload={onReload}
+              onActionStart={onActionStart}
+              onActionEnd={onActionEnd}
+            />
+          </div>
         </div>
       </div>
     </div>,

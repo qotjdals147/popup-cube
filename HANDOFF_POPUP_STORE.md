@@ -1363,7 +1363,7 @@ npx expo start --tunnel --port 8082 --clear
 | **목록** | `ShopperOrderRowCompact` — 썸네·상품명·가격·수량·상태·주문번호·매장 · 날짜별 묶음 |
 | **상세** | `ShopperOrderDetailSheet` + `ShopperOrderDetailContent` (기존 `ShopperOrderCardLight` 본문) |
 | **목록 뱃지** | 수정 요청 · 문의 답변 대기 · 반품·교환 (§0 카드형) |
-| **목록 CTA** | **구매확정** (배송완료만) · **주문 상세** |
+| **Fix** | 상세 시트 **CSS 미적용** (body 포털) → `shopper-account-page` + `ShopperOrderCardLight` **기존 카드 UI** 복구 · 목록 매장명 **2줄+ellipsis** |
 | **AD** | AD-065 후속 (§60 쿠팡형 주문내역) |
 | **Git** | **`ccacbf7`** push ✅ |
 

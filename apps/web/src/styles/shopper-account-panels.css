@@ -1551,20 +1551,28 @@
 }
 
 .shopper-account-main .oh-row-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   margin: 0;
-  font-size: 12px;
-  color: var(--acct-muted);
-  line-height: 1.35;
+  min-width: 0;
 }
 
 .shopper-account-main .oh-row-store {
   font-weight: 600;
   color: var(--acct-text-secondary, #4e5968);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .shopper-account-main .oh-row-ref {
   color: #b45309;
   font-weight: 700;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .shopper-account-main .oh-row-amount {
@@ -1616,16 +1624,18 @@
   cursor: pointer;
 }
 
-.shopper-account-main .oh-detail-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+/* 상세 시트 — body 포털이어도 shopper-account-page 토큰·패널 CSS 적용 */
+.shopper-account-page.oh-detail-sheet-portal {
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  min-height: 0;
+  background: transparent;
+  pointer-events: none;
 }
 
-.shopper-account-main .oh-detail-inner .oh-card-top {
-  margin-bottom: 14px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--acct-border);
+.shopper-account-page.oh-detail-sheet-portal .oh-detail-sheet-backdrop {
+  pointer-events: auto;
 }
 
 .oh-detail-sheet-backdrop {
@@ -1646,7 +1656,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--acct-surface, #fff);
+  background: var(--acct-bg, #f4f5f7);
   border-radius: 16px 16px 0 0;
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
 }
@@ -1665,16 +1675,13 @@
 
 .oh-detail-sheet-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   flex-shrink: 0;
   padding: 14px 16px 12px;
   border-bottom: 1px solid var(--acct-border, #e5e8eb);
-}
-
-.oh-detail-sheet-head-text {
-  min-width: 0;
+  background: var(--acct-surface, #fff);
 }
 
 .oh-detail-sheet-title {
@@ -1701,13 +1708,17 @@
   padding: 4px;
 }
 
-.oh-detail-sheet-body {
+.oh-detail-sheet-body.shopper-account-main {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  padding: 12px 16px 20px;
+  padding: 12px 14px 20px;
+}
+
+.oh-detail-sheet-body.shopper-account-main .oh-card {
+  margin: 0;
 }
 
 .oh-detail-sheet-body .oh-shipping-section,
