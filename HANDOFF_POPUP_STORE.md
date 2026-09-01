@@ -756,7 +756,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **§7.69 점주 반품 이력 + 손님 알림 탭 AD-076 ✅** · User实기 ⬜ · 다음 = **AD-078 소셜 로그인** |
-| **Git 상태** | commit/push 후 갱신 |
+| **Git 상태** | **`4d3b264`** push ✅ |
 | **User 실기** | §7.69 **⬜** (점주 거절·완료 이력 · 마이 › 알림 · 주문 deep link) |
 | **다음 에이전트 1순위** | ① **AD-078 소셜 로그인** |
 
@@ -1372,7 +1372,7 @@ npx expo start --tunnel --port 8082 --clear
 | **Deep link** | 알림 탭 → `order_id` → 주문내역 **상세 시트** (`initialOrderId`) |
 | **DB** | `20260901_shopper_notifications_ad076.sql` · POPUP **✅** |
 | **AD** | AD-076 알림 탭 ✅ · AD-073 R2 이력 보완 |
-| **Git** | commit/push 후 hash 갱신 |
+| **Git** | **`4d3b264`** push ✅ |
 
 #### Expo 재시작 여부
 
@@ -3100,7 +3100,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-09-01 — Owner return history filter + shopper notifications tab (AD-076)
 - **Author:** Cursor Agent
 - **Changed:** `OwnerReturnsPanel` · `NotificationsPanel` · `ShopperAccountPage` · mobile `me/notifications` · migration `20260901_shopper_notifications_ad076.sql` · §7.69
-- **Notes:** POPUP RPC **✅** · 알림→주문 deep link · **Expo ⚠️ 신규 라우트** · User实기 ⬜
+- **Notes:** git **`4d3b264`** · POPUP RPC **✅** · **Expo ⚠️ 신규 라우트** · User实기 ⬜
 
 ### 2026-09-01 — Shopper order history Ably-style UX + return-rejected findability
 - **Author:** Cursor Agent
