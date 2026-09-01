@@ -84,6 +84,7 @@ export const t = {
     guest: '손님',
     hubTagline: 'POP-UP CUBE 회원',
     openSettings: '내정보관리',
+    openNotifications: '알림',
     ordersSectionTitle: '주문 내역',
     viewAll: '전체 보기 ›',
     ordersTeaserTitle: '구매 · 배송 조회',

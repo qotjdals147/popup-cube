@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.69` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.70` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -621,6 +621,7 @@ npm run dev
 - [x] **§7.67 손님 주문내역 쿠팡형 (2026-09-01)** — `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · 날짜 묶음 · User实기 **⬜**
 - [x] **§7.68 손님 주문내역 에이블리형 + 반품 거절 찾기 (2026-09-01)** — 행 탭 · 필터 · 아코디언 · User实기 **⬜**
 - [x] **§7.69 점주 반품 이력 + 손님 알림 탭 AD-076 (2026-09-01)** — `OwnerReturnsPanel` 이력 · `NotificationsPanel` · RPC · User实기 **⬜**
+- [x] **§7.70 홈 알림 종 + 마이 탭 뱃지 (2026-09-01)** — 쿠팡형 접근성 · User实기 **⬜**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -755,9 +756,9 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§7.69 점주 반품 이력 + 손님 알림 탭 AD-076 ✅** · User实기 ⬜ · 다음 = **AD-078 소셜 로그인** |
-| **Git 상태** | **`4d3b264`** push ✅ |
-| **User 실기** | §7.69 **⬜** (점주 거절·완료 이력 · 마이 › 알림 · 주문 deep link) |
+| **한 줄 요약** | **§7.70 홈 🔔 + 마이 탭 뱃지 ✅** · User实기 ⬜ · 다음 = **AD-078 소셜 로그인** |
+| **Git 상태** | commit/push 후 갱신 |
+| **User 실기** | §7.70 **⬜** (홈 우측 알림 · 하단 마이 뱃지) |
 | **다음 에이전트 1순위** | ① **AD-078 소셜 로그인** |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
@@ -870,22 +871,21 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — **§7.69 점주 반품 이력 + 손님 알림 탭** · User实기 **⬜**
+**최신** — **§7.70 홈 🔔 + 마이 탭 뱃지** · User实기 **⬜**
 
 | | |
 |---|---|
 | **다음 우선 (에이전트)** | ① **AD-078 소셜 로그인** (§33.1) |
-| **손님 알림·주문 UX** | §7.69 push · **User实기 ⬜** |
-| **점주 반품 이력** | §7.69 · **처리 대기 / 거절·완료** |
-| **상세** | **§7.69** (최신) · §7.68 |
+| **손님 알림 UX** | §7.70 · **User实기 ⬜** |
+| **상세** | **§7.70** (최신) · §7.69 |
 
-#### Expo 재시작 여부 (최신 §7.69)
+#### Expo 재시작 여부 (최신 §7.70)
 
 | | |
 |---|---|
-| **수정** | `apps/web` + `apps/mobile` (마이 › **알림** 라우트 신규) |
-| **Expo(Metro) 재시작** | ⚠️ **권장** — `me/notifications` **신규 화면** · Metro **켜져 있으면 앱에서 한 번 뒤로→마이 재진입** 또는 **`r` 리로드** · **꺼져 있을 때만** §0 4줄 |
-| **User** | Vercel **1~2min** · WebView **Ctrl+F5** · **`demo@shopper.com`** |
+| **수정** | `apps/mobile` only |
+| **Expo(Metro) 재시작** | ❌ **불필요** — Metro 켜져 있으면 **`r` 리로드** |
+| **User** | **홈** 우측 🔔 · **마이** 탭 숫자 뱃지 |
 
 #### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
 
@@ -913,17 +913,13 @@ npx expo start --tunnel --port 8082 --clear
 ```
 
 5) **손님** `demo@shopper.com` / `demo`
-   - **마이 › 알림** — 목록 · 안 읽음 강조 · **전체 읽음**
-   - 알림 탭 → **해당 주문 상세** 시트 열림
-   - **마이 › 주문내역** — §7.68 (거절 뱃지 · 필터 · 행 탭)
+   - **홈 우측 상단 🔔** — 미읽음 숫자 · 탭 → 알림 목록
+   - **하단 마이 탭** — 미읽음 있으면 **숫자 뱃지** (장바구니와 동일)
+   - 알림 탭 → 주문 상세 (§7.69)
 
-6) **점주** demo owner → **반품·교환·문의 › 반품·교환 신청**
-   - **처리 대기** / **거절·완료** 칩
-   - 다른 탭 「연결된 처리」→ 거절 건 → **거절·완료** 탭에 카드 표시
-
-7) **합격**
-   - ✅ 알림 ↔ 주문번호 · 주문 deep link
-   - ✅ 점주 거절·완료 반품 **이력 조회**
+6) **합격**
+   - ✅ 앱 켜자마자 **홈에서 알림** 보임 (마이 안 들어가도 됨)
+   - ✅ 마이 탭에서도 **미읽음** 확인 가능
 
 #### 사용자가 지금 해야 할 것 (과거 — §7.66)
 
@@ -1358,6 +1354,52 @@ npx expo start --tunnel --port 8082 --clear
 #### 다음
 
 **AD-073 R2** — §7.59
+
+---
+
+### 7.70 세션 인수인계 — **2026-09-01** (홈 알림 종 · 마이 탭 뱃지 — 쿠팡형 접근성)
+
+| | |
+|---|---|
+| **Scope** | User — 알림이 **마이 안에만** 있어 접근성 ↓ → **쿠팡처럼 홈 우측 🔔** |
+| **홈** | `ShopperNotificationBell` — 헤더 우측 · 미읽음 뱃지 · `/me/notifications` |
+| **하단 탭** | `ShopperBottomNav` — **마이** 탭에 미읽음 숫자 (장바구니와 동일 패턴) |
+| **공통** | `useShopperNotificationBadge` · Realtime `order_notifications` |
+| **AD** | AD-076 후속 · §60 쿠팡형 |
+| **Git** | commit/push 후 hash 갱신 |
+
+#### Expo 재시작 여부 — **mobile-only** ❌
+
+| | |
+|---|---|
+| **수정** | `apps/mobile` only |
+| **Expo** | ❌ **`r` 리로드**면 충분 |
+| **User** | 홈 🔔 · 마이 탭 뱃지 |
+
+#### User实기 (§0 — **cmd 블록 생략 금지**)
+
+0) **앱 실기** — Metro **켜져 있으면 2) 생략** · **꺼져 있을 때만** §0 Expo 4줄
+
+1) **Win → `cmd` → Enter**
+
+2) **Expo 4줄** — Metro **꺼져 있을 때만**:
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+3) `demo@shopper.com` / `demo` → **홈** 우측 🔔 · **마이** 탭 뱃지
+
+4) **합격**
+   - ✅ 홈에서 **1탭**으로 알림 목록
+   - ⬜ User实기
+
+#### 다음
+
+**AD-078** 소셜 로그인
 
 ---
 
@@ -3096,6 +3138,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-09-01 — Home notification bell + My tab unread badge (Coupang-style)
+- **Author:** Cursor Agent
+- **Changed:** `ShopperNotificationBell` · `home.tsx` · `ShopperBottomNav` · §7.70
+- **Notes:** **Expo ❌** (`r` 리로드) · User实기 ⬜
 
 ### 2026-09-01 — Owner return history filter + shopper notifications tab (AD-076)
 - **Author:** Cursor Agent

@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { StoreSummary } from '../../src/types/domain';
+import { ShopperNotificationBell } from '../../src/components/ShopperNotificationBell';
 import { StoreEnterModal } from '../../src/components/StoreEnterModal';
 import { StoreMallCard } from '../../src/components/StoreMallCard';
 import { useAuth } from '../../src/context/AuthContext';
@@ -40,6 +41,13 @@ export default function HomeScreen() {
         safe: { flex: 1, backgroundColor: colors.bg },
         flex: { flex: 1 },
         header: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 12, backgroundColor: colors.bgCard },
+        headerTopRow: {
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 8,
+        },
+        headerBrandBlock: { flex: 1, minWidth: 0 },
         brandTitle: {
           fontSize: 20,
           fontWeight: '800',
@@ -133,8 +141,13 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.flex}>
         <View style={styles.header}>
-          <Text style={styles.brandTitle}>{t.home.title}</Text>
-          <Text style={styles.tagline}>{t.home.tagline}</Text>
+          <View style={styles.headerTopRow}>
+            <View style={styles.headerBrandBlock}>
+              <Text style={styles.brandTitle}>{t.home.title}</Text>
+              <Text style={styles.tagline}>{t.home.tagline}</Text>
+            </View>
+            <ShopperNotificationBell />
+          </View>
           <View style={styles.searchWrap}>
             <Text style={styles.searchIcon} accessibilityElementsHidden>
               🔍

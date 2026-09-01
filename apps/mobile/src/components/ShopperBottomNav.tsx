@@ -2,8 +2,10 @@ import { useRouter, type Href } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuth } from '../context/AuthContext';
 import { useCartCount } from '../context/CartCountContext';
 import { useTheme } from '../context/ThemeContext';
+import { useShopperNotificationBadge } from '../hooks/useShopperNotificationBadge';
 import { t } from '../i18n/ko';
 
 export type ShopperTab = 'home' | 'me' | 'cart';
@@ -24,6 +26,8 @@ export function ShopperBottomNav({
 }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { userId } = useAuth();
+  const unreadNotifications = useShopperNotificationBadge(userId);
   const { count: cartCount } = useCartCount();
   const { colors } = useTheme();
 
@@ -95,6 +99,10 @@ export function ShopperBottomNav({
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 6) }]}>
       {TABS.map((tab) => {
         const isActive = active === tab.id;
+        const showCartBadge = tab.id === 'cart' && cartCount > 0;
+        const showMeBadge = tab.id === 'me' && unreadNotifications > 0;
+        const badgeCount = tab.id === 'cart' ? cartCount : unreadNotifications;
+        const showBadge = showCartBadge || showMeBadge;
         return (
           <Pressable
             key={tab.id}
@@ -113,9 +121,9 @@ export function ShopperBottomNav({
             {isActive && <View style={styles.activeIndicator} />}
             <View style={styles.iconWrap}>
               <Text style={styles.icon}>{tab.icon}</Text>
-              {tab.id === 'cart' && cartCount > 0 && (
+              {showBadge && (
                 <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{cartCount > 99 ? '99+' : cartCount}</Text>
+                  <Text style={styles.badgeText}>{badgeCount > 99 ? '99+' : badgeCount}</Text>
                 </View>
               )}
             </View>
