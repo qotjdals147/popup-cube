@@ -53,6 +53,7 @@ export function StoreEditPage() {
   const [ownershipChecked, setOwnershipChecked] = useState(false);
   const [ownsStore, setOwnsStore] = useState(false);
   const [returnsSubTab, setReturnsSubTab] = useState<'requests' | 'claims'>('requests');
+  const [returnsListFilter, setReturnsListFilter] = useState<'active' | 'history'>('active');
   const [focusOrder, setFocusOrder] = useState<OwnerOrderFocus | null>(null);
 
   const navigateOwnerRelated = useCallback((target: OwnerNavigateTarget) => {
@@ -70,10 +71,14 @@ export function StoreEditPage() {
         dateTo: target.dateTo,
         focusKey: target.focusKey,
         openClaimHistory: target.openClaimHistory,
+        returnsListFilter: target.returnsListFilter,
       });
     }
     if (target.tab === 'returns') {
       setReturnsSubTab(target.returnsSubTab ?? 'requests');
+      if (target.returnsListFilter) {
+        setReturnsListFilter(target.returnsListFilter);
+      }
       setTab('returns');
       return;
     }
@@ -572,6 +577,8 @@ export function StoreEditPage() {
               refreshTick={refreshTick}
               subTab={returnsSubTab}
               onSubTabChange={setReturnsSubTab}
+              returnsListFilter={returnsListFilter}
+              onReturnsListFilterChange={setReturnsListFilter}
               onNavigateRelated={navigateOwnerRelated}
               focusOrder={focusOrder}
               onFocusClear={clearFocusOrder}

@@ -4,20 +4,22 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../../src/context/AuthContext';
 import { useTheme } from '../../../src/context/ThemeContext';
+import { useShopperNotificationBadge } from '../../../src/hooks/useShopperNotificationBadge';
 import { t } from '../../../src/i18n/ko';
 import { useRestoreSystemChromeOnFocus } from '../../../src/hooks/useWorldImmersiveChrome';
 
 const QUICK_ACTIONS = [
   { id: 'orders', icon: '📦', labelKey: 'orders' as const, href: '/me/orders' as const, enabled: true },
+  { id: 'notifications', icon: '🔔', labelKey: 'notifications' as const, href: '/me/notifications' as const, enabled: true },
   { id: 'addresses', icon: '📍', labelKey: 'addresses' as const, href: '/me/addresses' as const, enabled: true },
-  { id: 'wishlist', icon: '♡', labelKey: 'wishlist' as const, enabled: false },
   { id: 'recent', icon: '👁', labelKey: 'recent' as const, enabled: false },
-];
+] as const;
 
 /** §60 4-B — 쿠팡형 「마이」 허브 (네이티브 · WebView는 주문/배송지 화면에서만) */
 export default function MeHubScreen() {
   const router = useRouter();
   const { userId, email, nickname, loading: authLoading } = useAuth();
+  const unreadNotifications = useShopperNotificationBadge(userId);
   const { colors, isDark } = useTheme();
   useRestoreSystemChromeOnFocus();
 
@@ -80,11 +82,25 @@ export default function MeHubScreen() {
           alignItems: 'center',
           paddingVertical: 6,
           minHeight: 72,
+          position: 'relative',
         },
         quickItemDisabled: { opacity: 0.45 },
         quickIcon: { fontSize: 22, marginBottom: 6 },
         quickLabel: { fontSize: 11, fontWeight: '600', color: colors.text, textAlign: 'center' },
         quickLabelDisabled: { color: colors.textMuted },
+        quickBadge: {
+          position: 'absolute',
+          top: 0,
+          right: '18%',
+          minWidth: 18,
+          height: 18,
+          borderRadius: 9,
+          paddingHorizontal: 4,
+          backgroundColor: '#e94560',
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        quickBadgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
         comingSoon: { fontSize: 9, color: colors.textMuted, marginTop: 2 },
         ordersSection: { paddingTop: 16, paddingHorizontal: 14 },
         sectionHeader: {
@@ -166,24 +182,33 @@ export default function MeHubScreen() {
         </View>
 
         <View style={styles.quickGrid}>
-          {QUICK_ACTIONS.map((action) => (
+          {QUICK_ACTIONS.map((action) => {
+            const showBadge = action.id === 'notifications' && unreadNotifications > 0;
+            const badgeLabel = unreadNotifications > 99 ? '99+' : String(unreadNotifications);
+            return (
             <Pressable
               key={action.id}
               style={[styles.quickItem, !action.enabled && styles.quickItemDisabled]}
               disabled={!action.enabled}
               onPress={() => {
-                if (action.enabled && action.href) {
+                if (action.enabled && 'href' in action && action.href) {
                   router.push(action.href as Href);
                 }
               }}
             >
               <Text style={styles.quickIcon}>{action.icon}</Text>
+              {showBadge && (
+                <View style={styles.quickBadge}>
+                  <Text style={styles.quickBadgeText}>{badgeLabel}</Text>
+                </View>
+              )}
               <Text style={[styles.quickLabel, !action.enabled && styles.quickLabelDisabled]}>
                 {t.me.quick[action.labelKey]}
               </Text>
               {!action.enabled && <Text style={styles.comingSoon}>{t.me.comingSoon}</Text>}
             </Pressable>
-          ))}
+          );
+          })}
         </View>
 
         <View style={styles.ordersSection}>

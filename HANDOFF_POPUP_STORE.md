@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.68` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.69` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -541,7 +541,7 @@ npm run dev
 | AD-073 | **(설계 · User 2026-08-27) 반품·교환 v2 로드맵** — 지금 = **반품지·안내 + 클레임 v1** · v2 = **전용 탭·구조화 신청·입고·환불** · **문의 = AD-077 유지·병행** · §7.48~§7.49 · §7.52 | User 2026-08-27 | 2026-08-27 |
 | AD-074 | **(확정 · User 2026-08-27) 반품 정책·가챠 반납·판매자센터 확장** — **단순변심 = 점주 설정(ON/OFF·기간)** · **교환+반품 둘 다** · **가챠 반납 3상태**(반납 완료/예정/불가) · §7.49 · §53.9 | User 2026-08-27 | 2026-08-27 |
 | AD-075 | **(확정 · User 2026-08-27) 기능 구현 연관점 필수** — 주문번호·알림·재고·RPC·양쪽 UI·뱃지 등 **한 기능 = 연쇄 갱신** · 에이전트 **§62 체크리스트** 매번 · §0 | User 2026-08-27 | 2026-08-27 |
-| AD-076 | **(부분 ✅ · User 2026-08-28) 손님 알림 탭 + 반품지** — **반품지 ✅** `store_return_addresses` · `OwnerReturnAddressPanel` · AddressSearch · **알림 탭 UI ⬜** · §7.58~§7.59 | User 2026-08-27 | 2026-08-27 |
+| AD-076 | **(✅ · User 2026-08-28) 손님 알림 탭 + 반품지** — **반품지 ✅** · **알림 탭 UI ✅** §7.69 | User 2026-08-27 | 2026-09-01 |
 | AD-077 | **(구현 ✅ · User实기 ✅ 2026-08-27) 문의 유지 + 이력·타임스탬프** — **「문의하기」유지** · **2회차+「문의 전체 기록」** · **접수·답변 시각 필수** · R2 **반품 신청 별도** · §7.52~§7.54 | User 2026-08-27 | 2026-08-27 |
 | AD-078 | **(계획 · User 2026-08-27) 소셜 로그인** — **카카오 · 네이버 · 구글** (+ iOS **Apple** if other social) · **Supabase Auth OAuth** · 손님 **앱 로그인** 우선 · **로그인 API 무료**(과금 ❌) · **AD-034 자동 로그인**과 함께 · §33.1 · §7.57 | User 2026-08-27 | 2026-08-27 |
 | AD-062 | **(확정) v1 = 팝업 쇼핑몰 런칭 · 픽셀 월드 v2 보존** — CEO(mr심) 2026-08-13: Google 실물=PG 확정 · 월드+PG UX 이질감 · **에이블리/룩핀형 쇼핑몰**로 v1 출시. **코드 삭제 금지** — `/play`·Phaser·WebView·fixture·socket = **`legacy/world-v1` 보관** · 손님 **기본 진입 = 상품 쇼핑**(ShopPanel·ProductDetailModal·CartDrawer). v2/이벤트 = **2D 픽셀 재활용 또는 그래픽 업grade(영상·360 등) 별도 판단**. 상세 **§57** | User·CEO 2026-08-13 | 2026-08-13 |
@@ -619,7 +619,8 @@ npm run dev
 - [x] **블록 추가 시 스크롤 튐 (2026-08-12g, ISS-035)** — `OwnerProductPanel.reload()` fix · **⬜ commit/push**
 - [x] **§7.66 R2 UX polish (2026-09-01)** — 신규 상품 **재고** · 구매확정 **배송완료 후** · 날짜 **오픈일~오늘** · 반품 **카드 UI** · 사진 첨부 · `useShopperOrderRealtime` · migration `20260901_return_evidence_urls.sql` · User实기 **✅** · git **`ffa614f`**
 - [x] **§7.67 손님 주문내역 쿠팡형 (2026-09-01)** — `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · 날짜 묶음 · User实기 **⬜**
-- [x] **§7.68 손님 주문내역 에이블리형 + 반품 거절 찾기 (2026-09-01)** — 행 탭 · `›` · 필터 칩 · 거절/완료 뱃지 · 아코디언 상세 · User实기 **⬜**
+- [x] **§7.68 손님 주문내역 에이블리형 + 반품 거절 찾기 (2026-09-01)** — 행 탭 · 필터 · 아코디언 · User实기 **⬜**
+- [x] **§7.69 점주 반품 이력 + 손님 알림 탭 AD-076 (2026-09-01)** — `OwnerReturnsPanel` 이력 · `NotificationsPanel` · RPC · User实기 **⬜**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -754,18 +755,18 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§7.68 에이블리형 주문내역 + 반품 거절 찾기 ✅** · User实기 ⬜ · 다음 = **AD-076 알림 탭** |
-| **Git 상태** | **`65b29f7`** push ✅ |
-| **User 실기** | §7.68 **⬜** (반품 거절 뱃지 · 필터 · 행 탭 · 아코디언 상세) |
-| **다음 에이전트 1순위** | ① **AD-076 알림 탭** |
+| **한 줄 요약** | **§7.69 점주 반품 이력 + 손님 알림 탭 AD-076 ✅** · User实기 ⬜ · 다음 = **AD-078 소셜 로그인** |
+| **Git 상태** | commit/push 후 갱신 |
+| **User 실기** | §7.69 **⬜** (점주 거절·완료 이력 · 마이 › 알림 · 주문 deep link) |
+| **다음 에이전트 1순위** | ① **AD-078 소셜 로그인** |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
 
 | 순 | 작업 | AD | 비고 |
 |---|---|---|---|
-| **1** | 손님 **알림 탭** + deep link | AD-076 | §7.50 |
-| **2** | **소셜 로그인** | AD-078 | PG 전 · §33.1 |
-| **3** | R3~R4 · **PG** | AD-061 | 게이트 |
+| **1** | **소셜 로그인** | AD-078 | PG 전 · §33.1 |
+| **2** | R3~R4 · **PG** | AD-061 | 게이트 |
+| ~~**1**~~ | ~~**알림 탭**~~ | AD-076 | ✅ **§7.69** |
 | ~~**1**~~ | ~~**R2**~~ | AD-073 | ✅ **§7.60** |
 | ~~**1**~~ | ~~**store_return_addresses**~~ | AD-076 | ✅ **§7.58** |
 | ~~**1**~~ | ~~**AddressSearch**~~ | AD-076 | ✅ **§7.55** |
@@ -869,22 +870,22 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — **§7.68 에이블리형 주문내역 + 반품 거절 찾기** · User实기 **⬜**
+**최신** — **§7.69 점주 반품 이력 + 손님 알림 탭** · User实기 **⬜**
 
 | | |
 |---|---|
-| **다음 우선 (에이전트)** | ① **AD-076 손님 알림 탭** + deep link (§7.50) |
-| **손님 구매내역 UX** | §7.68 push · **User实기 ⬜** |
-| **점주 R2 UX** | ✅ §7.60~§7.66 |
-| **상세** | **§7.68** (최신) · §7.67 |
+| **다음 우선 (에이전트)** | ① **AD-078 소셜 로그인** (§33.1) |
+| **손님 알림·주문 UX** | §7.69 push · **User实기 ⬜** |
+| **점주 반품 이력** | §7.69 · **처리 대기 / 거절·완료** |
+| **상세** | **§7.69** (최신) · §7.68 |
 
-#### Expo 재시작 여부 (최신 §7.68 — **web-only**)
+#### Expo 재시작 여부 (최신 §7.69)
 
 | | |
 |---|---|
-| **수정** | `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · `ShopperOrderCardLight` · `ShopperAccordionSection` · `shopperOrderListFilters` · `OrderHistoryPanel` · CSS · i18n |
-| **Expo(Metro) 재시작** | ❌ **불필요** — **Ctrl+C / `--clear` 하지 말 것** |
-| **User** | **`main` push** → Vercel **1~2min** → **`demo@shopper.com`** · 마이 › 구매 내역 · **Ctrl+F5** |
+| **수정** | `apps/web` + `apps/mobile` (마이 › **알림** 라우트 신규) |
+| **Expo(Metro) 재시작** | ⚠️ **권장** — `me/notifications` **신규 화면** · Metro **켜져 있으면 앱에서 한 번 뒤로→마이 재진입** 또는 **`r` 리로드** · **꺼져 있을 때만** §0 4줄 |
+| **User** | Vercel **1~2min** · WebView **Ctrl+F5** · **`demo@shopper.com`** |
 
 #### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
 
@@ -911,16 +912,18 @@ cd apps\mobile
 npx expo start --tunnel --port 8082 --clear
 ```
 
-5) **손님** `demo@shopper.com` / `demo` → **마이 › 구매 내역**
-   - 목록 **행 전체 탭** + **`›`** → 상세 시트
-   - 상단 필터: **전체** · **반품·교환** · **문의**
-   - 반품 **거절** 건 = **`반품·교환 거절`** 빨간 뱃지 + **왼쪽 빨간 줄**
-   - 상세 = **아코디언** (주문상품 · 배송 · 결제 · 문의·반품·교환 · 매장 안내)
+5) **손님** `demo@shopper.com` / `demo`
+   - **마이 › 알림** — 목록 · 안 읽음 강조 · **전체 읽음**
+   - 알림 탭 → **해당 주문 상세** 시트 열림
+   - **마이 › 주문내역** — §7.68 (거절 뱃지 · 필터 · 행 탭)
 
-6) **합격**
-   - ✅ **상세 열기 전에** 거절/신청/완료 건 구분 가능
-   - ✅ 필터 **반품·교환**만 보면 해당 주문만
-   - ✅ 상세에서 거절 건 **문의·반품·교환** 섹션 **펼쳐진 상태**
+6) **점주** demo owner → **반품·교환·문의 › 반품·교환 신청**
+   - **처리 대기** / **거절·완료** 칩
+   - 다른 탭 「연결된 처리」→ 거절 건 → **거절·완료** 탭에 카드 표시
+
+7) **합격**
+   - ✅ 알림 ↔ 주문번호 · 주문 deep link
+   - ✅ 점주 거절·완료 반품 **이력 조회**
 
 #### 사용자가 지금 해야 할 것 (과거 — §7.66)
 
@@ -1355,6 +1358,63 @@ npx expo start --tunnel --port 8082 --clear
 #### 다음
 
 **AD-073 R2** — §7.59
+
+---
+
+### 7.69 세션 인수인계 — **2026-09-01** (점주 반품 이력 · 손님 알림 탭 AD-076)
+
+| | |
+|---|---|
+| **Scope** | User — ① 점주 **거절·완료 반품** 이력 ② **손님 알림 탭** (§7.50) |
+| **점주** | `OwnerReturnsPanel` — **처리 대기** / **거절·완료** 칩 · `OwnerOrderRelatedLinks` → 이력 탭 자동 전환 |
+| **손님 알림** | `NotificationsPanel` · `list_my_notifications` RPC · 읽음/전체읽음 · Realtime |
+| **앱 IA** | 마이 허브 **🔔 알림** · `me/notifications` → WebView `tab=notifications` · unread 뱃지 |
+| **Deep link** | 알림 탭 → `order_id` → 주문내역 **상세 시트** (`initialOrderId`) |
+| **DB** | `20260901_shopper_notifications_ad076.sql` · POPUP **✅** |
+| **AD** | AD-076 알림 탭 ✅ · AD-073 R2 이력 보완 |
+| **Git** | commit/push 후 hash 갱신 |
+
+#### Expo 재시작 여부
+
+| | |
+|---|---|
+| **수정** | `apps/web` + `apps/mobile/me/notifications` |
+| **Expo** | ⚠️ **신규 라우트** — Metro 켜져 있으면 **`r` 리로드** 또는 마이 재진입 · **꺼져 있을 때만** §0 4줄 |
+| **User** | Vercel **1~2min** · WebView 새로고침 |
+
+#### User实기 (§0 — **cmd 블록 생략 금지**)
+
+0) **PC 웹만**이면 2)부터 · 앱 실기면 4)까지
+
+1) **Win → `cmd` → Enter**
+
+2) **PC 3줄 — 한 줄씩:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) 점주 **반품·교환·문의** › **거절·완료** · 손님 **마이 › 알림**
+
+4) **Expo 4줄** — Metro **꺼져 있을 때만**:
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+5) **합격**
+   - ✅ 점주 거절·완료 반품 **이력**에서 카드 보임
+   - ✅ 손님 알림 목록 · 탭 → 주문 상세
+   - ⬜ User实기
+
+#### 다음
+
+**AD-078** 소셜 로그인 (권장 순서)
 
 ---
 
@@ -3036,6 +3096,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-09-01 — Owner return history filter + shopper notifications tab (AD-076)
+- **Author:** Cursor Agent
+- **Changed:** `OwnerReturnsPanel` · `NotificationsPanel` · `ShopperAccountPage` · mobile `me/notifications` · migration `20260901_shopper_notifications_ad076.sql` · §7.69
+- **Notes:** POPUP RPC **✅** · 알림→주문 deep link · **Expo ⚠️ 신규 라우트** · User实기 ⬜
 
 ### 2026-09-01 — Shopper order history Ably-style UX + return-rejected findability
 - **Author:** Cursor Agent

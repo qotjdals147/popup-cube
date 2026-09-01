@@ -29,13 +29,15 @@ interface OrderHistoryPanelProps {
   embedded?: boolean;
   /** AD-065 — `/app/me` 라이트 */
   appearance?: 'light' | 'dark';
+  /** AD-076 — 알림 탭 등에서 주문 상세 바로 열기 */
+  initialOrderId?: string | null;
 }
 
 /**
  * 손님 「내 주문」 (AD-054) — 로그인한 손님이 여러 매장에서 주문한 내역을 모두 모아 보여줌.
  * 배송 완료 이후 「구매확정」을 직접 누르거나, 누르지 않으면 주문일+7일 후 자동 확정됨.
  */
-export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dark' }: OrderHistoryPanelProps) {
+export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dark', initialOrderId = null }: OrderHistoryPanelProps) {
   const { userId } = useAuth();
   const { refreshTick, bumpRefresh } = useShopperOrderRealtime(userId);
   /** 앱 `/app/me` WebView — CSS 변수(`--acct-*`) · 라이트·다크 모두 차콜/화이트 토큰 */
@@ -76,6 +78,12 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
   useEffect(() => {
     void reload();
   }, [reload, refreshTick]);
+
+  useEffect(() => {
+    if (!initialOrderId || loading) return;
+    const found = orders.some((o) => o.id === initialOrderId);
+    if (found) setDetailOrderId(initialOrderId);
+  }, [initialOrderId, loading, orders]);
 
   async function handleConfirmPurchase(orderId: string) {
     if (!window.confirm(t('myOrders.confirmPurchaseConfirm'))) return;

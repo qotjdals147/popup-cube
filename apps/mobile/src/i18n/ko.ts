@@ -92,6 +92,7 @@ export const t = {
     comingSoon: '준비중',
     quick: {
       orders: '주문내역',
+      notifications: '알림',
       addresses: '배송지',
       wishlist: '찜',
       recent: '최근본',

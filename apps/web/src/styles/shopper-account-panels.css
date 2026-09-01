@@ -1907,3 +1907,87 @@
   line-height: 1;
   cursor: pointer;
 }
+
+/* AD-076 — 손님 알림 목록 */
+.shopper-account-main .oh-notifications-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.shopper-account-main .oh-notifications-mark-all {
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #e5e8eb;
+  background: var(--acct-surface, #fff);
+  color: var(--acct-text-secondary, #4e5968);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shopper-account-main .oh-notification-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shopper-account-main .oh-notification-row {
+  width: 100%;
+  text-align: left;
+  border: 1.5px solid #e5e8eb;
+  border-radius: 12px;
+  background: var(--acct-surface, #fff);
+  padding: 12px 14px;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.shopper-account-main .oh-notification-row--unread {
+  border-left: 4px solid #3182f6;
+  background: #f8fbff;
+}
+
+.shopper-account-main .oh-notification-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.shopper-account-main .oh-notification-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--acct-text);
+  flex: 1;
+  min-width: 0;
+}
+
+.shopper-account-main .oh-notification-time {
+  font-size: 12px;
+  color: var(--acct-muted, #868e96);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.shopper-account-main .oh-notification-body {
+  margin: 0 0 6px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--acct-text-secondary, #4e5968);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.shopper-account-main .oh-notification-order-ref {
+  font-size: 12px;
+  font-weight: 700;
+  color: #b45309;
+}

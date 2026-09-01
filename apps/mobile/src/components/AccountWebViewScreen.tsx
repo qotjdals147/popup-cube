@@ -10,9 +10,10 @@ import { t } from '../i18n/ko';
 interface AccountWebViewScreenProps {
   tab: AccountWebTab;
   embed?: AccountWebEmbed;
+  orderId?: string;
 }
 
-export function AccountWebViewScreen({ tab, embed = 'page' }: AccountWebViewScreenProps) {
+export function AccountWebViewScreen({ tab, embed = 'page', orderId }: AccountWebViewScreenProps) {
   const router = useRouter();
   const { colors, mode } = useTheme();
   const [ready, setReady] = useState(false);
@@ -26,7 +27,7 @@ export function AccountWebViewScreen({ tab, embed = 'page' }: AccountWebViewScre
     setWebError(null);
     setWebLoaded(false);
 
-    buildAccountWebViewUrl(tab, embed, mode)
+    buildAccountWebViewUrl(tab, embed, mode, orderId)
       .then((url) => {
         if (!active) return;
         if (!url) {
@@ -46,7 +47,7 @@ export function AccountWebViewScreen({ tab, embed = 'page' }: AccountWebViewScre
     return () => {
       active = false;
     };
-  }, [tab, embed, mode]);
+  }, [tab, embed, mode, orderId]);
 
   const backgroundInject = useMemo(() => buildWebViewBackgroundInject(mode), [mode]);
 
@@ -86,9 +87,13 @@ export function AccountWebViewScreen({ tab, embed = 'page' }: AccountWebViewScre
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
       try {
-        const msg = JSON.parse(event.nativeEvent.data) as { type?: string };
+        const msg = JSON.parse(event.nativeEvent.data) as { type?: string; orderId?: string };
         if (msg.type === 'navigate_home') {
           router.replace('/home');
+          return;
+        }
+        if (msg.type === 'navigate_order' && msg.orderId) {
+          router.push({ pathname: '/me/orders', params: { orderId: msg.orderId } });
         }
       } catch {
         // ignore

@@ -359,6 +359,19 @@ export interface ShopperOrderView extends Order {
   gacha_prize_image_url: string | null;
 }
 
+/** AD-076 — 손님 알림 목록 (`list_my_notifications`) */
+export interface ShopperNotificationView {
+  id: string;
+  order_id: string | null;
+  event_type: string;
+  title: string;
+  body: string;
+  read_at: string | null;
+  created_at: string;
+  store_code: string | null;
+  order_number: number | null;
+}
+
 /** AD-073 R2 — 반품·교환 신청 1건 상세 */
 export interface OrderReturnDetail {
   return_id: string;

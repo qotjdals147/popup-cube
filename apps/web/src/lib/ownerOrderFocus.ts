@@ -7,4 +7,8 @@ export type OwnerOrderFocus = {
   /** 동일 orderId 재적용 방지 */
   focusKey: string;
   openClaimHistory?: boolean;
+  /** 반품·교환 탭 — 거절·완료 이력 보기 */
+  returnsListFilter?: OwnerReturnListFilter;
 };
+
+export type OwnerReturnListFilter = 'active' | 'history';

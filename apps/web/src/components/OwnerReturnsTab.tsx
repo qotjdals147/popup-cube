@@ -3,7 +3,7 @@ import { OwnerOrdersPanel } from './OwnerOrdersPanel';
 import { OwnerReturnsPanel } from './OwnerReturnsPanel';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import type { OwnerNavigateTarget } from './OwnerOrderRelatedLinks';
-import type { OwnerOrderFocus } from '../lib/ownerOrderFocus';
+import type { OwnerOrderFocus, OwnerReturnListFilter } from '../lib/ownerOrderFocus';
 import { t } from '../i18n';
 
 interface OwnerReturnsTabProps {
@@ -11,6 +11,8 @@ interface OwnerReturnsTabProps {
   refreshTick?: number;
   subTab?: ReturnsSubTab;
   onSubTabChange?: (tab: ReturnsSubTab) => void;
+  returnsListFilter?: OwnerReturnListFilter;
+  onReturnsListFilterChange?: (filter: OwnerReturnListFilter) => void;
   onNavigateRelated?: (target: OwnerNavigateTarget) => void;
   focusOrder?: OwnerOrderFocus | null;
   onFocusClear?: () => void;
@@ -25,17 +27,26 @@ export function OwnerReturnsTab({
   refreshTick = 0,
   subTab: controlledSubTab,
   onSubTabChange,
+  returnsListFilter: controlledReturnsFilter,
+  onReturnsListFilterChange,
   onNavigateRelated,
   focusOrder = null,
   onFocusClear,
   storeOpenDate = null,
 }: OwnerReturnsTabProps) {
   const [internalSubTab, setInternalSubTab] = useState<ReturnsSubTab>('requests');
+  const [internalReturnsFilter, setInternalReturnsFilter] = useState<OwnerReturnListFilter>('active');
   const subTab = controlledSubTab ?? internalSubTab;
+  const returnsListFilter = controlledReturnsFilter ?? internalReturnsFilter;
 
   function setSubTab(next: ReturnsSubTab) {
     if (onSubTabChange) onSubTabChange(next);
     else setInternalSubTab(next);
+  }
+
+  function setReturnsListFilter(next: OwnerReturnListFilter) {
+    if (onReturnsListFilterChange) onReturnsListFilterChange(next);
+    else setInternalReturnsFilter(next);
   }
 
   return (
@@ -65,6 +76,8 @@ export function OwnerReturnsTab({
           <OwnerReturnsPanel
             storeId={storeId}
             refreshTick={refreshTick}
+            listFilter={returnsListFilter}
+            onListFilterChange={setReturnsListFilter}
             onNavigateRelated={onNavigateRelated}
             focusOrder={focusOrder}
             onFocusClear={onFocusClear}

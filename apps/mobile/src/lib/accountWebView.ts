@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import { getSupabase } from './supabase';
 
-export type AccountWebTab = 'orders' | 'addresses';
+export type AccountWebTab = 'orders' | 'addresses' | 'notifications';
 export type AccountWebEmbed = 'panel' | 'page';
 
 function readWebOrigin(): string {
@@ -18,6 +18,7 @@ export async function buildAccountWebViewUrl(
   tab: AccountWebTab,
   embed: AccountWebEmbed = 'page',
   theme: 'light' | 'dark' = 'light',
+  orderId?: string | null,
 ): Promise<string | null> {
   const { data, error } = await getSupabase().auth.getSession();
   if (error || !data.session) return null;
@@ -27,11 +28,12 @@ export async function buildAccountWebViewUrl(
     theme,
     tab,
     embed,
-  }).toString();
+  });
+  if (orderId) query.set('orderId', orderId);
   const hash = new URLSearchParams({
     access_token: data.session.access_token,
     refresh_token: data.session.refresh_token,
   }).toString();
 
-  return `${origin}/app/me?${query}#${hash}`;
+  return `${origin}/app/me?${query.toString()}#${hash}`;
 }

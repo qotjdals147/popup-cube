@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { AddressManagementPanel } from '../components/AddressManagementPanel';
+import { NotificationsPanel } from '../components/NotificationsPanel';
 import { OrderHistoryPanel } from '../components/OrderHistoryPanel';
 import { supabase } from '../lib/supabase';
 import { useShopperThemeMode } from '../lib/shopperThemeMode';
@@ -34,11 +35,17 @@ function postToApp(type: string) {
   window.ReactNativeWebView?.postMessage(JSON.stringify({ type }));
 }
 
-type AccountTab = 'orders' | 'addresses';
+type AccountTab = 'orders' | 'addresses' | 'notifications';
 
 function readTabFromSearch(): AccountTab {
   const raw = new URLSearchParams(window.location.search).get('tab');
-  return raw === 'addresses' ? 'addresses' : 'orders';
+  if (raw === 'addresses') return 'addresses';
+  if (raw === 'notifications') return 'notifications';
+  return 'orders';
+}
+
+function readOrderIdFromSearch(): string | null {
+  return new URLSearchParams(window.location.search).get('orderId');
 }
 
 function readEmbedFromSearch(): 'panel' | 'page' | null {
@@ -52,6 +59,7 @@ export function ShopperAccountPage() {
   const { userId, nickname, email, loading: authLoading } = useAuth();
   const [bootstrapping, setBootstrapping] = useState(true);
   const [tab, setTab] = useState<AccountTab>(() => readTabFromSearch());
+  const [openOrderId, setOpenOrderId] = useState<string | null>(() => readOrderIdFromSearch());
   const theme = useShopperThemeMode();
   const embed = useMemo(() => readEmbedFromSearch(), []);
 
@@ -101,8 +109,11 @@ export function ShopperAccountPage() {
     return (
       <div className="shopper-account-page shopper-account-page--embed-panel" data-theme={theme}>
         <main className="shopper-account-main">
-          {tab === 'orders' && <OrderHistoryPanel embedded appearance={theme} />}
+          {tab === 'orders' && (
+            <OrderHistoryPanel embedded appearance={theme} initialOrderId={openOrderId} />
+          )}
           {tab === 'addresses' && <AddressManagementPanel appearance={theme} embedded />}
+          {tab === 'notifications' && <NotificationsPanel embedded appearance={theme} />}
         </main>
       </div>
     );
@@ -137,11 +148,21 @@ export function ShopperAccountPage() {
         >
           {t('shopperAccount.tabAddresses')}
         </button>
+        <button
+          type="button"
+          className={`shopper-account-tab shopper-account-tab--notifications${tab === 'notifications' ? ' shopper-account-tab-active' : ''}`}
+          onClick={() => setTab('notifications')}
+        >
+          {t('shopperAccount.tabNotifications')}
+        </button>
       </nav>
 
       <main className="shopper-account-main">
-        {tab === 'orders' && <OrderHistoryPanel embedded appearance={theme} />}
+        {tab === 'orders' && (
+          <OrderHistoryPanel embedded appearance={theme} initialOrderId={openOrderId} />
+        )}
         {tab === 'addresses' && <AddressManagementPanel appearance={theme} embedded />}
+        {tab === 'notifications' && <NotificationsPanel embedded appearance={theme} />}
       </main>
     </div>
   );

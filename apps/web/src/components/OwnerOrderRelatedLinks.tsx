@@ -20,6 +20,7 @@ export type OwnerPanelContext =
 export type OwnerNavigateTarget = {
   tab: 'orders' | 'hold' | 'fulfillment' | 'returns';
   returnsSubTab?: 'requests' | 'claims';
+  returnsListFilter?: 'active' | 'history';
   orderId?: string;
   orderQuery?: string;
   dateFrom?: string;
@@ -45,7 +46,7 @@ function navigateWithFocusDates(
   order: OwnerOrderView,
   storeOpenDate: string | null | undefined,
   onNavigate: (target: OwnerNavigateTarget) => void,
-  target: Pick<OwnerNavigateTarget, 'tab' | 'returnsSubTab' | 'openClaimHistory'>,
+  target: Pick<OwnerNavigateTarget, 'tab' | 'returnsSubTab' | 'returnsListFilter' | 'openClaimHistory'>,
   kind: 'claim' | 'return' | 'orderHome',
 ) {
   const { dateFrom, dateTo } = focusDateRangeForRelatedLink(storeOpenDate);
@@ -87,11 +88,17 @@ export function OwnerOrderRelatedLinks({
       label: t('ownerOrders.relatedReturn', { kind, status }),
       detail: reason ?? undefined,
       action: () => {
+        const isHistory =
+          order.return_status === 'rejected' || order.return_status === 'completed';
         navigateWithFocusDates(
           order,
           storeOpenDate,
           onNavigate,
-          { tab: 'returns', returnsSubTab: 'requests' },
+          {
+            tab: 'returns',
+            returnsSubTab: 'requests',
+            returnsListFilter: isHistory ? 'history' : 'active',
+          },
           'return',
         );
       },

@@ -14,22 +14,33 @@ import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { OwnerOrderRelatedLinks, type OwnerNavigateTarget } from './OwnerOrderRelatedLinks';
 import { OrderReturnSection } from './OrderReturnSection';
-import type { OwnerOrderFocus } from '../lib/ownerOrderFocus';
+import type { OwnerOrderFocus, OwnerReturnListFilter } from '../lib/ownerOrderFocus';
 import '../styles/owner-order-focus.css';
 import { t } from '../i18n';
 
 interface OwnerReturnsPanelProps {
   storeId: string;
   refreshTick?: number;
+  listFilter?: OwnerReturnListFilter;
+  onListFilterChange?: (filter: OwnerReturnListFilter) => void;
   onNavigateRelated?: (target: OwnerNavigateTarget) => void;
   focusOrder?: OwnerOrderFocus | null;
   onFocusClear?: () => void;
   storeOpenDate?: string | null;
 }
 
+function orderMatchesReturnListFilter(order: OwnerOrderView, filter: OwnerReturnListFilter): boolean {
+  if (filter === 'active') {
+    return order.return_status === 'requested' || order.return_status === 'approved';
+  }
+  return order.return_status === 'rejected' || order.return_status === 'completed';
+}
+
 export function OwnerReturnsPanel({
   storeId,
   refreshTick = 0,
+  listFilter = 'active',
+  onListFilterChange,
   onNavigateRelated,
   focusOrder = null,
   onFocusClear,
@@ -62,16 +73,22 @@ export function OwnerReturnsPanel({
     void reload();
   }, [reload, refreshTick]);
 
+  useEffect(() => {
+    if (focusOrder?.returnsListFilter && onListFilterChange) {
+      onListFilterChange(focusOrder.returnsListFilter);
+    }
+  }, [focusOrder?.focusKey, focusOrder?.returnsListFilter, onListFilterChange]);
+
   const filtered = useMemo(
     () =>
       orders
-        .filter((o) => o.return_status === 'requested' || o.return_status === 'approved')
+        .filter((o) => o.return_status !== 'none' && orderMatchesReturnListFilter(o, listFilter))
         .sort((a, b) => {
           const ta = a.return_requested_at ? new Date(a.return_requested_at).getTime() : 0;
           const tb = b.return_requested_at ? new Date(b.return_requested_at).getTime() : 0;
           return tb - ta;
         }),
-    [orders],
+    [orders, listFilter],
   );
 
   useEffect(() => {
@@ -142,11 +159,52 @@ export function OwnerReturnsPanel({
     return <p style={styles.error}>{t('ownerReturns.errorLoad')}</p>;
   }
   if (filtered.length === 0) {
-    return <p style={styles.hint}>{t('ownerReturns.empty')}</p>;
+    return (
+      <div>
+        <div style={styles.listFilters} role="tablist" aria-label={t('ownerReturns.listFilterLabel')}>
+          {(['active', 'history'] as const).map((key) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={listFilter === key}
+              style={{
+                ...styles.listFilterChip,
+                ...(listFilter === key ? styles.listFilterChipActive : {}),
+              }}
+              onClick={() => onListFilterChange?.(key)}
+            >
+              {t(`ownerReturns.listFilter${key.charAt(0).toUpperCase()}${key.slice(1)}`)}
+            </button>
+          ))}
+        </div>
+        <p style={styles.hint}>
+          {listFilter === 'active' ? t('ownerReturns.empty') : t('ownerReturns.emptyHistory')}
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div style={styles.list}>
+    <div>
+      <div style={styles.listFilters} role="tablist" aria-label={t('ownerReturns.listFilterLabel')}>
+        {(['active', 'history'] as const).map((key) => (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={listFilter === key}
+            style={{
+              ...styles.listFilterChip,
+              ...(listFilter === key ? styles.listFilterChipActive : {}),
+            }}
+            onClick={() => onListFilterChange?.(key)}
+          >
+            {t(`ownerReturns.listFilter${key.charAt(0).toUpperCase()}${key.slice(1)}`)}
+          </button>
+        ))}
+      </div>
+      <div style={styles.list}>
       {filtered.map((order) => {
         const returnId = order.active_return_id;
         const busy = actionId === order.id;
@@ -318,11 +376,31 @@ export function OwnerReturnsPanel({
           </article>
         );
       })}
+      </div>
     </div>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
+  listFilters: { display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 },
+  listFilterChip: {
+    minHeight: 36,
+    padding: '6px 14px',
+    borderRadius: 999,
+    border: `1.5px solid ${oc.border}`,
+    background: oc.surface,
+    color: oc.textMuted,
+    fontSize: fs.sm,
+    fontWeight: 600,
+    cursor: 'pointer',
+    fontFamily: ownerFont,
+  },
+  listFilterChipActive: {
+    borderColor: oc.primary,
+    background: oc.navActiveBg,
+    color: oc.navActiveText,
+    fontWeight: 700,
+  },
   list: { display: 'flex', flexDirection: 'column', gap: 16 },
   hint: { color: oc.textMuted, margin: 0, textAlign: 'center', padding: '24px 0' },
   error: { color: oc.danger, margin: 0, textAlign: 'center', padding: '24px 0' },
