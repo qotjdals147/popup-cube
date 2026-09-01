@@ -760,7 +760,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **한 줄 요약** | **§7.73 Google 로그인 버튼 ✅** · Kakao/Naver ⏸️ · User实기 ⬜ |
-| **Git 상태** | commit/push 후 갱신 |
+| **Git 상태** | **`d713567`** (main pushed) |
 | **User 실기** | §7.73 **⬜** (Google OAuth · Expo `--clear`) |
 | **다음 에이전트 1순위** | ① Google 실기 확인 · ② Kakao(사업자 후) · ③ AD-034 |
 
@@ -3376,7 +3376,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-09-01 — Google sign-in button + OAuth flow (AD-078 Phase 1)
 - **Author:** Cursor Agent
 - **Changed:** `googleSignIn.ts` · `login-callback.tsx` · `login.tsx` · `AuthContext` · §7.73
-- **Notes:** Google console **✅** · Kakao **⏸️** · **Expo ✅ `--clear`** · User实기 ⬜
+- **Notes:** git **`d713567`** · Google console **✅** · Kakao **⏸️** · **Expo ✅ `--clear`** · User实기 ⬜
 
 ### 2026-09-01 — AD-078 Phase 0 OAuth developer console registration guide
 - **Author:** Cursor Agent
