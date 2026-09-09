@@ -70,6 +70,7 @@ export default function LoginScreen() {
   }
 
   async function handleGoogleLogin() {
+    if (googleSubmitting) return;
     setGoogleSubmitting(true);
     setError(null);
     setInfo(null);
@@ -80,6 +81,7 @@ export default function LoginScreen() {
       return;
     }
     if (ok) {
+      setError(null);
       router.replace('/home');
     }
   }
@@ -133,8 +135,6 @@ export default function LoginScreen() {
         <Text style={styles.subtitle}>{subtitle}</Text>
         {isOwner && <Text style={styles.hint}>{t.login.ownerPcHint}</Text>}
 
-        {isOwner && <Text style={styles.hint}>{t.login.ownerPcHint}</Text>}
-
         {showGoogleLogin && (
           <>
             <Pressable
@@ -148,6 +148,9 @@ export default function LoginScreen() {
                 <Text style={styles.googleButtonText}>{t.login.google}</Text>
               )}
             </Pressable>
+            {googleSubmitting && (
+              <Text style={styles.hint}>{t.login.googleBrowserHint}</Text>
+            )}
             <View style={styles.dividerRow}>
               <View style={styles.dividerLine} />
               <Text style={styles.dividerText}>{t.login.orDivider}</Text>

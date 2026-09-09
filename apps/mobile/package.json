@@ -6,6 +6,7 @@
   "scripts": {
     "start": "expo start",
     "start:go": "expo start --tunnel --port 8082 --clear",
+    "start:dev-client": "expo start --dev-client --tunnel --port 8082 --clear",
     "start:lan": "expo start --lan --port 8082 --clear",
     "start:lan:clean": "start-lan.cmd",
     "start:remote": "start-remote.cmd",
@@ -17,10 +18,13 @@
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
     "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-google-signin/google-signin": "^16.1.5",
     "@supabase/supabase-js": "^2.47.10",
     "expo": "~52.0.49",
     "expo-auth-session": "~6.0.3",
     "expo-constants": "~17.0.8",
+    "expo-crypto": "~14.0.2",
+    "expo-dev-client": "~5.0.20",
     "expo-linking": "~7.0.5",
     "expo-navigation-bar": "~4.0.9",
     "expo-notifications": "~0.29.14",

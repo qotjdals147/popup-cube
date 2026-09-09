@@ -2,7 +2,12 @@ import { useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import { createSessionFromOAuthUrl } from '../src/lib/googleSignIn';
+import {
+  createSessionFromOAuthUrl,
+  isOAuthFlowActive,
+  waitForOAuthSession,
+} from '../src/lib/oauthExchange';
+import { getSupabase } from '../src/lib/supabase';
 import { colors } from '../src/theme/colors';
 
 /** AD-078 — OAuth deep link (`popupcube://login-callback`) */
@@ -12,16 +17,45 @@ export default function LoginCallbackScreen() {
 
   useEffect(() => {
     let active = true;
+    let finished = false;
+
+    async function goHomeIfSession(): Promise<boolean> {
+      const { data } = await getSupabase().auth.getSession();
+      if (data.session) {
+        if (active) {
+          finished = true;
+          router.replace('/home');
+        }
+        return true;
+      }
+      return false;
+    }
 
     async function finish(url: string | null) {
-      if (!url) {
+      if (finished) return;
+
+      if (await goHomeIfSession()) return;
+
+      // login.tsx Google 버튼이 교환 중 — login-callback은 세션만 대기
+      if (isOAuthFlowActive()) {
+        const ok = await waitForOAuthSession(5000);
+        if (!active) return;
+        finished = true;
+        router.replace(ok ? '/home' : '/login');
+        return;
+      }
+
+      if (!url || !url.includes('login-callback')) {
         if (active) {
-          setError('로그인 정보가 없어요.');
+          finished = true;
+          router.replace('/');
         }
         return;
       }
+
       const { error: sessionError } = await createSessionFromOAuthUrl(url);
       if (!active) return;
+      finished = true;
       if (sessionError) {
         setError(sessionError);
         return;
@@ -29,7 +63,26 @@ export default function LoginCallbackScreen() {
       router.replace('/home');
     }
 
-    void Linking.getInitialURL().then((url) => void finish(url));
+    const timeout = setTimeout(() => {
+      if (active && !finished) {
+        finished = true;
+        router.replace('/');
+      }
+    }, 8000);
+
+    void (async () => {
+      try {
+        const getUrl = Linking.getInitialURL;
+        if (typeof getUrl !== 'function') return;
+        const url = await Promise.resolve(getUrl());
+        await finish(url);
+      } catch {
+        if (active && !finished) {
+          finished = true;
+          router.replace('/');
+        }
+      }
+    })();
 
     const sub = Linking.addEventListener('url', ({ url }) => {
       void finish(url);
@@ -37,6 +90,7 @@ export default function LoginCallbackScreen() {
 
     return () => {
       active = false;
+      clearTimeout(timeout);
       sub.remove();
     };
   }, [router]);

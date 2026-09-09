@@ -17,7 +17,8 @@ function maskEmail(email: string): string {
 /** §60 4-C — 쿠팡형 「내정보관리」(⚙️ · 다크 모드) */
 export default function SettingsScreen() {
   const router = useRouter();
-  const { userId, email, nickname, loading: authLoading, signOut } = useAuth();
+  const { userId, email, nickname, bootstrapping, loading, signOut } = useAuth();
+  const authPending = bootstrapping || loading;
   const { colors, isDark, setMode } = useTheme();
   useRestoreSystemChromeOnFocus();
 
@@ -147,17 +148,17 @@ export default function SettingsScreen() {
   );
 
   useEffect(() => {
-    if (!authLoading && !userId) {
+    if (!authPending && !userId) {
       router.replace('/');
     }
-  }, [authLoading, userId, router]);
+  }, [authPending, userId, router]);
 
   async function handleLogout() {
     await signOut();
     router.replace('/');
   }
 
-  if (authLoading || !userId) {
+  if (authPending || !userId) {
     return null;
   }
 

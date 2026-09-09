@@ -23,6 +23,7 @@ export const t = {
     orDivider: '또는',
     google: 'Google로 시작하기',
     googleLoading: 'Google 로그인 중...',
+    googleBrowserHint: 'Chrome에서 로그인 후 「Expo Go」로 돌아와 주세요.',
   },
   signup: {
     nickname: '닉네임',

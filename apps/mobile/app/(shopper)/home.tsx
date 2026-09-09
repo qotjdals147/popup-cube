@@ -23,7 +23,8 @@ import { useRestoreSystemChromeOnFocus } from '../../src/hooks/useWorldImmersive
 /** §58 #3 — 몰(홈) 허브: 검색 · D-day · 설명 · 쇼핑하기 CTA */
 export default function HomeScreen() {
   const router = useRouter();
-  const { userId, loading: authLoading, initError } = useAuth();
+  const { userId, bootstrapping, loading: authLoading, initError } = useAuth();
+  const authPending = bootstrapping || authLoading;
   const { colors } = useTheme();
   useRestoreSystemChromeOnFocus();
 
@@ -82,10 +83,10 @@ export default function HomeScreen() {
   );
 
   useEffect(() => {
-    if (!authLoading && !userId) {
+    if (!authPending && !userId) {
       router.replace('/');
     }
-  }, [authLoading, userId, router]);
+  }, [authPending, userId, router]);
 
   useEffect(() => {
     let active = true;
@@ -116,7 +117,7 @@ export default function HomeScreen() {
     router.push(`/store/${storeId}`);
   }
 
-  if (authLoading) {
+  if (authPending) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color={colors.accent} size="large" />

@@ -22,14 +22,16 @@ export function CartCountProvider({ children }: { children: ReactNode }) {
   const [bridgeReady, setBridgeReady] = useState(false);
 
   useEffect(() => {
-    void Promise.all([AsyncStorage.getItem(CART_COUNT_KEY), AsyncStorage.getItem(CART_ITEMS_KEY)]).then(
-      ([countRaw, itemsRaw]) => {
+    const fallback = setTimeout(() => setBridgeReady(true), 5_000);
+    void Promise.all([AsyncStorage.getItem(CART_COUNT_KEY), AsyncStorage.getItem(CART_ITEMS_KEY)])
+      .then(([countRaw, itemsRaw]) => {
         const n = countRaw ? Number.parseInt(countRaw, 10) : 0;
         if (Number.isFinite(n) && n >= 0) setCount(n);
         if (itemsRaw) setItemsJson(itemsRaw);
         setBridgeReady(true);
-      },
-    );
+      })
+      .catch(() => setBridgeReady(true));
+    return () => clearTimeout(fallback);
   }, []);
 
   const persist = useCallback((nextCount: number, nextItemsJson: string) => {

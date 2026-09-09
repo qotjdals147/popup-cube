@@ -38,7 +38,8 @@ function readWebOrigin(): string {
 export default function StoreScreen() {
   const router = useRouter();
   const { storeId } = useLocalSearchParams<{ storeId: string }>();
-  const { userId, loading: authLoading, role } = useAuth();
+  const { userId, bootstrapping, loading, role } = useAuth();
+  const authPending = bootstrapping || loading;
   const { handleWebViewMessage, itemsJson, bridgeReady } = useCartCount();
   const { colors, mode, isDark } = useTheme();
   const [store, setStore] = useState<StoreSummary | null>(null);
@@ -48,10 +49,10 @@ export default function StoreScreen() {
   const [webError, setWebError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading && !userId) {
+    if (!authPending && !userId) {
       router.replace('/');
     }
-  }, [authLoading, userId, router]);
+  }, [authPending, userId, router]);
 
   /** 쇼핑 WebView — 세로 고정 (§60 가로 레이아웃 깨짐 방지) */
   useEffect(() => {
@@ -190,7 +191,7 @@ export default function StoreScreen() {
     [colors, isDark],
   );
 
-  if (authLoading || loadingMeta || !sessionReady) {
+  if (authPending || loadingMeta || !sessionReady) {
     return (
       <View style={styles.centered}>
         <StatusBar style={isDark ? 'light' : 'dark'} />

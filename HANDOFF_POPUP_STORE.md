@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.73` 최신** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.84` 최신** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -543,7 +543,8 @@ npm run dev
 | AD-075 | **(확정 · User 2026-08-27) 기능 구현 연관점 필수** — 주문번호·알림·재고·RPC·양쪽 UI·뱃지 등 **한 기능 = 연쇄 갱신** · 에이전트 **§62 체크리스트** 매번 · §0 | User 2026-08-27 | 2026-08-27 |
 | AD-076 | **(✅ · User 2026-08-28) 손님 알림 탭 + 반품지** — **반품지 ✅** · **알림 탭 UI ✅** §7.69 | User 2026-08-27 | 2026-09-01 |
 | AD-077 | **(구현 ✅ · User实기 ✅ 2026-08-27) 문의 유지 + 이력·타임스탬프** — **「문의하기」유지** · **2회차+「문의 전체 기록」** · **접수·답변 시각 필수** · R2 **반품 신청 별도** · §7.52~§7.54 | User 2026-08-27 | 2026-08-27 |
-| AD-078 | **(계획 · User 2026-08-27) 소셜 로그인** — **카카오 · 네이버 · 구글** (+ iOS **Apple** if other social) · **Supabase Auth OAuth** · 손님 **앱 로그인** 우선 · **로그인 API 무료**(과금 ❌) · **AD-034 자동 로그인**과 함께 · §33.1 · §7.57 | User 2026-08-27 | 2026-08-27 |
+| AD-078 | **(진행 · User 2026-08-27) 소셜 로그인** — **Google ✅ Dev Client实机(§7.84)** · **카카오 · 네이버 ⏸️** (+ iOS **Apple** if other social) · **Supabase Auth** · **AD-034** 후속 · §33.1 | User 2026-08-27 | 2026-08-27 |
+| AD-079 | **(구현 ✅ · User实机 ✅ 2026-09-09) Google 네이티브 로그인 + EAS Dev Client** — `@react-native-google-signin/google-signin` + `signInWithIdToken` · Expo Go 브라우저 OAuth **fallback 유지**(ISS-040 Gmail 잔존) · **Dev Client = 표준 Google 테스트 경로** · §7.84 | User 2026-09-09 | 2026-09-09 |
 | AD-062 | **(확정) v1 = 팝업 쇼핑몰 런칭 · 픽셀 월드 v2 보존** — CEO(mr심) 2026-08-13: Google 실물=PG 확정 · 월드+PG UX 이질감 · **에이블리/룩핀형 쇼핑몰**로 v1 출시. **코드 삭제 금지** — `/play`·Phaser·WebView·fixture·socket = **`legacy/world-v1` 보관** · 손님 **기본 진입 = 상품 쇼핑**(ShopPanel·ProductDetailModal·CartDrawer). v2/이벤트 = **2D 픽셀 재활용 또는 그래픽 업grade(영상·360 등) 별도 판단**. 상세 **§57** | User·CEO 2026-08-13 | 2026-08-13 |
 | AD-063 | **(확정) v1 런칭 범위 · 점주센터 정리** — **팝업 점주 입점 → 팝업 상품만 판매** 플랫폼. 점주 PC **대부분 유지** · **「매장 꾸미기(layout)」탭 v1 숨김**(코드 유지) · 손님 **월드 우회→쇼핑** · P1=리뷰답글·KPI·팝업기간 UI. 실행 순서 **§58** | User 2026-08-13 | 2026-08-13 |
 | AD-064 | **(확정) 수익·월드 재포지셔닝 — B2B 마케팅 인벤토리** — 월드 = 손님 **기본 쇼핑 경로 ❌** · **유료 브랜드 홍보(배너·스폰서 팝업존·월드 체험)** = 플랫폼 **광고/마케팅 SKU** (에이블리형 배너 수익과 동급 축). v1 **커머스(몰→shop)** + v2+ **스폰서 월드**. 상세 **§59** | User 2026-08-13 | 2026-08-13 |
@@ -624,7 +625,9 @@ npm run dev
 - [x] **§7.70 홈 알림 종 + 마이 탭 뱃지 (2026-09-01)** — 쿠팡형 접근성 · User实기 **⬜**
 - [x] **§7.71 알림 삭제 + Realtime 중복 구독 fix (2026-09-01)** — × · 읽은/전체 삭제 · User实기 **✅**
 - [ ] **§7.72 AD-078 OAuth 개발자 콘솔 (2026-09-01)** — Google ✅ · Kakao/Naver ⏸️ 사업자 |
-- [ ] **§7.73 Google 로그인 버튼 + OAuth (2026-09-01)** — `login.tsx` · `googleSignIn.ts` · User实기 **⬜**
+- [x] **§7.73 Google 로그인 버튼 + OAuth (2026-09-01)** — `login.tsx` · `googleSignIn.ts` · User实기 **✅ §7.78**
+- [x] **§7.78 Google OAuth openBrowserAsync (2026-09-08)** — Expo Go **1회 ✅** · 반복 시 ISS-040 재발
+- [x] **§7.84 Google 네이티브 + Dev Client (2026-09-09 · AD-079)** — User实기 **✅** · Google → **홈** · **commit ⬜**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -750,6 +753,9 @@ popup_store/                          # Turborepo root
 | ISS-037 | ~~다크모드 탭 전환 시 **흰 번쩍임**~~ | Resolved | **Tabs `(shopper)`** + `lazy:false` · `SystemUI`/`NavigationTheme` 배경 · WebView `webviewThemeInject` · User **2026-08-14 OK** |
 | ISS-038 | ~~장바구니 탭 sync · 행 정렬 · 쿠팡형 · 줄금액 · 통합 결제 UX~~ | **Resolved** | User **`1413647`** UI OK · **`ebd3648`** 서랍 뱃지·할인가 **✅ User 2026-08-25** · **`choice` 뱃지 카피** → §7.41 |
 | ISS-039 | Expo `--tunnel` ngrok **`body` 일시 오류** (2026-08~) | Open (외부·간헐) | **§0 4줄 `--tunnel` 유지** · User **2026-08-24 정상** · 에이전트 **`--lan` 선제안 ❌** · 지속 실패만 `start-remote-cloudflare.cmd` |
+| ISS-040 | **Google OAuth (Expo Go 브라우저)** — 무한로딩 / Gmail redirect / 빨간 오류 flash | **Open (Expo Go만)** | **Dev Client 네이티브(§7.84) = ✅ 해결** · Expo Go fallback = 브라우저 경로 **잔존** |
+| ISS-041 | **Google OAuth 후** — 프로필 timeout · JWT clock skew · OAuth code **이중 교환** | **Mitigated** | Dev Client实机: **JWT clock skew** → 폰 **날짜·시간 자동** 후 OK · `loadProfile` retry · **미커밋** |
+| ISS-042 | **Dev Client** — `Cannot find native module 'ExpoCrypto'` | **Resolved** | `expo-auth-session` import 제거 → `oauthQueryParams.ts` · `Linking.createURL` · APK 재빌드 **`a7ade9ee`** (JS만으로도 해결 가능) |
 
 ---
 
@@ -759,10 +765,9 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§7.73 Google 로그인 버튼 ✅** · Kakao/Naver ⏸️ · User实기 ⬜ |
-| **Git 상태** | **`d713567`** (main pushed) |
-| **User 실기** | §7.73 **⬜** (Google OAuth · Expo `--clear`) |
-| **다음 에이전트 1순위** | ① Google 실기 확인 · ② Kakao(사업자 후) · ③ AD-034 |
+| **한 줄 요약** | **§7.84 Google Dev Client ✅** — 네이티브 로그인实机 합격 · **commit ⬜** |
+| **User实기** | §7.84 **✅** (2026-09-09) — POP-UP CUBE Dev Client · Google → **홈** |
+| **다음 에이전트 1순위** | ① **commit & push** (§7.84 전체) · ② 로그아웃×3 재확인 · ③ Kakao/Naver · AD-034 |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
 
@@ -874,22 +879,20 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — **§7.71 알림 삭제 + Realtime fix** · User实기 **⬜**
+**최신** — **§7.84 Google Dev Client ✅** — User实기 **✅** · **commit ⬜**
 
 | | |
 |---|---|
-| **다음 우선 (에이전트)** | ① **AD-078 소셜 로그인** (§33.1) |
-| **손님 알림 UX** | §7.71 · **User实기 ⬜** |
-| **상세** | **§7.71** (최신) · §7.70 · §7.69 |
+| **다음 우선 (에이전트)** | ① §7.84 **commit & push** · ② 로그아웃×3 · ③ Kakao/Naver |
+| **User实기** | §7.84 **✅** — POP-UP CUBE · Google → **홈** |
+| **상세** | **§7.84** (최신) · §7.82 · §7.78~81 (Expo Go fallback) |
 
-#### Expo 재시작 여부 (최신 §7.71)
+#### Expo 재시작 여부 (최신 §7.78)
 
 | | |
 |---|---|
-| **수정** | `apps/mobile` (Realtime Context) + `apps/web` (알림 삭제 UI) |
-| **Expo(Metro) 재시작** | ✅ **mobile Context 추가** — Metro **Ctrl+C** 후 §0 **4줄 `--clear`** · QR 재연결 |
-| **WebView 알림 UI** | Vercel **1~2분** 후 **알림 탭 재진입** (web-only 변경) |
-| **User** | 알림 **×** · **읽은 알림 삭제** · **전체 삭제** · 홈 🔔 **크래시 없음** |
+| **로컬 OAuth 코드 (미커밋)** | commit 전까지 **`--clear`** 유지 |
+| **User 현재 세션** | §7.78 **✅** |
 
 #### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
 
@@ -1359,6 +1362,411 @@ npx expo start --tunnel --port 8082 --clear
 #### 다음
 
 **AD-073 R2** — §7.59
+
+---
+
+---
+
+### 7.76 세션 인수인계 — **2026-09-02~04** (AD-078 · **Google OAuth — 간헐 성공만 ⬜**)
+
+| | |
+|---|---|
+| **Scope** | Google OAuth End-to-End · 콘솔 마무리 · 코드 race fix |
+| **User实기** | **⬜ 간헐만** (2026-09-04 User 재확인) — **완전 해결 ❌** |
+| **ISS** | ISS-040 Open (UX) · ISS-041 Open (Low) |
+| **Git** | **`930161c`** pushed · 로컬 **미커밋** |
+| **AD** | AD-078 |
+
+#### User实기 결과
+
+| | |
+|---|---|
+| **계정** | `qotjdals147@gmail.com` (Google · role `shopper`) |
+| **경로** | `accounts.google.com` **간헐 무한로딩** · **Gmail/메일 작성 화면**으로 빠짐 · **뒤로** 반복 → **가끔** Expo Go 복귀·홈 |
+| **기능** | **간헐 OK** — 한 번 홈까지 간 적 있으나 **재현 불안정** |
+| **비고** | **뒤로가기 = 정식 UX ❌** · JWT clock skew · 프로필 timeout 간헐 |
+
+#### User 콘솔 (2026-09-02)
+
+| 항목 | 상태 |
+|---|---|
+| Web Client · JS origins · redirect URI | ✅ |
+| Supabase Google Provider · `exp://**` | ✅ |
+| 브랜딩 (이름·이메일·연락처·도메인) | ✅ |
+| 데이터 액세스 — email · profile · openid | ✅ User 추가 |
+| 테스트 사용자 | ✅ |
+| 대상 노란 경고 | ⬜ 잔존 (로고 업로드 · Testing) |
+
+#### 코드 변경 (로컬 · **미커밋**)
+
+| 파일 | 변경 |
+|---|---|
+| **`oauthExchange.ts`** (신규) | PKCE code **1회** 교환 · `waitForOAuthSession` |
+| `googleSignIn.ts` | mutex · `preferEphemeralSession: false` |
+| `login-callback.tsx` | `oauthExchange` import |
+| `AuthContext.tsx` | bootstrapping · `loadProfile` retry · signOut reset |
+| `CartCountContext.tsx` · shopper guards | auth pending fix |
+
+#### Expo 재시작 여부
+
+| | |
+|---|---|
+| **User 이번 실기** | **`--clear`** 후 QR · **8082** |
+| **다음 코드 commit 후** | ✅ **`--clear`** 재필수 |
+
+#### User实기 (§0 — **cmd 블록 생략 금지**)
+
+1) **Win → `cmd` → Enter**
+
+2) Metro **Ctrl+C**
+
+3) **Expo 4줄**:
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+4) QR → **일반 회원 로그인** → **Google로 시작하기** → `qotjdals147@gmail.com`
+
+5) **합격 기준** — **⬜ 미달** (2026-09-04 User)
+   - ⚠️ `accounts.google.com` **간헐 무한로딩** (ISS-040)
+   - ⚠️ **Gmail/메일 작성** 화면으로 리다이렉트
+   - ⚠️ **뒤로가기 반복** 시에만 가끔 홈 — **정식 로그인 UX 아님**
+
+#### 다음
+
+- OAuth 코드 **commit** · ISS-040 UX 안정화 (로고 제거·EAS Dev Client 검토)
+- **AD-034** 자동 로그인
+
+---
+
+### 7.77 세션 인수인계 — **2026-09-08** (AD-078 · **Google OAuth UX 안정화**)
+
+| | |
+|---|---|
+| **Scope** | WebBrowser ↔ deep link race 통합 · 이중 교환 방지 · Android warmUp |
+| **User实기** | **⬜** — §0 Expo 4줄 **`--clear`** 후 재확인 |
+| **User 실기 (2026-09-08)** | **❌** — §7.77 적용 후에도 `accounts.google.com` **무한로딩 동일** |
+| **ISS** | ISS-040 Open (UX) · ISS-041 mitigated (mutex + flow guard) |
+| **Git** | **`930161c`** pushed · 로컬 **미커밋** |
+| **AD** | AD-078 |
+
+#### 코드 변경 (로컬 · **미커밋**)
+
+| 파일 | 변경 |
+|---|---|
+| **`oauthExchange.ts`** | `beginOAuthFlow` / `isOAuthFlowActive` · `watchOAuthCallbackUrl` · `waitForOAuthSession` **2500ms** |
+| **`googleSignIn.ts`** | 브라우저 **전** deep link 리스너 · `warmUpAsync`/`coolDownAsync` · `prompt: select_account` · `dismissBrowser` |
+| **`login-callback.tsx`** | flow active 시 교환 스kip · 기존 세션 있으면 바로 `/home` |
+| **`login.tsx`** | owner hint 중복 제거 |
+
+#### User实기 (§0)
+
+1) Win → `cmd` → Metro **Ctrl+C**
+
+2) Expo 4줄 (`--clear` 필수):
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+3) QR → **일반 회원 로그인** → **Google로 시작하기** → `qotjdals147@gmail.com`
+
+4) **합격 기준** — **⬜**
+   - ✅ Google 계정 선택 → **뒤로가기 없이** Expo Go 복귀 → **홈**
+   - ❌ `accounts.google.com` 무한로딩
+   - ❌ Gmail/메일 작성 화면으로 빠짐
+
+#### 다음
+
+- User实기 **⬜** → 합격 시 **commit & push**
+- ISS-040 잔존 시: consent 로고 · EAS Dev Client 검토
+
+---
+
+### 7.84 세션 인수인계 — **2026-09-09** (AD-079 · **Google 네이티브 + Dev Client ✅**)
+
+| | |
+|---|---|
+| **결과** | User实기 **✅** — POP-UP CUBE Dev Client · **Google로 시작하기 → 홈** |
+| **Scope** | `@react-native-google-signin/google-signin` + `signInWithIdToken` · EAS Dev Client · Google Cloud Android OAuth client |
+| **Git** | **전부 미커밋** — User 「commit」 요청 시 push |
+| **AD** | AD-079 · AD-078 (Google Phase 1 완료) |
+
+#### 배경 (§7.78~81 → §7.82)
+
+| | |
+|---|---|
+| **Expo Go 브라우저 OAuth** | Custom Tab / Chrome / `Linking.openURL` **4종 모두** Gmail 작성·무한로딩 **재발** |
+| **타 AI 4종 결론** | Testing consent 화면 `mailto:` → Android Gmail Intent · **코드만으로 Expo Go 완전 차단 불가** |
+| **해결** | **네이티브 Google Sign-In** — 브라우저 미사용 → ISS-040 **Dev Client 경로에서 소멸** |
+
+#### User 완료 (Google / Supabase / env)
+
+| # | 항목 | 상태 |
+|---|---|---|
+| 1 | expo.dev credentials → SHA-1 | ✅ |
+| 2 | Google Cloud → **Android** OAuth client (`com.popupcube.app`) | ✅ |
+| 3 | Supabase Google Provider → **Client IDs** (Web + Android, 쉼표) | ✅ |
+| 4 | `apps/mobile/.env` → `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` | ✅ (에이전트 추가) |
+| 5 | EAS Dev Client APK 설치 | ✅ |
+
+#### EAS 빌드 (Android development)
+
+| 빌드 | 용도 | URL |
+|---|---|---|
+| `b5e7f117` | 1차 Dev Client (Google Sign-In plugin) | `…/builds/b5e7f117-1ce9-4b98-ae0b-6c45b6d603e1` |
+| `a7ade9ee` | 2차 (+ `expo-crypto` · `expo-dev-client` plugin) | `…/builds/a7ade9ee-8a40-4a09-a0ba-cad9ffde1435` |
+
+**User는 `a7ade9ee` 또는 최신 development 빌드 사용.** Keystore SHA-1 = Google Android client와 **일치** 필수.
+
+#### 코드 변경 (로컬 · 미커밋)
+
+| 파일 | 변경 |
+|---|---|
+| **`googleSignInNative.ts`** (신규) | `GoogleSignin.signIn()` → `supabase.auth.signInWithIdToken` |
+| **`oauthQueryParams.ts`** (신규) | OAuth callback 파싱 — **`expo-auth-session`/`ExpoCrypto` 제거** (ISS-042) |
+| `AuthContext.tsx` | Dev Client → 네이티브 우선 · Expo Go → 브라우저 fallback |
+| `oauthRedirect.ts` | `makeRedirectUri` → **`Linking.createURL`** |
+| `oauthExchange.ts` | `QueryParams` → `parseOAuthCallbackParams` |
+| `googleSignIn.ts` | 브라우저 OAuth fallback · `[oauth-debug]` 로깅 |
+| `webBrowserSafe.ts` | `openOAuthUrl` · `dismissBrowserSafe` |
+| `app.config.ts` | `owner: popup_smhw` · `slug: popup-smhw` · plugins: `expo-dev-client`, `@react-native-google-signin/google-signin` · `extra.googleWebClientId` |
+| `package.json` | `expo-dev-client` · `expo-crypto` · `@react-native-google-signin/google-signin` · `start:dev-client` |
+| `start-dev-client.cmd` (신규) | Dev Client Metro 안내 |
+| `.env` · `.env.example` | `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` |
+
+#### 실기 트러블슈팅 (이번 세션)
+
+| 증상 | 원인 | 해결 |
+|---|---|---|
+| QR 찍어도 무반응 | Expo Go/카메라로 `exp+popup-smhw://` 처리 실패 | **POP-UP CUBE** 설치 · **카메라** QR → **POP-UP CUBE에서 열기** |
+| `ExpoCrypto` not found | `expo-auth-session` → 네이티브 모듈 | **`oauthQueryParams`/`Linking` 전환** (JS Reload) · APK **`a7ade9ee`** |
+| `JWT issued at future` | 폰 시간 ≠ 서버 | **설정 → 날짜·시간 자동** → 앱 재시작 → 재로그인 |
+| `Port 8082 is being used` | 예전 Metro | **Ctrl+C** → §7.84 Dev Client 4줄 재실행 · **8083 ❌** |
+
+#### Expo 재시작 여부 (§7.84)
+
+| 이번에 수정한 곳 | Expo(Metro) **재시작** | User가 할 일 |
+|---|---|---|
+| **`apps/mobile`** · `.env` · 네이티브 패키지 | ✅ **`--clear` 필수** | 아래 **Dev Client 4줄** |
+
+#### User 실기 — **Dev Client (Google 로그인 · §0 형식)**
+
+> **Expo Go ❌** · 폰에 **POP-UP CUBE** (EAS Dev Client) 필수.
+
+0) APK 미설치 → [빌드 `a7ade9ee`](https://expo.dev/accounts/popup_smhw/projects/popup-smhw/builds/a7ade9ee-8a40-4a09-a0ba-cad9ffde1435) Install
+
+1) **Win → `cmd` → Enter**
+
+2) **아래 한 줄씩 복붙** — 각 줄 **Enter**:
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --dev-client --tunnel --port 8082 --clear
+```
+
+3) **폰 카메라**로 PC cmd **QR** 스캔 → **「POP-UP CUBE에서 열기」** (Expo Go ❌)
+
+4) **Google로 시작하기** → 계정 선택 → **홈**
+
+5) **`JWT issued at future`** LogBox → **설정 → 날짜·시간 자동** → 앱 완전 종료 → 2)~4) 재시도
+
+데모: `demo@shopper.com` / `demo` (이메일 로그인)
+
+#### Expo Go fallback (브라우저 Google — ISS-040 잔존)
+
+일반 기능·WebView만 볼 때는 기존 §0 **Expo 4줄** (`--dev-client` **없음**) + **Expo Go SDK 52**.  
+**Google 로그인 안정 테스트 = Dev Client만.**
+
+#### 다음
+
+- [ ] **commit & push** (User 요청 시)
+- [ ] Dev Client — **로그아웃 → Google ×3** 재확인
+- [ ] Google consent **로고** · Testing → Production
+- [ ] Kakao / Naver (사업자 후)
+- [ ] iOS Dev Client (필요 시)
+
+---
+
+### 7.78 세션 인수인계 — **2026-09-08 pm** (AD-078 · **ISS-040 openBrowserAsync 전환**)
+
+| | |
+|---|---|
+| **Scope** | `openAuthSessionAsync`(redirect URL 감시) → **`openBrowserAsync` + deep link만** |
+| **원인 가설** | Custom Tab이 Google OAuth 중간 페이지를 redirect로 오인 → `accounts.google.com` **무한로딩** (§7.77 User **❌**) |
+| **User实기** | **✅** (2026-09-08 User) — Google 계정 선택 → **홈** 정상 |
+| **Git** | **`930161c`** pushed · 로컬 **미커밋** → **commit 대기** |
+| **AD** | AD-078 · ISS-040 |
+
+#### 코드 변경
+
+| 파일 | 변경 |
+|---|---|
+| **`googleSignIn.ts`** | `openBrowserAsync` · `createTask: true` · deep link `waitForOAuthCallbackUrl` |
+| **`oauthExchange.ts`** | `waitForOAuthCallbackUrl` Promise · `watchOAuthCallbackUrl` 제거 |
+| **`login.tsx`** · **`ko.ts`** | Google 로그인 중 Chrome 안내 문구 |
+
+#### §7.78 실패 시 다음 (Supabase 공식)
+
+| | |
+|---|---|
+| **권장** | `@react-native-google-signin/google-signin` + `signInWithIdToken` |
+| **필요** | **EAS Dev Client** (Expo Go ❌) · Google Cloud **Android/iOS OAuth client** |
+| **콘솔** | consent **로고 업로드** · Testing → Production 검토 |
+
+#### User实기 (§0)
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+QR → Google로 시작하기 → 계정 선택 → **Expo Go 자동 복귀** → 홈
+
+4) **합격** — **✅** (2026-09-08 User) — 무한로딩 ❌ · 홈 진입 ✅
+
+#### User实기 추가 (2026-09-09)
+
+| | |
+|---|---|
+| **반복 로그아웃→로그인** | ❌ Gmail/메일 작성 화면 재발 |
+| **빨간 오류 flash** | `TypeError: .catch of undefined` → §7.79 webBrowserSafe |
+
+#### §7.80 fix (Android · 미커밋)
+
+- Custom Tab → **`Linking.openURL`** (외부 Chrome)
+- `prompt: consent` · OAuth callback wait **cancel** on signOut
+- 로그인 후 **Expo Go 수동 복귀** 안내
+
+#### User实기 추가 (2026-09-09 재발) — **여전히 메일 작성 화면**
+
+- `Linking.openURL`로 바꿔도 **동일** → **브라우저 API(Custom Tab vs 외부 Chrome) 문제가 아님**
+- 결론: **Google/Android 쪽 화면 전환** 문제일 가능성 큼 (우리 JS 코드가 브라우저를 어떻게 여는지와 무관)
+
+#### §7.81 fix (미커밋) + 근본 원인 후보
+
+| 코드 변경 | 내용 |
+|---|---|
+| `browserPackage: 'com.android.chrome'` 명시 | 기기가 다른 브라우저/핸들러를 고를 가능성 차단 |
+| `prompt: consent` → **`select_account`로 원복** | consent 강제가 「앱 미인증」 경고·부가 화면을 매번 더 노출시켜 역효과였을 가능성 |
+
+**근본 원인 후보 (User 확인 필요 — 코드로 해결 불가 영역)**
+
+1. **Google Cloud Console → OAuth consent screen → 「User support email」/「Developer contact information」** 에 등록된 이메일이 **폰 연락처의 "성민찬"과 같은 주소인지** 확인. 같으면 Google이 어느 경고 화면에서 그 주소로 **mailto 링크**를 보여주고 있을 가능성 (Gmail 작성 화면의 「받는사람」에 그 연락처가 자동完성으로 뜬 것과 정황 일치).
+2. Android **Direct Share/Linkify** — Google 로그인 화면에 표시된 이메일 텍스트를 실수로 살짝 다르게 탭(길게 누르기 등)했을 때 Android가 "메일 보내기"로 인식하는 경우.
+3. **`disallowed_useragent`** (Google이 임베디드 웹뷰로 인식) — Custom Tab/외부 Chrome 둘 다 시도했으므로 가능성은 낮지만, 기기 기본 브라우저가 Chrome이 아니면 재발 가능.
+
+**다음 세션 우선 진단 (User 확인 시 즉시 원인 특정 가능)**
+- 메일 화면 뜨기 **직전** 화면이 정확히 무엇이었는지 (계정 선택 / 에러 문구 / 아무 화면 없이 바로 전환)
+- Google Cloud Console → OAuth consent screen → **User support email** 값
+- 폰 기본 브라우저가 **Chrome**인지
+
+**장기 해법 (Expo Go 브라우저 리다이렉트의 구조적 한계)**
+- Supabase 공식 권장: **`@react-native-google-signin/google-signin` + `signInWithIdToken`**
+- **EAS Dev Client 필수** (Expo Go ❌) — 브라우저 리다이렉트 자체가 없어져 이 문제군 **전체 소멸**
+- Google Cloud에 **Android OAuth client (SHA-1)** 추가 필요
+
+---
+
+### 7.82 세션 인수인계 — **2026-09-09** (AD-078 · **네이티브 Google 로그인 전환 시작**)
+
+| | |
+|---|---|
+| **결정** | User 위임 → 에이전트 판단: **§7.78~81 브라우저 패치 반복 실패** → **네이티브 전환**으로 근본 해결 시도 |
+| **Scope** | `@react-native-google-signin/google-signin` + `signInWithIdToken` · EAS Dev Client |
+| **상태** | **§7.84로 완료** — User实기 ✅ · 빌드 `a7ade9ee` |
+
+#### 코드 변경 (로컬 · 미커밋)
+
+| 파일 | 변경 |
+|---|---|
+| **`googleSignInNative.ts`** (신규) | `GoogleSignin.signIn()` → `supabase.auth.signInWithIdToken` · Expo Go에서는 `require` 실패 시 안전하게 비활성화 |
+| `AuthContext.tsx` | 네이티브 모듈 있으면 우선 사용, 없으면(Expo Go) 기존 브라우저 방식 fallback |
+| `app.config.ts` | `owner: 'popup_smhw'` · `slug: 'popup-smhw'`(EAS 프로젝트와 일치) · plugin `@react-native-google-signin/google-signin` · `extra.googleWebClientId` |
+| `package.json` | `@react-native-google-signin/google-signin` · `expo-dev-client` 추가 |
+
+#### EAS 빌드
+
+- `eas build --platform android --profile development` 진행 중
+- 로그: `https://expo.dev/accounts/popup_smhw/projects/popup-smhw/builds/b5e7f117-1ce9-4b98-ae0b-6c45b6d603e1`
+- 완료 시 **APK 다운로드 링크** 생성 → 폰에 설치 (Expo Go 대체)
+
+#### User 조치 필요 (병행 가능 — 빌드 기다리는 동안)
+
+1) **Keystore SHA-1 확인**
+   - `https://expo.dev/accounts/popup_smhw/projects/popup-smhw/credentials` 로그인 후 확인
+   - Android → Keystore → **SHA-1 Fingerprint** 복사
+
+2) **Google Cloud Console → Credentials → Create Credentials → OAuth client ID**
+   - Application type: **Android**
+   - Package name: `com.popupcube.app`
+   - SHA-1: 위에서 복사한 값
+   - 생성된 **Android Client ID** 복사 (Secret 없음)
+
+3) **Supabase Dashboard → Authentication → Providers → Google**
+   - **Authorized Client IDs** 필드에 방금 만든 **Android Client ID 추가** (기존 Web Client ID는 유지, 쉼표 구분)
+
+4) **`apps/mobile/.env`에 추가**
+   ```
+   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=<기존 Google Web Client ID>
+   ```
+   (Web Client ID는 Google Cloud Console → Credentials → 기존 "Web client" 항목에서 확인 · Supabase Google Provider에 이미 등록된 것과 동일값)
+
+5) **빌드 완료 후**
+   - EAS 빌드 페이지에서 **APK 다운로드** → 폰에 설치 (Expo Go 삭제 불필요, 병행 가능)
+   - `npx expo start --dev-client --tunnel --port 8082 --clear` 로 Metro 실행
+   - 설치한 Dev Client 앱에서 QR 스캔 (Expo Go 아님)
+
+#### 다음
+
+- User가 위 1~4 완료 → 빌드 완료 확인 → 실기
+- 성공 시 **commit & push**, §7.78~81 브라우저 코드는 Expo Go fallback으로 유지
+
+#### 타 AI 교차검증 (2026-09-09) — **결론 일치**
+
+Gemini(x2) · Perplexity · ChatGPT 4개 답변 모두 동일 결론:
+
+> **Google "앱 미인증(Testing)" 경고 페이지에 있는 developer contact `mailto:` 링크 → Android가
+> Gmail Compose Intent로 처리** — 브라우저를 4가지로 바꿔도 재현된 것과 정합적 (원인이 우리 JS가
+> 아니라 Google이 내려주는 HTML 페이지 자체).
+
+- ChatGPT가 가장 회의적·꼼꼼: **User support email을 바꾸는 시도부터 하지 말 것** (원인·결과 오판 위험) 지적.
+- 공통 권장 근본 해법: **네이티브 Google Sign-In + EAS Dev Client** (이미 §7.82로 진행 중 — 결론과 일치).
+- ChatGPT 제안 진단 3종 중 **가장 저비용인 `data.url` 로깅**을 `googleSignIn.ts`에 즉시 추가 (§7.83, 미커밋):
+  - `redirect_uri` / `client_id` / `scope` / `prompt` / `code_challenge`·`state` 존재 여부를 `__DEV__`에서 콘솔 출력
+  - client_secret 없음 → 로그 노출 안전
+  - Expo Go로 재현 시 Metro 콘솔에서 `[oauth-debug]` 로 검색해 확인 가능
+- (참고용, 실행 안 함) adb logcat으로 `mailto:` / `ACTION_SENDTO` / `com.google.android.gm` Intent 로그 확인 — 필요 시 User가 Android Studio/adb 있는 환경에서 실행
+
+---
+
+| | |
+|---|---|
+| **1회 로그인** | ✅ 홈 · **빨간 「Google 로그인 요청에 실패했어요」 flash** |
+| **로그아웃×반복** | △ 몇 번 OK → **Gmail/메일 화면** 재발 |
+
+#### §7.79 fix (코드 · 미커밋)
+
+- `getInitialURL` stale code 재사용 방지 (`ignoreInitialUrl`)
+- OAuth 중복 실행 mutex · signOut 시 browser dismiss
+- exchange 오류여도 **세션 있으면 성공** · initError flash 제거
+
+#### 다음
+
+- **commit & push** (User 요청 시)
+- 로그아웃 → Google 재로그인 **1회** 재확인 권장
+- 런칭 전: consent **로고** · Testing → Production
 
 ---
 
@@ -3388,6 +3796,41 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-09-09 — Google native sign-in + Dev Client User实기 ✅ (§7.84 · AD-079)
+- **Author:** Cursor Agent + User
+- **Changed:** `googleSignInNative.ts` · `oauthQueryParams.ts` · `oauthRedirect.ts` · `oauthExchange.ts` · `AuthContext.tsx` · `app.config.ts` · `package.json` · `.env` · EAS builds · HANDOFF §7.84 · ISS-040/041/042
+- **Notes:** Expo Go Gmail ISS **Dev Client 네이티브로 우회 ✅** · ExpoCrypto/JWT clock skew 해결 · **commit ⬜** · 실기: §7.84 Dev Client 4줄
+
+### 2026-09-08 pm2 — OAuth stale URL + error flash fix (§7.79)
+- **Author:** Cursor Agent + User
+- **Changed:** `oauthExchange.ts` · `googleSignIn.ts` · `AuthContext.tsx` · `login.tsx` · HANDOFF
+- **Notes:** 반복 로그인 Gmail·빨간 오류 flash 원인 수정 · **User实기 ⬜**
+
+### 2026-09-08 pm — ISS-040 Resolved · User实기 ✅ (§7.78)
+- **Author:** Cursor Agent + User
+- **Changed:** HANDOFF §7.78 · ISS-040 · §7.0
+- **Notes:** User **2026-09-08** — `openBrowserAsync` 후 Google → **홈 ✅** · **commit ⬜**
+
+### 2026-09-08 pm — ISS-040 openBrowserAsync 전환 (§7.78)
+- **Author:** Cursor Agent + User
+- **Changed:** `googleSignIn.ts` · `oauthExchange.ts` · `login.tsx` · `ko.ts` · HANDOFF §7.78
+- **Notes:** §7.77 **❌** 무한로딩 동일 · `openAuthSessionAsync` 제거 · **User实기 ⬜** · **미커밋**
+
+### 2026-09-08 — Google OAuth UX 안정화 (AD-078 §7.77)
+- **Author:** Cursor Agent
+- **Changed:** `oauthExchange.ts` · `googleSignIn.ts` · `login-callback.tsx` · `login.tsx` · HANDOFF §7.77
+- **Notes:** deep link coordinator · flow mutex · Android warmUp · `prompt=select_account` · **User实기 ⬜** · **미커밋**
+
+### 2026-09-04 — Google OAuth 상태 정정 (§7.76 · ISS-040 Open)
+- **Author:** Cursor Agent + User
+- **Changed:** HANDOFF §7.76 · §7.0 · §5 · ISS-041 Notes
+- **Notes:** User **2026-09-04** — **완전 해결 ❌** · 메일/Gmail 화면·무한로딩·뒤로가기 **간헐** 로그인만 · 이전 「User实기 ✅」 표기 **철회**
+
+### 2026-09-02 — Google OAuth 간헐 성공 (AD-078 §7.76 · ISS-040/041)
+- **Author:** Cursor Agent + User
+- **Changed:** `oauthExchange.ts` · `googleSignIn.ts` · `login-callback.tsx` · `AuthContext.tsx` · HANDOFF §7.76 · §7.0 · ISS-040/041
+- **Notes:** **간헐** 홈 진입 · 콘솔 스코프·`exp://**` ✅ · **`930161c` 이후 미커밋** · 2026-09-04 **완전 해결 아님으로 정정**
 
 ### 2026-09-01 — Google sign-in button + OAuth flow (AD-078 Phase 1)
 - **Author:** Cursor Agent

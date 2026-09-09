@@ -23,7 +23,8 @@ const dotenv = readDotEnv();
 
 const config: ExpoConfig = {
   name: 'POP-UP CUBE',
-  slug: 'popup-cube',
+  slug: 'popup-smhw',
+  owner: 'popup_smhw',
   version: '0.1.0',
   /** AD-047: 월드(/play WebView) 가로 HUD 확인 — 세로만 고정하면 폰을 돌려도 화면 안 돌아감 */
   orientation: 'default',
@@ -59,8 +60,10 @@ const config: ExpoConfig = {
     favicon: './assets/favicon.png',
   },
   plugins: [
+    'expo-dev-client',
     'expo-router',
     'expo-notifications',
+    '@react-native-google-signin/google-signin',
     [
       'expo-screen-orientation',
       {
@@ -86,6 +89,9 @@ const config: ExpoConfig = {
       dotenv.EXPO_PUBLIC_WEB_ORIGIN ??
       process.env.EXPO_PUBLIC_WEB_ORIGIN ??
       'https://popup-cube-web.vercel.app',
+    /** §7.82 — 네이티브 Google 로그인 (GoogleSignin.configure webClientId) */
+    googleWebClientId:
+      dotenv.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
     router: {},
     eas: {
       projectId: '49c42cb0-df70-47a8-b34d-22878a8e3529',

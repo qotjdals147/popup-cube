@@ -1,67 +1,111 @@
-import * as QueryParams from 'expo-auth-session/build/QueryParams';
 import * as WebBrowser from 'expo-web-browser';
+import {
+  beginOAuthFlow,
+  createSessionFromOAuthUrl,
+  endOAuthFlow,
+  hasOAuthSessionUser,
+  waitForOAuthCallbackUrl,
+  waitForOAuthSession,
+} from './oauthExchange';
 import { getOAuthRedirectUri } from './oauthRedirect';
 import { formatSupabaseAuthError, getSupabase } from './supabase';
+import { dismissBrowserSafe, openOAuthUrl } from './webBrowserSafe';
 
-WebBrowser.maybeCompleteAuthSession();
+let googleOAuthRunning = false;
 
-/** OAuth callback URL → Supabase session (PKCE code or token fragment) */
-export async function createSessionFromOAuthUrl(url: string): Promise<{ error: string | null }> {
-  const { params, errorCode } = QueryParams.getQueryParams(url);
-  if (errorCode) {
-    return { error: formatSupabaseAuthError(String(errorCode)) };
-  }
-
-  if (params.code) {
-    const { error } = await getSupabase().auth.exchangeCodeForSession(params.code);
-    if (error) return { error: formatSupabaseAuthError(error.message) };
-    return { error: null };
-  }
-
-  const accessToken = params.access_token;
-  const refreshToken = params.refresh_token;
-  if (accessToken && refreshToken) {
-    const { error } = await getSupabase().auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
-    if (error) return { error: formatSupabaseAuthError(error.message) };
-    return { error: null };
-  }
-
-  return { error: '로그인 응답을 처리하지 못했어요.' };
-}
-
-/** AD-078 — Google OAuth (Supabase Auth · Expo WebBrowser) */
+/**
+ * AD-078 — Google OAuth (Supabase Auth)
+ *
+ * Android: Linking.openURL → 외부 Chrome (Custom Tab Gmail redirect 회피)
+ * iOS: in-app browser + deep link
+ */
 export async function signInWithGoogleOAuth(): Promise<{ error: string | null; cancelled?: boolean }> {
-  const redirectTo = getOAuthRedirectUri();
-
-  const { data, error } = await getSupabase().auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo,
-      skipBrowserRedirect: true,
-    },
-  });
-
-  if (error) {
-    return { error: formatSupabaseAuthError(error.message) };
-  }
-  if (!data.url) {
-    return { error: 'Google 로그인 페이지를 열지 못했어요.' };
+  if (googleOAuthRunning) {
+    return { error: 'Google 로그인이 이미 진행 중이에요.' };
   }
 
-  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo, {
-    showInRecents: true,
-    createTask: false,
-  });
+  googleOAuthRunning = true;
+  WebBrowser.maybeCompleteAuthSession();
+  const flowId = beginOAuthFlow();
 
-  if (result.type === 'cancel' || result.type === 'dismiss') {
+  try {
+    await dismissBrowserSafe();
+
+    const redirectTo = getOAuthRedirectUri();
+
+    const { data, error } = await getSupabase().auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo,
+        skipBrowserRedirect: true,
+        queryParams: {
+          // consent 강제는 매번 「앱 미인증」경고·부가 화면 노출을 늘림 → select_account만
+          prompt: 'select_account',
+        },
+      },
+    });
+
+    if (error) {
+      return { error: formatSupabaseAuthError(error.message) };
+    }
+    if (!data.url) {
+      return { error: 'Google 로그인 페이지를 열지 못했어요.' };
+    }
+
+    // ISS-040 진단용 — data.url에는 client_secret이 없어 로그 노출 안전
+    if (__DEV__) {
+      try {
+        const u = new URL(data.url);
+        console.log('[oauth-debug] authorize URL host:', u.origin + u.pathname);
+        console.log('[oauth-debug] redirect_uri:', u.searchParams.get('redirect_uri'));
+        console.log('[oauth-debug] client_id:', u.searchParams.get('client_id'));
+        console.log('[oauth-debug] scope:', u.searchParams.get('scope'));
+        console.log('[oauth-debug] prompt:', u.searchParams.get('prompt'));
+        console.log('[oauth-debug] has code_challenge:', !!u.searchParams.get('code_challenge'));
+        console.log('[oauth-debug] has state:', !!u.searchParams.get('state'));
+      } catch (e) {
+        console.log('[oauth-debug] failed to parse data.url', e);
+      }
+    }
+
+    const callbackPromise = waitForOAuthCallbackUrl({
+      ignoreInitialUrl: true,
+      flowId,
+    });
+
+    const opened = await openOAuthUrl(data.url);
+    if (!opened) {
+      return { error: 'Google 로그인 페이지를 열지 못했어요.' };
+    }
+
+    const callbackUrl = await callbackPromise;
+
+    if (callbackUrl) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const sessionResult = await createSessionFromOAuthUrl(callbackUrl);
+      if (!sessionResult.error || (await hasOAuthSessionUser())) {
+        await dismissBrowserSafe();
+        return { error: null };
+      }
+      return sessionResult;
+    }
+
+    if (await waitForOAuthSession(3000)) {
+      await dismissBrowserSafe();
+      return { error: null };
+    }
+
+    if (await hasOAuthSessionUser()) {
+      await dismissBrowserSafe();
+      return { error: null };
+    }
+
     return { error: null, cancelled: true };
+  } finally {
+    googleOAuthRunning = false;
+    endOAuthFlow();
+    await dismissBrowserSafe();
   }
-  if (result.type !== 'success') {
-    return { error: 'Google 로그인이 완료되지 않았어요.' };
-  }
-
-  return createSessionFromOAuthUrl(result.url);
 }
+
+export { createSessionFromOAuthUrl } from './oauthExchange';

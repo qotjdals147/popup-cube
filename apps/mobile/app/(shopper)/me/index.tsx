@@ -18,7 +18,8 @@ const QUICK_ACTIONS = [
 /** §60 4-B — 쿠팡형 「마이」 허브 (네이티브 · WebView는 주문/배송지 화면에서만) */
 export default function MeHubScreen() {
   const router = useRouter();
-  const { userId, email, nickname, loading: authLoading } = useAuth();
+  const { userId, email, nickname, bootstrapping, loading } = useAuth();
+  const authPending = bootstrapping || loading;
   const unreadNotifications = useShopperNotificationBadge();
   const { colors, isDark } = useTheme();
   useRestoreSystemChromeOnFocus();
@@ -140,15 +141,16 @@ export default function MeHubScreen() {
   );
 
   useEffect(() => {
-    if (!authLoading && !userId) {
+    if (!authPending && !userId) {
       router.replace('/');
     }
-  }, [authLoading, userId, router]);
+  }, [authPending, userId, router]);
 
-  if (authLoading) {
+  if (authPending) {
     return (
       <View style={styles.loadingWrap}>
         <ActivityIndicator color={colors.primary} size="large" />
+        <Text style={{ color: colors.textMuted, marginTop: 12, fontSize: 14 }}>로그인 확인 중…</Text>
       </View>
     );
   }
