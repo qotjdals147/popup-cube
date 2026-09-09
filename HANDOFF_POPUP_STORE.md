@@ -627,7 +627,7 @@ npm run dev
 - [ ] **§7.72 AD-078 OAuth 개발자 콘솔 (2026-09-01)** — Google ✅ · Kakao/Naver ⏸️ 사업자 |
 - [x] **§7.73 Google 로그인 버튼 + OAuth (2026-09-01)** — `login.tsx` · `googleSignIn.ts` · User实기 **✅ §7.78**
 - [x] **§7.78 Google OAuth openBrowserAsync (2026-09-08)** — Expo Go **1회 ✅** · 반복 시 ISS-040 재발
-- [x] **§7.84 Google 네이티브 + Dev Client (2026-09-09 · AD-079)** — User实기 **✅** · Google → **홈** · **commit ⬜**
+- [x] **§7.84 Google 네이티브 + Dev Client (2026-09-09 · AD-079)** — User实기 **✅** · git **`15dbb4a`**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -765,9 +765,9 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§7.84 Google Dev Client ✅** — 네이티브 로그인实机 합격 · **commit ⬜** |
+| **한 줄 요약** | **§7.84 Google Dev Client ✅** — git **`15dbb4a`** |
 | **User实기** | §7.84 **✅** (2026-09-09) — POP-UP CUBE Dev Client · Google → **홈** |
-| **다음 에이전트 1순위** | ① **commit & push** (§7.84 전체) · ② 로그아웃×3 재확인 · ③ Kakao/Naver · AD-034 |
+| **다음 에이전트 1순위** | ① 로그아웃×3 재확인 · ② Kakao/Naver · AD-034 |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
 
@@ -879,11 +879,11 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — **§7.84 Google Dev Client ✅** — User实기 **✅** · **commit ⬜**
+**최신** — **§7.84 Google Dev Client ✅** — git **`15dbb4a`**
 
 | | |
 |---|---|
-| **다음 우선 (에이전트)** | ① §7.84 **commit & push** · ② 로그아웃×3 · ③ Kakao/Naver |
+| **다음 우선 (에이전트)** | ① 로그아웃×3 · ② Kakao/Naver |
 | **User实기** | §7.84 **✅** — POP-UP CUBE · Google → **홈** |
 | **상세** | **§7.84** (최신) · §7.82 · §7.78~81 (Expo Go fallback) |
 
@@ -1496,7 +1496,7 @@ npx expo start --tunnel --port 8082 --clear
 |---|---|
 | **결과** | User实기 **✅** — POP-UP CUBE Dev Client · **Google로 시작하기 → 홈** |
 | **Scope** | `@react-native-google-signin/google-signin` + `signInWithIdToken` · EAS Dev Client · Google Cloud Android OAuth client |
-| **Git** | **전부 미커밋** — User 「commit」 요청 시 push |
+| **Git** | **`15dbb4a`** pushed `main` |
 | **AD** | AD-079 · AD-078 (Google Phase 1 완료) |
 
 #### 배경 (§7.78~81 → §7.82)
@@ -1589,7 +1589,7 @@ npx expo start --dev-client --tunnel --port 8082 --clear
 
 #### 다음
 
-- [ ] **commit & push** (User 요청 시)
+- [x] **commit & push** — **`15dbb4a`**
 - [ ] Dev Client — **로그아웃 → Google ×3** 재확인
 - [ ] Google consent **로고** · Testing → Production
 - [ ] Kakao / Naver (사업자 후)
@@ -3800,7 +3800,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-09-09 — Google native sign-in + Dev Client User实기 ✅ (§7.84 · AD-079)
 - **Author:** Cursor Agent + User
 - **Changed:** `googleSignInNative.ts` · `oauthQueryParams.ts` · `oauthRedirect.ts` · `oauthExchange.ts` · `AuthContext.tsx` · `app.config.ts` · `package.json` · `.env` · EAS builds · HANDOFF §7.84 · ISS-040/041/042
-- **Notes:** Expo Go Gmail ISS **Dev Client 네이티브로 우회 ✅** · ExpoCrypto/JWT clock skew 해결 · **commit ⬜** · 실기: §7.84 Dev Client 4줄
+- **Notes:** Expo Go Gmail ISS **Dev Client 네이티브로 우회 ✅** · ExpoCrypto/JWT clock skew 해결 · git **`15dbb4a`** · 실기: §7.84 Dev Client 4줄
 
 ### 2026-09-08 pm2 — OAuth stale URL + error flash fix (§7.79)
 - **Author:** Cursor Agent + User
