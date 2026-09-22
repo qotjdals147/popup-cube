@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.87` 최신 (CEO·쿠폰)** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.88` 최신 (점주 리뷰)** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -566,6 +566,7 @@ npm run dev
 | AD-078 | **(진행 · User 2026-08-27) 소셜 로그인** — **Google ✅ Dev Client实机(§7.84)** · 버튼 UX **AD-080** · **카카오 · 네이버 ⏸️** (+ iOS **Apple** if other social) · **Supabase Auth** · **AD-034** 후속 · §33.1 | User 2026-08-27 | 2026-08-27 |
 | AD-079 | **(구현 ✅ · User实机 ✅ 2026-09-09) Google 네이티브 로그인 + EAS Dev Client** — `@react-native-google-signin/google-signin` + `signInWithIdToken` · Expo Go 브라우저 OAuth **fallback 유지**(ISS-040 Gmail 잔존) · **Dev Client = 표준 Google 테스트 경로** · §7.84 | User 2026-09-09 | 2026-09-09 |
 | AD-080 | **(확정 · User 2026-09-16) 손님 SNS 로그인 버튼 카피·레이아웃** — 이메일 로그인 **아래** · 버튼 = **로고 + 「로그인」** (제공자명 **버튼 글자에 중복 ❌**) · `SocialLoginRow` · `assets/google-wordmark.png` · §0 · §25 · §7.86 | User 2026-09-16 | 2026-09-16 |
+| AD-082 | **(구현 ✅ · 2026-09-22) 점주 리뷰 관리 P1** — `OwnerReviewsPanel` · **리뷰** 탭 · `get_store_reviews` · `set_owner_review_reply` · 손님 상세 **판매자 답글** · §7.88 · §58 #8 P1 | User 2026-09-22 | 2026-09-22 |
 | AD-081 | **(확정 · CEO·User 2026-09-22) 쿠폰·플랫폼 프로모 정책** — **실질** = 매장당 **HOT SKU 1개** · **플랫폼 3~4% 보조금** · 점주 **할인 전 정산** · **체감** = **손님 쿠폰 탭·쿠폰함 UX**(생색·「아싸 할인」) · 손님에게 **「플랫폼 부담 4%」문구 ❌** · PG 후 **보조금 정산 자동** · §7.87 · §53.9.1 | CEO·User 2026-09-22 | 2026-09-22 |
 | AD-062 | **(확정) v1 = 팝업 쇼핑몰 런칭 · 픽셀 월드 v2 보존** — CEO(mr심) 2026-08-13: Google 실물=PG 확정 · 월드+PG UX 이질감 · **에이블리/룩핀형 쇼핑몰**로 v1 출시. **코드 삭제 금지** — `/play`·Phaser·WebView·fixture·socket = **`legacy/world-v1` 보관** · 손님 **기본 진입 = 상품 쇼핑**(ShopPanel·ProductDetailModal·CartDrawer). v2/이벤트 = **2D 픽셀 재활용 또는 그래픽 업grade(영상·360 등) 별도 판단**. 상세 **§57** | User·CEO 2026-08-13 | 2026-08-13 |
 | AD-063 | **(확정) v1 런칭 범위 · 점주센터 정리** — **팝업 점주 입점 → 팝업 상품만 판매** 플랫폼. 점주 PC **대부분 유지** · **「매장 꾸미기(layout)」탭 v1 숨김**(코드 유지) · 손님 **월드 우회→쇼핑** · P1=리뷰답글·KPI·팝업기간 UI. 실행 순서 **§58** | User 2026-08-13 | 2026-08-13 |
@@ -787,10 +788,10 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§7.87 CEO·쿠폰 정책 (AD-081)** · PG **`§7.85`** · Google **`15dbb4a`** |
-| **User实기** | §7.84 **✅** Google Dev Client · §7.86 로그인 UX **⬜** |
-| **CEO·사업 Q** | **쿠폰·할인·밀어주기** → **§7.87** (에이전트·CTO 동일 답변) |
-| **다음 에이전트 1순위** | ① Google 로그아웃×3 · ② Kakao/Naver · AD-034 · **PG = AD-061 게이트** |
+| **한 줄 요약** | **§7.88 점주 리뷰 관리 (AD-082)** · git **push 후** |
+| **User实기** | §7.84 Google **✅** · §7.88 점주 **리뷰 탭** **⬜** |
+| **CEO·사업 Q** | **쿠폰·할인** → **§7.87** |
+| **다음 에이전트 1순위** | ① §7.88 **PC 실기** · ② §58 P1 **KPI** · Kakao ⏸️ · **PG = AD-061** |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
 
@@ -1518,6 +1519,51 @@ npx expo start --tunnel --port 8082 --clear
 
 - User实기 **⬜** → 합격 시 **commit & push**
 - ISS-040 잔존 시: consent 로고 · EAS Dev Client 검토
+
+---
+
+### 7.88 세션 인수인계 — **2026-09-22** (AD-082 · **점주 리뷰 관리 P1**)
+
+| | |
+|---|---|
+| **Scope** | 점주 PC **「리뷰」** 탭 · 목록(전체/답글 필요/답글 완료) · **판매자 답글** 등록·수정 · 손님 상세 **판매자 답글** 노출 |
+| **Git** | **push 후** commit hash 기록 |
+| **DB** | migration `20260922_owner_review_reply.sql` · Supabase **✅** (`owner_review_reply` + `owner_review_reply_rpc`) |
+| **AD** | AD-082 · §58 #8 P1 |
+
+#### 코드
+
+| | |
+|---|---|
+| **UI** | `OwnerReviewsPanel.tsx` · `StoreEditPage` tab `reviews` · 사이드바 **답글 필요** 뱃지 |
+| **API** | `get_store_reviews` · `set_owner_review_reply` · `reviews.ts` |
+| **손님** | `ProductDetailModal` — `owner_reply_body` |
+
+#### User 실기 (§0 — **PC 웹 3줄** + Expo 4줄 **생략 가능**)
+
+1) **Win → `cmd` → Enter**  
+2) **한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) 브라우저 → Local URL → `demo@owner.com` / `demo` → GUCCI **편집** → **리뷰** 탭  
+4) 리뷰 있으면 **답글 등록** → 손님 `/shop` 상품 상세 **판매자 답글** 확인 (Vercel push **1~2min** 또는 local web)
+
+#### Expo 재시작 여부
+
+| 이번 | Expo | User |
+|---|---|---|
+| §7.88 | ❌ **`apps/web`만** | **Vercel 1~2min** 또는 **local `npm run dev`** · WebView 상세 탭 재진입 |
+
+#### 다음
+
+- [ ] User **PC 실기** ⬜  
+- [ ] §58 P1 **KPI·상품별 통계**  
+- [ ] 리뷰 **신고(P2)**  
 
 ---
 
@@ -4002,6 +4048,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-09-22 pm — 점주 리뷰 관리 P1 (§7.88 · AD-082)
+- **Author:** Cursor Agent + User
+- **Changed:** `OwnerReviewsPanel` · `StoreEditPage` · `ProductDetailModal` · `reviews.ts` · `types.ts` · `ko.ts` · migration `20260922_owner_review_reply.sql` · HANDOFF §7.88
+- **Notes:** Supabase RPC **✅** · **Expo ❌** · PC **§0 3줄** · Vercel **1~2min**
+
 ### 2026-09-22 — CEO·쿠폰·플랫폼 HOT SKU + login UX + §0 push 규칙
 - **Author:** Cursor Agent + User(CTO) + CEO 확답
 - **Changed:** HANDOFF §7.87 · AD-081 · §53.9.1 · §0 Git push · `SocialLoginRow` · `login.tsx` · `google-wordmark.png` · §7.85~86
@@ -6455,7 +6506,7 @@ purchase_confirmed ← 자동: 주문(결제)일 + 7일, 수동 미확정 시 (A
 | # | 메뉴 (점주 PC) | 지금 | 권장 Phase | PG | 메모 |
 |---|---|---|---|---|---|
 | **1** | **반품·교환 관리** | 🔶 클레임 v1 (주문 카드 안) | **AD-073 R1→R4** · **AD-074 정책** · **AD-076 반품지** | mock OK | **PG 전 1순위** · §7.48~§7.50 |
-| **2** | **리뷰 관리** | 손님 작성 ✅ · 점주 답글 ❌ | **§58 #8 P1** | mock OK | 상품별 목록 · 답글 · (P2) 신고 |
+| **2** | **리뷰 관리** | **점주 답글 ✅ AD-082** · §7.88 | **§58 #8 P1** | mock OK | (P2) 신고 · 필터 UX |
 | **3** | **상품별 판매 통계** | 🔶 주문 목록만 | **P1-B** `/home` KPI + **상품 탭 미니 차트** | mock OK | 팝업 기간 **매출·주문수·TOP SKU** |
 | **4** | **쿠폰 관리** | 매장 `%` 할인·가챠만 (AD-028) | **P1-C** | mock 발급 OK | **CEO·AD-081:** **플랫폼 HOT SKU 보조금** + **손님 쿠폰 탭(심리 UX)** · §53.9.1 · 점주 자체 쿠폰 = 2차 |
 | **5** | **기획전 관리** | ❌ | **P2** | — | 홈 **큐레이션 존** · 매장 묶음 · (플랫폼 Admin 연계) |

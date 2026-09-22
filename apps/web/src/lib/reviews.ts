@@ -1,4 +1,4 @@
-import type { ProductReview } from '@popup-cube/shared';
+import type { OwnerStoreReview, ProductReview } from '@popup-cube/shared';
 import { supabase } from './supabase';
 
 /** §54 — 리뷰 사진 최대 크기/장수 */
@@ -64,5 +64,19 @@ export async function submitProductReview(userId: string, input: SubmitReviewInp
     p_image_urls: imageUrls,
   });
 
+  if (error) throw new ReviewError(error.message);
+}
+
+export async function getStoreReviews(storeId: string): Promise<OwnerStoreReview[]> {
+  const { data, error } = await supabase.rpc('get_store_reviews', { p_store_id: storeId });
+  if (error) throw new ReviewError(error.message);
+  return (data ?? []) as OwnerStoreReview[];
+}
+
+export async function setOwnerReviewReply(reviewId: string, body: string): Promise<void> {
+  const { error } = await supabase.rpc('set_owner_review_reply', {
+    p_review_id: reviewId,
+    p_body: body,
+  });
   if (error) throw new ReviewError(error.message);
 }

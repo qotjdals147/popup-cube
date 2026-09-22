@@ -291,6 +291,16 @@ export function ProductDetailModal({
                             ))}
                           </div>
                         )}
+                        {r.owner_reply_body?.trim() && (
+                          <div style={styleFor(light, S.ownerReplyBoxLayout, S.ownerReplyBoxDark)}>
+                            <span style={styleFor(light, S.ownerReplyTitleLayout, S.ownerReplyTitleDark)}>
+                              {t('productDetail.ownerReplyPrefix')}
+                            </span>
+                            <p style={styleFor(light, S.ownerReplyBodyLayout, S.ownerReplyBodyDark)}>
+                              {r.owner_reply_body}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -454,6 +464,12 @@ const S = {
   reviewBodyDark: { color: '#c9d4ee' },
   reviewPhotoRow: { display: 'flex', flexWrap: 'wrap' as const, gap: 6 },
   reviewPhoto: { width: 64, height: 64, borderRadius: 8, objectFit: 'cover' as const },
+  ownerReplyBoxLayout: { marginTop: 10, padding: 10, borderRadius: 8, background: '#f2f4f6' },
+  ownerReplyBoxDark: { background: '#0d1730', border: '1px solid #2c4270' },
+  ownerReplyTitleLayout: { fontSize: 11, fontWeight: 700, color: '#4e5968', display: 'block', marginBottom: 4 },
+  ownerReplyTitleDark: { color: '#9fb0d0' },
+  ownerReplyBodyLayout: { fontSize: 12.5, lineHeight: 1.55, margin: 0, whiteSpace: 'pre-wrap' as const, color: '#191f28' },
+  ownerReplyBodyDark: { color: '#d8e4ff' },
   buyBarLayout: {
     flexShrink: 0,
     display: 'flex',

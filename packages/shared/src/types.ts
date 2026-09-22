@@ -155,6 +155,25 @@ export interface ProductReview {
   created_at: string;
   reviewer_nickname: string | null;
   image_urls: string[];
+  owner_reply_body?: string | null;
+  owner_reply_at?: string | null;
+}
+
+/** §58 P1 — 점주 PC 리뷰 관리 목록 (`get_store_reviews`). */
+export interface OwnerStoreReview {
+  review_id: string;
+  product_id: string;
+  product_name: string;
+  order_id: string;
+  order_number: number;
+  store_code: string;
+  rating: number;
+  body: string;
+  created_at: string;
+  reviewer_nickname: string | null;
+  image_urls: string[];
+  owner_reply_body: string | null;
+  owner_reply_at: string | null;
 }
 
 /** 장바구니 담기 MVP(§10) — 아직 서버/DB에 저장하지 않는 클라이언트 전용 상태. */

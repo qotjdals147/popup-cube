@@ -12,6 +12,7 @@ import type { OwnerOrderFocus } from '../lib/ownerOrderFocus';
 import { OwnerDisplayPanel } from '../components/OwnerDisplayPanel';
 import { OwnerStorePolicyPanel } from '../components/OwnerStorePolicyPanel';
 import { OwnerPromotionPanel } from '../components/OwnerPromotionPanel';
+import { OwnerReviewsPanel } from '../components/OwnerReviewsPanel';
 import { DemoToast } from '../components/DemoToast';
 import { useOwnerOrderRealtime } from '../hooks/useOwnerOrderRealtime';
 import { isValidStoreCode, normalizeStoreCode } from '../lib/orderRef';
@@ -19,8 +20,19 @@ import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/own
 import { isWorldEnabled } from '../lib/featureFlags';
 import { t } from '../i18n';
 import type { StoreSummary } from '@popup-cube/shared';
+import { getStoreReviews } from '../lib/reviews';
 
-type EditTab = 'overview' | 'products' | 'orders' | 'hold' | 'fulfillment' | 'returns' | 'promotions' | 'layout' | 'policy';
+type EditTab =
+  | 'overview'
+  | 'products'
+  | 'reviews'
+  | 'orders'
+  | 'hold'
+  | 'fulfillment'
+  | 'returns'
+  | 'promotions'
+  | 'layout'
+  | 'policy';
 
 function formatBadgeCount(n: number): string {
   if (n <= 0) return '';
@@ -33,6 +45,7 @@ export function StoreEditPage() {
   const { userId, role, loading: authLoading, signOut } = useAuth();
 
   const [tab, setTab] = useState<EditTab>('overview');
+  const [pendingReviewReplies, setPendingReviewReplies] = useState(0);
   const [store, setStore] = useState<StoreSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -168,6 +181,15 @@ export function StoreEditPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeId, ownershipChecked, ownsStore]);
 
+  useEffect(() => {
+    if (!storeId || !ownershipChecked || !ownsStore) return;
+    void getStoreReviews(storeId)
+      .then((rows) =>
+        setPendingReviewReplies(rows.filter((r) => !r.owner_reply_body?.trim()).length),
+      )
+      .catch(() => setPendingReviewReplies(0));
+  }, [storeId, ownershipChecked, ownsStore, tab]);
+
   async function handleSignOut() {
     await signOut();
     navigate('/');
@@ -293,6 +315,7 @@ export function StoreEditPage() {
   const tabs: { id: EditTab; label: string; badge?: number }[] = [
     { id: 'overview', label: t('ownerEdit.tabOverview') },
     { id: 'products', label: t('ownerEdit.tabProducts') },
+    { id: 'reviews', label: t('ownerEdit.tabReviews'), badge: pendingReviewReplies },
     { id: 'orders', label: t('ownerEdit.tabOrders'), badge: pendingAccept },
     { id: 'hold', label: t('ownerEdit.tabHold'), badge: onHold },
     { id: 'fulfillment', label: t('ownerEdit.tabFulfillment'), badge: awaitingShip },
@@ -527,6 +550,10 @@ export function StoreEditPage() {
 
           {!loading && !error && tab === 'products' && userId && storeId && (
             <OwnerProductPanel storeId={storeId} userId={userId} embedded />
+          )}
+
+          {!loading && !error && tab === 'reviews' && storeId && (
+            <OwnerReviewsPanel storeId={storeId} onPendingCountChange={setPendingReviewReplies} />
           )}
 
           {!loading && !error && tab === 'orders' && storeId && (
