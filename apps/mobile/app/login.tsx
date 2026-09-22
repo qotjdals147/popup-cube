@@ -19,6 +19,7 @@ import {
 } from '../src/lib/nickname';
 import { colors } from '../src/theme/colors';
 import { useRestoreSystemChromeOnFocus } from '../src/hooks/useWorldImmersiveChrome';
+import { SocialLoginRow } from '../src/components/SocialLoginRow';
 
 type Mode = 'login' | 'signup';
 type NicknameStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
@@ -135,30 +136,6 @@ export default function LoginScreen() {
         <Text style={styles.subtitle}>{subtitle}</Text>
         {isOwner && <Text style={styles.hint}>{t.login.ownerPcHint}</Text>}
 
-        {showGoogleLogin && (
-          <>
-            <Pressable
-              style={[styles.googleButton, (googleSubmitting || authLoading) && styles.submitDisabled]}
-              disabled={googleSubmitting || authLoading || submitting}
-              onPress={() => void handleGoogleLogin()}
-            >
-              {googleSubmitting ? (
-                <ActivityIndicator color={colors.text} />
-              ) : (
-                <Text style={styles.googleButtonText}>{t.login.google}</Text>
-              )}
-            </Pressable>
-            {googleSubmitting && (
-              <Text style={styles.hint}>{t.login.googleBrowserHint}</Text>
-            )}
-            <View style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>{t.login.orDivider}</Text>
-              <View style={styles.dividerLine} />
-            </View>
-          </>
-        )}
-
         {mode === 'signup' && (
           <>
             <Text style={styles.label}>{t.signup.nickname}</Text>
@@ -227,6 +204,24 @@ export default function LoginScreen() {
             {mode === 'login' ? t.login.toggleSignup : t.login.toggleLogin}
           </Text>
         </Pressable>
+
+        {showGoogleLogin && (
+          <>
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>{t.login.orDivider}</Text>
+              <View style={styles.dividerLine} />
+            </View>
+            <Text style={styles.socialLabel}>{t.login.socialLoginLabel}</Text>
+            <SocialLoginRow
+              providers={['google']}
+              onGooglePress={() => void handleGoogleLogin()}
+              googleLoading={googleSubmitting}
+              disabled={submitting || authLoading}
+              hint={googleSubmitting ? t.login.googleBrowserHint : undefined}
+            />
+          </>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -238,22 +233,18 @@ const styles = StyleSheet.create({
   title: { color: colors.text, fontSize: 22, fontWeight: '700', marginBottom: 8 },
   subtitle: { color: colors.textSoft, fontSize: 14, lineHeight: 20, marginBottom: 8 },
   hint: { color: colors.textMuted, fontSize: 12, marginBottom: 16 },
-  googleButton: {
-    marginTop: 4,
-    marginBottom: 4,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
+  socialLabel: {
+    color: colors.textMuted,
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 12,
   },
-  googleButtonText: { color: '#1f1f1f', fontSize: 16, fontWeight: '600' },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginVertical: 16,
+    marginTop: 28,
+    marginBottom: 16,
   },
   dividerLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
   dividerText: { color: colors.textMuted, fontSize: 13 },
