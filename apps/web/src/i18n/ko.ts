@@ -885,6 +885,7 @@ export const ko = {
     filterPending: '답글 필요',
     filterReplied: '답글 완료',
     productFilterLabel: '상품별 보기',
+    productSectionLabel: '등록 상품',
     productFilterAll: '전체 상품',
     productReviewCount: '{count}건',
     productThumbAlt: '{name} 상품 이미지',

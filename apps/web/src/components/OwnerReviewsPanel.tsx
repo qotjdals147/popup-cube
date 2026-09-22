@@ -172,7 +172,7 @@ export function OwnerReviewsPanel({ storeId, onPendingCountChange }: OwnerReview
             </button>
           ))}
         </div>
-        {products.length > 1 && (
+        {products.length > 0 && (
           <div style={styles.productFilterBlock}>
             <span style={styles.productFilterHeading}>{t('ownerReviews.productFilterLabel')}</span>
             <div style={styles.productFilterRow} role="list">
@@ -249,19 +249,24 @@ export function OwnerReviewsPanel({ storeId, onPendingCountChange }: OwnerReview
 
           return (
             <article key={review.review_id} style={styles.card}>
-              <header style={styles.cardTop}>
+              <div style={styles.productBand}>
+                <span style={styles.productBandLabel}>{t('ownerReviews.productSectionLabel')}</span>
                 <div style={styles.productRow}>
                   <ProductThumb
                     name={review.product_name}
                     imageUrl={review.product_image_url ?? null}
-                    size={56}
+                    size={64}
                   />
                   <div style={styles.productText}>
                     <span style={styles.productName}>{review.product_name}</span>
-                    <span style={styles.meta}>
-                      {orderRef} · {formatClaimDateTime(review.created_at)}
-                    </span>
                   </div>
+                </div>
+              </div>
+              <header style={styles.cardTop}>
+                <div style={styles.orderMetaBlock}>
+                  <span style={styles.meta}>
+                    {orderRef} · {formatClaimDateTime(review.created_at)}
+                  </span>
                 </div>
                 {!hasReply && <span style={styles.badgePending}>{t('ownerReviews.badgePending')}</span>}
                 {hasReply && <span style={styles.badgeDone}>{t('ownerReviews.badgeReplied')}</span>}
@@ -348,9 +353,24 @@ const styles: Record<string, CSSProperties> = {
   card: {
     border: `1px solid ${oc.border}`,
     borderRadius: 12,
-    padding: 16,
+    padding: 0,
+    overflow: 'hidden',
     background: oc.surface,
     fontFamily: ownerFont,
+  },
+  productBand: {
+    padding: '12px 16px',
+    background: oc.surfaceMuted,
+    borderBottom: `1px solid ${oc.border}`,
+  },
+  productBandLabel: {
+    display: 'block',
+    fontSize: fs.xs,
+    fontWeight: 700,
+    color: oc.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
+    marginBottom: 8,
   },
   cardTop: {
     display: 'flex',
@@ -358,7 +378,9 @@ const styles: Record<string, CSSProperties> = {
     alignItems: 'flex-start',
     gap: 12,
     marginBottom: 10,
+    padding: '12px 16px 0',
   },
+  orderMetaBlock: { minWidth: 0, flex: 1 },
   productRow: { display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 },
   productText: { minWidth: 0 },
   productName: { display: 'block', fontWeight: 700, fontSize: fs.base, color: oc.text },
@@ -418,13 +440,20 @@ const styles: Record<string, CSSProperties> = {
     background: oc.navActiveBg,
     color: oc.primary,
   },
-  ratingRow: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 },
+  ratingRow: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, padding: '0 16px' },
   stars: { color: '#f59e0b', fontSize: 14, letterSpacing: 1 },
   nickname: { fontSize: fs.sm, color: oc.textMuted },
-  body: { margin: '0 0 10px', fontSize: fs.sm, color: oc.text, lineHeight: 1.5, whiteSpace: 'pre-wrap' },
-  photoRow: { display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
+  body: {
+    margin: '0 0 10px',
+    padding: '0 16px',
+    fontSize: fs.sm,
+    color: oc.text,
+    lineHeight: 1.5,
+    whiteSpace: 'pre-wrap',
+  },
+  photoRow: { display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12, padding: '0 16px' },
   photo: { width: 72, height: 72, objectFit: 'cover', borderRadius: 8, border: `1px solid ${oc.border}` },
-  replyBox: { marginTop: 8, paddingTop: 12, borderTop: `1px solid ${oc.border}` },
+  replyBox: { marginTop: 8, padding: '12px 16px 16px', borderTop: `1px solid ${oc.border}` },
   replyLabel: { display: 'block', fontSize: fs.sm, fontWeight: 600, color: oc.text, marginBottom: 6 },
   textarea: {
     width: '100%',
