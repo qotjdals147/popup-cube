@@ -49,7 +49,7 @@ REVOKE ALL ON FUNCTION public.get_product_reviews(uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.get_product_reviews(uuid) TO anon, authenticated;
 
 -- 점주 PC — 매장 전체 리뷰 목록
-CREATE OR REPLACE FUNCTION public.get_store_reviews(p_store_id uuid)
+CREATE OR REPLACE FUNCTION public.get_store_reviews(p_store_id character varying)
 RETURNS TABLE(
   review_id uuid,
   product_id uuid,
@@ -85,7 +85,7 @@ BEGIN
   SELECT
     r.id,
     p.id,
-    p.name,
+    p.name::text,
     r.order_id,
     o.order_number::integer,
     s.store_code,
@@ -111,8 +111,8 @@ BEGIN
 END;
 $function$;
 
-REVOKE ALL ON FUNCTION public.get_store_reviews(uuid) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.get_store_reviews(uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.get_store_reviews(character varying) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_store_reviews(character varying) TO authenticated;
 
 -- 점주 — 답글 저장 (본인 매장 리뷰만)
 CREATE OR REPLACE FUNCTION public.set_owner_review_reply(

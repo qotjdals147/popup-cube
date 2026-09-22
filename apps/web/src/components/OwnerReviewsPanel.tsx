@@ -35,7 +35,8 @@ export function OwnerReviewsPanel({ storeId, onPendingCountChange }: OwnerReview
       setReviews(data);
       const pending = data.filter((r) => !r.owner_reply_body?.trim()).length;
       onPendingCountChange?.(pending);
-    } catch {
+    } catch (err) {
+      console.error('[owner-reviews] load failed:', err);
       setError(true);
       onPendingCountChange?.(0);
     } finally {

@@ -1529,6 +1529,7 @@ npx expo start --tunnel --port 8082 --clear
 | **Scope** | 점주 PC **「리뷰」** 탭 · 목록(전체/답글 필요/답글 완료) · **판매자 답글** 등록·수정 · 손님 상세 **판매자 답글** 노출 |
 | **Git** | **push 후** commit hash 기록 |
 | **DB** | migration `20260922_owner_review_reply.sql` · Supabase **✅** (`owner_review_reply` + `owner_review_reply_rpc`) |
+| **ISS** | **`get_store_reviews` `p_store_id` = `character varying`** (`stores.id` = `popup_*`) — uuid RPC면 **「리뷰 목록을 불러오지 못했어요」** · fix `20260922b_fix_get_store_reviews_store_id.sql` **✅ remote** |
 | **AD** | AD-082 · §58 #8 P1 |
 
 #### 코드
@@ -4047,6 +4048,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-09-22 pm — fix owner review list RPC store id type (§7.88)
+- **Author:** Cursor Agent + User
+- **Changed:** `20260922b_fix_get_store_reviews_store_id.sql` · `20260922_owner_review_reply.sql` GRANT · `OwnerReviewsPanel` load error log · HANDOFF §7.88 ISS
+- **Notes:** Supabase **✅** · **Expo ❌** · hard refresh / local `npm run dev`
 
 ### 2026-09-22 pm — 점주 리뷰 관리 P1 (§7.88 · AD-082)
 - **Author:** Cursor Agent + User
