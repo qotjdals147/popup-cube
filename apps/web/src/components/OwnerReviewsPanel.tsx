@@ -8,6 +8,67 @@ import { t } from '../i18n';
 
 type ReviewFilter = 'all' | 'pending' | 'replied';
 
+interface StoreProductReviewSummary {
+  product_id: string;
+  product_name: string;
+  product_image_url: string | null;
+  review_count: number;
+}
+
+function productSummaries(reviews: OwnerStoreReview[]): StoreProductReviewSummary[] {
+  const map = new Map<string, StoreProductReviewSummary>();
+  for (const r of reviews) {
+    const existing = map.get(r.product_id);
+    if (existing) {
+      existing.review_count += 1;
+    } else {
+      map.set(r.product_id, {
+        product_id: r.product_id,
+        product_name: r.product_name,
+        product_image_url: r.product_image_url ?? null,
+        review_count: 1,
+      });
+    }
+  }
+  return [...map.values()].sort((a, b) => a.product_name.localeCompare(b.product_name, 'ko'));
+}
+
+function ProductThumb({
+  name,
+  imageUrl,
+  size,
+  style,
+}: {
+  name: string;
+  imageUrl: string | null;
+  size: number;
+  style?: CSSProperties;
+}) {
+  const box: CSSProperties = {
+    width: size,
+    height: size,
+    borderRadius: 8,
+    border: `1px solid ${oc.border}`,
+    background: oc.surfaceMuted,
+    flexShrink: 0,
+    overflow: 'hidden',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...style,
+  };
+  if (imageUrl) {
+    return <img src={imageUrl} alt={t('ownerReviews.productThumbAlt', { name })} style={{ ...box, objectFit: 'cover' }} />;
+  }
+  return (
+    <div style={box} aria-hidden>
+      <span style={{ fontSize: 10, color: oc.textMuted, textAlign: 'center', padding: 4, lineHeight: 1.2 }}>
+        {t('ownerReviews.noProductImage')}
+      </span>
+    </div>
+  );
+}
+
 interface OwnerReviewsPanelProps {
   storeId: string;
   onPendingCountChange?: (count: number) => void;
@@ -23,6 +84,7 @@ export function OwnerReviewsPanel({ storeId, onPendingCountChange }: OwnerReview
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [filter, setFilter] = useState<ReviewFilter>('all');
+  const [productFilter, setProductFilter] = useState<string>('all');
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
   const [saveErrorId, setSaveErrorId] = useState<string | null>(null);
@@ -48,15 +110,21 @@ export function OwnerReviewsPanel({ storeId, onPendingCountChange }: OwnerReview
     void reload();
   }, [reload]);
 
+  const products = useMemo(() => productSummaries(reviews), [reviews]);
+
   const filtered = useMemo(() => {
+    let list = reviews;
+    if (productFilter !== 'all') {
+      list = list.filter((r) => r.product_id === productFilter);
+    }
     if (filter === 'pending') {
-      return reviews.filter((r) => !r.owner_reply_body?.trim());
+      return list.filter((r) => !r.owner_reply_body?.trim());
     }
     if (filter === 'replied') {
-      return reviews.filter((r) => Boolean(r.owner_reply_body?.trim()));
+      return list.filter((r) => Boolean(r.owner_reply_body?.trim()));
     }
-    return reviews;
-  }, [reviews, filter]);
+    return list;
+  }, [reviews, filter, productFilter]);
 
   async function handleSave(review: OwnerStoreReview) {
     const text = (draft[review.review_id] ?? review.owner_reply_body ?? '').trim();
@@ -86,23 +154,61 @@ export function OwnerReviewsPanel({ storeId, onPendingCountChange }: OwnerReview
 
   function filterButtons() {
     return (
-      <div style={styles.listFilters} role="tablist" aria-label={t('ownerReviews.filterLabel')}>
-        {(['all', 'pending', 'replied'] as const).map((key) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={filter === key}
-            style={{
-              ...styles.listFilterChip,
-              ...(filter === key ? styles.listFilterChipActive : {}),
-            }}
-            onClick={() => setFilter(key)}
-          >
-            {t(`ownerReviews.filter${key.charAt(0).toUpperCase()}${key.slice(1)}`)}
-          </button>
-        ))}
-      </div>
+      <>
+        <div style={styles.listFilters} role="tablist" aria-label={t('ownerReviews.filterLabel')}>
+          {(['all', 'pending', 'replied'] as const).map((key) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={filter === key}
+              style={{
+                ...styles.listFilterChip,
+                ...(filter === key ? styles.listFilterChipActive : {}),
+              }}
+              onClick={() => setFilter(key)}
+            >
+              {t(`ownerReviews.filter${key.charAt(0).toUpperCase()}${key.slice(1)}`)}
+            </button>
+          ))}
+        </div>
+        {products.length > 1 && (
+          <div style={styles.productFilterBlock}>
+            <span style={styles.productFilterHeading}>{t('ownerReviews.productFilterLabel')}</span>
+            <div style={styles.productFilterRow} role="list">
+              <button
+                type="button"
+                role="listitem"
+                style={{
+                  ...styles.productFilterChip,
+                  ...(productFilter === 'all' ? styles.productFilterChipActive : {}),
+                }}
+                onClick={() => setProductFilter('all')}
+              >
+                {t('ownerReviews.productFilterAll')}
+              </button>
+              {products.map((p) => (
+                <button
+                  key={p.product_id}
+                  type="button"
+                  role="listitem"
+                  style={{
+                    ...styles.productFilterChip,
+                    ...(productFilter === p.product_id ? styles.productFilterChipActive : {}),
+                  }}
+                  onClick={() => setProductFilter(p.product_id)}
+                >
+                  <ProductThumb name={p.product_name} imageUrl={p.product_image_url} size={28} style={{ borderRadius: 6 }} />
+                  <span style={styles.productFilterName}>{p.product_name}</span>
+                  <span style={styles.productFilterCount}>
+                    {t('ownerReviews.productReviewCount', { count: String(p.review_count) })}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </>
     );
   }
 
@@ -144,11 +250,18 @@ export function OwnerReviewsPanel({ storeId, onPendingCountChange }: OwnerReview
           return (
             <article key={review.review_id} style={styles.card}>
               <header style={styles.cardTop}>
-                <div>
-                  <span style={styles.productName}>{review.product_name}</span>
-                  <span style={styles.meta}>
-                    {orderRef} · {formatClaimDateTime(review.created_at)}
-                  </span>
+                <div style={styles.productRow}>
+                  <ProductThumb
+                    name={review.product_name}
+                    imageUrl={review.product_image_url ?? null}
+                    size={56}
+                  />
+                  <div style={styles.productText}>
+                    <span style={styles.productName}>{review.product_name}</span>
+                    <span style={styles.meta}>
+                      {orderRef} · {formatClaimDateTime(review.created_at)}
+                    </span>
+                  </div>
                 </div>
                 {!hasReply && <span style={styles.badgePending}>{t('ownerReviews.badgePending')}</span>}
                 {hasReply && <span style={styles.badgeDone}>{t('ownerReviews.badgeReplied')}</span>}
@@ -246,7 +359,46 @@ const styles: Record<string, CSSProperties> = {
     gap: 12,
     marginBottom: 10,
   },
+  productRow: { display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 },
+  productText: { minWidth: 0 },
   productName: { display: 'block', fontWeight: 700, fontSize: fs.base, color: oc.text },
+  productFilterBlock: { marginBottom: 16 },
+  productFilterHeading: {
+    display: 'block',
+    fontSize: fs.xs,
+    fontWeight: 600,
+    color: oc.textMuted,
+    marginBottom: 8,
+    fontFamily: ownerFont,
+  },
+  productFilterRow: { display: 'flex', flexWrap: 'wrap', gap: 8 },
+  productFilterChip: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 8,
+    maxWidth: '100%',
+    padding: '6px 12px 6px 6px',
+    borderRadius: 999,
+    border: `1px solid ${oc.border}`,
+    background: oc.surface,
+    color: oc.textSecondary,
+    fontSize: fs.sm,
+    fontFamily: ownerFont,
+    cursor: 'pointer',
+  },
+  productFilterChipActive: {
+    borderColor: oc.primary,
+    background: oc.navActiveBg,
+    color: oc.primary,
+    fontWeight: 600,
+  },
+  productFilterName: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    maxWidth: 160,
+  },
+  productFilterCount: { fontSize: fs.xs, color: oc.textMuted, flexShrink: 0 },
   meta: { display: 'block', fontSize: fs.sm, color: oc.textMuted, marginTop: 4 },
   badgePending: {
     flexShrink: 0,

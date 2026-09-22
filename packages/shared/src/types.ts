@@ -164,6 +164,7 @@ export interface OwnerStoreReview {
   review_id: string;
   product_id: string;
   product_name: string;
+  product_image_url: string | null;
   order_id: string;
   order_number: number;
   store_code: string;
