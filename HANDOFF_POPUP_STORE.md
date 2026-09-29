@@ -14,7 +14,7 @@
 
 - **사용자가 지시했든, 에이전트가 스스로 다음 작업을 이어가든 — 새 작업(요청/할 일)을 시작할 때마다** 이 `## 0. Handoff Protocol`을 다시 읽고 따른다.
 - 같은 세션 안에서 이미 한 번 읽었어도, 다음 작업으로 넘어갈 때 **다시** §0을 확인한다 `(대화가 길어지며 규칙을 놓치는 것을 방지)`.
-- 특히 아래는 매번 재확인: **브리핑 형식(§0 하단)**, **모델 추천(§24)**, **HANDOFF 실시간 갱신**, **Git commit+push 즉시(§0)**, **한국어 대화 규칙**, **UI/UX · 쇼핑몰 퀄리티(§0)**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · **축약·「--clear 후 매장→」식 금지**), **Expo 재시작 여부 표(§0 · commit/push·테스트 안내 시 필수 동반)**, **기능 구현 연관점(§62 · 주문번호·알림·재고·RPC·양쪽 UI)**.
+- 특히 아래는 매번 재확인: **브리핑 형식(§0 하단)**, **모델 추천(§24)**, **HANDOFF 실시간 갱신**, **Git commit+push 즉시(§0 · HANDOFF만 바꿔도 push)**, **한국어 대화 규칙**, **UI/UX · 쇼핑몰 퀄리티(§0)**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · **축약·「--clear 후 매장→」식 금지**), **Expo 재시작 여부 표(§0 · commit/push·테스트 안내 시 필수 동반)**, **기능 구현 연관점(§62 · 주문번호·알림·재고·RPC·양쪽 UI)**.
 - 규칙을 지키지 못했다고 사용자가 지적하면, 즉시 인정하고 그 지점부터 규칙대로 다시 수행한다.
 
 ### 세션 시작 시
@@ -52,6 +52,7 @@
 | | 규칙 |
 |---|---|
 | **에이전트** | HANDOFF Changelog·§7 갱신과 **같은 흐름**에서 **`main` push**까지 (User 별도 지시 **기다리지 않음**) |
+| **`HANDOFF_POPUP_STORE.md` (User 2026-09-29)** | **문서만** 수정해도 **무조건** `commit` + **`origin/main` push** — 「나중에 푸시」·로컬만 보관 **❌** · push 실패 시 **즉시 재시도**하고 User에게 **ahead 커밋 hash** 알림 |
 | **한 커밋에** | 코드 + **같은 주제 HANDOFF** · `.env`·키 **❌** |
 | **web (`apps/web`)** | push → Vercel (기존: 「푸쉬해줘?」 **묻지 말고 push** — **동일 원칙 확대**) |
 | **예외** | User가 **「커밋하지 마」** 등 **명시**한 경우만 보류 |
@@ -4057,6 +4058,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-09-29 — §0 HANDOFF-only auto push + Cursor rule
+- **Author:** Cursor Agent + User
+- **Changed:** §0 Git 표 · `.cursor/rules/popup-store-handoff.mdc` (repo + workspace Cursor rules)
+- **Notes:** **`HANDOFF_POPUP_STORE.md`만 수정해도 commit+push** · **Expo ❌**
 
 ### 2026-09-22 pm — owner reviews per-product + thumbnail (§7.88)
 - **Author:** Cursor Agent + User

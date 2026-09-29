@@ -1,0 +1,21 @@
+---
+description: POP-UP CUBE — HANDOFF 갱신 시 Git push 필수
+globs: "**/*"
+alwaysApply: true
+---
+
+# POP-UP CUBE — HANDOFF & push
+
+**`HANDOFF_POPUP_STORE.md`** 가 단일 인수인계 원본이다. 상세는 **§0** 참고.
+
+## Git (예외 없음)
+
+- 의미 있는 작업이 끝나면 **항상** `commit` + **`git push origin main`** — User에게 「푸시할까요?」 **묻지 않음**.
+- **`HANDOFF_POPUP_STORE.md`만** 수정한 경우에도 **동일**: 문서 커밋 직후 **반드시 push** (로컬 ahead 방치 **금지**).
+- 코드 변경 시 **같은 주제 HANDOFF** (Changelog·§7 등)를 **같은 커밋**에 포함하는 것을 기본으로 한다.
+- `.env.local`, service_role 키, `.env` — **커밋 금지**.
+- push가 Auto-review 등으로 막히면 **재시도**; 끝까지 실패하면 User에게 **`git log origin/main..HEAD`** 로 남은 커밋을 알린다.
+
+## Supabase
+
+DB/스키마 작업 전 workspace 루트 **`.env.local`** 의 `POPUP_*` 사용 (상위 `.cursor/rules/supabase-env.mdc`).
