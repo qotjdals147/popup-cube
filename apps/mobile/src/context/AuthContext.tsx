@@ -9,6 +9,7 @@ import {
 import { resetOAuthExchangeState } from '../lib/oauthExchange';
 import { getSupabase, isSupabaseConfigured, formatSupabaseAuthError, isJwtClockSkewError } from '../lib/supabase';
 import { dismissBrowserSafe } from '../lib/webBrowserSafe';
+import { ensureProfileNickname } from '../lib/ensureProfileNickname';
 
 interface AuthState {
   userId: string | null;
@@ -84,9 +85,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         'profile'
       );
 
-      if (error) {
-        console.error('[auth] profile load failed:', error.message);
-        if (isJwtClockSkewError(error.message)) {
+      let profileRow = data;
+
+      if (!error && profileRow && (!profileRow.nickname || !String(profileRow.nickname).trim())) {
+        const ensured = await ensureProfileNickname();
+        if (ensured) {
+          const retry = await getSupabase()
+            .from('profiles')
+            .select('role, store_id, nickname')
+            .eq('id', userId)
+            .single();
+          if (!retry.error && retry.data) profileRow = retry.data;
+        }
+      }
+
+      if (error || !profileRow) {
+        if (error) console.error('[auth] profile load failed:', error.message);
+        if (error && isJwtClockSkewError(error.message)) {
           await getSupabase().auth.signOut();
           resetOAuthExchangeState();
           setState((s) => ({
@@ -121,9 +136,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...idleAuth({
           userId,
           email,
-          role: data.role,
-          storeId: data.store_id,
-          nickname: data.nickname,
+          role: profileRow.role,
+          storeId: profileRow.store_id,
+          nickname: profileRow.nickname,
           initError: null,
         }),
       }));

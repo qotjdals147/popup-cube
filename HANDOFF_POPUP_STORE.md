@@ -4059,6 +4059,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-09-29 — Google 구매자 닉네임 · 장바구니 주소 폼 레이아웃
+- **Author:** Cursor Agent + User
+- **Changed:** `ensure_profile_nickname` RPC · mobile `AuthContext` · `AddressFormFields` stack · `cart-drawer-shop.css` · migration `20260929_oauth_profile_nickname.sql`
+- **Notes:** Supabase **✅** · OAuth NULL nickname backfill · **닉네임 변경 UI = 아직 없음**(§7) · web Vercel **1~2min** · mobile **JS only Expo ❌** Metro reload
+
 ### 2026-09-29 — 손님 리뷰·confirm WebView UX (주문 상세 z-index)
 - **Author:** Cursor Agent + User
 - **Changed:** `OrderHistoryPanel` · `ReviewFormModal` portal · `ShopperConfirmDialog` portal · `ProductDetailModal` · `review-form.css` · `shopper-account-panels.css` · `ko.ts`

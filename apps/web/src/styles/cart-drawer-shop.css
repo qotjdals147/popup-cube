@@ -66,6 +66,7 @@
   max-height: none;
   flex: 1;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   border-radius: 0;
   box-shadow: none;
@@ -834,6 +835,13 @@
   margin-top: 10px;
   padding: 12px;
   border-radius: 10px;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.cart-drawer-add-address-form .address-input-block {
+  max-width: 100%;
 }
 
 .cart-drawer--light .cart-drawer-add-address-form {

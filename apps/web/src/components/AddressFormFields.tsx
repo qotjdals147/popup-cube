@@ -33,21 +33,29 @@ interface AddressFormFieldsProps {
   values: AddressFormValues;
   onChange: (values: AddressFormValues) => void;
   appearance?: 'light' | 'dark';
+  /** 좁은 WebView(장바구니) — 한 줄씩 쌓기 */
+  layout?: 'twoColumn' | 'stack';
 }
 
 /**
  * 배송지 입력 폼 (마이페이지 주소 관리 · 결제 시 신규 주소 추가에서 공통으로 사용, AD-030).
  */
-export function AddressFormFields({ values, onChange, appearance = 'dark' }: AddressFormFieldsProps) {
+export function AddressFormFields({
+  values,
+  onChange,
+  appearance = 'dark',
+  layout = 'twoColumn',
+}: AddressFormFieldsProps) {
   const inputStyle = appearance === 'light' ? styles.inputLight : styles.input;
+  const stacked = layout === 'stack';
 
   function set<K extends keyof AddressFormValues>(key: K, value: string) {
     onChange({ ...values, [key]: value });
   }
 
   return (
-    <div style={styles.root}>
-      <div style={styles.grid}>
+    <div style={styles.root} className={stacked ? 'address-form-fields--stack' : undefined}>
+      <div style={stacked ? styles.stack : styles.grid}>
         <input
           style={inputStyle}
           value={values.label}
@@ -63,7 +71,7 @@ export function AddressFormFields({ values, onChange, appearance = 'dark' }: Add
           maxLength={60}
         />
         <input
-          style={{ ...inputStyle, gridColumn: '1 / -1' }}
+          style={stacked ? inputStyle : { ...inputStyle, gridColumn: '1 / -1' }}
           value={values.phone}
           onChange={(e) => set('phone', e.target.value)}
           placeholder={t('mypage.phonePlaceholder')}
@@ -93,6 +101,13 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
     gap: 8,
+    minWidth: 0,
+  },
+  stack: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    minWidth: 0,
   },
   input: {
     padding: '10px 12px',
@@ -101,6 +116,9 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#0f3460',
     color: '#fff',
     fontSize: 13,
+    minWidth: 0,
+    width: '100%',
+    boxSizing: 'border-box',
   },
   inputLight: {
     padding: '10px 12px',
@@ -109,5 +127,8 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#fff',
     color: '#191f28',
     fontSize: 13,
+    minWidth: 0,
+    width: '100%',
+    boxSizing: 'border-box',
   },
 };

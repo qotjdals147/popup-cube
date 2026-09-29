@@ -397,7 +397,7 @@ export function DisplayProductModal({
               </button>
             ) : (
               <div style={styles.addAddressForm}>
-                <AddressFormFields values={addressForm} onChange={setAddressForm} />
+                <AddressFormFields values={addressForm} onChange={setAddressForm} layout="stack" />
                 <div style={styles.addAddressActions}>
                   <button
                     type="button"

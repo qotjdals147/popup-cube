@@ -750,7 +750,12 @@ export function CartView({
             </button>
           ) : (
             <div className="cart-drawer-add-address-form">
-              <AddressFormFields values={addressForm} onChange={setAddressForm} appearance={addressAppearance} />
+              <AddressFormFields
+                values={addressForm}
+                onChange={setAddressForm}
+                appearance={addressAppearance}
+                layout="stack"
+              />
               <div className="cart-drawer-form-actions">
                 {addresses.length > 0 && (
                   <button type="button" className="cart-drawer-secondary-btn" onClick={() => setAddAddressOpen(false)}>
