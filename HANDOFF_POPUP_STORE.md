@@ -55,6 +55,7 @@
 | **`HANDOFF_POPUP_STORE.md` (User 2026-09-29)** | **문서만** 수정해도 **무조건** `commit` + **`origin/main` push** — 「나중에 푸시」·로컬만 보관 **❌** · push 실패 시 **즉시 재시도**하고 User에게 **ahead 커밋 hash** 알림 |
 | **한 커밋에** | 코드 + **같은 주제 HANDOFF** · `.env`·키 **❌** |
 | **web (`apps/web`)** | push → Vercel (기존: 「푸쉬해줘?」 **묻지 말고 push** — **동일 원칙 확대**) |
+| **Auto-review** | `git push` 거절돼도 **「푸시할까요?」 ❌** — **바로 재시도** · User는 승인만 · 실패 시 **ahead hash** 알림 |
 | **예외** | User가 **「커밋하지 마」** 등 **명시**한 경우만 보류 |
 
 ### 세션 종료 시 (반드시 — 실시간 갱신의 마무리 점검)
@@ -4148,10 +4149,15 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-09-29 pm3 — Vercel web-only build fix (§7.90 · KPI 미노출)
+- **Author:** Cursor Agent / User
+- **Changed:** `apps/web/vercel.json` buildCommand → `npx turbo run build --filter=@popup-cube/web` · `DEPLOY.md`
+- **Notes:** **원인:** Vercel이 mobile build까지 실행 → fail → **production JS에 KPI 없음** (`get_store_kpi` 등 NO) · push 후 **Redeploy 1~2min** · **Expo ❌**
+
 ### 2026-09-29 pm2 — 점주 KPI·상품별 통계 (§7.90 · AD-084)
 - **Author:** Cursor Agent / User
 - **Changed:** migration `20260929_store_kpi_ad084.sql` · `storeKpi.ts` · `OwnerStoreKpiStrip` · `OwnerProductSalesPanel` · `HomePage` · `OwnerProductPanel` · `ko.ts` · §7.90 · §7.0
-- **Notes:** Supabase POPUP **✅** · **§7.89 User实机 ✅** · **Expo ❌** · §0 PC 3줄 실기 ⬜
+- **Notes:** Supabase POPUP **✅** · **§7.89 User实机 ✅** · **Git `2922a21` pushed** · **Expo ❌** · §0 PC 3줄 실기 ⬜
 
 ### 2026-09-29 pm — 닉네임 변경 카피 (§7.89)
 - **Changed:** mobile `ko.ts` — placeholder · hint (TMI 제거)

@@ -14,7 +14,8 @@ alwaysApply: true
 - **`HANDOFF_POPUP_STORE.md`만** 수정한 경우에도 **동일**: 문서 커밋 직후 **반드시 push** (로컬 ahead 방치 **금지**).
 - 코드 변경 시 **같은 주제 HANDOFF** (Changelog·§7 등)를 **같은 커밋**에 포함하는 것을 기본으로 한다.
 - `.env.local`, service_role 키, `.env` — **커밋 금지**.
-- push가 Auto-review 등으로 막히면 **재시도**; 끝까지 실패하면 User에게 **`git log origin/main..HEAD`** 로 남은 커밋을 알린다.
+- push가 **Cursor Auto-review** 등으로 막혀도 **User에게 「푸시할까요?」 묻지 않음** — **즉시 같은 `git push origin main` 재시도**(승인 카드 허용) · 여러 번 실패할 때만 **`git log origin/main..HEAD`** hash와 함께 「승인 후 push 필요」 알림.
+- **`popup_store/` 작업 시작 시** `HANDOFF_POPUP_STORE.md` **§0**(특히 Git commit & push) **매번 재확인** — 「이전에 읽음」으로 건너뛰기 **❌**.
 
 ## Supabase
 

@@ -66,4 +66,5 @@ railway domain
 
 - **Root Directory:** `apps/web`
 - `apps/web/vercel.json` — install/build 명령 포함
+- **Build:** `npx turbo run build --filter=@popup-cube/web` only — `npm run build --filter=…`는 turbo에 filter가 전달되지 **않아** mobile `tsc`까지 돌며 **Vercel 배포 실패·구번들 고정**될 수 있음 (2026-09-29)
 
