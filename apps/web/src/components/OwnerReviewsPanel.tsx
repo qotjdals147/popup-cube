@@ -8,6 +8,9 @@ import { t } from '../i18n';
 
 type ReviewFilter = 'all' | 'pending' | 'replied';
 
+/** 칩은 소수 SKU용. 그 이상은 주문 탭과 같이 검색+셀렉트 (§7.88 스케일). */
+const PRODUCT_CHIP_MAX = 8;
+
 interface StoreProductReviewSummary {
   product_id: string;
   product_name: string;
@@ -85,6 +88,7 @@ export function OwnerReviewsPanel({ storeId, onPendingCountChange }: OwnerReview
   const [error, setError] = useState(false);
   const [filter, setFilter] = useState<ReviewFilter>('all');
   const [productFilter, setProductFilter] = useState<string>('all');
+  const [productSearch, setProductSearch] = useState('');
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
   const [saveErrorId, setSaveErrorId] = useState<string | null>(null);
@@ -111,6 +115,18 @@ export function OwnerReviewsPanel({ storeId, onPendingCountChange }: OwnerReview
   }, [reload]);
 
   const products = useMemo(() => productSummaries(reviews), [reviews]);
+
+  const productSelectOptions = useMemo(() => {
+    const q = productSearch.trim().toLowerCase();
+    let list = q
+      ? products.filter((p) => p.product_name.toLowerCase().includes(q))
+      : products;
+    if (productFilter !== 'all' && !list.some((p) => p.product_id === productFilter)) {
+      const selected = products.find((p) => p.product_id === productFilter);
+      if (selected) list = [selected, ...list];
+    }
+    return list;
+  }, [products, productSearch, productFilter]);
 
   const filtered = useMemo(() => {
     let list = reviews;
@@ -175,37 +191,66 @@ export function OwnerReviewsPanel({ storeId, onPendingCountChange }: OwnerReview
         {products.length > 0 && (
           <div style={styles.productFilterBlock}>
             <span style={styles.productFilterHeading}>{t('ownerReviews.productFilterLabel')}</span>
-            <div style={styles.productFilterRow} role="list">
-              <button
-                type="button"
-                role="listitem"
-                style={{
-                  ...styles.productFilterChip,
-                  ...(productFilter === 'all' ? styles.productFilterChipActive : {}),
-                }}
-                onClick={() => setProductFilter('all')}
-              >
-                {t('ownerReviews.productFilterAll')}
-              </button>
-              {products.map((p) => (
+            {products.length <= PRODUCT_CHIP_MAX ? (
+              <div style={styles.productFilterRow} role="list">
                 <button
-                  key={p.product_id}
                   type="button"
                   role="listitem"
                   style={{
                     ...styles.productFilterChip,
-                    ...(productFilter === p.product_id ? styles.productFilterChipActive : {}),
+                    ...(productFilter === 'all' ? styles.productFilterChipActive : {}),
                   }}
-                  onClick={() => setProductFilter(p.product_id)}
+                  onClick={() => setProductFilter('all')}
                 >
-                  <ProductThumb name={p.product_name} imageUrl={p.product_image_url} size={28} style={{ borderRadius: 6 }} />
-                  <span style={styles.productFilterName}>{p.product_name}</span>
-                  <span style={styles.productFilterCount}>
-                    {t('ownerReviews.productReviewCount', { count: String(p.review_count) })}
-                  </span>
+                  {t('ownerReviews.productFilterAll')}
                 </button>
-              ))}
-            </div>
+                {products.map((p) => (
+                  <button
+                    key={p.product_id}
+                    type="button"
+                    role="listitem"
+                    style={{
+                      ...styles.productFilterChip,
+                      ...(productFilter === p.product_id ? styles.productFilterChipActive : {}),
+                    }}
+                    onClick={() => setProductFilter(p.product_id)}
+                  >
+                    <ProductThumb name={p.product_name} imageUrl={p.product_image_url} size={28} style={{ borderRadius: 6 }} />
+                    <span style={styles.productFilterName}>{p.product_name}</span>
+                    <span style={styles.productFilterCount}>
+                      {t('ownerReviews.productReviewCount', { count: String(p.review_count) })}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div style={styles.productFilterCompact}>
+                <input
+                  type="search"
+                  style={styles.productSearch}
+                  value={productSearch}
+                  onChange={(e) => setProductSearch(e.target.value)}
+                  placeholder={t('ownerReviews.productSearchPlaceholder')}
+                  aria-label={t('ownerReviews.productSearchPlaceholder')}
+                />
+                <select
+                  style={styles.productSelect}
+                  value={productFilter}
+                  aria-label={t('ownerReviews.productFilterSelectAria')}
+                  onChange={(e) => setProductFilter(e.target.value)}
+                >
+                  <option value="all">{t('ownerReviews.productFilterAll')}</option>
+                  {productSelectOptions.map((p) => (
+                    <option key={p.product_id} value={p.product_id}>
+                      {t('ownerReviews.productFilterOption', {
+                        name: p.product_name,
+                        count: String(p.review_count),
+                      })}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         )}
       </>
@@ -421,6 +466,29 @@ const styles: Record<string, CSSProperties> = {
     maxWidth: 160,
   },
   productFilterCount: { fontSize: fs.xs, color: oc.textMuted, flexShrink: 0 },
+  productFilterCompact: { display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'stretch' },
+  productSearch: {
+    flex: '1 1 200px',
+    minWidth: 160,
+    padding: '10px 12px',
+    borderRadius: 8,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.text,
+    fontSize: fs.sm,
+    fontFamily: ownerFont,
+  },
+  productSelect: {
+    flex: '1 1 240px',
+    minWidth: 200,
+    padding: '10px 12px',
+    borderRadius: 8,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.text,
+    fontSize: fs.sm,
+    fontFamily: ownerFont,
+  },
   meta: { display: 'block', fontSize: fs.sm, color: oc.textMuted, marginTop: 4 },
   badgePending: {
     flexShrink: 0,
