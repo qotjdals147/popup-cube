@@ -29,7 +29,7 @@ export const t = {
   },
   signup: {
     nickname: '닉네임',
-    nicknamePlaceholder: '게임에서 보일 이름 (2~16자)',
+    nicknamePlaceholder: '닉네임 (2~16자)',
     check: '중복확인',
     checking: '확인 중...',
     available: '사용 가능한 닉네임이에요 ✅',

@@ -397,7 +397,7 @@ export default function SettingsScreen() {
                 setNicknameCheck('idle');
                 setNicknameFormError(null);
               }}
-              placeholder={t.signup.nicknamePlaceholder}
+              placeholder={t.settings.nicknamePlaceholder}
               maxLength={16}
               autoCapitalize="none"
               autoCorrect={false}

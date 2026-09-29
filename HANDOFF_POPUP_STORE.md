@@ -4104,6 +4104,10 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-09-29 pm — 닉네임 변경 카피 (§7.89)
+- **Changed:** mobile `ko.ts` — placeholder · hint (TMI 제거)
+- **Notes:** **Expo ✅** Reload
+
 ### 2026-09-29 — 마이 닉네임 변경 (§7.89 · AD-083)
 - **Author:** Cursor Agent + User
 - **Changed:** `update_my_nickname` · `settings.tsx` · mobile `nickname.ts` · `AuthContext.refreshProfile` · web `nickname.ts` (RPC wrapper) · HANDOFF §7.89
