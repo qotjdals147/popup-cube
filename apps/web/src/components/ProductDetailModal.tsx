@@ -6,6 +6,7 @@ import { canFileClaim, confirmPurchase, listMyOrders } from '../lib/orders';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { ReviewFormModal } from './ReviewFormModal';
+import { ShopperConfirmDialog } from './ShopperConfirmDialog';
 import { t } from '../i18n';
 import '../styles/product-detail-shop.css';
 
@@ -87,6 +88,7 @@ export function ProductDetailModal({
   const [reviewTarget, setReviewTarget] = useState<{ orderId: string; productId: string; productName: string } | null>(
     null
   );
+  const [reviewConfirmOpen, setReviewConfirmOpen] = useState(false);
 
   async function loadReviewEligibility() {
     if (previewMode || !userId) {
@@ -167,8 +169,12 @@ export function ProductDetailModal({
       return;
     }
 
-    if (!window.confirm(t('review.needConfirmBody'))) return;
+    setReviewConfirmOpen(true);
+  }
 
+  async function runReviewAfterConfirmPurchase() {
+    if (!reviewableOrder) return;
+    setReviewConfirmOpen(false);
     setConfirmingForReview(true);
     try {
       await confirmPurchase(reviewableOrder.orderId);
@@ -329,6 +335,16 @@ export function ProductDetailModal({
           </div>
         )}
       </div>
+
+      <ShopperConfirmDialog
+        open={reviewConfirmOpen}
+        title={t('review.needConfirmTitle')}
+        message={t('review.needConfirmBody')}
+        confirmLabel={t('review.needConfirmConfirm')}
+        busy={confirmingForReview}
+        onCancel={() => setReviewConfirmOpen(false)}
+        onConfirm={() => void runReviewAfterConfirmPurchase()}
+      />
 
       {reviewTarget && (
         <ReviewFormModal

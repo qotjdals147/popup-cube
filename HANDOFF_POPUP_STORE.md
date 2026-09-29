@@ -4059,6 +4059,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-09-29 — 손님 리뷰·confirm WebView UX (주문 상세 z-index)
+- **Author:** Cursor Agent + User
+- **Changed:** `OrderHistoryPanel` · `ReviewFormModal` portal · `ShopperConfirmDialog` portal · `ProductDetailModal` · `review-form.css` · `shopper-account-panels.css` · `ko.ts`
+- **Notes:** 리뷰 클릭 시 **주문 상세 닫힘** · **`window.confirm` → 앱 다이얼로그**(손님 주문·상품상세) · **Expo ❌** · Vercel **1~2min**
+
 ### 2026-09-29 — §0 HANDOFF-only auto push + Cursor rule
 - **Author:** Cursor Agent + User
 - **Changed:** §0 Git 표 · `.cursor/rules/popup-store-handoff.mdc` (repo + workspace Cursor rules)

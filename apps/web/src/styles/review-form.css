@@ -10,6 +10,11 @@
   padding: 16px;
 }
 
+/* 주문 상세 시트(11000) 위 — WebView /app/me */
+.review-form-portal {
+  z-index: 12100;
+}
+
 .review-form--light.review-form-overlay {
   background: rgba(0, 0, 0, 0.45);
 }

@@ -483,6 +483,7 @@ export const ko = {
     cancel: '취소',
     needConfirmTitle: '구매확정이 필요해요',
     needConfirmBody: '리뷰는 구매확정 후에 작성할 수 있어요. 지금 구매확정 하고 리뷰를 작성할까요?',
+    needConfirmConfirm: '구매확정하고 리뷰 쓰기',
     errorInvalidRating: '별점을 선택해 주세요.',
     errorEmptyBody: '리뷰 내용을 입력해 주세요.',
     errorAlreadyReviewed: '이미 리뷰를 작성한 주문이에요.',

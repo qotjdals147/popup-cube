@@ -16,6 +16,7 @@ import {
 import { formatOrderRef } from '../lib/orderRef';
 import { getMyReviewKeys, reviewKey } from '../lib/reviews';
 import { ReviewFormModal } from './ReviewFormModal';
+import { ShopperConfirmDialog } from './ShopperConfirmDialog';
 import { ShopperOrderRowCompact } from './ShopperOrderRowCompact';
 import { ShopperOrderDetailSheet } from './ShopperOrderDetailSheet';
 import { groupOrdersByDate } from '../lib/shopperOrderListUtils';
@@ -57,6 +58,13 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
   } | null>(null);
   const [detailOrderId, setDetailOrderId] = useState<string | null>(null);
   const [listFilter, setListFilter] = useState<ShopperOrderListFilter>('all');
+  const [confirmPurchaseOrderId, setConfirmPurchaseOrderId] = useState<string | null>(null);
+  const [confirmCancelOrderId, setConfirmCancelOrderId] = useState<string | null>(null);
+  const [reviewConfirmPending, setReviewConfirmPending] = useState<{
+    order: ShopperOrderView;
+    productId: string;
+    productName: string;
+  } | null>(null);
 
   const detailOrder = detailOrderId ? orders.find((o) => o.id === detailOrderId) ?? null : null;
   const filteredOrders = filterShopperOrders(orders, listFilter);
@@ -85,8 +93,12 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
     if (found) setDetailOrderId(initialOrderId);
   }, [initialOrderId, loading, orders]);
 
-  async function handleConfirmPurchase(orderId: string) {
-    if (!window.confirm(t('myOrders.confirmPurchaseConfirm'))) return;
+  function requestConfirmPurchase(orderId: string) {
+    setConfirmPurchaseOrderId(orderId);
+  }
+
+  async function runConfirmPurchase(orderId: string) {
+    setConfirmPurchaseOrderId(null);
     setActionId(orderId);
     setActionError(null);
     try {
@@ -99,8 +111,12 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
     }
   }
 
-  async function handleCancelOrder(orderId: string) {
-    if (!window.confirm(t('myOrders.confirmCancelOrder'))) return;
+  function requestCancelOrder(orderId: string) {
+    setConfirmCancelOrderId(orderId);
+  }
+
+  async function runCancelOrder(orderId: string) {
+    setConfirmCancelOrderId(null);
     setActionId(orderId);
     setActionError(null);
     try {
@@ -133,21 +149,31 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
     }
   }
 
-  async function handleWriteReviewClick(order: ShopperOrderView, productId: string, productName: string) {
+  function handleWriteReviewClick(order: ShopperOrderView, productId: string, productName: string) {
     if (order.status === 'purchase_confirmed' || order.status === 'completed') {
+      setDetailOrderId(null);
       setReviewTarget({ orderId: order.id, productId, productName });
       return;
     }
 
-    // shipped / delivery_completed — 구매확정 없이는 리뷰를 못 남기니 먼저 물어봄
-    if (!window.confirm(t('review.needConfirmBody'))) return;
+    setDetailOrderId(null);
+    setReviewConfirmPending({ order, productId, productName });
+  }
 
-    setActionId(order.id);
+  async function runReviewAfterConfirmPurchase() {
+    const pending = reviewConfirmPending;
+    if (!pending) return;
+    setReviewConfirmPending(null);
+    setActionId(pending.order.id);
     setActionError(null);
     try {
-      await confirmPurchase(order.id);
+      await confirmPurchase(pending.order.id);
       await reload();
-      setReviewTarget({ orderId: order.id, productId, productName });
+      setReviewTarget({
+        orderId: pending.order.id,
+        productId: pending.productId,
+        productName: pending.productName,
+      });
     } catch (err) {
       setActionError(err instanceof OrderError ? err.message : t('myOrders.confirmPurchaseError'));
     } finally {
@@ -246,7 +272,7 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
                         order={order}
                         actionId={actionId}
                         onOpenDetail={setDetailOrderId}
-                        onConfirmPurchase={(id) => void handleConfirmPurchase(id)}
+                        onConfirmPurchase={(id) => requestConfirmPurchase(id)}
                       />
                     ))}
                   </div>
@@ -343,7 +369,7 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
                       type="button"
                       style={styles.primaryBtn}
                       disabled={actionId === order.id}
-                      onClick={() => void handleConfirmPurchase(order.id)}
+                      onClick={() => requestConfirmPurchase(order.id)}
                     >
                       {t('myOrders.confirmPurchase')}
                     </button>
@@ -361,7 +387,7 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
                       type="button"
                       style={styles.dangerBtn}
                       disabled={actionId === order.id}
-                      onClick={() => void handleCancelOrder(order.id)}
+                      onClick={() => requestCancelOrder(order.id)}
                     >
                       {t('myOrders.cancelOrder')}
                     </button>
@@ -451,6 +477,39 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
     />
   );
 
+  const confirmDialogs = (
+    <>
+      <ShopperConfirmDialog
+        open={confirmPurchaseOrderId !== null}
+        message={t('myOrders.confirmPurchaseConfirm')}
+        busy={confirmPurchaseOrderId !== null && actionId === confirmPurchaseOrderId}
+        onCancel={() => setConfirmPurchaseOrderId(null)}
+        onConfirm={() => {
+          if (confirmPurchaseOrderId) void runConfirmPurchase(confirmPurchaseOrderId);
+        }}
+      />
+      <ShopperConfirmDialog
+        open={confirmCancelOrderId !== null}
+        message={t('myOrders.confirmCancelOrder')}
+        danger
+        busy={confirmCancelOrderId !== null && actionId === confirmCancelOrderId}
+        onCancel={() => setConfirmCancelOrderId(null)}
+        onConfirm={() => {
+          if (confirmCancelOrderId) void runCancelOrder(confirmCancelOrderId);
+        }}
+      />
+      <ShopperConfirmDialog
+        open={reviewConfirmPending !== null}
+        title={t('review.needConfirmTitle')}
+        message={t('review.needConfirmBody')}
+        confirmLabel={t('review.needConfirmConfirm')}
+        busy={reviewConfirmPending !== null && actionId === reviewConfirmPending?.order.id}
+        onCancel={() => setReviewConfirmPending(null)}
+        onConfirm={() => void runReviewAfterConfirmPurchase()}
+      />
+    </>
+  );
+
   const detailSheet =
     useAccountTokens &&
     detailOrder && (
@@ -462,8 +521,8 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
         claimDraft={claimDraft}
         onClose={() => setDetailOrderId(null)}
         onWriteReview={(o, pid, pname) => void handleWriteReviewClick(o, pid, pname)}
-        onConfirmPurchase={(id) => void handleConfirmPurchase(id)}
-        onCancelOrder={(id) => void handleCancelOrder(id)}
+        onConfirmPurchase={(id) => requestConfirmPurchase(id)}
+        onCancelOrder={(id) => requestCancelOrder(id)}
         onSubmitClaim={(id) => void handleSubmitClaim(id)}
         onOpenClaimForm={setClaimFormId}
         onClaimDraftChange={(id, text) => setClaimDraft((prev) => ({ ...prev, [id]: text }))}
@@ -479,6 +538,7 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
         {listBody}
         {detailSheet}
         {reviewModal}
+        {confirmDialogs}
       </div>
     );
   }
@@ -490,6 +550,7 @@ export function OrderHistoryPanel({ onClose, embedded = false, appearance = 'dar
       </div>
       {detailSheet}
       {reviewModal}
+      {confirmDialogs}
     </div>
   );
 }

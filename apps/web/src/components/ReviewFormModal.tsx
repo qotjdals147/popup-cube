@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { MAX_REVIEW_IMAGES, ReviewError, submitProductReview } from '../lib/reviews';
 import { useAuth } from '../context/AuthContext';
 import { t } from '../i18n';
@@ -40,6 +41,14 @@ export function ReviewFormModal({
       previews.forEach((url) => URL.revokeObjectURL(url));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
   }, []);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -97,8 +106,8 @@ export function ReviewFormModal({
     }
   }
 
-  return (
-    <div className={`${rootClass} review-form-overlay`} onClick={onClose}>
+  return createPortal(
+    <div className={`${rootClass} review-form-overlay review-form-portal`} onClick={onClose}>
       <div className="review-form-panel" onClick={(e) => e.stopPropagation()}>
         <div className="review-form-header">
           <h3 className="review-form-title">{t('review.writeTitle')}</h3>
@@ -170,6 +179,7 @@ export function ReviewFormModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
