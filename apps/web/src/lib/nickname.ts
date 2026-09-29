@@ -16,3 +16,22 @@ export async function checkNicknameAvailable(nickname: string): Promise<boolean>
   if (error) throw error;
   return Boolean(data);
 }
+
+export class NicknameUpdateError extends Error {
+  constructor(public code: string) {
+    super(code);
+  }
+}
+
+export async function updateMyNickname(nickname: string): Promise<string> {
+  const { data, error } = await supabase.rpc('update_my_nickname', {
+    p_nickname: nickname.trim(),
+  });
+  if (error) {
+    const msg = error.message ?? '';
+    if (msg.includes('invalid_length')) throw new NicknameUpdateError('invalid_length');
+    if (msg.includes('nickname_taken')) throw new NicknameUpdateError('nickname_taken');
+    throw new NicknameUpdateError('unknown');
+  }
+  return String(data);
+}

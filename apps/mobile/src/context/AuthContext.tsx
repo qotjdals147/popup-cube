@@ -34,6 +34,7 @@ interface AuthContextValue extends AuthState {
   ) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>;
   signInWithGoogle: () => Promise<{ error: string | null; ok: boolean }>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -369,6 +370,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function refreshProfile() {
+    const { data } = await getSupabase().auth.getSession();
+    const user = data.session?.user;
+    if (user) {
+      await loadProfile(user.id, user.email ?? null);
+    }
+  }
+
   async function signOut() {
     oauthBusyRef.current = false;
     await dismissBrowserSafe();
@@ -390,7 +399,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ ...state, signInWithPassword, signUp, signInWithGoogle, signOut }}>
+    <AuthContext.Provider
+      value={{ ...state, signInWithPassword, signUp, signInWithGoogle, signOut, refreshProfile }}
+    >
       {children}
     </AuthContext.Provider>
   );
