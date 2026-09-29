@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.89` 최신 (마이 닉네임)** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.90` 최신 (점주 KPI)** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -569,6 +569,7 @@ npm run dev
 | AD-080 | **(확정 · User 2026-09-16) 손님 SNS 로그인 버튼 카피·레이아웃** — 이메일 로그인 **아래** · 버튼 = **로고 + 「로그인」** (제공자명 **버튼 글자에 중복 ❌**) · `SocialLoginRow` · `assets/google-wordmark.png` · §0 · §25 · §7.86 | User 2026-09-16 | 2026-09-16 |
 | AD-082 | **(구현 ✅ · 2026-09-22) 점주 리뷰 관리 P1** — `OwnerReviewsPanel` · **리뷰** 탭 · `get_store_reviews` · `set_owner_review_reply` · 손님 상세 **판매자 답글** · §7.88 · §58 #8 P1 | User 2026-09-22 | 2026-09-22 |
 | AD-083 | **(구현 ✅ · 2026-09-29) 마이 › 닉네임 변경** — `update_my_nickname` RPC · **중복확인 필수** · `settings.tsx` · AD-023 연장 · §7.89 | User 2026-09-29 | 2026-09-29 |
+| AD-084 | **(구현 ✅ · 2026-09-29) 점주 KPI·상품별 판매 통계** — `get_store_kpi` · `get_store_sales_daily` · `get_store_product_sales` · `/home` KPI strip · **상품** 탭 미니 차트 · §7.90 · §58 #8 P1 | User 2026-09-29 | 2026-09-29 |
 | AD-081 | **(확정 · CEO·User 2026-09-22) 쿠폰·플랫폼 프로모 정책** — **실질** = 매장당 **HOT SKU 1개** · **플랫폼 3~4% 보조금** · 점주 **할인 전 정산** · **체감** = **손님 쿠폰 탭·쿠폰함 UX**(생색·「아싸 할인」) · 손님에게 **「플랫폼 부담 4%」문구 ❌** · PG 후 **보조금 정산 자동** · §7.87 · §53.9.1 | CEO·User 2026-09-22 | 2026-09-22 |
 | AD-062 | **(확정) v1 = 팝업 쇼핑몰 런칭 · 픽셀 월드 v2 보존** — CEO(mr심) 2026-08-13: Google 실물=PG 확정 · 월드+PG UX 이질감 · **에이블리/룩핀형 쇼핑몰**로 v1 출시. **코드 삭제 금지** — `/play`·Phaser·WebView·fixture·socket = **`legacy/world-v1` 보관** · 손님 **기본 진입 = 상품 쇼핑**(ShopPanel·ProductDetailModal·CartDrawer). v2/이벤트 = **2D 픽셀 재활용 또는 그래픽 업grade(영상·360 등) 별도 판단**. 상세 **§57** | User·CEO 2026-08-13 | 2026-08-13 |
 | AD-063 | **(확정) v1 런칭 범위 · 점주센터 정리** — **팝업 점주 입점 → 팝업 상품만 판매** 플랫폼. 점주 PC **대부분 유지** · **「매장 꾸미기(layout)」탭 v1 숨김**(코드 유지) · 손님 **월드 우회→쇼핑** · P1=리뷰답글·KPI·팝업기간 UI. 실행 순서 **§58** | User 2026-08-13 | 2026-08-13 |
@@ -790,10 +791,10 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§7.89 마이 닉네임 변경 (AD-083)** · push 후 |
-| **User实기** | §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 **닉네임 변경 ⬜** |
+| **한 줄 요약** | **§7.90 점주 KPI·상품별 통계 (AD-084)** · User PC 실기 ⬜ |
+| **User实기** | §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 **KPI ⬜** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** |
-| **다음 에이전트 1순위** | ① §7.89 **실기** · ② §58 P1 **KPI** · Kakao ⏸️ · **PG = AD-061** |
+| **다음 에이전트 1순위** | ① §7.90 **PC 실기** · ② §58 #8 P1 **상품 옵션** · Kakao ⏸️ · **PG = AD-061** |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
 
@@ -1601,8 +1602,51 @@ npx expo start --dev-client --tunnel --port 8082 --clear
 
 #### 다음
 
-- [ ] User **닉네임 변경 실기** ⬜  
+- [x] User **닉네임 변경 실기** ✅  
 - [ ] (선택) Web `/app/me` 브라우저에도 동일 UI  
+
+---
+
+### 7.90 세션 인수인계 — **2026-09-29** (AD-084 · **점주 KPI·상품별 통계**)
+
+| | |
+|---|---|
+| **Scope** | 점주 **`/home`** 매장 카드 — **오늘/팝업 기간** 주문·매출 · **수락·발송·재고·자동수락** 알림 pill · **상품** 탭 — **7일 매출 막대** · **TOP SKU** |
+| **Git** | push 후 hash |
+| **DB** | `get_store_kpi` · `get_store_sales_daily` · `get_store_product_sales` · migration `20260929_store_kpi_ad084.sql` **✅ remote** |
+| **AD** | AD-084 · §58 #8 P1 (KPI) · §53.9 #3 |
+
+#### 코드
+
+| | |
+|---|---|
+| **UI** | `HomePage` + `OwnerStoreKpiStrip` · `OwnerProductPanel` + `OwnerProductSalesPanel` |
+| **lib** | `storeKpi.ts` · `ko.ts` `ownerDashboard.kpi*` · `ownerProducts.salesStats*` |
+
+#### 집계 규칙
+
+| | |
+|---|---|
+| **기간** | 매장 `created_at` ~ `popup_ends_at`(KST 일자) · 종료일 없으면 상한 없음 |
+| **매출** | 주문 `total_amount` 합 · **`rejected`·`cancelled` 제외** |
+| **재고 부족** | 노출 중 상품 · **재고 &lt; 10** |
+| **자동수락 소진** | `auto_accept_enabled` · **remaining ≤ 0** |
+
+#### User 실기 (§0 — **PC 웹 3줄** · Expo ❌)
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+→ `demo@owner.com` / `demo` → **`/home`** KPI 숫자 · GUCCI **편집 → 상품** 탭 **판매 통계** 블록
+
+#### 다음
+
+- [ ] User **PC 실기** ⬜  
+- [ ] §58 #8 P1 **상품 옵션** · 블록 템플릿  
+- [ ] 리뷰 **신고(P2)**  
 
 ---
 
@@ -1617,8 +1661,8 @@ npx expo start --dev-client --tunnel --port 8082 --clear
 
 #### 다음
 
-- [ ] User **PC 실기** ⬜  
-- [ ] §58 P1 **KPI·상품별 통계**  
+- [x] User **PC 실기** (리뷰) ✅  
+- [x] §58 P1 **KPI·상품별 통계** ✅ **§7.90**  
 - [ ] 리뷰 **신고(P2)**  
 
 ---
@@ -4103,6 +4147,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-09-29 pm2 — 점주 KPI·상품별 통계 (§7.90 · AD-084)
+- **Author:** Cursor Agent / User
+- **Changed:** migration `20260929_store_kpi_ad084.sql` · `storeKpi.ts` · `OwnerStoreKpiStrip` · `OwnerProductSalesPanel` · `HomePage` · `OwnerProductPanel` · `ko.ts` · §7.90 · §7.0
+- **Notes:** Supabase POPUP **✅** · **§7.89 User实机 ✅** · **Expo ❌** · §0 PC 3줄 실기 ⬜
 
 ### 2026-09-29 pm — 닉네임 변경 카피 (§7.89)
 - **Changed:** mobile `ko.ts` — placeholder · hint (TMI 제거)

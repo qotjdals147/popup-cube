@@ -16,6 +16,7 @@ import {
 } from '../lib/formatInteger';
 import { ownerColors as oc, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { OwnerProductBlockEditor } from './OwnerProductBlockEditor';
+import { OwnerProductSalesPanel } from './OwnerProductSalesPanel';
 import { ProductDetailModal } from './ProductDetailModal';
 
 interface OwnerProductPanelProps {
@@ -270,6 +271,8 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
             )}
           </div>
         )}
+
+        {embedded && <OwnerProductSalesPanel storeId={storeId} />}
 
         <div style={styles.toolbar}>
           <button

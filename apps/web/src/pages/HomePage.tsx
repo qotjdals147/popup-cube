@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { listOwnedStores } from '../lib/stores';
+import { getStoreKpi, type StoreKpi } from '../lib/storeKpi';
+import { OwnerStoreKpiStrip } from '../components/OwnerStoreKpiStrip';
 import { DEMO_STORE_ID } from '@popup-cube/shared';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
@@ -14,6 +16,8 @@ export function HomePage() {
 
   const [stores, setStores] = useState<StoreSummary[]>([]);
   const [loading, setLoading] = useState(false);
+  const [kpiByStore, setKpiByStore] = useState<Record<string, StoreKpi | null>>({});
+  const [kpiLoading, setKpiLoading] = useState(false);
 
   const reload = useCallback(async () => {
     if (!userId || role !== 'owner') {
@@ -30,10 +34,29 @@ export function HomePage() {
         return a.name.localeCompare(b.name, 'ko');
       });
       setStores(sorted);
+      if (sorted.length > 0) {
+        setKpiLoading(true);
+        const entries = await Promise.all(
+          sorted.map(async (s) => {
+            try {
+              const kpi = await getStoreKpi(s.id);
+              return [s.id, kpi] as const;
+            } catch {
+              return [s.id, null] as const;
+            }
+          })
+        );
+        setKpiByStore(Object.fromEntries(entries));
+        setKpiLoading(false);
+      } else {
+        setKpiByStore({});
+      }
     } catch {
       setStores([]);
+      setKpiByStore({});
     } finally {
       setLoading(false);
+      setKpiLoading(false);
     }
   }, [userId, role]);
 
@@ -114,6 +137,10 @@ export function HomePage() {
                           <p style={styles.storeDesc}>
                             {store.description?.trim() || t('ownerEdit.noDescription')}
                           </p>
+                          <OwnerStoreKpiStrip
+                            kpi={kpiByStore[store.id] ?? null}
+                            loading={kpiLoading && !(store.id in kpiByStore)}
+                          />
                         </div>
                       </div>
                       <div style={styles.cardActions}>
