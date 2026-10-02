@@ -19,6 +19,12 @@ alwaysApply: true
 - **점주·손님 신규 기능** — 숫자/차트만 던지지 말고 **메뉴명(탭)·섹션 제목·한 줄 안내**로 「어디서 무엇인지」를 **첫 화면에서** 알 수 있게 (§0 UI/UX · AD-068).
 - **`ko.ts`·HANDOFF 카피** — **AI/매뉴얼 톤 금지** (§0 UI·i18n · User 2026-10-02): 짧게 · 소리 내어 읽었을 때 자연스러운지 확인.
 
+## 출시 전 감사 (§63 · AD-086 · User 2026-10-02)
+
+- User **출시 불안·건강검진** → **`HANDOFF §63`** 전체.
+- **1차 점검:** 코드·DB·migration·commit·push **금지** → P0~P3 + **미검증** → **`## 6` ISS** · **User 승인 후만 수정**.
+- **모델:** 읽기 전용 감사 = **Claude Opus 5 (High)** · **Composer 2.5 Fast** 감사 **❌** (§63.11).
+
 ## Supabase
 
 DB/스키마 작업 전 workspace 루트 **`.env.local`** 의 `POPUP_*` 사용 (상위 `.cursor/rules/supabase-env.mdc`).
