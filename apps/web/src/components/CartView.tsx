@@ -140,7 +140,7 @@ export function CartView({
   appearance = 'light',
 }: CartViewProps) {
   const rootClass = appearance === 'light' ? 'cart-drawer--light' : 'cart-drawer--dark';
-  const { items, incrementQuantity, decrementQuantity, removeItem, removeItemsByProductIds } = useCart();
+  const { items, incrementQuantity, decrementQuantity, removeItem, removeItemsByLineKeys } = useCart();
   const [phase, setPhase] = useState<Phase>('cart');
   const [checkoutStoreId, setCheckoutStoreId] = useState<string | null>(focusStoreId ?? null);
 
@@ -162,7 +162,7 @@ export function CartView({
   const [storeInfoById, setStoreInfoById] = useState<Record<string, StoreSummary>>({});
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   /** 결제 성공 직후 — 해당 줄만 장바구니에서 제거 (매장 storeId 통째 삭제 방지) */
-  const [lastOrderedProductIds, setLastOrderedProductIds] = useState<string[]>([]);
+  const [lastOrderedLineKeys, setLastOrderedLineKeys] = useState<string[]>([]);
   /** AD-066 mock — 한 번의 결제 플로우에서 처리할 매장 목록 */
   const [checkoutStoreIds, setCheckoutStoreIds] = useState<string[]>([]);
   const [checkoutPlansByStore, setCheckoutPlansByStore] = useState<Record<string, CheckoutBenefitPlan>>({});
@@ -431,11 +431,11 @@ export function CartView({
     setCheckoutBusy(true);
     if (userChoice === 'gacha') setPhase('gachaRolling');
     const rollingStarted = userChoice === 'gacha' ? Date.now() : 0;
+    const orderedLineKeys: string[] = [];
     try {
       let totalAmount = 0;
       let preSubtotal = 0;
       let discountSubtotal = 0;
-      const orderedProductIds: string[] = [];
       const rolledGacha: GachaResultWithStore[] = [];
       let lastGacha: GachaRollResult | null = null;
       let anyGachaRollAttempted = false;
@@ -459,7 +459,7 @@ export function CartView({
           mode,
           shouldRollGacha,
         );
-        orderedProductIds.push(...ordering.map((item) => item.productId));
+        orderedLineKeys.push(...ordering.map((item) => cartLineKey(item)));
         totalAmount += storeTotal;
         const storePre =
           plan?.preDiscountSubtotal ?? ordering.reduce((s, i) => s + i.price * i.quantity, 0);
@@ -505,7 +505,7 @@ export function CartView({
         }
       }
 
-      setLastOrderedProductIds(orderedProductIds);
+      setLastOrderedLineKeys(orderedLineKeys);
       setFinalTotal(totalAmount);
       setGachaResultsByStore(rolledGacha);
 
@@ -520,6 +520,9 @@ export function CartView({
         setPhase('discountResult');
       }
     } catch (err) {
+      if (orderedLineKeys.length > 0) {
+        removeItemsByLineKeys(orderedLineKeys);
+      }
       setRewardError(orderErrorMessage(err));
       if (userChoice) setPhase('reward');
     } finally {
@@ -536,12 +539,12 @@ export function CartView({
   }
 
   function handleFinish() {
-    const ids =
-      lastOrderedProductIds.length > 0
-        ? lastOrderedProductIds
-        : checkoutItems.map((item) => item.productId);
-    removeItemsByProductIds(ids);
-    setLastOrderedProductIds([]);
+    const lineKeys =
+      lastOrderedLineKeys.length > 0
+        ? lastOrderedLineKeys
+        : checkoutItems.map((item) => cartLineKey(item));
+    removeItemsByLineKeys(lineKeys);
+    setLastOrderedLineKeys([]);
     setPhase('cart');
     setCheckoutStoreId(focusStoreId ?? null);
     setCheckoutStoreIds([]);

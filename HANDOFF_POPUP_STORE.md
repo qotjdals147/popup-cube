@@ -836,8 +836,8 @@ popup_store/                          # Turborepo root
 | **User实기** | §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** |
 | **출시 불안·건강검진** | **§63 (AD-086)** — **1차 감사 A+B 완료 (2026-10-02)** → **§63.14 결과** |
-| **🚨 Open P0 (감사 채팅 발견 · 2026-10-02)** | **ISS-044** 옵션 취소·거절 시 **재고 꼬임(운영 DB 오염 진행 중)** · **ISS-045** 손님이 **주문 금액·상태 위조 가능** · **ISS-046** anon **사칭 알림 가능** → **§6 · §63.14** |
-| **다음 에이전트 1순위** | ① **ISS-044 P0** (User 승인 후 · §63.4 D) · ② ISS-046→045→049 권한 축소 · ③ **ISS-052** migration 역동기화 · ④ **AD-085** 옵션 **User实机** ⬜ · **PG = AD-061** |
+| **🚨 Open P0 (감사 · 2026-10-02)** | **ISS-044/045/046/049** → **원격 migration `iss_audit_p0_p1_fixes` 적용 ✅** (과거 오염 **보정 쿼리는 별도**) · **ISS-048/051** → repo `20261002b_iss_place_order_lock.sql` **원격 미적용 ⬜** (SQL Editor 또는 MCP 승인 필요) |
+| **다음 에이전트 1순위** | ① **`20261002b` 원격 적용** · ② **ISS-052** migration 역동기화 · ③ **ISS-044 오염 집계** · ④ **AD-085 User实机** ⬜ · **PG = AD-061** |
 | **채팅 분리 (User 2026-10-02)** | 점검은 **별도 채팅**에서 진행 중 → **착수 전 `## 6` Open ISS + §63.14 B표** 확인 · 수정 시 **양쪽 상태 갱신** (§0 「채팅 분리」) |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
@@ -4228,6 +4228,12 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-02 pm6 — §63 감사 ISS 수정 (P0/P1 일부)
+- **Author:** Cursor Agent (Composer 2.5 Fast · **작업 채팅**)
+- **Changed:** `20261002_iss_audit_p0_p1_fixes.sql` · `20261002b_iss_place_order_lock.sql` · `CartView`/`CartContext` (ISS-047/050) · `place_order` repo 동기화
+- **DB:** POPUP **`iss_audit_p0_p1_fixes`** 원격 적용 ✅ (044/045/046/049) · **`20261002b` 원격 ⬜**
+- **Notes:** ISS-052/053/054/055 · ISS-044 **역대 오염 집계·보정** · AD-085 **User实机** ⬜
 
 ### 2026-10-02 pm5 — **§63 1차 감사 결과** (읽기 전용 · ISS-044~055 · P0 3건)
 - **Author:** Cursor Agent (**감사 채팅** — 작업 채팅과 분리)
@@ -7621,14 +7627,14 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 
 | ISS | 한 줄 | 등급 | 상태 | **담당 채팅** |
 |---|---|---|---|---|
-| **ISS-044** | 옵션 주문 취소·거절 시 SKU 재고 미복구 + 대표 재고 증식 | **P0** | Open | 감사 발견 → **작업 채팅 수정 대기** |
-| **ISS-045** | `orders` UPDATE 권한 무제한 → 손님이 금액·상태 위조 | **P0** | Open | 감사 발견 → **작업 채팅 수정 대기** |
-| **ISS-046** | `_enqueue_order_notification` anon 호출 가능 → 사칭 알림 | **P0** | Open | 감사 발견 → **작업 채팅 수정 대기** |
-| **ISS-047** | 통합 결제 부분 실패 → 장바구니 미정리 → 중복 주문 | **P1** | Open | 감사 발견 |
-| **ISS-048** | `order_number` `MAX+1` 경합 → 동시 주문 1건 실패 | **P1** | Open | 감사 발견 |
-| **ISS-049** | `profiles` UPDATE 무제한 → 자가 `role`/`store_id` 변경 | **P1** | Open | 감사 발견 |
-| **ISS-050** | 주문 후 장바구니 정리가 `skuId` 무시 → 안 산 옵션 삭제 | **P2** | Open | 감사 발견 |
-| **ISS-051** | `auto_accept_remaining` 감소 `NOT FOUND` 미검사 | **P2** | Open | 감사 발견 |
+| **ISS-044** | 옵션 주문 취소·거절 시 SKU 재고 미복구 + 대표 재고 증식 | **P0** | **Fixed (원격)** | `20261002_iss_audit_p0_p1_fixes` · **과거 오염 보정 ⬜** |
+| **ISS-045** | `orders` UPDATE 권한 무제한 → 손님이 금액·상태 위조 | **P0** | **Fixed (원격)** | 동 migration |
+| **ISS-046** | `_enqueue_order_notification` anon 호출 가능 → 사칭 알림 | **P0** | **Fixed (원격)** | 동 migration |
+| **ISS-047** | 통합 결제 부분 실패 → 장바구니 미정리 → 중복 주문 | **P1** | **Fixed (web)** | `CartView` 부분 성공 라인 즉시 제거 · 멱등키 ⬜ |
+| **ISS-048** | `order_number` `MAX+1` 경합 → 동시 주문 1건 실패 | **P1** | **Fixed (repo)** | `20261002b` · **원격 적용 ⬜** |
+| **ISS-049** | `profiles` UPDATE 무제한 → 자가 `role`/`store_id` 변경 | **P1** | **Fixed (원격)** | `iss_audit_p0_p1_fixes` |
+| **ISS-050** | 주문 후 장바구니 정리가 `skuId` 무시 → 안 산 옵션 삭제 | **P2** | **Fixed (web)** | `removeItemsByLineKeys` |
+| **ISS-051** | `auto_accept_remaining` 감소 `NOT FOUND` 미검사 | **P2** | **Fixed (repo)** | `20261002b` · **원격 적용 ⬜** |
 | **ISS-052** | 원격 migration 93 vs repo 41 → 운영 DB 재현 불가 | **P2** | Open | 감사 발견 |
 | **ISS-053** | 장바구니 가격 stale → 표시 금액 ≠ 청구 금액 | **P2** | Open | 감사 발견 |
 | **ISS-054** | AD-085 옵션이 반품·KPI RPC에 미연동 (§62) | **P3** | Open | 감사 발견 |

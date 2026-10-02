@@ -1,4 +1,4 @@
--- AD-085 — place_order SKU 재고 · order_items 스냅샷
+-- ISS-048 / ISS-051 — place_order (split from iss_audit_p0_p1_fixes for migration history)
 
 CREATE OR REPLACE FUNCTION public.place_order(
   p_store_id character varying,
