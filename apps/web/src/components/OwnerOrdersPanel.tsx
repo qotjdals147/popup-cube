@@ -447,7 +447,12 @@ export function OwnerOrdersPanel({
                     <ul style={styles.itemList}>
                       {order.items.map((item) => (
                         <li key={item.id} style={styles.itemRow}>
-                          <span style={styles.itemName}>{item.product_name}</span>
+                          <span style={styles.itemName}>
+                            {item.product_name}
+                            {item.option_label ? (
+                              <span style={styles.itemOption}> · {item.option_label}</span>
+                            ) : null}
+                          </span>
                           <span style={styles.itemQty}>× {item.quantity}</span>
                         </li>
                       ))}
@@ -966,6 +971,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: oc.text,
   },
   itemName: { flex: 1, minWidth: 0, lineHeight: 1.4 },
+  itemOption: { color: oc.textMuted, fontWeight: 400, fontSize: fs.xs },
   itemQty: { color: oc.textSecondary, fontWeight: 600, flexShrink: 0 },
   gachaBox: {
     marginTop: 10,

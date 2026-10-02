@@ -185,6 +185,19 @@ export interface CartItem {
   price: number;
   imageUrl: string | null;
   quantity: number;
+  /** AD-085 — 옵션 SKU (없으면 단일 재고 상품) */
+  skuId?: string | null;
+  optionLabel?: string | null;
+}
+
+/** AD-085 — 손님·점주 조회용 SKU */
+export interface ProductSku {
+  sku_id: string;
+  color: string | null;
+  size: string | null;
+  option_label: string | null;
+  stock_quantity: number;
+  sort_order?: number;
 }
 
 /** 매장별 프로모션 기본 설정 (AD-028, §10). */
@@ -350,6 +363,8 @@ export interface OwnerOrderItemView {
   product_image_url?: string | null;
   quantity: number;
   unit_price: number;
+  /** AD-085 — 주문 시점 옵션 스냅샷 */
+  option_label?: string | null;
 }
 
 export interface OwnerOrderView extends Order {

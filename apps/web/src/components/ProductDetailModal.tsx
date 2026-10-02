@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react';
-import type { OrderStatus, Product, ProductDetailBlock, ProductReview } from '@popup-cube/shared';
+import type { OrderStatus, Product, ProductDetailBlock, ProductReview, ProductSku } from '@popup-cube/shared';
+import { getProductSkus } from '../lib/productSkus';
 import { listProductDetailBlocks } from '../lib/productDetailBlocks';
 import { getMyReviewKeys, getProductReviews, reviewKey } from '../lib/reviews';
 import { canFileClaim, confirmPurchase, listMyOrders } from '../lib/orders';
@@ -80,6 +81,9 @@ export function ProductDetailModal({
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [skus, setSkus] = useState<ProductSku[]>([]);
+  const [selectedSkuId, setSelectedSkuId] = useState<string | null>(null);
+  const [skuErr, setSkuErr] = useState<string | null>(null);
 
   const [reviewableOrder, setReviewableOrder] = useState<ReviewableOrder | null>(null);
   const [alreadyReviewedByMe, setAlreadyReviewedByMe] = useState(false);
@@ -127,11 +131,18 @@ export function ProductDetailModal({
     let mounted = true;
     setLoading(true);
     setReviewConfirmError(null);
-    Promise.all([listProductDetailBlocks(product.id), getProductReviews(product.id)])
-      .then(([blocks, reviewList]) => {
+    Promise.all([
+      listProductDetailBlocks(product.id),
+      getProductReviews(product.id),
+      previewMode ? Promise.resolve([] as ProductSku[]) : getProductSkus(product.id).catch(() => [] as ProductSku[]),
+    ])
+      .then(([blocks, reviewList, skuList]) => {
         if (!mounted) return;
         setDetailBlocks(blocks);
         setReviews(reviewList);
+        setSkus(skuList);
+        setSelectedSkuId(null);
+        setSkuErr(null);
       })
       .catch(() => {
         /* 상세 정보 로드 실패 시 기본 정보만 보여줌 */
@@ -149,10 +160,35 @@ export function ProductDetailModal({
     reviews.length > 0 ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length) * 10) / 10 : null;
 
   function handleAdd() {
-    addToCart(storeId, product, qty);
+    if (skus.length > 0) {
+      const sku = skus.find((s) => s.sku_id === selectedSkuId);
+      if (!sku || sku.stock_quantity < 1) {
+        setSkuErr(t('productDetail.optionRequired'));
+        return;
+      }
+      if (qty > sku.stock_quantity) {
+        setSkuErr(t('productDetail.optionStockShort'));
+        return;
+      }
+      addToCart(storeId, product, qty, {
+        skuId: sku.sku_id,
+        optionLabel: sku.option_label ?? sku.sku_id,
+      });
+    } else {
+      addToCart(storeId, product, qty);
+    }
+    setSkuErr(null);
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1200);
   }
+
+  const selectedSku = skus.find((s) => s.sku_id === selectedSkuId) ?? null;
+  const maxQty =
+    skus.length > 0
+      ? selectedSku
+        ? Math.max(1, selectedSku.stock_quantity)
+        : 1
+      : Math.max(1, product.stock_quantity);
 
   function reloadReviews() {
     return getProductReviews(product.id)
@@ -318,13 +354,62 @@ export function ProductDetailModal({
 
         {!previewMode && !shoppingBlocked && (
           <div className="product-detail-buy-bar" style={styleFor(light, S.buyBarLayout, S.buyBarDark)}>
+            {skus.length > 0 && (
+              <div style={S.optionBlock}>
+                <span style={styleFor(light, S.optionLabelLayout, S.optionLabelDark)}>{t('productDetail.optionLabel')}</span>
+                <div style={S.optionChipRow}>
+                  {skus.map((sku) => {
+                    const soldOut = sku.stock_quantity < 1;
+                    const active = selectedSkuId === sku.sku_id;
+                    return (
+                      <button
+                        key={sku.sku_id}
+                        type="button"
+                        disabled={soldOut}
+                        style={styleFor(
+                          light,
+                          {
+                            ...S.optionChipLayout,
+                            borderColor: active ? '#3182f6' : undefined,
+                            background: active ? 'rgba(49,130,246,0.12)' : undefined,
+                            opacity: soldOut ? 0.45 : 1,
+                          },
+                          active ? S.optionChipActiveDark : S.optionChipDark
+                        )}
+                        onClick={() => {
+                          setSelectedSkuId(sku.sku_id);
+                          setSkuErr(null);
+                          setQty((q) => Math.min(q, Math.max(1, sku.stock_quantity)));
+                        }}
+                      >
+                        {sku.option_label ?? sku.sku_id}
+                        {soldOut ? ` · ${t('productDetail.optionSoldOut')}` : ''}
+                      </button>
+                    );
+                  })}
+                </div>
+                {skuErr && <p style={S.optionErr}>{skuErr}</p>}
+              </div>
+            )}
             <div className="product-detail-buy-qty-row">
               <div className="product-detail-stepper" style={styleFor(light, S.stepperLayout, S.stepperDark)}>
-                <button type="button" className="product-detail-stepper-btn" style={styleFor(light, S.stepperBtnLayout, S.stepperBtnDark)} onClick={() => setQty((q) => Math.max(1, q - 1))}>
+                <button
+                  type="button"
+                  className="product-detail-stepper-btn"
+                  style={styleFor(light, S.stepperBtnLayout, S.stepperBtnDark)}
+                  onClick={() => setQty((q) => Math.max(1, q - 1))}
+                >
                   −
                 </button>
-                <span className="product-detail-stepper-value" style={styleFor(light, S.stepperValueLayout, S.stepperValueDark)}>{qty}</span>
-                <button type="button" className="product-detail-stepper-btn" style={styleFor(light, S.stepperBtnLayout, S.stepperBtnDark)} onClick={() => setQty((q) => q + 1)}>
+                <span className="product-detail-stepper-value" style={styleFor(light, S.stepperValueLayout, S.stepperValueDark)}>
+                  {qty}
+                </span>
+                <button
+                  type="button"
+                  className="product-detail-stepper-btn"
+                  style={styleFor(light, S.stepperBtnLayout, S.stepperBtnDark)}
+                  onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
+                >
                   +
                 </button>
               </div>
@@ -511,4 +596,19 @@ const S = {
     whiteSpace: 'nowrap' as const,
   },
   addBtnDark: { background: '#e94560', color: '#fff' },
+  optionBlock: { display: 'flex', flexDirection: 'column' as const, gap: 8, width: '100%' },
+  optionLabelLayout: { fontSize: 12, fontWeight: 600, color: '#4e5968' },
+  optionLabelDark: { color: '#c9d4ee' },
+  optionChipRow: { display: 'flex', flexWrap: 'wrap' as const, gap: 8 },
+  optionChipLayout: {
+    padding: '8px 12px',
+    borderRadius: 8,
+    border: '1px solid #d1d6db',
+    background: '#fff',
+    fontSize: 13,
+    cursor: 'pointer',
+  },
+  optionChipDark: { border: '1px solid #2c4270', background: '#0d1730', color: '#d8e4ff' },
+  optionChipActiveDark: { borderColor: '#3182f6', background: 'rgba(49,130,246,0.2)' },
+  optionErr: { margin: 0, fontSize: 12, color: '#e94560' },
 };

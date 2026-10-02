@@ -39,7 +39,11 @@ export async function placeOrder(
 
     .filter((item) => item.storeId === storeId)
 
-    .map((item) => ({ product_id: item.productId, quantity: item.quantity }));
+    .map((item) => ({
+      product_id: item.productId,
+      quantity: item.quantity,
+      ...(item.skuId ? { sku_id: item.skuId } : {}),
+    }));
 
 
 
@@ -70,6 +74,8 @@ export async function placeOrder(
   if (error) {
 
     if (error.message.includes('insufficient_stock')) throw new OrderError('insufficient_stock');
+    if (error.message.includes('sku_required')) throw new OrderError('sku_required');
+    if (error.message.includes('invalid_sku')) throw new OrderError('invalid_sku');
     if (error.message.includes('popup_ended')) throw new OrderError('popup_ended');
 
     throw new OrderError(error.message);
@@ -188,6 +194,8 @@ interface StoreOrderRow {
   quantity: number;
 
   unit_price: number;
+
+  option_label: string | null;
 
   gacha_product_name: string | null;
 
@@ -338,6 +346,8 @@ export async function listStoreOrders(storeId: string): Promise<OwnerOrderView[]
       quantity: row.quantity,
 
       unit_price: row.unit_price,
+
+      option_label: row.option_label ?? null,
 
     });
 
@@ -768,6 +778,8 @@ interface MyOrderRow {
 
   unit_price: number;
 
+  option_label: string | null;
+
   gacha_product_name: string | null;
 
   gacha_exclusive_name: string | null;
@@ -918,6 +930,8 @@ export async function listMyOrders(): Promise<ShopperOrderView[]> {
       quantity: row.quantity,
 
       unit_price: row.unit_price,
+
+      option_label: row.option_label ?? null,
 
     });
 

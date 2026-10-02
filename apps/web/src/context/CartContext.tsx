@@ -1,17 +1,23 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { CartItem, Product } from '@popup-cube/shared';
 import { CART_STORAGE_KEY, postCartToApp } from '../lib/cartSync';
+import { cartLineKey } from '../lib/cartLineKey';
 
 const STORAGE_KEY = CART_STORAGE_KEY;
+
+export interface AddToCartOption {
+  skuId: string;
+  optionLabel: string;
+}
 
 interface CartContextValue {
   items: CartItem[];
   totalQuantity: number;
   totalPrice: number;
-  addToCart: (storeId: string, product: Product, quantity?: number) => void;
-  incrementQuantity: (productId: string) => void;
-  decrementQuantity: (productId: string) => void;
-  removeItem: (productId: string) => void;
+  addToCart: (storeId: string, product: Product, quantity?: number, option?: AddToCartOption) => void;
+  incrementQuantity: (lineKey: string) => void;
+  decrementQuantity: (lineKey: string) => void;
+  removeItem: (lineKey: string) => void;
   /** 결제 완료된 product_id만 제거 (매장 통째 clearStoreItems 대신) */
   removeItemsByProductIds: (productIds: string[]) => void;
   clearCart: () => void;
@@ -52,13 +58,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('popup_cart_hydrate', syncFromNativeBridge);
   }, []);
 
-  function addToCart(storeId: string, product: Product, quantity = 1) {
+  function addToCart(storeId: string, product: Product, quantity = 1, option?: AddToCartOption) {
     const lineStoreId = product.store_id || storeId;
+    const skuId = option?.skuId ?? null;
+    const optionLabel = option?.optionLabel ?? null;
     setItems((prev) => {
-      const existing = prev.find((item) => item.productId === product.id);
+      const key = cartLineKey({ productId: product.id, skuId });
+      const existing = prev.find((item) => cartLineKey(item) === key);
       if (existing) {
         return prev.map((item) =>
-          item.productId === product.id
+          cartLineKey(item) === key
             ? { ...item, quantity: item.quantity + quantity, storeId: lineStoreId }
             : item
         );
@@ -72,27 +81,33 @@ export function CartProvider({ children }: { children: ReactNode }) {
           price: product.price,
           imageUrl: product.image_url,
           quantity,
+          skuId,
+          optionLabel,
         },
       ];
     });
   }
 
-  function incrementQuantity(productId: string) {
+  function incrementQuantity(lineKey: string) {
     setItems((prev) =>
-      prev.map((item) => (item.productId === productId ? { ...item, quantity: item.quantity + 1 } : item))
+      prev.map((item) =>
+        cartLineKey(item) === lineKey ? { ...item, quantity: item.quantity + 1 } : item
+      )
     );
   }
 
-  function decrementQuantity(productId: string) {
+  function decrementQuantity(lineKey: string) {
     setItems((prev) =>
       prev
-        .map((item) => (item.productId === productId ? { ...item, quantity: item.quantity - 1 } : item))
+        .map((item) =>
+          cartLineKey(item) === lineKey ? { ...item, quantity: item.quantity - 1 } : item
+        )
         .filter((item) => item.quantity > 0)
     );
   }
 
-  function removeItem(productId: string) {
-    setItems((prev) => prev.filter((item) => item.productId !== productId));
+  function removeItem(lineKey: string) {
+    setItems((prev) => prev.filter((item) => cartLineKey(item) !== lineKey));
   }
 
   function removeItemsByProductIds(productIds: string[]) {

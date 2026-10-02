@@ -304,6 +304,11 @@
   font-weight: 500;
 }
 
+.shopper-account-main .oh-item-option {
+  color: var(--acct-text-secondary, #4e5968);
+  font-weight: 400;
+}
+
 .shopper-account-main .oh-item-qty {
   color: var(--acct-text-secondary, #4e5968);
   font-weight: 600;

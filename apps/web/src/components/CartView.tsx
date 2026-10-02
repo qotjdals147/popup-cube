@@ -15,6 +15,7 @@ import {
   resolveEffectivePromo,
 } from '@popup-cube/shared';
 import { useCart } from '../context/CartContext';
+import { cartLineKey } from '../lib/cartLineKey';
 import { getActivePromotion, GachaError, rollGacha } from '../lib/gacha';
 import { createAddress, listMyAddresses } from '../lib/addresses';
 import { OrderError, placeOrder } from '../lib/orders';
@@ -180,11 +181,11 @@ export function CartView({
   const activeStoreId = checkoutStoreId ?? focusStoreId ?? null;
 
   useEffect(() => {
-    setSelectedIds(new Set(items.map((item) => item.productId)));
+    setSelectedIds(new Set(items.map((item) => cartLineKey(item))));
   }, [items]);
 
   const selectedItems = useMemo(
-    () => items.filter((item) => selectedIds.has(item.productId)),
+    () => items.filter((item) => selectedIds.has(cartLineKey(item))),
     [items, selectedIds],
   );
   const allSelected = items.length > 0 && selectedIds.size === items.length;
@@ -205,7 +206,7 @@ export function CartView({
     () =>
       checkoutTargetStoreIds.length > 0
         ? items.filter(
-            (item) => checkoutTargetStoreIds.includes(item.storeId) && selectedIds.has(item.productId),
+            (item) => checkoutTargetStoreIds.includes(item.storeId) && selectedIds.has(cartLineKey(item)),
           )
         : [],
     [items, checkoutTargetStoreIds, selectedIds],
@@ -291,21 +292,21 @@ export function CartView({
     };
   }, [items]);
 
-  function toggleProduct(productId: string) {
+  function toggleLine(lineKey: string) {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(productId)) next.delete(productId);
-      else next.add(productId);
+      if (next.has(lineKey)) next.delete(lineKey);
+      else next.add(lineKey);
       return next;
     });
   }
 
   function toggleStoreProducts(storeId: string) {
-    const storeProductIds = items.filter((item) => item.storeId === storeId).map((item) => item.productId);
-    const allInStore = storeProductIds.length > 0 && storeProductIds.every((id) => selectedIds.has(id));
+    const storeLineKeys = items.filter((item) => item.storeId === storeId).map((item) => cartLineKey(item));
+    const allInStore = storeLineKeys.length > 0 && storeLineKeys.every((id) => selectedIds.has(id));
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      for (const id of storeProductIds) {
+      for (const id of storeLineKeys) {
         if (allInStore) next.delete(id);
         else next.add(id);
       }
@@ -317,7 +318,7 @@ export function CartView({
     if (allSelected) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(items.map((item) => item.productId)));
+      setSelectedIds(new Set(items.map((item) => cartLineKey(item))));
     }
   }
 
@@ -330,7 +331,7 @@ export function CartView({
     const eligible = storesWithSelection.filter(
       (storeId) =>
         !isStoreCheckoutBlocked(storeId) &&
-        items.some((item) => item.storeId === storeId && selectedIds.has(item.productId)),
+        items.some((item) => item.storeId === storeId && selectedIds.has(cartLineKey(item))),
     );
     if (eligible.length === 0) return;
     setCheckoutStoreIds(eligible);
@@ -384,7 +385,7 @@ export function CartView({
         const plans: Record<string, CheckoutBenefitPlan> = {};
         for (const storeId of storeIds) {
           const ordering = items.filter(
-            (item) => item.storeId === storeId && selectedIds.has(item.productId),
+            (item) => item.storeId === storeId && selectedIds.has(cartLineKey(item)),
           );
           if (ordering.length === 0) continue;
           const productIds = ordering.map((item) => item.productId);
@@ -441,7 +442,7 @@ export function CartView({
 
       for (const storeId of checkoutTargetStoreIds) {
         const ordering = items.filter(
-          (item) => item.storeId === storeId && selectedIds.has(item.productId),
+          (item) => item.storeId === storeId && selectedIds.has(cartLineKey(item)),
         );
         if (ordering.length === 0) continue;
         const plan = plans[storeId];
@@ -598,7 +599,8 @@ export function CartView({
   }
 
   function renderCartItem(item: (typeof items)[number]) {
-    const checked = selectedIds.has(item.productId);
+    const lineKey = cartLineKey(item);
+    const checked = selectedIds.has(lineKey);
     const productPromo = productPromoById[item.productId] ?? {
       promo_mode: 'inherit' as const,
       promo_discount_percent: null,
@@ -627,14 +629,14 @@ export function CartView({
 
     return (
       <article
-        key={item.productId}
+        key={lineKey}
         className={`cart-drawer-item ${isPageLayout ? 'cart-drawer-item--page' : 'cart-drawer-item--drawer'}${!checked ? ' cart-drawer-item--unchecked' : ''}`}
       >
         <label className="cart-drawer-item-check">
           <input
             type="checkbox"
             checked={checked}
-            onChange={() => toggleProduct(item.productId)}
+            onChange={() => toggleLine(lineKey)}
             aria-label={item.name}
           />
         </label>
@@ -648,10 +650,13 @@ export function CartView({
         <div className="cart-drawer-item-body">
           <div className="cart-drawer-item-top">
             <p className="cart-drawer-item-name">{item.name}</p>
+            {item.optionLabel ? (
+              <p className="cart-drawer-item-option">{item.optionLabel}</p>
+            ) : null}
             <button
               type="button"
               className="cart-drawer-remove-x"
-              onClick={() => removeItem(item.productId)}
+              onClick={() => removeItem(lineKey)}
               aria-label={t('cart.removeItem')}
             >
               ✕
@@ -673,11 +678,11 @@ export function CartView({
           <div className="cart-drawer-item-footer">
             <div className="cart-drawer-item-qty-col">
               <div className="cart-drawer-stepper">
-                <button type="button" className="cart-drawer-qty-btn" onClick={() => decrementQuantity(item.productId)}>
+                <button type="button" className="cart-drawer-qty-btn" onClick={() => decrementQuantity(lineKey)}>
                   −
                 </button>
                 <span className="cart-drawer-qty-value">{item.quantity}</span>
-                <button type="button" className="cart-drawer-qty-btn" onClick={() => incrementQuantity(item.productId)}>
+                <button type="button" className="cart-drawer-qty-btn" onClick={() => incrementQuantity(lineKey)}>
                   +
                 </button>
               </div>
@@ -893,9 +898,9 @@ export function CartView({
               <p className="cart-drawer-promo-once-note">{t('cart.promoOrderOnceHint')}</p>
             )}
             {storeGroups.map((group) => {
-              const storeProductIds = group.items.map((item) => item.productId);
+              const storeLineKeys = group.items.map((item) => cartLineKey(item));
               const storeAllSelected =
-                storeProductIds.length > 0 && storeProductIds.every((id) => selectedIds.has(id));
+                storeLineKeys.length > 0 && storeLineKeys.every((id) => selectedIds.has(id));
               return (
               <section
                 key={group.storeId}

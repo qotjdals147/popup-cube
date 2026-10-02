@@ -16,6 +16,7 @@ import {
 } from '../lib/formatInteger';
 import { ownerColors as oc, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { OwnerProductBlockEditor } from './OwnerProductBlockEditor';
+import { OwnerProductSkusEditor } from './OwnerProductSkusEditor';
 import { OwnerStatsShortcutBanner } from './OwnerStatsShortcutBanner';
 import { ProductDetailModal } from './ProductDetailModal';
 
@@ -473,6 +474,8 @@ export function OwnerProductPanel({
                         {t('common.back')}
                       </button>
                     </div>
+
+                    <OwnerProductSkusEditor productId={product.id} />
 
                     <div style={styles.detailDivider} />
                     <h4 style={styles.detailSectionTitle}>{t('ownerProducts.detailSectionTitle')}</h4>

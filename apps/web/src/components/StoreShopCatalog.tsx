@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Product } from '@popup-cube/shared';
 import { listActiveProducts } from '../lib/products';
+import { getProductSkus } from '../lib/productSkus';
 import { useCart } from '../context/CartContext';
 import { ProductDetailModal } from './ProductDetailModal';
 import { t } from '../i18n';
@@ -60,8 +61,17 @@ export function StoreShopCatalog({
     setQuantities((prev) => ({ ...prev, [productId]: Math.max(1, qty) }));
   }
 
-  function handleAdd(product: Product) {
+  async function handleAdd(product: Product) {
     if (shoppingBlocked) return;
+    try {
+      const skuList = await getProductSkus(product.id);
+      if (skuList.length > 0) {
+        setDetailProduct(product);
+        return;
+      }
+    } catch {
+      /* 단일 재고 상품으로 처리 */
+    }
     addToCart(storeId, product, getQty(product.id));
     setAddedId(product.id);
     window.setTimeout(() => setAddedId((prev) => (prev === product.id ? null : prev)), 1200);
@@ -123,7 +133,7 @@ export function StoreShopCatalog({
                   type="button"
                   className="store-shop-card__action-btn store-shop-card__action-btn--add"
                   disabled={shoppingBlocked}
-                  onClick={() => handleAdd(product)}
+                  onClick={() => void handleAdd(product)}
                 >
                   {shoppingBlocked
                     ? t('storeShop.popupEndedShort')

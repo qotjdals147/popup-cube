@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.90` 최신 (점주 KPI)** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.91` 최신 (상품 옵션 AD-085)** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -574,6 +574,7 @@ npm run dev
 | AD-080 | **(확정 · User 2026-09-16) 손님 SNS 로그인 버튼 카피·레이아웃** — 이메일 로그인 **아래** · 버튼 = **로고 + 「로그인」** (제공자명 **버튼 글자에 중복 ❌**) · `SocialLoginRow` · `assets/google-wordmark.png` · §0 · §25 · §7.86 | User 2026-09-16 | 2026-09-16 |
 | AD-082 | **(구현 ✅ · 2026-09-22) 점주 리뷰 관리 P1** — `OwnerReviewsPanel` · **리뷰** 탭 · `get_store_reviews` · `set_owner_review_reply` · 손님 상세 **판매자 답글** · §7.88 · §58 #8 P1 | User 2026-09-22 | 2026-09-22 |
 | AD-083 | **(구현 ✅ · 2026-09-29) 마이 › 닉네임 변경** — `update_my_nickname` RPC · **중복확인 필수** · `settings.tsx` · AD-023 연장 · §7.89 | User 2026-09-29 | 2026-09-29 |
+| AD-085 | **(착수 · 2026-10-02) 상품 옵션 v1** — `product_skus`(색·사이즈·재고) · 점주·손님·`place_order` · §7.91 · §58 #8 P1 | User 2026-10-02 | 2026-10-02 |
 | AD-084 | **(구현 ✅ · 2026-09-29) 점주 KPI·상품별 판매 통계** — `get_store_kpi` · `get_store_sales_daily` · `get_store_product_sales` · `/home` KPI strip · **상품** 탭 미니 차트 · §7.90 · §58 #8 P1 | User 2026-09-29 | 2026-09-29 |
 | AD-081 | **(확정 · CEO·User 2026-09-22) 쿠폰·플랫폼 프로모 정책** — **실질** = 매장당 **HOT SKU 1개** · **플랫폼 3~4% 보조금** · 점주 **할인 전 정산** · **체감** = **손님 쿠폰 탭·쿠폰함 UX**(생색·「아싸 할인」) · 손님에게 **「플랫폼 부담 4%」문구 ❌** · PG 후 **보조금 정산 자동** · §7.87 · §53.9.1 | CEO·User 2026-09-22 | 2026-09-22 |
 | AD-062 | **(확정) v1 = 팝업 쇼핑몰 런칭 · 픽셀 월드 v2 보존** — CEO(mr심) 2026-08-13: Google 실물=PG 확정 · 월드+PG UX 이질감 · **에이블리/룩핀형 쇼핑몰**로 v1 출시. **코드 삭제 금지** — `/play`·Phaser·WebView·fixture·socket = **`legacy/world-v1` 보관** · 손님 **기본 진입 = 상품 쇼핑**(ShopPanel·ProductDetailModal·CartDrawer). v2/이벤트 = **2D 픽셀 재활용 또는 그래픽 업grade(영상·360 등) 별도 판단**. 상세 **§57** | User·CEO 2026-08-13 | 2026-08-13 |
@@ -797,10 +798,10 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약** | **§7.90 점주 KPI·상품별 통계 (AD-084)** · User PC 실기 ⬜ |
-| **User实기** | §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 **KPI ⬜** |
+| **한 줄 요약** | **§7.91 상품 옵션 (AD-085)** · §58 #8 P1 |
+| **User实기** | §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** |
-| **다음 에이전트 1순위** | ① §7.90 **PC 실기** · ② §58 #8 P1 **상품 옵션** · Kakao ⏸️ · **PG = AD-061** |
+| **다음 에이전트 1순위** | ① **AD-085** 옵션 v1 · ② 블록 템플릿 · Kakao ⏸️ · **PG = AD-061** |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
 
@@ -1650,9 +1651,46 @@ npm run dev
 
 #### 다음
 
-- [ ] User **PC 실기** ⬜  
-- [ ] §58 #8 P1 **상품 옵션** · 블록 템플릿  
+- [x] User **PC 실기** ✅ (2026-10-02)  
+- [ ] §58 #8 P1 **상품 옵션** → **§7.91**  
 - [ ] 리뷰 **신고(P2)**  
+
+---
+
+### 7.91 세션 인수인계 — **2026-10-02** (AD-085 · **상품 옵션 v1**)
+
+| | |
+|---|---|
+| **Scope** | **색·사이즈 SKU** — `product_skus` · 점주 등록 · 손님 **옵션 선택** · `place_order` · 주문/장바구니 **옵션 표시** |
+| **AD** | AD-085 · §58 Phase 2 · §53.4 #6 |
+| **§62** | `place_order` · `order_items` · `get_store_orders` · `get_my_orders` · Cart · 상세 · 점주 상품 |
+
+#### v1 규칙
+
+| | |
+|---|---|
+| **SKU 없음** | 기존과 동일 — `products.stock_quantity` |
+| **SKU 있음** | 주문 시 **`sku_id` 필수** · 재고는 **SKU별** 차감 |
+| **표시** | `order_items.option_label` 스냅샷 (예: `네이비 / M`) |
+
+#### 코드 (2026-10-02 pm — E2E ✅ push 대기)
+
+| | |
+|---|---|
+| **DB 원격 ✅** | `20261002_product_skus_ad085` · `_rpcs` · **`place_order`** · **`order_rpc`** (`option_label`) |
+| **점주** | `OwnerProductSkusEditor` · `productSkus.ts` · `OwnerProductPanel` 수정 폼 |
+| **손님** | `ProductDetailModal` 옵션 칩 · `CartContext`/`cartLineKey` · `StoreShopCatalog` (옵션 있으면 상세로) · `place_order` `sku_id` |
+| **주문 표시** | 점주 `OwnerOrdersPanel` · 손님 `ShopperOrderCardLight` · 장바구니 |
+
+#### User 실기 (§0)
+
+- **PC 3줄** — 점주: 상품 **수정** → **색·사이즈 옵션** 저장 · 손님: `/shop` **상세** → 옵션 → 장바구니 → 결제 · 점주 **주문**에 옵션 문구  
+- **Expo** — `apps/web`만 변경 → WebView **탭 재진입** (Metro **재시작 ❌**)
+
+#### 다음
+
+- [ ] User **옵션 실기** ⬜  
+- [ ] 블록 템플릿 (§58 P1)  
 
 ---
 
@@ -4153,6 +4191,16 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-02 pm3 — AD-085 상품 옵션 v1 (코드 + DB)
+- **Author:** Cursor Agent
+- **Changed:** `product_skus` migrations · `place_order`/`get_*_orders` · `OwnerProductSkusEditor` · `ProductDetailModal` · Cart · `ko.ts` · §7.91
+- **Notes:** POPUP Supabase migration 4건 원격 적용. **User 옵션 실기 ⬜** (§7.91). Vercel = push 후 web 빌드.
+
+### 2026-10-02 pm2 — §7.90 User实机 ✅ · AD-085 착수 (§7.91)
+- **Author:** Cursor Agent / User
+- **Changed:** §7.0 · §7.90实机 ✅ · §7.91 · AD-085 · `product_skus` migration (진행)
+- **Notes:** 다음 = 옵션 E2E 실기 ⬜
 
 ### 2026-10-02 pm — KPI 카피·점주 /home D-day (§7.90)
 - **Author:** Cursor Agent / User

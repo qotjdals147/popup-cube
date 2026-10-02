@@ -180,7 +180,12 @@ function ShopperOrderDetailBody({
                 </div>
                 <div className="oh-item-body">
                   <div className="oh-item-main">
-                    <span className="oh-item-name">{item.product_name}</span>
+                    <span className="oh-item-name">
+                      {item.product_name}
+                      {item.option_label ? (
+                        <span className="oh-item-option"> · {item.option_label}</span>
+                      ) : null}
+                    </span>
                     <span className="oh-item-unit">
                       {t('myOrders.lineItemUnit', {
                         price: item.unit_price.toLocaleString('ko-KR'),
