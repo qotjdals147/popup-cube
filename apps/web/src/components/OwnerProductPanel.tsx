@@ -16,7 +16,7 @@ import {
 } from '../lib/formatInteger';
 import { ownerColors as oc, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { OwnerProductBlockEditor } from './OwnerProductBlockEditor';
-import { OwnerProductSalesPanel } from './OwnerProductSalesPanel';
+import { OwnerStatsShortcutBanner } from './OwnerStatsShortcutBanner';
 import { ProductDetailModal } from './ProductDetailModal';
 
 interface OwnerProductPanelProps {
@@ -25,6 +25,7 @@ interface OwnerProductPanelProps {
   onClose?: () => void;
   /** 에디터 탭에 임베드 — 모달 오버레이 없음 (Sprint 2) */
   embedded?: boolean;
+  onOpenStatsTab?: () => void;
 }
 
 /**
@@ -32,7 +33,13 @@ interface OwnerProductPanelProps {
  * "숨기기"를 누르면 손님 화면에서만 안 보이고(soft delete), 완전히 지워지진 않음
  * (나중에 주문 이력과 연결될 걸 대비).
  */
-export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }: OwnerProductPanelProps) {
+export function OwnerProductPanel({
+  storeId,
+  userId,
+  onClose,
+  embedded = false,
+  onOpenStatsTab,
+}: OwnerProductPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -272,7 +279,7 @@ export function OwnerProductPanel({ storeId, userId, onClose, embedded = false }
           </div>
         )}
 
-        {embedded && <OwnerProductSalesPanel storeId={storeId} />}
+        {embedded && onOpenStatsTab && <OwnerStatsShortcutBanner onOpenStats={onOpenStatsTab} />}
 
         <div style={styles.toolbar}>
           <button

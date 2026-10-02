@@ -137,6 +137,8 @@
 
 **User 지적 시:** 가시성·편의성 문제는 **버그급** — HANDOFF `ISS-0xx` 또는 §60에 기록 후 **우선 수정**.
 
+**점주·손님 신규 화면 (2026-10-02):** 데이터·차트 추가 시 **사이드바/탭 이름·섹션 제목·한 줄 설명** 필수 — 숫자 박스만 두면 **ISS-043급** UX 실패.
+
 ### 쇼핑몰 퀄리티 — 「구리면 안 됨」(User 2026-08-14 — **절대 규칙**)
 
 **지금 단계 = v1 쇼핑몰 런칭.** 손님이 보는 앱·WebView는 **에이블리·쿠팡급** 체감이 목표. **기능만 있고 UI가 허술하면 출시 불가.**
@@ -783,6 +785,7 @@ popup_store/                          # Turborepo root
 | ISS-040 | **Google OAuth (Expo Go 브라우저)** — 무한로딩 / Gmail redirect / 빨간 오류 flash | **Open (Expo Go만)** | **Dev Client 네이티브(§7.84) = ✅ 해결** · Expo Go fallback = 브라우저 경로 **잔존** |
 | ISS-041 | **Google OAuth 후** — 프로필 timeout · JWT clock skew · OAuth code **이중 교환** | **Mitigated** | Dev Client实机: **JWT clock skew** → 폰 **날짜·시간 자동** 후 OK · `loadProfile` retry · **미커밋** |
 | ISS-042 | **Dev Client** — `Cannot find native module 'ExpoCrypto'` | **Resolved** | `expo-auth-session` import 제거 → `oauthQueryParams.ts` · `Linking.createURL` · APK 재빌드 **`a7ade9ee`** (JS만으로도 해결 가능) |
+| ISS-043 | ~~점주 KPI 숫자만 노출 — 「통계」가 뭔지·어디서 보는지 불명~~ | **Resolved** | **§0 UX** — `/home` **「매출·주문 통계」** 제목·안내 · 매장 관리 **「통계」** 탭 · 상품 탭 **통계 탭 열기** 배너 (2026-10-02) |
 
 ---
 
@@ -1612,7 +1615,7 @@ npx expo start --dev-client --tunnel --port 8082 --clear
 
 | | |
 |---|---|
-| **Scope** | 점주 **`/home`** 매장 카드 — **오늘/팝업 기간** 주문·매출 · **수락·발송·재고·자동수락** 알림 pill · **상품** 탭 — **7일 매출 막대** · **TOP SKU** |
+| **Scope** | **`/home`** — **「매출·주문 통계」** 제목·안내 · **매장 관리 → 「통계」** 탭(차트·TOP SKU) · **상품** 탭 — **「통계 탭 열기」** 배너 · ISS-043 |
 | **Git** | push 후 hash |
 | **DB** | `get_store_kpi` · `get_store_sales_daily` · `get_store_product_sales` · migration `20260929_store_kpi_ad084.sql` **✅ remote** |
 | **AD** | AD-084 · §58 #8 P1 (KPI) · §53.9 #3 |
@@ -1621,7 +1624,7 @@ npx expo start --dev-client --tunnel --port 8082 --clear
 
 | | |
 |---|---|
-| **UI** | `HomePage` + `OwnerStoreKpiStrip` · `OwnerProductPanel` + `OwnerProductSalesPanel` |
+| **UI** | `OwnerStoreStatsPanel` · `OwnerStoreKpiStrip` · `OwnerStatsShortcutBanner` · `StoreEditPage` **`tabStats`** |
 | **lib** | `storeKpi.ts` · `ko.ts` `ownerDashboard.kpi*` · `ownerProducts.salesStats*` |
 
 #### 집계 규칙
@@ -1641,7 +1644,7 @@ npm install --legacy-peer-deps
 npm run dev
 ```
 
-→ `demo@owner.com` / `demo` → **`/home`** KPI 숫자 · GUCCI **편집 → 상품** 탭 **판매 통계** 블록
+→ `demo@owner.com` / `demo` → **`/home`** **「매출·주문 통계」** · GUCCI **편집 → 통계** 탭
 
 #### 다음
 
@@ -4148,6 +4151,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-02 — 점주 「통계」 탭·KPI 가시성 (§7.90 · ISS-043)
+- **Author:** Cursor Agent / User
+- **Changed:** `StoreEditPage` tab **통계** · `OwnerStoreStatsPanel` · `OwnerStoreKpiStrip` 제목/안내 · `OwnerStatsShortcutBanner` · `ko.ts` · §0 · ISS-043 · `.cursor/rules`
+- **Notes:** **Expo ❌** · Vercel push 후 PC 3줄 · **어디서:** `/home` 요약 + **매장 관리 → 통계**
 
 ### 2026-09-29 pm3 — Vercel web-only build fix (§7.90 · KPI 미노출)
 - **Author:** Cursor Agent / User

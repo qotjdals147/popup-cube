@@ -13,6 +13,7 @@ import { OwnerDisplayPanel } from '../components/OwnerDisplayPanel';
 import { OwnerStorePolicyPanel } from '../components/OwnerStorePolicyPanel';
 import { OwnerPromotionPanel } from '../components/OwnerPromotionPanel';
 import { OwnerReviewsPanel } from '../components/OwnerReviewsPanel';
+import { OwnerStoreStatsPanel } from '../components/OwnerStoreStatsPanel';
 import { DemoToast } from '../components/DemoToast';
 import { useOwnerOrderRealtime } from '../hooks/useOwnerOrderRealtime';
 import { isValidStoreCode, normalizeStoreCode } from '../lib/orderRef';
@@ -24,6 +25,7 @@ import { getStoreReviews } from '../lib/reviews';
 
 type EditTab =
   | 'overview'
+  | 'stats'
   | 'products'
   | 'reviews'
   | 'orders'
@@ -314,6 +316,7 @@ export function StoreEditPage() {
 
   const tabs: { id: EditTab; label: string; badge?: number }[] = [
     { id: 'overview', label: t('ownerEdit.tabOverview') },
+    { id: 'stats', label: t('ownerEdit.tabStats') },
     { id: 'products', label: t('ownerEdit.tabProducts') },
     { id: 'reviews', label: t('ownerEdit.tabReviews'), badge: pendingReviewReplies },
     { id: 'orders', label: t('ownerEdit.tabOrders'), badge: pendingAccept },
@@ -548,8 +551,17 @@ export function StoreEditPage() {
             </section>
           )}
 
+          {!loading && !error && tab === 'stats' && storeId && (
+            <OwnerStoreStatsPanel storeId={storeId} />
+          )}
+
           {!loading && !error && tab === 'products' && userId && storeId && (
-            <OwnerProductPanel storeId={storeId} userId={userId} embedded />
+            <OwnerProductPanel
+              storeId={storeId}
+              userId={userId}
+              embedded
+              onOpenStatsTab={() => setTab('stats')}
+            />
           )}
 
           {!loading && !error && tab === 'reviews' && storeId && (

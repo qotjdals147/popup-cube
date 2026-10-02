@@ -12,9 +12,10 @@ import { ownerColors as oc, ownerFontSize as fs } from '../styles/ownerAdminThem
 
 interface OwnerProductSalesPanelProps {
   storeId: string;
+  variant?: 'page' | 'embed';
 }
 
-export function OwnerProductSalesPanel({ storeId }: OwnerProductSalesPanelProps) {
+export function OwnerProductSalesPanel({ storeId, variant = 'page' }: OwnerProductSalesPanelProps) {
   const [daily, setDaily] = useState<StoreSalesDailyRow[]>([]);
   const [topProducts, setTopProducts] = useState<StoreProductSalesRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,10 +58,12 @@ export function OwnerProductSalesPanel({ storeId }: OwnerProductSalesPanelProps)
   const hasAnyData =
     daily.some((r) => r.order_count > 0) || topProducts.length > 0;
 
+  const sectionStyle = variant === 'page' ? styles.sectionPage : styles.section;
+
   return (
-    <section style={styles.section}>
-      <h3 style={styles.title}>{t('ownerProducts.salesStatsTitle')}</h3>
-      <p style={styles.intro}>{t('ownerProducts.salesStatsIntro')}</p>
+    <section style={sectionStyle}>
+      <h3 style={styles.title}>{t('ownerStats.chartSectionTitle')}</h3>
+      <p style={styles.intro}>{t('ownerStats.chartSectionIntro')}</p>
 
       {!hasAnyData ? (
         <p style={styles.hint}>{t('ownerProducts.salesStatsEmpty')}</p>
@@ -130,6 +133,12 @@ const styles: Record<string, React.CSSProperties> = {
     background: oc.surfaceMuted,
     borderRadius: 10,
     border: `1px solid ${oc.border}`,
+  },
+  sectionPage: {
+    padding: 0,
+    background: 'transparent',
+    border: 'none',
+    marginBottom: 0,
   },
   title: { margin: '0 0 6px', fontSize: fs.base, fontWeight: 600, color: oc.text },
   intro: { margin: '0 0 14px', fontSize: fs.sm, color: oc.textMuted, lineHeight: 1.5 },

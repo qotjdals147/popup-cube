@@ -7,9 +7,11 @@ import { ownerColors as oc, ownerFontSize as fs } from '../styles/ownerAdminThem
 interface OwnerStoreKpiStripProps {
   kpi: StoreKpi | null;
   loading?: boolean;
+  /** card = /home 매장 카드 · page = 매장 관리 「통계」 탭 */
+  variant?: 'card' | 'page';
 }
 
-export function OwnerStoreKpiStrip({ kpi, loading }: OwnerStoreKpiStripProps) {
+export function OwnerStoreKpiStrip({ kpi, loading, variant = 'card' }: OwnerStoreKpiStripProps) {
   if (loading) {
     return <p style={styles.hint}>{t('ownerDashboard.kpiLoading')}</p>;
   }
@@ -36,51 +38,104 @@ export function OwnerStoreKpiStrip({ kpi, loading }: OwnerStoreKpiStripProps) {
     });
   }
 
+  const showCardHeader = variant === 'card';
+
   return (
-    <div style={styles.wrap}>
+    <div style={variant === 'page' ? styles.wrapPage : styles.wrapCard}>
+      {showCardHeader && (
+        <div style={styles.sectionHead}>
+          <h3 style={styles.sectionTitle}>{t('ownerDashboard.statsSectionTitle')}</h3>
+          <p style={styles.sectionHint}>{t('ownerDashboard.statsSectionHint')}</p>
+        </div>
+      )}
+
       <div style={styles.grid}>
         <KpiCell
-          label={t('ownerDashboard.kpiTodayOrders')}
-          value={formatIntegerDisplay(kpi.today_order_count)}
-          sub={formatWon(kpi.today_revenue)}
+          title={t('ownerDashboard.kpiTodayTitle')}
+          countLabel={t('ownerDashboard.kpiOrderCount', {
+            n: formatIntegerDisplay(kpi.today_order_count),
+          })}
+          revenueLabel={t('ownerDashboard.kpiRevenueLabel', {
+            amount: formatWon(kpi.today_revenue),
+          })}
         />
         <KpiCell
-          label={t('ownerDashboard.kpiPopupOrders')}
-          value={formatIntegerDisplay(kpi.popup_order_count)}
-          sub={formatWon(kpi.popup_revenue)}
+          title={t('ownerDashboard.kpiPopupTitle')}
+          countLabel={t('ownerDashboard.kpiOrderCount', {
+            n: formatIntegerDisplay(kpi.popup_order_count),
+          })}
+          revenueLabel={t('ownerDashboard.kpiRevenueLabel', {
+            amount: formatWon(kpi.popup_revenue),
+          })}
         />
       </div>
+
       {alerts.length > 0 && (
-        <div style={styles.alertRow}>
-          {alerts.map((a) => (
-            <span
-              key={a.label}
-              style={a.tone === 'danger' ? styles.alertDanger : styles.alertWarn}
-            >
-              {a.label} {formatIntegerDisplay(a.value)}
-            </span>
-          ))}
+        <div style={styles.todoBlock}>
+          <span style={styles.todoTitle}>{t('ownerDashboard.kpiTodoTitle')}</span>
+          <div style={styles.alertRow}>
+            {alerts.map((a) => (
+              <span
+                key={a.label}
+                style={a.tone === 'danger' ? styles.alertDanger : styles.alertWarn}
+              >
+                {a.label} {formatIntegerDisplay(a.value)}
+              </span>
+            ))}
+          </div>
         </div>
+      )}
+
+      {showCardHeader && (
+        <p style={styles.moreHint}>{t('ownerDashboard.statsMoreHint')}</p>
       )}
     </div>
   );
 }
 
-function KpiCell({ label, value, sub }: { label: string; value: string; sub: string }) {
+function KpiCell({
+  title,
+  countLabel,
+  revenueLabel,
+}: {
+  title: string;
+  countLabel: string;
+  revenueLabel: string;
+}) {
   return (
     <div style={styles.cell}>
-      <span style={styles.cellLabel}>{label}</span>
-      <strong style={styles.cellValue}>{value}</strong>
-      <span style={styles.cellSub}>{sub}</span>
+      <span style={styles.cellTitle}>{title}</span>
+      <strong style={styles.cellCount}>{countLabel}</strong>
+      <span style={styles.cellRevenue}>{revenueLabel}</span>
     </div>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  wrap: {
+  wrapCard: {
     marginTop: 12,
     paddingTop: 12,
     borderTop: `1px solid ${oc.border}`,
+  },
+  wrapPage: {
+    marginBottom: 20,
+    padding: '16px 18px',
+    background: oc.surfaceMuted,
+    borderRadius: 10,
+    border: `1px solid ${oc.border}`,
+  },
+  sectionHead: { marginBottom: 12 },
+  sectionTitle: {
+    margin: 0,
+    fontSize: fs.base,
+    fontWeight: 700,
+    color: oc.text,
+  },
+  sectionHint: {
+    margin: '6px 0 0',
+    fontSize: fs.sm,
+    color: oc.textMuted,
+    lineHeight: 1.5,
   },
   hint: { margin: '12px 0 0', fontSize: fs.sm, color: oc.textMuted },
   grid: {
@@ -89,23 +144,30 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 10,
   },
   cell: {
-    background: oc.surfaceMuted,
+    background: oc.surface,
     borderRadius: 8,
-    padding: '10px 12px',
-    border: `1px solid ${oc.border}`,
+    padding: '12px 14px',
+    border: `1px solid ${oc.borderStrong}`,
     display: 'flex',
     flexDirection: 'column',
-    gap: 2,
+    gap: 4,
     minWidth: 0,
   },
-  cellLabel: { fontSize: fs.xs, color: oc.textMuted },
-  cellValue: { fontSize: fs.lg, color: oc.text, fontWeight: 700 },
-  cellSub: { fontSize: fs.xs, color: oc.textSecondary },
+  cellTitle: { fontSize: fs.sm, fontWeight: 600, color: oc.textSecondary },
+  cellCount: { fontSize: fs.lg, color: oc.text, fontWeight: 700 },
+  cellRevenue: { fontSize: fs.sm, color: oc.primary, fontWeight: 600 },
+  todoBlock: { marginTop: 12 },
+  todoTitle: {
+    display: 'block',
+    fontSize: fs.xs,
+    fontWeight: 600,
+    color: oc.textSecondary,
+    marginBottom: 6,
+  },
   alertRow: {
     display: 'flex',
     flexWrap: 'wrap',
     gap: 6,
-    marginTop: 10,
   },
   alertDanger: {
     fontSize: fs.xs,
@@ -122,5 +184,11 @@ const styles: Record<string, React.CSSProperties> = {
     background: oc.warningBg,
     color: oc.warningText,
     border: `1px solid ${oc.warningBorder}`,
+  },
+  moreHint: {
+    margin: '12px 0 0',
+    fontSize: fs.xs,
+    color: oc.textMuted,
+    lineHeight: 1.5,
   },
 };
