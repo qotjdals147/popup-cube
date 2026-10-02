@@ -4242,6 +4242,9 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-02 pm8 — AD-087 옵션 점주 UI (표 · 조합 생성)
+- **Changed:** `owner-product-skus.css` · `OwnerProductSkusEditor` 테이블·일괄 조합 · `ko.ts` 카피 정리
+
 ### 2026-10-02 pm7 — AD-087 옵션 v2 (±가격 · 점주 UX · place_order)
 - **Author:** Cursor Agent
 - **Changed:** `product_skus.price_delta` · RPC · `OwnerProductSkusEditor` 표 · `ProductDetailModal` · Cart · migrations `20261003*` · §7.92 · AD-087

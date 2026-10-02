@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getOwnerProductSkus, saveOwnerProductSkus, type OwnerSkuRow } from '../lib/productSkus';
 import { formatIntegerDisplay, formatIntegerInputRaw, parseIntegerInput } from '../lib/formatInteger';
 import { t } from '../i18n';
-import { ownerColors as oc, ownerFontSize as fs } from '../styles/ownerAdminTheme';
+import '../styles/owner-product-skus.css';
 
 interface OwnerProductSkusEditorProps {
   productId: string;
@@ -11,6 +11,10 @@ interface OwnerProductSkusEditorProps {
 
 function emptyRow(): OwnerSkuRow {
   return { color: '', size: '', stock_quantity: 0, price_delta: 0 };
+}
+
+function rowKey(r: OwnerSkuRow): string {
+  return `${r.color.trim().toLowerCase()}|${r.size.trim().toLowerCase()}`;
 }
 
 function parseSignedDelta(raw: string): number {
@@ -25,12 +29,55 @@ function formatSignedDeltaDisplay(value: number): string {
   return value.toLocaleString('ko-KR');
 }
 
+function parseOptionList(raw: string): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const part of raw.split(/[,，/\n|]+/)) {
+    const v = part.trim();
+    if (!v) continue;
+    const k = v.toLowerCase();
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(v);
+  }
+  return out;
+}
+
+function buildCombinations(colors: string[], sizes: string[]): OwnerSkuRow[] {
+  if (colors.length === 0 && sizes.length === 0) return [];
+  if (colors.length === 0) {
+    return sizes.map((size) => ({ color: '', size, stock_quantity: 0, price_delta: 0 }));
+  }
+  if (sizes.length === 0) {
+    return colors.map((color) => ({ color, size: '', stock_quantity: 0, price_delta: 0 }));
+  }
+  return colors.flatMap((color) =>
+    sizes.map((size) => ({ color, size, stock_quantity: 0, price_delta: 0 }))
+  );
+}
+
+function mergeGeneratedRows(existing: OwnerSkuRow[], generated: OwnerSkuRow[]): OwnerSkuRow[] {
+  const byKey = new Map<string, OwnerSkuRow>();
+  for (const r of existing) {
+    if (!r.color.trim() && !r.size.trim()) continue;
+    byKey.set(rowKey(r), r);
+  }
+  for (const g of generated) {
+    const k = rowKey(g);
+    if (!byKey.has(k)) byKey.set(k, g);
+  }
+  const merged = [...byKey.values()];
+  return merged.length > 0 ? merged : [emptyRow()];
+}
+
 export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSkusEditorProps) {
   const [rows, setRows] = useState<OwnerSkuRow[]>([emptyRow()]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [bulkColors, setBulkColors] = useState('');
+  const [bulkSizes, setBulkSizes] = useState('');
 
   const activeRows = useMemo(
     () => rows.filter((r) => r.color.trim() || r.size.trim()),
@@ -85,186 +132,199 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
     }
   }
 
-  if (loading) {
-    return <p style={styles.hint}>{t('ownerProducts.skusLoading')}</p>;
+  function handleGenerateCombinations() {
+    const colors = parseOptionList(bulkColors);
+    const sizes = parseOptionList(bulkSizes);
+    const generated = buildCombinations(colors, sizes);
+    if (generated.length === 0) {
+      setErr(t('ownerProducts.skusGenEmpty'));
+      return;
+    }
+    setErr(null);
+    setRows((prev) => mergeGeneratedRows(prev, generated));
+    setMsg(t('ownerProducts.skusGenDone', { count: generated.length }));
   }
 
-  return (
-    <div style={styles.box}>
-      <h4 style={styles.title}>{t('ownerProducts.skusTitle')}</h4>
-      <p style={styles.intro}>{t('ownerProducts.skusIntro')}</p>
-      <p style={styles.intro}>{t('ownerProducts.skusStockNote')}</p>
-      {activeRows.length > 0 && (
-        <p style={styles.summary}>
-          {t('ownerProducts.skusStockSum', { count: totalOptionStock })}
-        </p>
-      )}
+  function updateRow(idx: number, patch: Partial<OwnerSkuRow>) {
+    setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+  }
 
-      <div style={styles.tableHead}>
-        <span style={styles.thColor}>{t('ownerProducts.skusColorPh')}</span>
-        <span style={styles.thSize}>{t('ownerProducts.skusSizePh')}</span>
-        <span style={styles.thStock}>{t('ownerProducts.skusColStock')}</span>
-        <span style={styles.thDelta}>{t('ownerProducts.skusColPriceDelta')}</span>
-        <span style={styles.thSale}>{t('ownerProducts.skusColSalePrice')}</span>
-        <span style={styles.thAction} />
+  function removeRow(idx: number) {
+    setRows((prev) => {
+      const next = prev.filter((_, i) => i !== idx);
+      return next.length > 0 ? next : [emptyRow()];
+    });
+  }
+
+  if (loading) {
+    return <p className="owner-sku-msg-err">{t('ownerProducts.skusLoading')}</p>;
+  }
+
+  const basePriceLabel = basePrice.toLocaleString('ko-KR');
+
+  return (
+    <section className="owner-sku-panel" aria-labelledby="owner-sku-title">
+      <div className="owner-sku-panel__head">
+        <div>
+          <h4 id="owner-sku-title" className="owner-sku-panel__title">
+            {t('ownerProducts.skusTitle')}
+          </h4>
+          <p className="owner-sku-panel__base-price">
+            {t('ownerProducts.skusBasePriceLabel')}{' '}
+            <strong>{basePriceLabel}원</strong>
+          </p>
+        </div>
+        {activeRows.length > 0 && (
+          <span className="owner-sku-panel__badge">
+            {t('ownerProducts.skusStockSum', { count: totalOptionStock })}
+          </span>
+        )}
       </div>
 
-      {rows.map((row, idx) => {
-        const salePrice = basePrice + (row.price_delta ?? 0);
-        return (
-          <div key={idx} style={styles.row}>
-            <input
-              style={styles.inputColor}
-              placeholder={t('ownerProducts.skusColorPh')}
-              value={row.color}
-              onChange={(e) =>
-                setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, color: e.target.value } : r)))
-              }
-              maxLength={40}
-            />
-            <input
-              style={styles.inputSize}
-              placeholder={t('ownerProducts.skusSizePh')}
-              value={row.size}
-              onChange={(e) =>
-                setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, size: e.target.value } : r)))
-              }
-              maxLength={40}
-            />
-            <input
-              style={styles.inputStock}
-              placeholder="0"
-              value={row.stock_quantity ? formatIntegerDisplay(row.stock_quantity) : ''}
-              onChange={(e) => {
-                const n = parseIntegerInput(formatIntegerInputRaw(e.target.value));
-                setRows((prev) =>
-                  prev.map((r, i) => (i === idx ? { ...r, stock_quantity: Number.isFinite(n) ? n : 0 } : r))
-                );
-              }}
-              inputMode="numeric"
-            />
-            <input
-              style={styles.inputDelta}
-              placeholder={t('ownerProducts.skusDeltaPh')}
-              value={formatSignedDeltaDisplay(row.price_delta)}
-              onChange={(e) => {
-                const n = parseSignedDelta(e.target.value);
-                setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, price_delta: n } : r)));
-              }}
-              inputMode="numeric"
-            />
-            <span style={styles.salePreview}>
-              {salePrice >= 0 ? `${salePrice.toLocaleString('ko-KR')}원` : '—'}
-            </span>
-            {rows.length > 1 && (
-              <button type="button" style={styles.removeBtn} onClick={() => setRows((p) => p.filter((_, i) => i !== idx))}>
-                {t('ownerProducts.skusRemoveRow')}
-              </button>
-            )}
-          </div>
-        );
-      })}
+      <ul className="owner-sku-panel__tips">
+        <li>{t('ownerProducts.skusTipStock')}</li>
+        <li>{t('ownerProducts.skusTipPrice')}</li>
+      </ul>
 
-      <div style={styles.actions}>
-        <button type="button" style={styles.addBtn} onClick={() => setRows((p) => [...p, emptyRow()])}>
-          {t('ownerProducts.skusAddRow')}
+      <div className="owner-sku-gen">
+        <p className="owner-sku-gen__title">{t('ownerProducts.skusGenTitle')}</p>
+        <div className="owner-sku-gen__fields">
+          <div>
+            <label className="owner-sku-gen__label" htmlFor={`sku-bulk-colors-${productId}`}>
+              {t('ownerProducts.skusGenColors')}
+            </label>
+            <input
+              id={`sku-bulk-colors-${productId}`}
+              className="owner-sku-gen__input"
+              value={bulkColors}
+              onChange={(e) => setBulkColors(e.target.value)}
+              placeholder={t('ownerProducts.skusGenColorsPh')}
+            />
+          </div>
+          <div>
+            <label className="owner-sku-gen__label" htmlFor={`sku-bulk-sizes-${productId}`}>
+              {t('ownerProducts.skusGenSizes')}
+            </label>
+            <input
+              id={`sku-bulk-sizes-${productId}`}
+              className="owner-sku-gen__input"
+              value={bulkSizes}
+              onChange={(e) => setBulkSizes(e.target.value)}
+              placeholder={t('ownerProducts.skusGenSizesPh')}
+            />
+          </div>
+        </div>
+        <p className="owner-sku-gen__hint">{t('ownerProducts.skusGenHint')}</p>
+        <button type="button" className="owner-sku-gen__btn" onClick={handleGenerateCombinations}>
+          {t('ownerProducts.skusGenButton')}
         </button>
-        <button type="button" style={styles.saveBtn} disabled={saving} onClick={() => void handleSave()}>
+      </div>
+
+      <div className="owner-sku-table-wrap">
+        <table className="owner-sku-table">
+          <thead>
+            <tr>
+              <th className="col-no">#</th>
+              <th>{t('ownerProducts.skusColColor')}</th>
+              <th>{t('ownerProducts.skusColSize')}</th>
+              <th className="col-num">{t('ownerProducts.skusColStock')}</th>
+              <th className="col-num">{t('ownerProducts.skusColPriceDelta')}</th>
+              <th className="col-sale">{t('ownerProducts.skusColSalePrice')}</th>
+              <th className="col-action">{t('ownerProducts.skusColAction')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, idx) => {
+              const salePrice = basePrice + (row.price_delta ?? 0);
+              const labelPreview =
+                [row.color.trim(), row.size.trim()].filter(Boolean).join(' / ') ||
+                t('ownerProducts.skusRowEmpty');
+              return (
+                <tr key={idx}>
+                  <td className="col-no">{idx + 1}</td>
+                  <td>
+                    <input
+                      className="owner-sku-cell-input"
+                      aria-label={`${t('ownerProducts.skusColColor')} ${idx + 1}`}
+                      placeholder={t('ownerProducts.skusColorExample')}
+                      value={row.color}
+                      onChange={(e) => updateRow(idx, { color: e.target.value })}
+                      maxLength={40}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="owner-sku-cell-input"
+                      aria-label={`${t('ownerProducts.skusColSize')} ${idx + 1}`}
+                      placeholder={t('ownerProducts.skusSizeExample')}
+                      value={row.size}
+                      onChange={(e) => updateRow(idx, { size: e.target.value })}
+                      maxLength={40}
+                    />
+                  </td>
+                  <td className="col-num">
+                    <input
+                      className="owner-sku-cell-input owner-sku-cell-input--num"
+                      aria-label={`${labelPreview} ${t('ownerProducts.skusColStock')}`}
+                      placeholder="0"
+                      value={row.stock_quantity ? formatIntegerDisplay(row.stock_quantity) : ''}
+                      onChange={(e) => {
+                        const n = parseIntegerInput(formatIntegerInputRaw(e.target.value));
+                        updateRow(idx, { stock_quantity: Number.isFinite(n) ? n : 0 });
+                      }}
+                      inputMode="numeric"
+                    />
+                  </td>
+                  <td className="col-num">
+                    <div className="owner-sku-delta-wrap">
+                      <span className="owner-sku-delta-prefix">±</span>
+                      <input
+                        className="owner-sku-cell-input owner-sku-cell-input--num"
+                        aria-label={`${labelPreview} ${t('ownerProducts.skusColPriceDelta')}`}
+                        placeholder="0"
+                        value={formatSignedDeltaDisplay(row.price_delta)}
+                        onChange={(e) => updateRow(idx, { price_delta: parseSignedDelta(e.target.value) })}
+                        inputMode="numeric"
+                      />
+                    </div>
+                  </td>
+                  <td className="col-sale">{salePrice >= 0 ? `${salePrice.toLocaleString('ko-KR')}원` : '—'}</td>
+                  <td className="col-action">
+                    <button
+                      type="button"
+                      className="owner-sku-row-del"
+                      disabled={rows.length <= 1}
+                      onClick={() => removeRow(idx)}
+                      aria-label={t('ownerProducts.skusRemoveRow')}
+                    >
+                      {t('ownerProducts.skusRemoveRow')}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="owner-sku-footer">
+        <div className="owner-sku-footer__left">
+          <button type="button" className="owner-sku-btn" onClick={() => setRows((p) => [...p, emptyRow()])}>
+            {t('ownerProducts.skusAddRow')}
+          </button>
+        </div>
+        <button
+          type="button"
+          className="owner-sku-btn owner-sku-btn--primary"
+          disabled={saving}
+          onClick={() => void handleSave()}
+        >
           {saving ? t('ownerProducts.submitting') : t('ownerProducts.skusSave')}
         </button>
       </div>
-      {msg && <p style={styles.ok}>{msg}</p>}
-      {err && <p style={styles.error}>{err}</p>}
-    </div>
+
+      {msg && <p className="owner-sku-msg-ok">{msg}</p>}
+      {err && <p className="owner-sku-msg-err">{err}</p>}
+    </section>
   );
 }
-
-const styles: Record<string, CSSProperties> = {
-  box: {
-    marginTop: 12,
-    padding: '12px 0',
-    borderTop: `1px solid ${oc.border}`,
-  },
-  title: { margin: '0 0 4px', fontSize: fs.sm, fontWeight: 700, color: oc.text },
-  intro: { margin: '0 0 8px', fontSize: fs.xs, color: oc.textMuted, lineHeight: 1.5 },
-  summary: { margin: '0 0 10px', fontSize: fs.xs, fontWeight: 600, color: oc.text },
-  hint: { fontSize: fs.sm, color: oc.textMuted },
-  tableHead: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr 72px 88px 88px 52px',
-    gap: 6,
-    marginBottom: 6,
-    fontSize: 11,
-    fontWeight: 600,
-    color: oc.textMuted,
-  },
-  thColor: { gridColumn: '1' },
-  thSize: { gridColumn: '2' },
-  thStock: { gridColumn: '3' },
-  thDelta: { gridColumn: '4' },
-  thSale: { gridColumn: '5' },
-  thAction: { gridColumn: '6' },
-  row: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr 72px 88px 88px 52px',
-    gap: 6,
-    marginBottom: 8,
-    alignItems: 'center',
-  },
-  inputColor: {
-    padding: '8px 10px',
-    borderRadius: 8,
-    border: `1px solid ${oc.borderStrong}`,
-    fontSize: fs.sm,
-  },
-  inputSize: {
-    padding: '8px 10px',
-    borderRadius: 8,
-    border: `1px solid ${oc.borderStrong}`,
-    fontSize: fs.sm,
-  },
-  inputStock: {
-    padding: '8px 6px',
-    borderRadius: 8,
-    border: `1px solid ${oc.borderStrong}`,
-    fontSize: fs.sm,
-    width: '100%',
-  },
-  inputDelta: {
-    padding: '8px 6px',
-    borderRadius: 8,
-    border: `1px solid ${oc.borderStrong}`,
-    fontSize: fs.sm,
-    width: '100%',
-  },
-  salePreview: { fontSize: 11, color: oc.textMuted, whiteSpace: 'nowrap' },
-  removeBtn: {
-    padding: '6px 8px',
-    border: `1px solid ${oc.border}`,
-    background: oc.surface,
-    borderRadius: 8,
-    fontSize: 10,
-    cursor: 'pointer',
-  },
-  actions: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 },
-  addBtn: {
-    padding: '8px 12px',
-    borderRadius: 8,
-    border: `1px solid ${oc.borderStrong}`,
-    background: oc.surfaceMuted,
-    fontSize: fs.sm,
-    cursor: 'pointer',
-  },
-  saveBtn: {
-    padding: '8px 14px',
-    borderRadius: 8,
-    border: 'none',
-    background: oc.primary,
-    color: '#fff',
-    fontSize: fs.sm,
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-  ok: { margin: '8px 0 0', fontSize: fs.xs, color: oc.successText },
-  error: { margin: '8px 0 0', fontSize: fs.xs, color: oc.dangerText },
-};
