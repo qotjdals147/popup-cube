@@ -17,6 +17,7 @@ alwaysApply: true
 - push가 **Cursor Auto-review** 등으로 막혀도 **User에게 「푸시할까요?」 묻지 않음** — **즉시 같은 `git push origin main` 재시도**(승인 카드 허용) · 여러 번 실패할 때만 **`git log origin/main..HEAD`** hash와 함께 「승인 후 push 필요」 알림.
 - **`popup_store/` 작업 시작 시** `HANDOFF_POPUP_STORE.md` **§0**(특히 Git commit & push · **UI/UX 가시성**) **매번 재확인** — 「이전에 읽음」으로 건너뛰기 **❌**.
 - **점주·손님 신규 기능** — 숫자/차트만 던지지 말고 **메뉴명(탭)·섹션 제목·한 줄 안내**로 「어디서 무엇인지」를 **첫 화면에서** 알 수 있게 (§0 UI/UX · AD-068).
+- **`ko.ts`·HANDOFF 카피** — **AI/매뉴얼 톤 금지** (§0 UI·i18n · User 2026-10-02): 짧게 · 소리 내어 읽었을 때 자연스러운지 확인.
 
 ## Supabase
 

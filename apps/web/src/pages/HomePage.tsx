@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { listOwnedStores } from '../lib/stores';
 import { getStoreKpi, type StoreKpi } from '../lib/storeKpi';
 import { OwnerStoreKpiStrip } from '../components/OwnerStoreKpiStrip';
+import { PopupPeriodBadgePill } from '../components/PopupPeriodBadgePill';
 import { DEMO_STORE_ID } from '@popup-cube/shared';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
@@ -133,6 +134,7 @@ export function HomePage() {
                                 ? t('ownerDashboard.statusPublished')
                                 : t('ownerDashboard.statusDraft')}
                             </span>
+                            <PopupPeriodBadgePill popupEndsAt={store.popup_ends_at} />
                           </div>
                           <p style={styles.storeDesc}>
                             {store.description?.trim() || t('ownerEdit.noDescription')}

@@ -109,6 +109,8 @@
 
 **HANDOFF·에이전트:** §25 i18n 갱신 시 위 규칙 준수. 불필요한 `helpText` 블록 추가 금지.
 
+**AI 티 금지 (User 2026-10-02):** 「~할 일」「~해보세요」「한곳에서」「~이에요」 남발 · 친절한 챗봇/매뉴얼체 **❌** — **쿠팡·스마트스토어 점주센터**처럼 **짧은 라벨·명사구** · 문구 추가 전 **소리 내어 읽기** · §25·`ko.ts`·HANDOFF 본문 동일.
+
 **SNS 로그인 버튼 카피 (User 2026-09-16 · AD-080):**
 
 | | 규칙 |
@@ -4151,6 +4153,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-02 pm — KPI 카피·점주 /home D-day (§7.90)
+- **Author:** Cursor Agent / User
+- **Changed:** `PopupPeriodBadgePill` · `popupPeriod.getPopupPeriodBadge` · `HomePage` · `ko.ts` (**대기 건** 등) · §0 AI 톤 · `.cursor/rules`
+- **Notes:** D-day = 손님 앱과 동일 로직 · **매장 개요**에서 종료일 없으면 뱃지 없음 · Expo ❌
 
 ### 2026-10-02 — 점주 「통계」 탭·KPI 가시성 (§7.90 · ISS-043)
 - **Author:** Cursor Agent / User
