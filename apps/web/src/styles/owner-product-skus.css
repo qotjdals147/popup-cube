@@ -47,7 +47,7 @@
 
 .owner-sku-panel__tips {
   margin: 0 0 14px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   font-size: 13px;
   line-height: 1.55;
   color: #4e5968;
@@ -56,11 +56,12 @@
   border: 1px solid #e5e8eb;
 }
 
-.owner-sku-panel__tips li {
-  margin: 0 0 4px;
+.owner-sku-panel__tips p {
+  margin: 0 0 6px;
+  padding-left: 0;
 }
 
-.owner-sku-panel__tips li:last-child {
+.owner-sku-panel__tips p:last-child {
   margin-bottom: 0;
 }
 
@@ -93,10 +94,10 @@
 
 .owner-sku-gen__label {
   display: block;
-  margin-bottom: 4px;
-  font-size: 12px;
+  margin-bottom: 6px;
+  font-size: 14px;
   font-weight: 600;
-  color: #4e5968;
+  color: #191f28;
 }
 
 .owner-sku-gen__input {
@@ -148,9 +149,9 @@
 .owner-sku-table thead th {
   padding: 10px 12px;
   text-align: left;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  color: #4e5968;
+  color: #191f28;
   background: #f2f4f6;
   border-bottom: 1px solid #e5e8eb;
   white-space: nowrap;

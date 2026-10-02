@@ -14,7 +14,12 @@ import {
   formatIntegerInputRaw,
   parseIntegerInput,
 } from '../lib/formatInteger';
-import { ownerColors as oc, ownerFontSize as fs } from '../styles/ownerAdminTheme';
+import {
+  ownerColors as oc,
+  ownerFieldLabel,
+  ownerFontSize as fs,
+  ownerHelpText,
+} from '../styles/ownerAdminTheme';
 import { OwnerProductBlockEditor } from './OwnerProductBlockEditor';
 import { OwnerProductSkusEditor } from './OwnerProductSkusEditor';
 import { OwnerStatsShortcutBanner } from './OwnerStatsShortcutBanner';
@@ -300,7 +305,7 @@ export function OwnerProductPanel({
         {createFormOpen && (
         <div style={styles.formCard}>
         <form style={styles.form} onSubmit={handleSubmit}>
-          <label style={styles.fieldLabel}>{t('ownerProducts.nameLabel')}</label>
+          <label style={styles.fieldLabelFirst}>{t('ownerProducts.nameLabel')}</label>
           <input
             style={styles.inputFull}
             value={name}
@@ -377,7 +382,7 @@ export function OwnerProductPanel({
               <div key={product.id} style={styles.card}>
                 {editingId === product.id ? (
                   <div style={styles.editArea}>
-                    <label style={styles.fieldLabel}>{t('ownerProducts.nameLabel')}</label>
+                    <label style={styles.fieldLabelFirst}>{t('ownerProducts.nameLabel')}</label>
                     <input
                       style={styles.inputFull}
                       value={editName}
@@ -834,9 +839,10 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 999,
     padding: '3px 10px',
   },
-  fieldLabel: { color: oc.textMuted, fontSize: fs.sm, marginTop: 2 },
-  checkRow: { display: 'flex', alignItems: 'center', gap: 8, color: oc.textSecondary, fontSize: fs.base },
-  helpText: { color: oc.textMuted, fontSize: fs.xs, margin: '4px 0 0', lineHeight: 1.45 },
+  fieldLabel: ownerFieldLabel,
+  fieldLabelFirst: { ...ownerFieldLabel, marginTop: 0 },
+  checkRow: { display: 'flex', alignItems: 'center', gap: 8, color: oc.text, fontSize: fs.base, fontWeight: 600 },
+  helpText: { ...ownerHelpText, fontSize: fs.xs, margin: '4px 0 0' },
   productDesc: { color: oc.textSecondary, fontSize: fs.base, lineHeight: 1.55, margin: 0 },
   productDescEmpty: { color: oc.textMuted, fontSize: fs.sm, lineHeight: 1.55, margin: 0 },
   editArea: { display: 'flex', flexDirection: 'column', gap: 6 },

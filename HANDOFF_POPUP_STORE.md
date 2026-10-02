@@ -4242,6 +4242,9 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-02 pm9 — 점주 폼 라벨 가시성 · 옵션 안내 박스
+- **Changed:** `ownerFieldLabel`/`ownerHelpText` (theme) · 상품·정책·프로모 라벨 · 옵션 tips `ul`→`p` (불릿 튐 수정)
+
 ### 2026-10-02 pm8 — AD-087 옵션 점주 UI (표 · 조합 생성)
 - **Changed:** `owner-product-skus.css` · `OwnerProductSkusEditor` 테이블·일괄 조합 · `ko.ts` 카피 정리
 

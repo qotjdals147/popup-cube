@@ -17,7 +17,7 @@ import {
   type GachaEntryRow,
   type ProductPromoRow,
 } from '../lib/promotions';
-import { ownerColors as oc, ownerFontSize as fs } from '../styles/ownerAdminTheme';
+import { ownerColors as oc, ownerFieldLabel, ownerFontSize as fs, ownerHelpText } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 
 interface OwnerPromotionPanelProps {
@@ -543,9 +543,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sectionLast: { marginBottom: 8 },
   sectionTitle: { margin: '0 0 12px', fontSize: fs.lg, color: oc.text, fontWeight: 700 },
-  label: { display: 'block', color: oc.textMuted, fontSize: fs.sm, margin: '10px 0 6px' },
-  hint: { color: oc.textMuted, fontSize: fs.sm },
-  help: { color: oc.textMuted, fontSize: fs.sm, lineHeight: 1.45, margin: '0 0 12px' },
+  label: ownerFieldLabel,
+  hint: { color: oc.textSecondary, fontSize: fs.sm },
+  help: { ...ownerHelpText, margin: '0 0 12px' },
   checkRow: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, cursor: 'pointer' },
   modeRow: { display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 },
   modeOption: { display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' },

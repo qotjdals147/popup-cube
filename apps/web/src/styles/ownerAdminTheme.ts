@@ -60,6 +60,24 @@ export const ownerColors = {
 
 const c = ownerColors;
 
+/** 폼 필드명 (상품명·판매가 등) — textMuted ❌, 본문 대비 선명 */
+export const ownerFieldLabel: React.CSSProperties = {
+  display: 'block',
+  color: c.text,
+  fontSize: 14,
+  fontWeight: 600,
+  margin: '12px 0 6px',
+  letterSpacing: '-0.01em',
+};
+
+/** 필드 아래 보조 설명 */
+export const ownerHelpText: React.CSSProperties = {
+  color: c.textSecondary,
+  fontSize: 13,
+  lineHeight: 1.45,
+  margin: '0 0 8px',
+};
+
 /** 공통 입력 필드 */
 export const ownerInput: React.CSSProperties = {
   borderRadius: 8,

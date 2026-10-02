@@ -208,7 +208,7 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden',
   },
   title: { margin: '0 0 14px', fontSize: fs.lg, color: oc.text, fontWeight: 600 },
-  label: { display: 'block', fontSize: fs.sm, color: oc.textMuted, marginBottom: 6, fontWeight: 600 },
+  label: { display: 'block', fontSize: fs.sm, color: oc.text, marginBottom: 6, fontWeight: 600 },
   select: {
     ...fieldBase,
     width: '100%',

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { StorePolicy, StoreShippingFeeType } from '@popup-cube/shared';
 import { getMyStore, updateStorePolicy } from '../lib/stores';
-import { ownerColors as oc, ownerFontSize as fs } from '../styles/ownerAdminTheme';
+import { ownerColors as oc, ownerFieldLabel, ownerFontSize as fs, ownerHelpText } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 import {
   formatIntegerDisplay,
@@ -243,7 +243,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: `1px solid ${oc.border}`,
   },
   sectionTitle: { margin: '0 0 12px', fontSize: fs.lg, color: oc.text, fontWeight: 700 },
-  label: { display: 'block', color: oc.textMuted, fontSize: fs.sm, margin: '10px 0 6px' },
+  label: ownerFieldLabel,
   input: {
     width: '100%',
     padding: '10px 12px',
@@ -285,7 +285,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: fs.base,
     cursor: 'pointer',
   },
-  help: { color: oc.textMuted, fontSize: fs.sm, lineHeight: 1.45, margin: '8px 0 0' },
+  help: { ...ownerHelpText, margin: '8px 0 0' },
   saveBtn: {
     marginTop: 8,
     padding: '12px 20px',

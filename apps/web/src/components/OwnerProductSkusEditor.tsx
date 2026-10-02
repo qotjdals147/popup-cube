@@ -181,10 +181,10 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
         )}
       </div>
 
-      <ul className="owner-sku-panel__tips">
-        <li>{t('ownerProducts.skusTipStock')}</li>
-        <li>{t('ownerProducts.skusTipPrice')}</li>
-      </ul>
+      <div className="owner-sku-panel__tips">
+        <p>{t('ownerProducts.skusTipStock')}</p>
+        <p>{t('ownerProducts.skusTipPrice')}</p>
+      </div>
 
       <div className="owner-sku-gen">
         <p className="owner-sku-gen__title">{t('ownerProducts.skusGenTitle')}</p>
