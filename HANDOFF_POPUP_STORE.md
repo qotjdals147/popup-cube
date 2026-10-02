@@ -14,7 +14,7 @@
 
 - **사용자가 지시했든, 에이전트가 스스로 다음 작업을 이어가든 — 새 작업(요청/할 일)을 시작할 때마다** 이 `## 0. Handoff Protocol`을 다시 읽고 따른다.
 - 같은 세션 안에서 이미 한 번 읽었어도, 다음 작업으로 넘어갈 때 **다시** §0을 확인한다 `(대화가 길어지며 규칙을 놓치는 것을 방지)`.
-- 특히 아래는 매번 재확인: **브리핑 형식(§0 하단)**, **모델 추천(§24)**, **출시 전 감사·QA(§63 · User 2026-10-02)**, **HANDOFF 실시간 갱신**, **Git commit+push 즉시(§0 · HANDOFF만 바꿔도 push)**, **한국어 대화 규칙**, **UI/UX · 쇼핑몰 퀄리티(§0)**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · **축약·「--clear 후 매장→」식 금지**), **Expo 재시작 여부 표(§0 · commit/push·테스트 안내 시 필수 동반)**, **기능 구현 연관점(§62 · 주문번호·알림·재고·RPC·양쪽 UI)**.
+- 특히 아래는 매번 재확인: **브리핑 형식(§0 하단)**, **모델 추천(§24)**, **출시 전 감사·QA(§63 · User 2026-10-02)**, **HANDOFF 실시간 갱신**, **Git commit+push 즉시(§0 · HANDOFF만 바꿔도 push)**, **한국어 대화 규칙**, **UI/UX · 쇼핑몰 퀄리티(§0)**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · **축약·「--clear 후 매장→」식 금지**), **Expo 재시작 여부 표(§0 · commit/push·테스트 안내 시 필수 동반)**, **기능 구현 연관점(§62 · 주문번호·알림·재고·RPC·양쪽 UI)**, **채팅 분리 인수인계(§0 · 감사 채팅↔작업 채팅 · 착수 전 `## 6` Open P0 확인 · User 2026-10-02)**.
 - 규칙을 지키지 못했다고 사용자가 지적하면, 즉시 인정하고 그 지점부터 규칙대로 다시 수행한다.
 
 ### 세션 시작 시
@@ -171,6 +171,22 @@
 | **수정 요청 (AD-069)** | `on_hold` 양쪽 UI · `order_notifications` · **알림 탭** · 푸시 · 금액 재계산 · 가챠 예외 |
 
 **상세 표·파일 목록 = §62.**
+
+### 채팅 분리 — **감사 채팅 ↔ 작업 채팅 인수인계** (User 2026-10-02 — **필수**)
+
+> **쉬운 말:** User는 **점검(§63)을 별도 채팅**에서 돌리고, **개발은 다른 채팅**에서 한다. 두 채팅은 **서로의 대화를 볼 수 없다.** 따라서 **HANDOFF 파일 하나만 읽어도** 「저쪽 채팅에서 무슨 점검을 했고 / 무엇이 터졌고 / 내가 지금 뭘 조심해야 하는지」가 **전부** 보여야 한다.
+
+| 채팅 | 역할 | HANDOFF에 **반드시** 남길 것 |
+|---|---|---|
+| **감사 채팅** (§63) | 읽기 전용 점검 · 코드·DB·commit **금지** | **`## 6` ISS-0xx**(P0~P3 · 재현·영향·조치) · **§63.14 결과 보고서** · **`## 8` Changelog** · 마지막에 **HANDOFF만 commit+push** |
+| **작업 채팅** (개발) | 실제 수정·migration·배포 | 착수 전 **§6 Open P0/P1 + §63.14** 먼저 읽기 · 수정 시 ISS **Status 갱신**(Open→Fixed) · Changelog에 **ISS 번호 명시** |
+
+**에이전트 필수 (양쪽 공통):**
+1. **감사 채팅** — 발견 즉시 ISS 번호를 **부여**하고 P0~P3·**재현 절차**·**영향 범위**·**권장 조치**를 §6/§63.14에 적는다. 「대화로만 설명하고 끝」 **❌** (상대 채팅은 못 본다).
+2. **작업 채팅** — 세션 시작 시 **§6 Open ISS**(특히 **P0**)를 훑고, 지금 건드리는 파일·RPC가 **Open ISS와 겹치면 User에게 먼저 알린다**.
+3. **수정 완료 시** — ISS 행을 **`Fixed (hash)`** 로 바꾸고 **§63.14 B 표의 상태도 같이** 갱신. 한쪽만 고치면 다른 채팅이 **이미 고친 걸 또 고친다.**
+4. **중복 작업 방지** — §63.14에 **`담당 채팅`** 칸을 두고 「감사 발견 / 작업 수정 대기 / 작업 중 / 완료」로 표시.
+5. **감사 결과는 승인 전까지 수정 금지** (§63.4) — 작업 채팅이 §63.14를 보고 **자동으로 고치지 말고**, User 승인(D단계)을 받는다. 단 **P0는 「먼저 고치자」고 제안**한다.
 
 ### 다음 작업 우선순위 판단 (User 요청, 2026-07-13)
 
@@ -791,6 +807,23 @@ popup_store/                          # Turborepo root
 | ISS-042 | **Dev Client** — `Cannot find native module 'ExpoCrypto'` | **Resolved** | `expo-auth-session` import 제거 → `oauthQueryParams.ts` · `Linking.createURL` · APK 재빌드 **`a7ade9ee`** (JS만으로도 해결 가능) |
 | ISS-043 | ~~점주 KPI 숫자만 노출 — 「통계」가 뭔지·어디서 보는지 불명~~ | **Resolved** | **§0 UX** — `/home` **「매출·주문 통계」** 제목·안내 · 매장 관리 **「통계」** 탭 · 상품 탭 **통계 탭 열기** 배너 (2026-10-02) |
 
+**↓ §63 1차 감사(2026-10-02 · 읽기 전용) 발견 — 수정은 §63.4 D단계(User 승인) 후. 상세·재현 = §63.14**
+
+| ID | Issue | Severity | Action |
+|---|---|---|---|
+| ISS-044 | **옵션(SKU) 주문 취소·거절 시 재고 꼬임** — `_restore_order_stock`이 `products.stock_quantity`만 복구하고 **`product_skus.stock_quantity`는 복구 안 함** | **P0 (데이터 오염 · 진행 중)** | `place_order`는 SKU 상품이면 **`product_skus`만 차감**(`products` 미차감) → 취소/거절 때마다 ① **옵션 재고 영구 소멸**(반복 시 품절·판매 불가) ② **`products.stock_quantity` 무한 증식**(총재고·품절 판정 왜곡). 호출자 = `cancel_order_by_shopper`·`reject_order`. 조치 = restore에 `order_items.product_sku_id` 분기 추가 + **기존 오염 데이터 수동 보정** |
+| ISS-045 | **손님이 자기 주문 금액·상태 직접 변경 가능** — `authenticated`에 `orders` **UPDATE GRANT(전 컬럼)** + RLS `orders_update_own`이 **소유자만 확인**(`USING/WITH CHECK auth.uid()=user_id`), **컬럼 제한 없음** | **P0 (보안)** | `PATCH /rest/v1/orders?id=eq...`로 `total_amount`·`status`·`discount_percent`·`shipping_address_id` 위조 → 정산·KPI 왜곡, **PG 연동 시 결제금액 조작**. 클라이언트 코드에 `.from('orders').update(` **0건**(SELECT만) → **GRANT·정책 제거해도 기능 영향 없음**(권장) |
+| ISS-046 | **비로그인(anon)도 임의 유저에게 알림 생성 가능** — `_enqueue_order_notification` SECURITY DEFINER · **EXECUTE to PUBLIC** | **P0 (보안)** | `/rest/v1/rpc/_enqueue_order_notification`로 **아무 `user_id`에 임의 제목·본문** 알림 삽입 → 사칭·피싱("결제 실패, 여기로 입금"). 내부 헬퍼라 외부 노출 불필요 → **`REVOKE EXECUTE FROM PUBLIC, anon, authenticated`** |
+| ISS-047 | **통합 결제 부분 실패 → 재시도 시 중복 주문** — `CartView.executeCheckout`이 매장별 `place_order`를 **순차 호출**(매장마다 별 트랜잭션), 중간 실패 시 **앞 매장 주문은 이미 확정** | **P1** | 장바구니는 **성공 화면의 `handleFinish()`에서만** 비워짐 → 실패하면 **앞 매장 상품이 장바구니에 그대로** 남고, 손님이 결제 재시도 → **같은 매장 주문 2건·재고 2중 차감**. `place_order`에 **멱등키 없음**. 조치 = 성공 매장 라인 **즉시 제거** + 부분 성공 안내 + 멱등키 |
+| ISS-048 | **동시 주문 시 1건이 통째로 실패** — `place_order`가 주문번호를 `MAX(order_number)+1`로 생성, `orders_store_id_order_number_key` **UNIQUE** 존재 | **P1** | 같은 매장에 동시 결제 2건 → 뒤 건이 **23505 unique violation**으로 롤백(손님은 원인 불명 오류 · 매출 유실). **번호 중복·재고 꼬임은 없음**(UNIQUE가 막고 트랜잭션 롤백). 조치 = per-store **sequence** 또는 `FOR UPDATE` 잠금 / 재시도 |
+| ISS-049 | **손님이 자기 `role`·`store_id` 변경 가능** — `authenticated`에 `profiles` **UPDATE GRANT(전 컬럼)** + `profiles_self_update`에 **`WITH CHECK` 없음** | **P1 (보안)** | `role='owner'`·`store_id` 임의 설정 → 점주 UI·라우팅 진입, `update_my_nickname` **검증(길이·금칙어) 우회**. **실피해 제한적** — 반품·주문·가챠 RPC는 전부 **`stores.owner_id = auth.uid()`** 로 검증(감사에서 확인) → **타 매장 데이터 침투 불가**. 조치 = 컬럼 제한 GRANT 또는 RPC 전용화 |
+| ISS-050 | **옵션 상품 주문 후 「안 산 옵션」까지 장바구니에서 사라짐** — `CartContext.removeItemsByProductIds`가 **`productId`만** 비교, **`skuId` 무시** | **P2 (AD-085)** | 장바구니 라인 식별은 전부 `cartLineKey({productId, skuId})`인데 주문 후 정리만 productId 기준 → 같은 상품의 **선택 안 한 다른 옵션 라인이 삭제**됨. 조치 = **lineKey 기준** 제거 |
+| ISS-051 | **자동 수락 quota 초과 가능** — `place_order`의 `auto_accept_remaining` 감소 `UPDATE` 뒤 **`IF NOT FOUND` 검사 없음** | **P2** | quota 소진·비활성 상태에서도 **주문은 자동 수락으로 진행**(감소만 실패) → 점주가 설정한 자동 수락 건수 초과. 음수는 안 됨. 조치 = `NOT FOUND` 시 수동 수락으로 폴백 |
+| ISS-052 | **운영 DB를 repo로 재현 불가** — 원격 `schema_migrations` **93건** vs repo `supabase/migrations` **41개 파일** | **P2** | 예: `20261002003108 product_skus_rpcs`는 **원격에만 존재**(repo 파일 없음) · `return_evidence_urls_rpc_v2/v3`·`store_kpi_ad084_b` 등 다수. → **스테이징 분리·재배포·롤백 불가**(§63.9 전제 붕괴). 조치 = `supabase db pull`로 누락 migration **repo 역동기화** |
+| ISS-053 | **장바구니 표시 금액 ≠ 실제 청구 금액** — 담을 때 `price`를 **localStorage에 스냅샷** 저장, 점주가 가격 변경해도 갱신 안 됨 | **P2 (AD-068)** | `place_order`는 **DB `products.price`로 재계산**하므로 **금전 손실은 없음**. 다만 결제 전 합계와 결제 후 금액이 달라 **「고객 의문 제로」 위반**. 조치 = 장바구니 진입 시 가격 재조회 + 변동 시 고지 |
+| ISS-054 | **AD-085 옵션이 반품·KPI 경로에 미연동** — `option_label`이 `get_my_orders`·`get_store_orders`에는 **있으나** `get_order_return`·`request_return`·`get_store_product_sales`에는 **없음** | **P3 (§62)** | 반품 상세·반품 신청 화면에서 **어떤 옵션인지 표시 안 됨** · 상품별 판매 통계 **옵션별 집계 불가**. 품목 식별 자체는 `order_items.id` 기준이라 **데이터 무결성은 정상** |
+| ISS-055 | **Supabase advisor 잔여 경고** — `function_search_path_mutable` 3건(`resolve_effective_promo`·`format_product_sku_label`·`set_display_fixture_updated_at`) · `auth_leaked_password_protection` **비활성** · RLS 정책 0개 2건(`order_returns`·`order_claim_messages`) | **P3** | search_path 3건은 `place_order`(자체 `search_path` 고정) 내부에서 호출돼 **실위험 낮음** · RLS 0개 = **deny-all**이고 클라이언트는 RPC만 사용 → **안전**(의도 명시 필요) · 유출 비밀번호 차단은 **대시보드 토글** 1회. ISS-013과 동계열 |
+
 ---
 
 ## 7. Next Steps (Priority Order)
@@ -802,8 +835,10 @@ popup_store/                          # Turborepo root
 | **한 줄 요약** | **§7.91 상품 옵션 (AD-085)** · §58 #8 P1 |
 | **User实기** | §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** |
-| **출시 불안·건강검진** | **§63 (AD-086)** — User 요청 시 **읽기 전용 1차 점검** · 기능 추가와 **병행 가능** |
-| **다음 에이전트 1순위** | ① **AD-085** 옵션 **User实机** ⬜ · ② **§63 1차 감사**(User 지시 시) · ③ 블록 템플릿 · **PG = AD-061** |
+| **출시 불안·건강검진** | **§63 (AD-086)** — **1차 감사 A+B 완료 (2026-10-02)** → **§63.14 결과** |
+| **🚨 Open P0 (감사 채팅 발견 · 2026-10-02)** | **ISS-044** 옵션 취소·거절 시 **재고 꼬임(운영 DB 오염 진행 중)** · **ISS-045** 손님이 **주문 금액·상태 위조 가능** · **ISS-046** anon **사칭 알림 가능** → **§6 · §63.14** |
+| **다음 에이전트 1순위** | ① **ISS-044 P0** (User 승인 후 · §63.4 D) · ② ISS-046→045→049 권한 축소 · ③ **ISS-052** migration 역동기화 · ④ **AD-085** 옵션 **User实机** ⬜ · **PG = AD-061** |
+| **채팅 분리 (User 2026-10-02)** | 점검은 **별도 채팅**에서 진행 중 → **착수 전 `## 6` Open ISS + §63.14 B표** 확인 · 수정 시 **양쪽 상태 갱신** (§0 「채팅 분리」) |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
 
@@ -4194,6 +4229,12 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-02 pm5 — **§63 1차 감사 결과** (읽기 전용 · ISS-044~055 · P0 3건)
+- **Author:** Cursor Agent (**감사 채팅** — 작업 채팅과 분리)
+- **Changed:** **HANDOFF만** — `## 6` **ISS-044~055** · **§63.14 감사 보고서**(§63.10 형식) · §0 **채팅 분리 인수인계 규칙** 신설 + §0 재확인 목록
+- **Code/DB:** **변경 0건** (User 오더 = 코드·DB·migration 금지 · 수정은 §63.4 D단계 승인 후)
+- **Notes:** **P0 3건** — ① **ISS-044** 옵션 주문 취소·거절 시 `_restore_order_stock`이 `product_skus` 미복구 → **옵션 재고 영구 소멸 + 대표 재고 증식(운영 DB 오염 진행 중)** ② **ISS-045** `orders` UPDATE 권한 무제한 → 손님이 **금액·상태 위조** ③ **ISS-046** `_enqueue_order_notification` **anon 호출 가능** → 사칭 알림. **P1** = 통합 결제 부분 실패 중복 주문(ISS-047) · 주문번호 `MAX+1` 경합(ISS-048) · `profiles` 자가 권한 상승(ISS-049). **P2** = 옵션 라인 오삭제(ISS-050) · quota 미검사(ISS-051) · **원격 migration 93 vs repo 41**(ISS-052) · 장바구니 가격 stale(ISS-053). **정상 확인** = 반품·가챠·구매확정 RPC **owner_id 검증 ✅** · 재고 **차감 원자성 ✅** · 결제 연타 가드 ✅. **미검증** = RLS 실토큰 매트릭스 · Storage · 진열 fixture · E2E 실기 (§63.14 C). **다음 = User 승인 후 ISS-044 최우선.**
+
 ### 2026-10-02 pm4 — §63 출시 전 감사·QA (AD-086 · User 불안)
 - **Author:** Cursor Agent / User
 - **Changed:** §63 · §0·§7.0·§24 · AD-086 · `popup-store-handoff.mdc` (workspace + popup_store)
@@ -7567,7 +7608,80 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 6. **migration 목록 vs repo**  
 7. **PG 전 구조** (§61)
 
-*§63 Last updated: 2026-10-02 (AD-086 · User 출시 불안·외부 AI 조언 반영)*
+### 63.14 **1차 감사 결과** (2026-10-02 · 읽기 전용 A+B 완료)
+
+> **다른 채팅(작업 채팅)에서 이 절만 읽어도 상태 파악 가능해야 함 (§0 채팅 분리 규칙).**
+> 범위 = **A(읽기 전용 감사) + B(분류)** · **코드·DB·migration 변경 0건** · 변경된 파일 = **HANDOFF만**.
+
+#### A. 건강 요약
+
+**권한 격리(테넌트)는 튼튼하지만, 재고·결제 정합성에 출시 차단급 결함이 있다.** 반품·가챠·구매확정 RPC 전수 확인 결과 **모두 `stores.owner_id = auth.uid()`** 로 점주를 검증하고 있어 **남의 매장 데이터를 건드릴 수는 없고**, SKU·상품 재고 **차감**은 조건부 `UPDATE` + `IF NOT FOUND`로 **원자적**이다. 반면 ① 옵션 상품을 **취소·거절하면 재고가 복구되지 않고 오히려 대표 재고가 늘어나는** 양방향 오염(ISS-044)이 **이미 운영 DB에서 진행 중**이고, ② 손님이 REST로 **자기 주문 금액·상태를 직접 수정**할 수 있으며(ISS-045), ③ **비로그인 상태에서 아무 유저에게 알림을 꽂을 수 있다**(ISS-046). 셋 다 **PG를 붙이기 전에** 막아야 한다. 결제 쪽은 멱등키가 없어 **통합 결제 중간 실패 후 재시도 시 중복 주문**이 생기고(ISS-047), 동시 주문 1건이 주문번호 경합으로 **통째로 실패**한다(ISS-048). 추가로 **원격 migration 93건 vs repo 41개 파일**로 운영 DB를 코드로 재현할 수 없어(ISS-052) §63.9 스테이징 전략의 전제가 깨져 있다.
+
+#### B. P0~P3 목록 · **담당 채팅 추적**
+
+| ISS | 한 줄 | 등급 | 상태 | **담당 채팅** |
+|---|---|---|---|---|
+| **ISS-044** | 옵션 주문 취소·거절 시 SKU 재고 미복구 + 대표 재고 증식 | **P0** | Open | 감사 발견 → **작업 채팅 수정 대기** |
+| **ISS-045** | `orders` UPDATE 권한 무제한 → 손님이 금액·상태 위조 | **P0** | Open | 감사 발견 → **작업 채팅 수정 대기** |
+| **ISS-046** | `_enqueue_order_notification` anon 호출 가능 → 사칭 알림 | **P0** | Open | 감사 발견 → **작업 채팅 수정 대기** |
+| **ISS-047** | 통합 결제 부분 실패 → 장바구니 미정리 → 중복 주문 | **P1** | Open | 감사 발견 |
+| **ISS-048** | `order_number` `MAX+1` 경합 → 동시 주문 1건 실패 | **P1** | Open | 감사 발견 |
+| **ISS-049** | `profiles` UPDATE 무제한 → 자가 `role`/`store_id` 변경 | **P1** | Open | 감사 발견 |
+| **ISS-050** | 주문 후 장바구니 정리가 `skuId` 무시 → 안 산 옵션 삭제 | **P2** | Open | 감사 발견 |
+| **ISS-051** | `auto_accept_remaining` 감소 `NOT FOUND` 미검사 | **P2** | Open | 감사 발견 |
+| **ISS-052** | 원격 migration 93 vs repo 41 → 운영 DB 재현 불가 | **P2** | Open | 감사 발견 |
+| **ISS-053** | 장바구니 가격 stale → 표시 금액 ≠ 청구 금액 | **P2** | Open | 감사 발견 |
+| **ISS-054** | AD-085 옵션이 반품·KPI RPC에 미연동 (§62) | **P3** | Open | 감사 발견 |
+| **ISS-055** | advisor 잔여 (search_path 3 · 유출 비번 · RLS 0정책 2) | **P3** | Open | 감사 발견 |
+
+**정상 확인(수정 불필요)** — `approve_return`·`complete_return`·`reject_return`·`set_gacha_return_status`·`get_store_order_counts`·`confirm_purchase` **점주 소유권 검증 ✅** · `roll_gacha` **주문 소유자 + `gacha_already_rolled` 중복 방지 ✅** · SKU/상품 재고 **차감 원자성 ✅** · `order_number` **UNIQUE 제약 존재 ✅** · 결제 버튼 **`checkoutBusy` 연타 가드 ✅** · `get_my_orders`/`get_store_orders` **`option_label` 양쪽 노출 ✅**
+
+#### C. **미검증** (이번 감사에서 확인 못 함 — 「통과」 아님)
+
+| 항목 | 이유 |
+|---|---|
+| **테스트 계정 RLS 매트릭스 (§63.8)** | 손님/점주/비로그인 실제 토큰으로 CRUD 시도 **미실행** (읽기 전용 · DB 변경 금지) |
+| **ISS-044 오염 규모** | 이미 잘못 복구된 주문 건수·영향 상품 **집계 안 함**(집계 쿼리는 읽기 전용이라 가능 → **작업 채팅 1순위**) |
+| **반품 완료 시 재고 복구 정책** | `_restore_order_stock` 호출자는 **취소·거절 2곳뿐** → 반품 승인·완료 시 **재고 복구 없음**이 의도인지 **User 확인 필요** |
+| **진열 슬롯·fixture 인덱스 의존 (§63.13 #4)** | v1에서 월드 freeze(`VITE_WORLD_ENABLED=false`) → 우선순위 낮춰 **미점검** |
+| **Storage 버킷 정책** | 반품 증빙·상품 이미지 업로드 권한 **미점검** |
+| **PG 전 구조 (§61 · §63.13 #7)** | AD-061에 따라 **착수 금지** — 구조 검토만 필요하나 **미실시** |
+| **E2E 실기 (§63.7 S1~S10)** | User 실기 **미실행** — 아래 E 참고 |
+
+#### D. §62 연관 이슈
+
+| 연관점 | 결과 |
+|---|---|
+| **`get_my_orders` / `get_store_orders` / `get_store_order_counts` 3종** | `option_label` **양쪽 반영 ✅** · counts 정상 |
+| **AD-085 옵션 → 반품·KPI** | `get_order_return`·`request_return`·`get_store_product_sales` **미반영 ❌ (ISS-054)** |
+| **재고 연쇄 (§52.2)** | 차감 ✅ / **복구 ❌ (ISS-044 · P0)** — AD-085 추가 시 `_restore_order_stock`을 **같이 안 고친 전형적 §62 누락** |
+| **자동 수락 quota 연쇄** | 복구(`_restore_auto_accept_quota`) ✅ / **차감 검사 ❌ (ISS-051)** |
+| **알림 연쇄** | 내부 삽입 동작 ✅ / **권한 노출 ❌ (ISS-046)** |
+| **주문번호 `{store_code}-{order_number}`** | 포맷·UNIQUE ✅ / **발급 경합 ❌ (ISS-048)** |
+
+#### E. User 실기 체크리스트 (코드 수정 **없이** 지금 확인 가능)
+
+> 아래는 **버그를 눈으로 확인**하는 절차다. ISS-044는 **실행하면 운영 재고가 실제로 오염**되니 **테스트 매장·테스트 상품**에서만 할 것.
+
+1. **ISS-044 (P0)** — 테스트 매장에 **옵션 있는 상품**을 만들고 옵션 재고를 **10**으로 → 손님 앱에서 **2개 주문** → 점주센터에서 **거절** → 상품 옵션 재고가 **10으로 돌아오는지** 확인. **8로 남아 있으면 재현 성공.** 동시에 상품 **대표 재고가 2 늘어났는지**도 확인.
+2. **ISS-047 (P1)** — 장바구니에 **서로 다른 매장 2곳** 상품을 담고, 한쪽 상품 재고를 **0**으로 만든 뒤 **한 번에 결제** → 오류 뜬 다음 **장바구니에 앞 매장 상품이 남아 있는지** 확인.
+3. **ISS-050 (P2)** — 같은 옵션 상품의 **옵션 A·옵션 B**를 둘 다 담고 **A만 선택 결제** → 완료 후 **B도 사라졌는지** 확인.
+4. **ISS-053 (P2)** — 장바구니에 담아둔 뒤 점주센터에서 **가격 변경** → 손님 장바구니 합계와 **결제 후 금액이 다른지** 확인.
+5. **ISS-055** — Supabase 대시보드 **Authentication → 유출된 비밀번호 차단** 토글 ON (코드 변경 아님, User 1클릭).
+
+#### F. **다음 수정은 승인 후** (§63.4 D단계)
+
+이 감사에서는 **코드·DB·migration을 변경하지 않았다.** 수정 착수 전 User 승인이 필요하며, 에이전트 권장 순서는 다음과 같다.
+
+1. **ISS-044** — 재고 복구 분기 + **기존 오염 집계·보정** (지금도 계속 오염되는 중 → **최우선**)
+2. **ISS-046 → ISS-045 → ISS-049** — GRANT/정책 축소. **클라이언트 직접 UPDATE 사용처 0건**이라 **기능 영향 없이 제거 가능**(회귀 위험 낮음)
+3. **ISS-052** — `supabase db pull`로 migration 역동기화 (이후 수정들의 **롤백 안전망**)
+4. **ISS-047 · ISS-048** — 멱등키 + 주문번호 sequence (**PG 연동 전 필수**)
+5. **ISS-050 · ISS-051 · ISS-053 · ISS-054 · ISS-055** — v1 런칭 전 정리
+
+**작업 채팅 유의:** 위를 고치면 **§6 ISS 행 Status + 이 절 B표 상태·담당 채팅**을 **둘 다** 갱신할 것 (§0 채팅 분리 규칙 #3).
+
+*§63 Last updated: 2026-10-02 (AD-086 · 1차 감사 A+B 완료 · §63.14 · ISS-044~055)*
 
 ---
 
