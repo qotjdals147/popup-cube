@@ -14,6 +14,7 @@ import { OwnerStorePolicyPanel } from '../components/OwnerStorePolicyPanel';
 import { OwnerPromotionPanel } from '../components/OwnerPromotionPanel';
 import { OwnerReviewsPanel } from '../components/OwnerReviewsPanel';
 import { OwnerStoreStatsPanel } from '../components/OwnerStoreStatsPanel';
+import { OwnerStoreThumbnailField } from '../components/OwnerStoreThumbnailField';
 import { DemoToast } from '../components/DemoToast';
 import { useOwnerOrderRealtime } from '../hooks/useOwnerOrderRealtime';
 import { isValidStoreCode, normalizeStoreCode } from '../lib/orderRef';
@@ -399,14 +400,17 @@ export function StoreEditPage() {
           {!loading && !error && tab === 'overview' && store && (
             <section style={styles.panel}>
               <h2 style={styles.panelTitle}>{t('ownerEdit.overviewTitle')}</h2>
+              {userId && (
+                <OwnerStoreThumbnailField
+                  userId={userId}
+                  store={store}
+                  onUpdated={(next) => {
+                    setStore(next);
+                    setLifecycleMsg(null);
+                  }}
+                />
+              )}
               <div style={styles.overviewRow}>
-                <div style={styles.thumbWrap}>
-                  {store.thumbnail_url ? (
-                    <img src={store.thumbnail_url} alt="" style={styles.thumb} />
-                  ) : (
-                    <div style={styles.thumbFallback}>{store.name.charAt(0)}</div>
-                  )}
-                </div>
                 <div style={styles.overviewMeta}>
                   <div style={styles.statusRow}>
                     <span style={styles.metaLabel}>{t('ownerEdit.statusLabel')}</span>

@@ -2,7 +2,7 @@
 
 > **이 파일은 Cursor AI 세션 간 인수인계용 living document입니다.**  
 > **규칙: 작업 시작 시 먼저 읽고, 작업하는 동안 실시간으로 갱신하고, 세션 종료 시 최종 정리하세요.**  
-> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.91` 최신** → **출시·건강검진 = `§63`** → `## 8. Changelog` 최신 항목
+> **다음 세션 빠른 시작:** `## 7.0` **「다음 세션 착수 가이드」** → **`§7.93` 최신** → **출시·건강검진 = `§63`** → `## 8. Changelog` 최신 항목
 
 ---
 
@@ -1758,6 +1758,21 @@ npm run dev
 - [x] User **PC 실기** (리뷰) ✅  
 - [x] §58 P1 **KPI·상품별 통계** ✅ **§7.90**  
 - [ ] 리뷰 **신고(P2)**  
+
+---
+
+### 7.93 세션 인수인계 — **2026-10-02** (매장 **대표 사진** · **4:3 크롭**)
+
+| | |
+|---|---|
+| **위치** | 점주 **`StoreEditPage` → 매장 개요** · **매장 만들기** 동일 UX |
+| **UX** | 파일 선택 → **`ImageCropDialog`** (드래그·줌) → 손님 홈 카드 **4:3** 영역 저장 |
+| **코드** | `OwnerStoreThumbnailField` · `storeThumbnail.ts` · `cropImage.ts` · `updateStoreThumbnail` |
+
+#### 다음
+
+- [ ] User **개요 탭에서 사진 변경 실기** ⬜  
+- [ ] (P2) **상품 이미지** 동일 크롭 패턴  
 
 ---
 
@@ -4241,6 +4256,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-02 pm10 — 매장 대표 사진 (개요 탭 · 4:3 크롭)
+- **Changed:** `OwnerStoreThumbnailField` · **매장 개요**에서 대표 사진 변경 · `CreateStorePage` 동일 크롭 UX · `react-easy-crop` · `store-assets` 업로드 · `imageCrop.*` ko
+- **Notes:** 예전에는 **매장 만들기**에만 첨부 UI가 있었고 **개요**는 URL만 표시 → “사라진 것처럼” 보였음. 손님 홈 카드 **4:3**에 맞춰 드래그·줌 후 적용.
 
 ### 2026-10-02 pm9 — 점주 폼 라벨 가시성 · 옵션 안내 박스
 - **Changed:** `ownerFieldLabel`/`ownerHelpText` (theme) · 상품·정책·프로모 라벨 · 옵션 tips `ul`→`p` (불릿 튐 수정)

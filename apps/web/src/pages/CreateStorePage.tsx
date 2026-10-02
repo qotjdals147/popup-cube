@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createStore, CreateStoreError } from '../lib/storeCreate';
 import { isValidStoreCode, normalizeStoreCode, suggestStoreCodeFromName } from '../lib/orderRef';
+import { ImageCropDialog } from '../components/ImageCropDialog';
 import { ownerColors as oc, ownerFont } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 
@@ -17,6 +18,7 @@ export function CreateStorePage() {
   const [description, setDescription] = useState('');
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,8 +31,9 @@ export function CreateStorePage() {
   useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (cropSrc) URL.revokeObjectURL(cropSrc);
     };
-  }, [previewUrl]);
+  }, [previewUrl, cropSrc]);
 
   function handleNameChange(value: string) {
     setName(value);
@@ -46,11 +49,29 @@ export function CreateStorePage() {
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
+    e.target.value = '';
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setCropSrc((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return url;
+    });
+  }
+
+  function closeCrop() {
+    setCropSrc((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+  }
+
+  function applyCropped(file: File) {
     setThumbnailFile(file);
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
-      return file ? URL.createObjectURL(file) : null;
+      return URL.createObjectURL(file);
     });
+    closeCrop();
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -181,6 +202,16 @@ export function CreateStorePage() {
           {submitting ? t('createStore.submitting') : t('createStore.submit')}
         </button>
       </form>
+
+      {cropSrc && (
+        <ImageCropDialog
+          imageSrc={cropSrc}
+          title={t('imageCrop.storeTitle')}
+          previewHint={t('imageCrop.storeHint')}
+          onCancel={closeCrop}
+          onConfirm={applyCropped}
+        />
+      )}
     </div>
   );
 }
@@ -244,7 +275,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   thumbnailRow: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 },
   thumbnailPreviewWrap: {
-    width: 72,
+    width: 96,
     height: 72,
     borderRadius: 10,
     overflow: 'hidden',

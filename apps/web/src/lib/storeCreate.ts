@@ -1,7 +1,8 @@
 import { supabase } from './supabase';
+import { MAX_STORE_THUMBNAIL_BYTES, StoreThumbnailError, uploadStoreThumbnail } from './storeThumbnail';
 
-/** 대표 이미지 업로드 최대 크기 (§26 P1) */
-export const MAX_THUMBNAIL_BYTES = 5 * 1024 * 1024; // 5MB
+/** @deprecated use MAX_STORE_THUMBNAIL_BYTES */
+export const MAX_THUMBNAIL_BYTES = MAX_STORE_THUMBNAIL_BYTES;
 
 export interface CreateStoreInput {
   name: string;
@@ -31,20 +32,6 @@ function generateStoreId(): string {
   return `store_${random}`;
 }
 
-async function uploadThumbnail(userId: string, file: File): Promise<string> {
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-  const path = `${userId}/${Date.now()}.${ext}`;
-
-  const { error } = await supabase.storage
-    .from('store-assets')
-    .upload(path, file, { contentType: file.type || 'image/jpeg', upsert: false });
-
-  if (error) throw new CreateStoreError('UPLOAD_FAILED', error.message);
-
-  const { data } = supabase.storage.from('store-assets').getPublicUrl(path);
-  return data.publicUrl;
-}
-
 /**
  * 매장 만들기(§26 P1). Storage 업로드 → DB 함수 `create_owner_store` 호출로
  * `stores` insert + `profiles.role/store_id` 갱신을 한 번에 원자적으로 처리.
@@ -53,11 +40,19 @@ export async function createStore(
   userId: string,
   input: CreateStoreInput
 ): Promise<{ storeId: string }> {
-  if (input.thumbnailFile.size > MAX_THUMBNAIL_BYTES) {
+  if (input.thumbnailFile.size > MAX_STORE_THUMBNAIL_BYTES) {
     throw new CreateStoreError('THUMBNAIL_TOO_LARGE');
   }
 
-  const thumbnailUrl = await uploadThumbnail(userId, input.thumbnailFile);
+  let thumbnailUrl: string;
+  try {
+    thumbnailUrl = await uploadStoreThumbnail(userId, input.thumbnailFile);
+  } catch (e) {
+    if (e instanceof StoreThumbnailError && e.code === 'TOO_LARGE') {
+      throw new CreateStoreError('THUMBNAIL_TOO_LARGE');
+    }
+    throw new CreateStoreError('UPLOAD_FAILED', e instanceof Error ? e.message : undefined);
+  }
   const storeId = generateStoreId();
 
   const { error } = await supabase.rpc('create_owner_store', {

@@ -1,6 +1,7 @@
 import type { StorePolicy, StoreSummary } from '@popup-cube/shared';
 import { supabase } from './supabase';
 import { mapStorePolicyRow, STORE_POLICY_SELECT } from './storePolicy';
+import { StoreThumbnailError, uploadStoreThumbnail } from './storeThumbnail';
 
 const STORE_SUMMARY_SELECT = `id, name, store_code, description, thumbnail_url, status, popup_ends_at, created_at, ${STORE_POLICY_SELECT}`;
 
@@ -110,6 +111,27 @@ export async function updateStorePolicy(storeId: string, policy: StorePolicy): P
     .single();
 
   if (error) throw error;
+  return mapStoreSummary(data as Record<string, unknown>);
+}
+
+/** 매장 대표 이미지 (홈 카드 · 입장 모달) */
+export async function updateStoreThumbnail(
+  storeId: string,
+  userId: string,
+  file: File,
+): Promise<StoreSummary> {
+  const url = await uploadStoreThumbnail(userId, file);
+  const { data, error } = await supabase
+    .from('stores')
+    .update({ thumbnail_url: url })
+    .eq('id', storeId)
+    .select(STORE_SUMMARY_SELECT)
+    .single();
+
+  if (error) {
+    if (error.message) throw new StoreThumbnailError('UPDATE_FAILED', error.message);
+    throw new StoreThumbnailError('UPDATE_FAILED');
+  }
   return mapStoreSummary(data as Record<string, unknown>);
 }
 
