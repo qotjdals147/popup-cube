@@ -8,6 +8,8 @@ const STORAGE_KEY = CART_STORAGE_KEY;
 export interface AddToCartOption {
   skuId: string;
   optionLabel: string;
+  /** AD-087 — product.price + priceDelta = 장바구니 단가 */
+  priceDelta?: number;
 }
 
 interface CartContextValue {
@@ -64,6 +66,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const lineStoreId = product.store_id || storeId;
     const skuId = option?.skuId ?? null;
     const optionLabel = option?.optionLabel ?? null;
+    const linePrice = product.price + (option?.priceDelta ?? 0);
     setItems((prev) => {
       const key = cartLineKey({ productId: product.id, skuId });
       const existing = prev.find((item) => cartLineKey(item) === key);
@@ -80,7 +83,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           productId: product.id,
           storeId: lineStoreId,
           name: product.name,
-          price: product.price,
+          price: linePrice,
           imageUrl: product.image_url,
           quantity,
           skuId,

@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import type { OrderStatus, Product, ProductDetailBlock, ProductReview, ProductSku } from '@popup-cube/shared';
 import { getProductSkus } from '../lib/productSkus';
+import { formatPriceDeltaLabel, skuUnitPrice } from '../lib/skuPrice';
 import { listProductDetailBlocks } from '../lib/productDetailBlocks';
 import { getMyReviewKeys, getProductReviews, reviewKey } from '../lib/reviews';
 import { canFileClaim, confirmPurchase, listMyOrders } from '../lib/orders';
@@ -173,6 +174,7 @@ export function ProductDetailModal({
       addToCart(storeId, product, qty, {
         skuId: sku.sku_id,
         optionLabel: sku.option_label ?? sku.sku_id,
+        priceDelta: sku.price_delta ?? 0,
       });
     } else {
       addToCart(storeId, product, qty);
@@ -183,6 +185,7 @@ export function ProductDetailModal({
   }
 
   const selectedSku = skus.find((s) => s.sku_id === selectedSkuId) ?? null;
+  const displayUnitPrice = skuUnitPrice(product.price, selectedSku?.price_delta ?? 0);
   const maxQty =
     skus.length > 0
       ? selectedSku
@@ -245,7 +248,12 @@ export function ProductDetailModal({
               )}
             </div>
             <div style={S.topInfo}>
-              <div className="product-detail-price" style={styleFor(light, S.priceLayout, S.priceDark)}>{formatPrice(product.price)}</div>
+              <div className="product-detail-price" style={styleFor(light, S.priceLayout, S.priceDark)}>
+                {formatPrice(skus.length > 0 ? displayUnitPrice : product.price)}
+                {skus.length > 0 && !selectedSku && (
+                  <span style={S.priceFromHint}> {t('productDetail.priceFromBase')}</span>
+                )}
+              </div>
               {product.description && <p className="product-detail-short-desc" style={styleFor(light, S.shortDescLayout, S.shortDescDark)}>{product.description}</p>}
               {avgRating !== null && (
                 <div style={S.ratingSummaryInline}>
@@ -383,6 +391,7 @@ export function ProductDetailModal({
                         }}
                       >
                         {sku.option_label ?? sku.sku_id}
+                        {formatPriceDeltaLabel(sku.price_delta ?? 0, formatPrice)}
                         {soldOut ? ` · ${t('productDetail.optionSoldOut')}` : ''}
                       </button>
                     );
@@ -518,6 +527,7 @@ const S = {
   mainThumbPlaceholder: { fontSize: 40, opacity: 0.4 },
   topInfo: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' as const, gap: 6 },
   priceLayout: { fontSize: 18, fontWeight: 700 },
+  priceFromHint: { fontSize: 12, fontWeight: 500, opacity: 0.75 },
   priceDark: { color: '#e94560' },
   shortDescLayout: { fontSize: 12.5, lineHeight: 1.5, margin: 0 },
   shortDescDark: { color: '#c9d4ee' },

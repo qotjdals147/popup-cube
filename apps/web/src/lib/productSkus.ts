@@ -5,6 +5,7 @@ export interface OwnerSkuRow {
   color: string;
   size: string;
   stock_quantity: number;
+  price_delta: number;
 }
 
 export async function getProductSkus(productId: string): Promise<ProductSku[]> {
@@ -26,6 +27,7 @@ export async function saveOwnerProductSkus(productId: string, rows: OwnerSkuRow[
       color: r.color.trim(),
       size: r.size.trim(),
       stock_quantity: r.stock_quantity,
+      price_delta: r.price_delta ?? 0,
       sort_order: i,
       is_active: true,
     }));

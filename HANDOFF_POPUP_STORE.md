@@ -591,6 +591,7 @@ npm run dev
 | AD-082 | **(구현 ✅ · 2026-09-22) 점주 리뷰 관리 P1** — `OwnerReviewsPanel` · **리뷰** 탭 · `get_store_reviews` · `set_owner_review_reply` · 손님 상세 **판매자 답글** · §7.88 · §58 #8 P1 | User 2026-09-22 | 2026-09-22 |
 | AD-083 | **(구현 ✅ · 2026-09-29) 마이 › 닉네임 변경** — `update_my_nickname` RPC · **중복확인 필수** · `settings.tsx` · AD-023 연장 · §7.89 | User 2026-09-29 | 2026-09-29 |
 | AD-085 | **(착수 · 2026-10-02) 상품 옵션 v1** — `product_skus`(색·사이즈·재고) · 점주·손님·`place_order` · §7.91 · §58 #8 P1 | User 2026-10-02 | 2026-10-02 |
+| AD-087 | **(구현 · 2026-10-02) 옵션 v2** — 옵션별 **±판매가**(`price_delta`) · 점주 표 UI · 재고/자동수락 **관계 안내** · `place_order` 반영 · §7.92 | User 2026-10-02 | 2026-10-02 |
 | AD-086 | **(확정 · 2026-10-02) 출시 전 기술 감사·QA 프로토콜** — 읽기 전용 → P0~P3 → 승인 후 수정 · §63 · User 1인+Cursor+MCP | User 2026-10-02 | 2026-10-02 |
 | AD-084 | **(구현 ✅ · 2026-09-29) 점주 KPI·상품별 판매 통계** — `get_store_kpi` · `get_store_sales_daily` · `get_store_product_sales` · `/home` KPI strip · **상품** 탭 미니 차트 · §7.90 · §58 #8 P1 | User 2026-09-29 | 2026-09-29 |
 | AD-081 | **(확정 · CEO·User 2026-09-22) 쿠폰·플랫폼 프로모 정책** — **실질** = 매장당 **HOT SKU 1개** · **플랫폼 3~4% 보조금** · 점주 **할인 전 정산** · **체감** = **손님 쿠폰 탭·쿠폰함 UX**(생색·「아싸 할인」) · 손님에게 **「플랫폼 부담 4%」문구 ❌** · PG 후 **보조금 정산 자동** · §7.87 · §53.9.1 | CEO·User 2026-09-22 | 2026-09-22 |
@@ -836,8 +837,8 @@ popup_store/                          # Turborepo root
 | **User实기** | §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** |
 | **출시 불안·건강검진** | **§63 (AD-086)** — **1차 감사 A+B 완료 (2026-10-02)** → **§63.14 결과** |
-| **🚨 Open P0 (감사 · 2026-10-02)** | **ISS-044/045/046/049** → **원격 migration `iss_audit_p0_p1_fixes` 적용 ✅** (과거 오염 **보정 쿼리는 별도**) · **ISS-048/051** → repo `20261002b_iss_place_order_lock.sql` **원격 미적용 ⬜** (SQL Editor 또는 MCP 승인 필요) |
-| **다음 에이전트 1순위** | ① **`20261002b` 원격 적용** · ② **ISS-052** migration 역동기화 · ③ **ISS-044 오염 집계** · ④ **AD-085 User实机** ⬜ · **PG = AD-061** |
+| **🚨 감사 P0 (2026-10-02)** | **044~046·049·048·051** DB ✅ · **047·050** 웹 = **GitHub push 후 Vercel** ⬜ · **044 과거 오염 보정** ⬜ |
+| **다음 에이전트 1순위** | ① **ISS-052** migration 역동기화 · ② **ISS-044 오염 집계** · ③ **053/054** · ④ **AD-085 User实机** ⬜ · **PG = AD-061** |
 | **채팅 분리 (User 2026-10-02)** | 점검은 **별도 채팅**에서 진행 중 → **착수 전 `## 6` Open ISS + §63.14 B표** 확인 · 수정 시 **양쪽 상태 갱신** (§0 「채팅 분리」) |
 
 #### 권장 작업 순서 (User 2026-08-27 — **에이전트 판단 그대로** · 임의 앞당김 ❌)
@@ -1728,6 +1729,18 @@ npm run dev
 
 - [ ] User **옵션 실기** ⬜  
 - [ ] 블록 템플릿 (§58 P1)  
+
+---
+
+### 7.92 세션 인수인계 — **2026-10-02** (AD-087 · **옵션 v2**)
+
+| | |
+|---|---|
+| **벤치마크** | 쿠팡·네이버 스마트스토어 — **조합(색/사이즈)별 재고** · **기본가 ± 옵션 추가금** |
+| **재고 규칙** | **옵션 0건** → `products.stock_quantity` · **옵션 1건+** → **`product_skus.stock_quantity`만** (상단 재고·자동수락 건수와 **연동 없음**) |
+| **자동 수락** | **주문 건수** quota (`auto_accept_limit`) — 재고 개수와 **별개** |
+| **DB** | `20261003_ad087_product_sku_price_delta.sql` + `20261003b_place_order_sku_price_delta.sql` — **SQL Editor 순서 적용** |
+| **미포함(v3)** | 옵션 **그룹 2~3개**(옵션명 자유) · **옵션 이미지** · **일괄 재고입고** |
 
 ---
 
@@ -4228,6 +4241,12 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-02 pm7 — AD-087 옵션 v2 (±가격 · 점주 UX · place_order)
+- **Author:** Cursor Agent
+- **Changed:** `product_skus.price_delta` · RPC · `OwnerProductSkusEditor` 표 · `ProductDetailModal` · Cart · migrations `20261003*` · §7.92 · AD-087
+- **DB:** User **SQL Editor** — `20261003_ad087` → `20261003b` 순 실행 필요
+- **Notes:** v1 대비 **재고·자동수락 관계** HANDOFF·화면 안내 명시
 
 ### 2026-10-02 pm6 — §63 감사 ISS 수정 (P0/P1 일부)
 - **Author:** Cursor Agent (Composer 2.5 Fast · **작업 채팅**)
@@ -7631,10 +7650,10 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 | **ISS-045** | `orders` UPDATE 권한 무제한 → 손님이 금액·상태 위조 | **P0** | **Fixed (원격)** | 동 migration |
 | **ISS-046** | `_enqueue_order_notification` anon 호출 가능 → 사칭 알림 | **P0** | **Fixed (원격)** | 동 migration |
 | **ISS-047** | 통합 결제 부분 실패 → 장바구니 미정리 → 중복 주문 | **P1** | **Fixed (web)** | `CartView` 부분 성공 라인 즉시 제거 · 멱등키 ⬜ |
-| **ISS-048** | `order_number` `MAX+1` 경합 → 동시 주문 1건 실패 | **P1** | **Fixed (repo)** | `20261002b` · **원격 적용 ⬜** |
+| **ISS-048** | `order_number` `MAX+1` 경합 → 동시 주문 1건 실패 | **P1** | **Fixed** | `20261002b` · User SQL Editor ✅ |
 | **ISS-049** | `profiles` UPDATE 무제한 → 자가 `role`/`store_id` 변경 | **P1** | **Fixed (원격)** | `iss_audit_p0_p1_fixes` |
 | **ISS-050** | 주문 후 장바구니 정리가 `skuId` 무시 → 안 산 옵션 삭제 | **P2** | **Fixed (web)** | `removeItemsByLineKeys` |
-| **ISS-051** | `auto_accept_remaining` 감소 `NOT FOUND` 미검사 | **P2** | **Fixed (repo)** | `20261002b` · **원격 적용 ⬜** |
+| **ISS-051** | `auto_accept_remaining` 감소 `NOT FOUND` 미검사 | **P2** | **Fixed** | `20261002b` · User SQL Editor ✅ |
 | **ISS-052** | 원격 migration 93 vs repo 41 → 운영 DB 재현 불가 | **P2** | Open | 감사 발견 |
 | **ISS-053** | 장바구니 가격 stale → 표시 금액 ≠ 청구 금액 | **P2** | Open | 감사 발견 |
 | **ISS-054** | AD-085 옵션이 반품·KPI RPC에 미연동 (§62) | **P3** | Open | 감사 발견 |

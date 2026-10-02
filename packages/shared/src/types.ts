@@ -197,6 +197,8 @@ export interface ProductSku {
   size: string | null;
   option_label: string | null;
   stock_quantity: number;
+  /** AD-087 — 기본 판매가(product.price) 대비 추가(+)/할인(-) */
+  price_delta?: number;
   sort_order?: number;
 }
 

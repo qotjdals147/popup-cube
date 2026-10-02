@@ -427,7 +427,14 @@ export function OwnerProductPanel({
                         onChange={handleEditFileChange}
                       />
                     </div>
+
+                    <OwnerProductSkusEditor
+                      productId={product.id}
+                      basePrice={parseIntegerInput(editPrice) || product.price}
+                    />
+
                     <label style={styles.fieldLabel}>{t('ownerProducts.stockLabel')}</label>
+                    <p style={styles.helpText}>{t('ownerProducts.stockWhenOptionsHelp')}</p>
                     <input
                       style={styles.inputFull}
                       value={editStock}
@@ -460,6 +467,7 @@ export function OwnerProductPanel({
                           placeholder="400"
                         />
                         <p style={styles.helpText}>{t('ownerProducts.autoAcceptQuotaHelp')}</p>
+                        <p style={styles.helpText}>{t('ownerProducts.autoAcceptVsStockHelp')}</p>
                       </>
                     )}
                     <div style={styles.editActions}>
@@ -474,8 +482,6 @@ export function OwnerProductPanel({
                         {t('common.back')}
                       </button>
                     </div>
-
-                    <OwnerProductSkusEditor productId={product.id} />
 
                     <div style={styles.detailDivider} />
                     <h4 style={styles.detailSectionTitle}>{t('ownerProducts.detailSectionTitle')}</h4>
