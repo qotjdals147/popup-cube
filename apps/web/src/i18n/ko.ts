@@ -469,6 +469,8 @@ export const ko = {
     addressRequired: '배송지를 선택하거나 추가해 주세요.',
     addressSaveError: '배송지를 저장하지 못했어요. 다시 시도해 주세요.',
     orderSaveError: '주문을 저장하지 못했어요. 다시 시도해 주세요.',
+    skuRequiredCheckout: '옵션 정보가 빠졌어요. 장바구니에서 해당 상품을 지우고 다시 담아 주세요.',
+    invalidSkuCheckout: '선택한 옵션을 더 이상 주문할 수 없어요. 다시 담아 주세요.',
     orderNoValidItems: '담긴 상품을 주문할 수 없어요. 장바구니를 비우고 다시 담아 주세요.',
     orderDiscountMismatch: '할인 정보가 맞지 않아요. 다시 결제해 주세요.',
     invalidRewardChoice: '이 주문에는 선택할 수 없는 혜택이에요. 다시 시도해 주세요.',

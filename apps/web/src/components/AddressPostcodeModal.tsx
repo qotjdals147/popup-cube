@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { embedDaumPostcode, type DaumPostcodeResult } from '../lib/daumPostcode';
+import { useOverlayScrollLock } from '../hooks/useOverlayScrollLock';
 import { t } from '../i18n';
 
 interface AddressPostcodeModalProps {
@@ -45,6 +46,8 @@ export function AddressPostcodeModal({ open, onClose, onSelect }: AddressPostcod
       container.replaceChildren();
     };
   }, [open]);
+
+  useOverlayScrollLock(open);
 
   if (!open) return null;
 

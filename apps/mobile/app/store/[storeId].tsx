@@ -18,6 +18,7 @@ import { useTheme } from '../../src/context/ThemeContext';
 import { CART_COUNT_INJECT_SCRIPT, buildCartHydrateScript } from '../../src/lib/cartWebView';
 import { buildWebViewBackgroundInject } from '../../src/lib/webviewThemeInject';
 import { t } from '../../src/i18n/ko';
+import { parseWebViewScrollLockMessage } from '../../src/lib/webviewScrollLock';
 import { getStoreSummary } from '../../src/lib/stores';
 import { getSupabase } from '../../src/lib/supabase';
 import type { StoreSummary } from '../../src/types/domain';
@@ -47,6 +48,7 @@ export default function StoreScreen() {
   const [sessionReady, setSessionReady] = useState(false);
   const [shopUrl, setShopUrl] = useState<string | null>(null);
   const [webError, setWebError] = useState<string | null>(null);
+  const [webScrollLocked, setWebScrollLocked] = useState(false);
 
   useEffect(() => {
     if (!authPending && !userId) {
@@ -104,6 +106,10 @@ export default function StoreScreen() {
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
       handleWebViewMessage(event);
+      const scrollLock = parseWebViewScrollLockMessage(event);
+      if (scrollLock !== null) {
+        setWebScrollLocked(scrollLock);
+      }
       try {
         const msg = JSON.parse(event.nativeEvent.data) as { type?: string };
         if (msg.type === 'navigate_home') {
@@ -225,9 +231,9 @@ export default function StoreScreen() {
       <WebView
         source={{ uri: shopUrl }}
         style={styles.webview}
-        scrollEnabled
-        bounces
-        overScrollMode="always"
+        scrollEnabled={!webScrollLocked}
+        bounces={!webScrollLocked}
+        overScrollMode={webScrollLocked ? 'never' : 'always'}
         onMessage={onMessage}
         allowsInlineMediaPlayback
         mediaPlaybackRequiresUserAction={false}

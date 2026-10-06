@@ -58,12 +58,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isNativeWebView()) return;
 
-    const syncFromStorage = () => {
-      setItems(loadFromStorage());
+    const mergeFromStorage = () => {
+      const loaded = loadFromStorage();
+      setItems((prev) => {
+        if (prev.length > 0 && loaded.length === 0) return prev;
+        return loaded;
+      });
       persistReadyRef.current = true;
     };
 
-    window.addEventListener('popup_cart_hydrate', syncFromStorage);
+    window.addEventListener('popup_cart_hydrate', mergeFromStorage);
     requestAnimationFrame(() => {
       const loaded = loadFromStorage();
       if (loaded.length > 0) {
@@ -71,10 +75,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         persistReadyRef.current = true;
         return;
       }
-      window.setTimeout(syncFromStorage, 120);
+      window.setTimeout(mergeFromStorage, 120);
     });
 
-    return () => window.removeEventListener('popup_cart_hydrate', syncFromStorage);
+    return () => window.removeEventListener('popup_cart_hydrate', mergeFromStorage);
   }, []);
 
   useEffect(() => {
@@ -84,6 +88,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items]);
 
   function addToCart(storeId: string, product: Product, quantity = 1, option?: AddToCartOption) {
+    if (isNativeWebView()) persistReadyRef.current = true;
     const lineStoreId = product.store_id || storeId;
     const skuId = option?.skuId ?? null;
     const optionLabel = option?.optionLabel ?? null;

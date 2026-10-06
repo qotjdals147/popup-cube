@@ -11,6 +11,7 @@ import {
   CART_COUNT_INJECT_SCRIPT,
 } from '../lib/cartWebView';
 import { buildWebViewBackgroundInject } from '../lib/webviewThemeInject';
+import { parseWebViewScrollLockMessage } from '../lib/webviewScrollLock';
 import { t } from '../i18n/ko';
 
 export function CartWebViewScreen() {
@@ -22,6 +23,7 @@ export function CartWebViewScreen() {
   const [cartUrl, setCartUrl] = useState<string | null>(null);
   const [webError, setWebError] = useState<string | null>(null);
   const [webLoaded, setWebLoaded] = useState(false);
+  const [webScrollLocked, setWebScrollLocked] = useState(false);
 
   useEffect(() => {
     if (!bridgeReady) return;
@@ -102,6 +104,10 @@ export function CartWebViewScreen() {
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
       handleWebViewMessage(event);
+      const scrollLock = parseWebViewScrollLockMessage(event);
+      if (scrollLock !== null) {
+        setWebScrollLocked(scrollLock);
+      }
       try {
         const msg = JSON.parse(event.nativeEvent.data) as { type?: string };
         if (msg.type === 'navigate_home') {
@@ -140,6 +146,9 @@ export function CartWebViewScreen() {
         ref={webViewRef}
         source={{ uri: cartUrl }}
         style={[styles.webview, !webLoaded && styles.webviewHidden]}
+        scrollEnabled={!webScrollLocked}
+        bounces={!webScrollLocked}
+        overScrollMode={webScrollLocked ? 'never' : 'always'}
         onMessage={onMessage}
         javaScriptEnabled
         domStorageEnabled

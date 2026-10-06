@@ -19,6 +19,8 @@ import { cartLineKey } from '../lib/cartLineKey';
 import { getActivePromotion, GachaError, rollGacha } from '../lib/gacha';
 import { createAddress, listMyAddresses } from '../lib/addresses';
 import { OrderError, placeOrder } from '../lib/orders';
+import { validateCheckoutCartLines } from '../lib/validateCheckoutCartLines';
+import { useOverlayScrollLock } from '../hooks/useOverlayScrollLock';
 import { getProductPromosByIds, getStorePromotion, shopperStoreHasGachaPool } from '../lib/promotions';
 import { getStoreSummary } from '../lib/stores';
 import { isPopupEnded } from '../lib/popupPeriod';
@@ -50,6 +52,8 @@ function orderErrorMessage(err: unknown): string {
   if (err instanceof OrderError && err.message.includes('no_valid_items')) return t('cart.orderNoValidItems');
   if (err instanceof OrderError && err.message.includes('discount_mismatch')) return t('cart.orderDiscountMismatch');
   if (err instanceof OrderError && err.message.includes('invalid_reward_choice')) return t('cart.invalidRewardChoice');
+  if (err instanceof OrderError && err.message === 'sku_required') return t('cart.skuRequiredCheckout');
+  if (err instanceof OrderError && err.message === 'invalid_sku') return t('cart.invalidSkuCheckout');
   if (err instanceof OrderError) return t('cart.orderSaveError');
   if (err instanceof GachaError) return t('cart.gachaError');
   return t('cart.rewardError');
@@ -140,6 +144,8 @@ export function CartView({
   appearance = 'light',
 }: CartViewProps) {
   const rootClass = appearance === 'light' ? 'cart-drawer--light' : 'cart-drawer--dark';
+  const isPageLayout = layout === 'page';
+  useOverlayScrollLock(!isPageLayout);
   const { items, incrementQuantity, decrementQuantity, removeItem, removeItemsByLineKeys } = useCart();
   const [phase, setPhase] = useState<Phase>('cart');
   const [checkoutStoreId, setCheckoutStoreId] = useState<string | null>(focusStoreId ?? null);
@@ -177,7 +183,6 @@ export function CartView({
   >({});
   const [storePromoById, setStorePromoById] = useState<Record<string, StorePromotion | null>>({});
 
-  const isPageLayout = layout === 'page';
   const activeStoreId = checkoutStoreId ?? focusStoreId ?? null;
 
   useEffect(() => {
@@ -445,6 +450,7 @@ export function CartView({
           (item) => item.storeId === storeId && selectedIds.has(cartLineKey(item)),
         );
         if (ordering.length === 0) continue;
+        await validateCheckoutCartLines(ordering);
         const plan = plans[storeId];
         const mode = userChoice
           ? resolveStorePlacementMode(plan, userChoice)
@@ -496,6 +502,10 @@ export function CartView({
             result: storeGacha,
           });
         }
+      }
+
+      if (orderedLineKeys.length === 0) {
+        throw new OrderError('no_valid_items');
       }
 
       if (rollingStarted > 0) {

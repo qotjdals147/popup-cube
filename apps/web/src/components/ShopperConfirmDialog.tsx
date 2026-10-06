@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useOverlayScrollLock } from '../hooks/useOverlayScrollLock';
 import { t } from '../i18n';
 
 interface ShopperConfirmDialogProps {
@@ -26,14 +26,7 @@ export function ShopperConfirmDialog({
   onConfirm,
   onCancel,
 }: ShopperConfirmDialogProps) {
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open]);
+  useOverlayScrollLock(open);
 
   if (!open) return null;
 

@@ -1776,7 +1776,8 @@
 
 /* 상세 시트 — body 포털이어도 shopper-account-page 토큰·패널 CSS 적용 */
 /* WebView: 주문 상세(11000) 위 — confirm / 리뷰 */
-.oh-confirm-dialog-portal {
+.oh-confirm-dialog-portal,
+.oh-stacked-dialog-portal {
   z-index: 12050 !important;
 }
 

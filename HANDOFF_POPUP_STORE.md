@@ -831,9 +831,10 @@ popup_store/                          # Turborepo root
 | ID | Issue | Severity | Action |
 |---|---|---|---|
 | ISS-056 | ~~점주 PC — 손님 결제 후 주문·Realtime 뱃지 미갱신~~ | **Fixed (web · 보조)** | CEO **실체감 원인 = ISS-059**(옵션 SKU 장바구니 소실 → **결제·주문 자체 실패**) · 본 항목은 **KST 필터·/home Realtime·탭 복귀 갱신** 등 **별도 개선**(유지) · **자동수락 ON** → **배송 처리** 탭 |
-| ISS-059 | ~~옵션(SKU) 상품 — 장바구니 탭 진입 시 품목 소실~~ — 결제·`place_order` 불가 → 점주 **주문 0** | **Fixed (web+mobile · ISS-059)** | 앱 **WebView마다 localStorage 분리** · React **마운트 전** 빈 `[]`가 **AsyncStorage 덮어쓰기** · **조치** `CartProvider` persist 지연 · `buildCartHydrateScript` + `popup_cart_hydrate` · `normalizeCartItems`(skuId) |
-| ISS-057 | **손님 앱 — 반품·교환 신청 모달이 주문 상세 뒤에 깔림** | **P1 (CEO 실기)** | **환경 = 앱 WebView** · 모달 z-index/portal · `OrderDetail` vs 반품 다이얼로그 레이어 |
-| ISS-058 | **손님 앱 — 모달 열릴 때 배경 스크롤 잔존** | **P1 (CEO 실기)** | **환경 = 앱** · WebView+RN 전역 **scroll lock** 미적용 화면 추적 · ISS-032 계열 회귀 |
+| ISS-059 | ~~옵션(SKU) — 장바구니·결제~~ | **Fixed (web+mobile · ISS-059+060)** | WebView hydrate · **담기 직후 persist** · **결제 전 `validateCheckoutCartLines`** · 옵션 누락 시 **`cart.skuRequiredCheckout`** · 가짜 성공 방지(`no_valid_items`) |
+| ISS-060 | ~~옵션 담긴 뒤에도 `sku_id` 없이 결제 시도~~ | **Fixed (ISS-060 · ISS-059 연계)** | hydrate 타이밍·빈 storage merge로 **옵션 라인 skuId 소실** 가능 → **checkout 검증** + Cart **mergeFromStorage** |
+| ISS-057 | ~~반품·교환 모달이 주문 상세 뒤~~ | **Fixed (web · ISS-057)** | `OrderReturnRequestDialog` → **`oh-stacked-dialog-portal`** (z-index 12050 · 상세 시트 11000 위) |
+| ISS-058 | ~~모달·상세·장바구니 뒤 배경 스크롤~~ | **Fixed (web+mobile · ISS-058)** | **`overlayScrollLock.ts`** + **`useOverlayScrollLock`** (상품상세·장바구니 drawer·confirm·반품·리뷰·우편번호) · 앱 **`webview_scroll_lock`** → WebView **`scrollEnabled`** |
 
 ---
 
@@ -847,7 +848,7 @@ popup_store/                          # Turborepo root
 | **User实기** | §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
 | **출시 불안·건강검진** | **§63 (AD-086)** — **1차 감사 (2026-10-02) ✅** · **2차 최종 = 기능·CEO 항목 완료 후 동일 §63 재실시** (§63.8 · User 2026-10-06) |
-| **🚨 즉시 (User 2026-10-06)** | **ISS-056** ✅ web push 후 Vercel · **ISS-057** 반품 모달 · **ISS-058** 스크롤 락 |
+| **🚨 즉시 (User 2026-10-06)** | **ISS-056~060** ✅ push 후 Vercel 1~2분 · **앱 `apps/mobile` 변경 → Expo `--clear` 재시작** · 점주 **자동수락 ON** → **배송 처리** 탭 |
 | **🚨 감사 잔여 (2026-10-02)** | **044~046·049·048·051** DB ✅ · **047·050** 웹 ⬜ · **044 과거 오염 보정** ⬜ · **052** migration 역동기화 |
 | **채팅 분리 (User 2026-10-02)** | 점검은 **별도 채팅** → 착수 전 **`## 6` Open ISS + §63.14** · 수정 시 ISS **Fixed(hash)** 갱신 |
 
@@ -1822,7 +1823,7 @@ npm run dev
 #### 다음
 
 - [x] **ISS-056** web (KST 필터 · `/home` pulse · 폴링) — **User实机** ⬜  
-- [ ] **ISS-057** · **ISS-058** ⬜  
+- [x] **ISS-057** · **ISS-058** · **ISS-060** ✅  
 - [ ] CEO **홈 카테고리** 확정 ⬜  
 - [ ] AD-088 **Phase** (홈 상품 피드 vs 상세 연관) 우선순위 ⬜  
 
@@ -4323,6 +4324,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-06 pm5 — ISS-058/057/060 스크롤 락 · 옵션 결제 검증
+- **Changed:** `overlayScrollLock.ts` · `useOverlayScrollLock` · `validateCheckoutCartLines` · `CartContext` merge · mobile `webviewScrollLock` · `ProductDetailModal`/`CartView`/dialogs · `ko.ts`
+- **Notes:** **web Vercel 1~2min + 앱 Expo `--clear`** · 옵션 결제 실패 시 **「옵션 정보가 빠졌어요…」** · 점주 **배송 처리** 탭(자동수락)
 
 ### 2026-10-06 pm4 — ISS-059 옵션 SKU 장바구니·앱 WebView 동기화
 - **Changed:** `CartContext` · `normalizeCartItems` · `cartWebView.ts` · `orders.ts` sku_id

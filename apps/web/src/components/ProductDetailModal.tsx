@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { ReviewFormModal } from './ReviewFormModal';
 import { ShopperConfirmDialog } from './ShopperConfirmDialog';
 import { t } from '../i18n';
+import { useOverlayScrollLock } from '../hooks/useOverlayScrollLock';
 import '../styles/product-detail-shop.css';
 
 interface ProductDetailModalProps {
@@ -75,6 +76,7 @@ export function ProductDetailModal({
 }: ProductDetailModalProps) {
   const light = appearance === 'light';
   const rootClass = light ? 'product-detail--light' : undefined;
+  useOverlayScrollLock(true);
   const { addToCart } = useCart();
   const { userId } = useAuth();
   const [detailBlocks, setDetailBlocks] = useState<ProductDetailBlock[]>([]);

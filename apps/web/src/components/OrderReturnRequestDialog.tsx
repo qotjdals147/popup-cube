@@ -13,6 +13,7 @@ import {
 import { OrderError } from '../lib/orders';
 import { copyTextToClipboard, formatReturnAddressText } from '../lib/returnAddressText';
 import { QuantityStepper } from './QuantityStepper';
+import { useOverlayScrollLock } from '../hooks/useOverlayScrollLock';
 import { t } from '../i18n';
 
 interface OrderReturnRequestDialogProps {
@@ -78,22 +79,7 @@ export function OrderReturnRequestDialog({
       .finally(() => setLoading(false));
   }, [open, order]);
 
-  useEffect(() => {
-    if (!open) return;
-    const html = document.documentElement;
-    const body = document.body;
-    const prevHtmlOverflow = html.style.overflow;
-    const prevBodyOverflow = body.style.overflow;
-    const prevBodyOverscroll = body.style.overscrollBehavior;
-    html.style.overflow = 'hidden';
-    body.style.overflow = 'hidden';
-    body.style.overscrollBehavior = 'none';
-    return () => {
-      html.style.overflow = prevHtmlOverflow;
-      body.style.overflow = prevBodyOverflow;
-      body.style.overscrollBehavior = prevBodyOverscroll;
-    };
-  }, [open]);
+  useOverlayScrollLock(open);
 
   const reasonOptions = useMemo(() => {
     if (!policy) return DEFAULT_RETURN_REASON_OPTIONS;
@@ -179,7 +165,7 @@ export function OrderReturnRequestDialog({
   }
 
   return createPortal(
-    <div className="oh-return-dialog-backdrop" role="presentation" onClick={onClose}>
+    <div className="oh-return-dialog-backdrop oh-stacked-dialog-portal" role="presentation" onClick={onClose}>
       <div
         className="oh-return-dialog"
         role="dialog"

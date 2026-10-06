@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ShopperOrderView } from '@popup-cube/shared';
 import { ShopperOrderCardLight } from './ShopperOrderCardLight';
+import { useOverlayScrollLock } from '../hooks/useOverlayScrollLock';
 import { t } from '../i18n';
 
 interface ShopperOrderDetailSheetProps {
@@ -45,13 +46,7 @@ export function ShopperOrderDetailSheet({
     setTheme(document.querySelector('.shopper-account-page')?.getAttribute('data-theme') ?? null);
   }, []);
 
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, []);
+  useOverlayScrollLock(true);
 
   return createPortal(
     <div

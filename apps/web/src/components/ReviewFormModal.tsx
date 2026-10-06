@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { MAX_REVIEW_IMAGES, ReviewError, submitProductReview } from '../lib/reviews';
 import { useAuth } from '../context/AuthContext';
+import { useOverlayScrollLock } from '../hooks/useOverlayScrollLock';
 import { t } from '../i18n';
 import '../styles/review-form.css';
 
@@ -43,13 +44,7 @@ export function ReviewFormModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, []);
+  useOverlayScrollLock(true);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = Array.from(e.target.files ?? []);
