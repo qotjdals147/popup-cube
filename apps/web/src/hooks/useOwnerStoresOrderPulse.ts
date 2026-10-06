@@ -1,11 +1,9 @@
 import { useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
-const OWNER_ORDER_POLL_MS = 45_000;
-
 /**
- * 점주 `/home` — 소유 매장 `orders` Realtime + 탭 포커스·주기 폴링 (ISS-056).
- * KPI·할 일 뱃지는 `get_store_kpi` 1회만 쓰던 경로 보강.
+ * 점주 `/home` — 소유 매장 `orders` Realtime + **다른 탭/앱 갔다가 돌아올 때** KPI 갱신 (ISS-056).
+ * 주기 폴링 없음 — 작업 중 갑자기 목록이 로딩되는 일 방지.
  */
 export function useOwnerStoresOrderPulse(
   storeIds: string[],
@@ -40,13 +38,8 @@ export function useOwnerStoresOrderPulse(
     };
     document.addEventListener('visibilitychange', onVisible);
 
-    const timer = window.setInterval(() => {
-      if (document.visibilityState === 'visible') bump();
-    }, OWNER_ORDER_POLL_MS);
-
     return () => {
       document.removeEventListener('visibilitychange', onVisible);
-      window.clearInterval(timer);
       for (const ch of channels) {
         void supabase.removeChannel(ch);
       }

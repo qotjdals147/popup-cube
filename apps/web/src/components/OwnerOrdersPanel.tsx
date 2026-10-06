@@ -94,21 +94,27 @@ export function OwnerOrdersPanel({
             ? 'returns-claims'
             : undefined);
 
-  const reload = useCallback(async () => {
-    setLoading(true);
-    setError(false);
+  const reload = useCallback(async (opts?: { silent?: boolean }) => {
+    const silent = opts?.silent === true;
+    if (!silent) {
+      setLoading(true);
+      setError(false);
+    }
     try {
       const data = await listStoreOrders(storeId);
       setOrders(data);
     } catch {
-      setError(true);
+      if (!silent) setError(true);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [storeId]);
 
+  const isFirstLoadRef = useRef(true);
   useEffect(() => {
-    void reload();
+    const silent = !isFirstLoadRef.current;
+    isFirstLoadRef.current = false;
+    void reload(silent ? { silent: true } : undefined);
   }, [reload, refreshTick]);
 
   useEffect(() => {

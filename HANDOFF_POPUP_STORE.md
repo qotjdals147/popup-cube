@@ -846,7 +846,7 @@ popup_store/                          # Turborepo root
 | **User实기** | §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
 | **출시 불안·건강검진** | **§63 (AD-086)** — **1차 감사 (2026-10-02) ✅** · **2차 최종 = 기능·CEO 항목 완료 후 동일 §63 재실시** (§63.8 · User 2026-10-06) |
-| **🚨 즉시 (User 2026-10-06)** | **ISS-056** 점주 웹 주문 미표시 · **ISS-057** 반품 모달 레이어 · **ISS-058** 앱 스크롤 락 |
+| **🚨 즉시 (User 2026-10-06)** | **ISS-056** ✅ web push 후 Vercel · **ISS-057** 반품 모달 · **ISS-058** 스크롤 락 |
 | **🚨 감사 잔여 (2026-10-02)** | **044~046·049·048·051** DB ✅ · **047·050** 웹 ⬜ · **044 과거 오염 보정** ⬜ · **052** migration 역동기화 |
 | **채팅 분리 (User 2026-10-02)** | 점검은 **별도 채팅** → 착수 전 **`## 6` Open ISS + §63.14** · 수정 시 ISS **Fixed(hash)** 갱신 |
 
@@ -1820,7 +1820,7 @@ npm run dev
 
 #### 다음
 
-- [ ] **ISS-056** 조사·수정 ⬜  
+- [x] **ISS-056** web (KST 필터 · `/home` pulse · 폴링) — **User实机** ⬜  
 - [ ] **ISS-057** · **ISS-058** ⬜  
 - [ ] CEO **홈 카테고리** 확정 ⬜  
 - [ ] AD-088 **Phase** (홈 상품 피드 vs 상세 연관) 우선순위 ⬜  
@@ -4322,6 +4322,13 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-06 pm3 — ISS-056 폴링 UX (작업 중 끊김 방지)
+- **Changed:** 45s **목록** 폴링 제거 · Realtime·탭 복귀만 목록 갱신(silent) · 2min **뱃지 숫자**만 백그라운드
+
+### 2026-10-06 pm2 — ISS-056 점주 웹 주문·뱃지 갱신
+- **Changed:** `ownerOrderSeoulDates.ts` · `ownerOrderFilters` · `useOwnerOrderRealtime` · `useOwnerStoresOrderPulse` · `HomePage`
+- **Notes:** **`apps/web`만** — Expo 재시작 ❌ · Vercel 1~2min · 점주 **Ctrl+F5** · 자동수락 주문 = **배송 처리** 탭
 
 ### 2026-10-06 pm — CEO 회의 벤치마크 PNG repo 보관
 - **Changed:** `docs/benchmark/ably-2026-10-02/` (9 PNG + README) · 회의록 · §7.94 경로

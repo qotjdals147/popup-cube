@@ -3,7 +3,8 @@ import { getStoreOrderCounts } from '../lib/orders';
 import { supabase } from '../lib/supabase';
 import { t } from '../i18n';
 
-const OWNER_ORDER_POLL_MS = 45_000;
+/** Realtime 끊김 대비 — **뱃지 숫자만** (주문 목록·입력 중 UI는 건드리지 않음) */
+const OWNER_ORDER_BADGE_POLL_MS = 120_000;
 
 export interface OwnerOrderCounts {
   pendingAccept: number;
@@ -103,11 +104,8 @@ export function useOwnerOrderRealtime(
     document.addEventListener('visibilitychange', onVisible);
 
     const timer = window.setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        setRefreshTick((n) => n + 1);
-        void refreshCounts();
-      }
-    }, OWNER_ORDER_POLL_MS);
+      if (document.visibilityState === 'visible') void refreshCounts();
+    }, OWNER_ORDER_BADGE_POLL_MS);
 
     return () => {
       document.removeEventListener('visibilitychange', onVisible);
