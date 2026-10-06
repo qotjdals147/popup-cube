@@ -1,7 +1,12 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { CartItem, Product } from '@popup-cube/shared';
 import { CART_STORAGE_KEY, postCartToApp } from '../lib/cartSync';
 import { cartLineKey } from '../lib/cartLineKey';
+import { normalizeCartItems } from '../lib/normalizeCartItems';
+
+function isNativeWebView(): boolean {
+  return typeof window !== 'undefined' && Boolean(window.ReactNativeWebView);
+}
 
 const STORAGE_KEY = CART_STORAGE_KEY;
 
@@ -35,8 +40,7 @@ function loadFromStorage(): CartItem[] {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    return normalizeCartItems(JSON.parse(raw));
   } catch {
     return [];
   }
@@ -48,19 +52,36 @@ function loadFromStorage(): CartItem[] {
  */
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(() => loadFromStorage());
+  /** 앱 WebView: inject 전 빈 []를 localStorage·AsyncStorage에 덮어쓰지 않음 (ISS-059) */
+  const persistReadyRef = useRef(!isNativeWebView());
 
   useEffect(() => {
+    if (!isNativeWebView()) return;
+
+    const syncFromStorage = () => {
+      setItems(loadFromStorage());
+      persistReadyRef.current = true;
+    };
+
+    window.addEventListener('popup_cart_hydrate', syncFromStorage);
+    requestAnimationFrame(() => {
+      const loaded = loadFromStorage();
+      if (loaded.length > 0) {
+        setItems(loaded);
+        persistReadyRef.current = true;
+        return;
+      }
+      window.setTimeout(syncFromStorage, 120);
+    });
+
+    return () => window.removeEventListener('popup_cart_hydrate', syncFromStorage);
+  }, []);
+
+  useEffect(() => {
+    if (!persistReadyRef.current) return;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     postCartToApp(items);
   }, [items]);
-
-  useEffect(() => {
-    function syncFromNativeBridge() {
-      setItems(loadFromStorage());
-    }
-    window.addEventListener('popup_cart_hydrate', syncFromNativeBridge);
-    return () => window.removeEventListener('popup_cart_hydrate', syncFromNativeBridge);
-  }, []);
 
   function addToCart(storeId: string, product: Product, quantity = 1, option?: AddToCartOption) {
     const lineStoreId = product.store_id || storeId;

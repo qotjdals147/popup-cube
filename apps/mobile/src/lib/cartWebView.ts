@@ -29,9 +29,11 @@ export async function buildCartWebViewUrl(theme: 'light' | 'dark' = 'light'): Pr
 
 /** 네이티브에 저장된 장바구니 → WebView localStorage (페이지/React 로드 전) */
 export function buildCartHydrateScript(itemsJson: string): string {
-  if (!itemsJson || itemsJson === '[]') return 'true;';
+  if (!itemsJson || itemsJson === '[]') {
+    return `(function(){try{localStorage.removeItem('${CART_STORAGE_KEY}');window.dispatchEvent(new Event('popup_cart_hydrate'));}catch(e){}})();true;`;
+  }
   const payload = JSON.stringify(itemsJson);
-  return `(function(){try{var raw=${payload};if(raw)localStorage.setItem('${CART_STORAGE_KEY}',raw);}catch(e){}})();true;`;
+  return `(function(){try{var raw=${payload};if(raw){localStorage.setItem('${CART_STORAGE_KEY}',raw);window.dispatchEvent(new Event('popup_cart_hydrate'));}}catch(e){}})();true;`;
 }
 
 /** localStorage 반영 후 React CartContext 리로드 (탭 포커스·이미 마운트된 WebView) */

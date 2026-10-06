@@ -830,7 +830,8 @@ popup_store/                          # Turborepo root
 
 | ID | Issue | Severity | Action |
 |---|---|---|---|
-| ISS-056 | ~~점주 PC — 손님 결제 후 주문·Realtime 뱃지 미갱신~~ | **Fixed (web · ISS-056)** | **원인** ① `/home` KPI **Realtime 없음** ② 주문 **날짜 필터**가 브라우저 로컬 vs **KST** 불일치로 당일 주문 숨김 ③ Realtime 실패 시 **폴백 없음** · **조치** `ownerOrderSeoulDates` · `useOwnerStoresOrderPulse` · `useOwnerOrderRealtime` 폴링·포커스 · **자동수락 ON** → **배송 처리** 탭(뱃지 `awaitingShip`) |
+| ISS-056 | ~~점주 PC — 손님 결제 후 주문·Realtime 뱃지 미갱신~~ | **Fixed (web · 보조)** | CEO **실체감 원인 = ISS-059**(옵션 SKU 장바구니 소실 → **결제·주문 자체 실패**) · 본 항목은 **KST 필터·/home Realtime·탭 복귀 갱신** 등 **별도 개선**(유지) · **자동수락 ON** → **배송 처리** 탭 |
+| ISS-059 | ~~옵션(SKU) 상품 — 장바구니 탭 진입 시 품목 소실~~ — 결제·`place_order` 불가 → 점주 **주문 0** | **Fixed (web+mobile · ISS-059)** | 앱 **WebView마다 localStorage 분리** · React **마운트 전** 빈 `[]`가 **AsyncStorage 덮어쓰기** · **조치** `CartProvider` persist 지연 · `buildCartHydrateScript` + `popup_cart_hydrate` · `normalizeCartItems`(skuId) |
 | ISS-057 | **손님 앱 — 반품·교환 신청 모달이 주문 상세 뒤에 깔림** | **P1 (CEO 실기)** | **환경 = 앱 WebView** · 모달 z-index/portal · `OrderDetail` vs 반품 다이얼로그 레이어 |
 | ISS-058 | **손님 앱 — 모달 열릴 때 배경 스크롤 잔존** | **P1 (CEO 실기)** | **환경 = 앱** · WebView+RN 전역 **scroll lock** 미적용 화면 추적 · ISS-032 계열 회귀 |
 
@@ -4322,6 +4323,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-06 pm4 — ISS-059 옵션 SKU 장바구니·앱 WebView 동기화
+- **Changed:** `CartContext` · `normalizeCartItems` · `cartWebView.ts` · `orders.ts` sku_id
+- **Notes:** **web Vercel + 앱 `--clear` 재시작** (mobile `cartWebView` 변경) · CEO 「주문 안 뜸」= **결제 실패** 연쇄
 
 ### 2026-10-06 pm3 — ISS-056 폴링 UX (작업 중 끊김 방지)
 - **Changed:** 45s **목록** 폴링 제거 · Realtime·탭 복귀만 목록 갱신(silent) · 2min **뱃지 숫자**만 백그라운드

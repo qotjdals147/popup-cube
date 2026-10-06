@@ -39,11 +39,14 @@ export async function placeOrder(
 
     .filter((item) => item.storeId === storeId)
 
-    .map((item) => ({
-      product_id: item.productId,
-      quantity: item.quantity,
-      ...(item.skuId ? { sku_id: item.skuId } : {}),
-    }));
+    .map((item) => {
+      const sku = item.skuId ?? (item as { sku_id?: string }).sku_id;
+      return {
+        product_id: item.productId,
+        quantity: item.quantity,
+        ...(sku ? { sku_id: sku } : {}),
+      };
+    });
 
 
 
