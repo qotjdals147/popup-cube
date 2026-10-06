@@ -830,7 +830,7 @@ popup_store/                          # Turborepo root
 
 | ID | Issue | Severity | Action |
 |---|---|---|---|
-| ISS-056 | **점주 PC — 손님 결제 후 주문·Realtime 뱃지 미갱신** — 새로고침해도 주문 안 보임 | **P0 (CEO 실기)** | **환경 = 점주센터 웹** · `get_store_orders`·주문 탭 fetch · Realtime `orders` 구독 · `place_order` 후 INSERT/RLS · 알림 카운트 RPC 연동 추적 |
+| ISS-056 | ~~점주 PC — 손님 결제 후 주문·Realtime 뱃지 미갱신~~ | **Fixed (web · ISS-056)** | **원인** ① `/home` KPI **Realtime 없음** ② 주문 **날짜 필터**가 브라우저 로컬 vs **KST** 불일치로 당일 주문 숨김 ③ Realtime 실패 시 **폴백 없음** · **조치** `ownerOrderSeoulDates` · `useOwnerStoresOrderPulse` · `useOwnerOrderRealtime` 폴링·포커스 · **자동수락 ON** → **배송 처리** 탭(뱃지 `awaitingShip`) |
 | ISS-057 | **손님 앱 — 반품·교환 신청 모달이 주문 상세 뒤에 깔림** | **P1 (CEO 실기)** | **환경 = 앱 WebView** · 모달 z-index/portal · `OrderDetail` vs 반품 다이얼로그 레이어 |
 | ISS-058 | **손님 앱 — 모달 열릴 때 배경 스크롤 잔존** | **P1 (CEO 실기)** | **환경 = 앱** · WebView+RN 전역 **scroll lock** 미적용 화면 추적 · ISS-032 계열 회귀 |
 
@@ -4322,6 +4322,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-06 pm — CEO 회의 벤치마크 PNG repo 보관
+- **Changed:** `docs/benchmark/ably-2026-10-02/` (9 PNG + README) · 회의록 · §7.94 경로
+- **Notes:** Expo 재시작 ❌ · **다음 코드 = ISS-056~058**
 
 ### 2026-10-06 — CEO 회의 HANDOFF · AD-088 · §63.8 최종 재검수 예정
 - **Author:** Cursor Agent / User

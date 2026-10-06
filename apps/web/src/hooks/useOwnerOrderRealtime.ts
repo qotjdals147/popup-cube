@@ -3,6 +3,8 @@ import { getStoreOrderCounts } from '../lib/orders';
 import { supabase } from '../lib/supabase';
 import { t } from '../i18n';
 
+const OWNER_ORDER_POLL_MS = 45_000;
+
 export interface OwnerOrderCounts {
   pendingAccept: number;
   awaitingShip: number;
@@ -70,6 +72,14 @@ export function useOwnerOrderRealtime(
   useEffect(() => {
     if (!storeId) return;
 
+    const onOrderChange = (payload: { eventType: string }) => {
+      setRefreshTick((n) => n + 1);
+      void refreshCounts();
+      if (payload.eventType === 'INSERT' && !suppressOrderRef.current) {
+        setToastMessage(t('ownerOrders.toastNewOrder'));
+      }
+    };
+
     const channel = supabase
       .channel(`owner-orders:${storeId}`)
       .on(
@@ -80,17 +90,28 @@ export function useOwnerOrderRealtime(
           table: 'orders',
           filter: `store_id=eq.${storeId}`,
         },
-        (payload) => {
-          setRefreshTick((n) => n + 1);
-          void refreshCounts();
-          if (payload.eventType === 'INSERT' && !suppressOrderRef.current) {
-            setToastMessage(t('ownerOrders.toastNewOrder'));
-          }
-        }
+        onOrderChange,
       )
       .subscribe();
 
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        setRefreshTick((n) => n + 1);
+        void refreshCounts();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        setRefreshTick((n) => n + 1);
+        void refreshCounts();
+      }
+    }, OWNER_ORDER_POLL_MS);
+
     return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.clearInterval(timer);
       void supabase.removeChannel(channel);
     };
   }, [storeId, refreshCounts]);

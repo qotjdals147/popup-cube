@@ -1,6 +1,7 @@
 import type { OwnerOrderView, OrderStatus } from '@popup-cube/shared';
 import { formatOrderRef } from './orderRef';
 import { storeOrderDateRange } from './ownerOrderFocusDates';
+import { anchorIsoInSeoulDateRange } from './ownerOrderSeoulDates';
 
 export type OwnerOrderSort = 'newest' | 'oldest';
 
@@ -73,21 +74,11 @@ function orderMatchesDate(
   dateTo: string,
   queue?: OwnerOrderQueue,
 ): boolean {
-  if (!dateFrom && !dateTo) return true;
   const anchorRaw =
     queue === 'claims'
       ? order.claim_created_at ?? order.claim_resolved_at ?? order.created_at
       : order.created_at;
-  const anchor = new Date(anchorRaw);
-  if (dateFrom) {
-    const from = new Date(`${dateFrom}T00:00:00`);
-    if (anchor < from) return false;
-  }
-  if (dateTo) {
-    const to = new Date(`${dateTo}T23:59:59.999`);
-    if (anchor > to) return false;
-  }
-  return true;
+  return anchorIsoInSeoulDateRange(anchorRaw, dateFrom, dateTo);
 }
 
 export function filterAndSortOwnerOrders(

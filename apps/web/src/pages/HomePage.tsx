@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { listOwnedStores } from '../lib/stores';
 import { getStoreKpi, type StoreKpi } from '../lib/storeKpi';
+import { useOwnerStoresOrderPulse } from '../hooks/useOwnerStoresOrderPulse';
 import { OwnerStoreKpiStrip } from '../components/OwnerStoreKpiStrip';
 import { PopupPeriodBadgePill } from '../components/PopupPeriodBadgePill';
 import { DEMO_STORE_ID } from '@popup-cube/shared';
@@ -71,6 +72,9 @@ export function HomePage() {
   useEffect(() => {
     void reload();
   }, [reload]);
+
+  const ownedStoreIds = stores.map((s) => s.id);
+  useOwnerStoresOrderPulse(ownedStoreIds, reload, role === 'owner' && ownedStoreIds.length > 0);
 
   async function handleSignOut() {
     await signOut();

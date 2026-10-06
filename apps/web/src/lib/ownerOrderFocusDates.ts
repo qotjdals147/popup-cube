@@ -1,30 +1,24 @@
 import type { OwnerOrderView } from '@popup-cube/shared';
 import { listOrderClaimHistory } from './orders';
+import { seoulDateInputFromIso, seoulTodayDateInput } from './ownerOrderSeoulDates';
 
-function pad2(n: number): string {
-  return String(n).padStart(2, '0');
-}
-
-/** ISO → `<input type="date">` (로컬 날짜) */
+/** ISO → `<input type="date">` (서울 달력 — 점주 주문 필터) */
 export function dateInputFromIso(iso: string | null | undefined): string {
-  if (!iso) return '';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  return seoulDateInputFromIso(iso);
 }
 
 export function todayDateInput(now = new Date()): string {
-  return dateInputFromIso(now.toISOString());
+  return seoulTodayDateInput(now);
 }
 
-/** 점주 주문 필터 · 연결 이동 공통 — A=매장 오픈일 · B=오늘 */
+/** 점주 주문 필터 · 연결 이동 공통 — A=매장 오픈일 · B=오늘 (Asia/Seoul) */
 export function storeOrderDateRange(
   storeCreatedAt: string | null | undefined,
   now = new Date(),
 ): { dateFrom: string; dateTo: string } {
   return {
-    dateFrom: storeCreatedAt ? dateInputFromIso(storeCreatedAt) : '',
-    dateTo: todayDateInput(now),
+    dateFrom: storeCreatedAt ? seoulDateInputFromIso(storeCreatedAt) : '',
+    dateTo: seoulTodayDateInput(now),
   };
 }
 
