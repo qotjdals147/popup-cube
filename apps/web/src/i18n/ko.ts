@@ -685,7 +685,9 @@ export const ko = {
     skusSaved: '저장됨',
     skusLoading: '옵션 불러오는 중…',
     skusLoadError: '옵션을 불러오지 못했어요.',
-    skusSaveError: '옵션 저장에 실패했어요.',
+    skusSaveError: '옵션 저장에 실패했어요. 잠시 후 다시 시도해 주세요.',
+    skusSaveErrorOwner: '이 매장 점주 계정으로만 옵션을 저장할 수 있어요.',
+    skusSaveErrorTooManyGroups: '옵션명은 3개까지예요. 옵션명을 줄인 뒤 다시 저장해 주세요.',
   },
   ownerOrders: {
     title: '📊 주문 관리',

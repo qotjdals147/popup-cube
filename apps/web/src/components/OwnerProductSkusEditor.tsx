@@ -122,14 +122,16 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
       try {
         const data = await getOwnerProductSkus(productId);
         if (cancelled) return;
-        const names = deriveOptionGroupNames(data);
+        const activeSkus = data.filter((s) => s.is_active !== false);
+        const source = activeSkus.length > 0 ? activeSkus : data;
+        const names = deriveOptionGroupNames(source);
         const nextNames = names.length > 0 ? names : DEFAULT_OPTION_GROUP_NAMES;
         setGroupNames(nextNames);
         setBulkValues(nextNames.map(() => ''));
         setRows(
-          data.length === 0
+          source.length === 0
             ? [emptyRow(nextNames.length)]
-            : data.map((s) => ({
+            : source.map((s) => ({
                 values: nextNames.map((_, i) => s.option_values[i]?.value ?? ''),
                 stock_quantity: s.stock_quantity,
                 price_delta: s.price_delta ?? 0,
@@ -153,8 +155,15 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
     try {
       await saveOwnerProductSkus(productId, groupNames, rows);
       setMsg(t('ownerProducts.skusSaved'));
-    } catch {
-      setErr(t('ownerProducts.skusSaveError'));
+    } catch (e) {
+      const raw = e && typeof e === 'object' && 'message' in e ? String((e as { message: string }).message) : '';
+      if (raw.includes('not_store_owner')) {
+        setErr(t('ownerProducts.skusSaveErrorOwner'));
+      } else if (raw.includes('too_many_option_groups')) {
+        setErr(t('ownerProducts.skusSaveErrorTooManyGroups'));
+      } else {
+        setErr(t('ownerProducts.skusSaveError'));
+      }
     } finally {
       setSaving(false);
     }
