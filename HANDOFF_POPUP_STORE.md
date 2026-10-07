@@ -281,6 +281,7 @@
    - PC 점주만 → **PC 웹 3줄** · 앱 WebView까지 → **Expo 4줄** (+ 필요 시 PC 3줄)
    - Vercel만 → `https://popup-cube-web.vercel.app` + push 1~2분
    - **❌ 금지 (User 반복 지적):** 「Expo `--clear` 후 매장 → …」 「`--clear` 재시작 후 장바구니 확인」 등 **명령 블록 없이** 테스트만 설명 · 「Vercel 1~2분 + `--clear`」 한 줄로 **§0 4줄 생략**
+   - **❌ 금지 (User 2026-10-07 지적 — 새 위반 유형):** **클릭 순서를 코드 블록에 담아** 「테스트 (PC 웹 — 한 줄씩)」처럼 **cmd 블록인 척** 내보내기. `1) 판매자센터 → 상품 → …` 같은 **클릭 안내는 코드 블록이 아니다.** 코드 블록에는 **오직 §0 PC 3줄 / Expo 4줄 명령만** 넣고, **Win→cmd 한 줄**·**SDK 52**·**데모 계정**·**클릭 순서**·**이번에 볼 것**을 **전부** 적는다. 「Expo 재시작 ❌」라고 썼으니 블록은 안 넣어도 된다 **← 오해 금지** (재시작 ❌여도 **두 블록 모두 제시**)
    - **✅ 올바른 예:** §0 **「표준 Expo 4줄」코드 블록 전체** → SDK 52 → `demo@shopper.com` → **표준 안내문 5) 클릭 순서** → **이번에 볼 것** → **§0 「Expo 재시작 여부」표에서 해당 행**
 9. **commit/push·테스트 안내 = Expo 재시작 여부 표 필수 동반 (User 2026-08-25 — 절대 규칙)**
    - **❌ 금지:** 「push 했으니 `--clear` 재시작」만 단독 안내 · web-only 수정인데 **매번 Expo 껐다 켜라**고만 말하기
@@ -2018,9 +2019,62 @@ npm run dev
 - **ISS-050 Fixed** — 확인해보니 `CartView` 는 이미 `removeItemsByLineKeys`(= `cartLineKey`)만 쓰고 있었고 `removeItemsByProductIds` 는 **호출처 0의 죽은 코드**였다. 다시 잘못 쓰이지 않게 **context에서 제거**.
 - **ISS-054 미해결 (P3)** — 옵션이 `get_order_return`·`request_return`·`get_store_product_sales` 에 **여전히 미연동**. `option_label` 스냅샷은 `order_items` 에 있으므로 **해당 RPC 3개에 칼럼만 추가**하면 된다.
 
+#### Expo 재시작 여부 (§0 표 — **web-only 행**)
+
+| | |
+|---|---|
+| **이번에 수정한 곳** | **`apps/web` + `packages/shared` + migration** — `apps/mobile` **없음** |
+| **Expo(Metro) 재시작** | ❌ **불필요** · Metro **Ctrl+C 불필요** |
+| **User가 할 일** | `main` push ✅ → **Vercel 1~2분** → 점주 탭 **`Ctrl+F5`** · 손님은 해당 **탭 나갔다 다시** |
+
+#### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
+
+0) 폰 **Expo Go SDK 52** (Play 스토어 54+ ❌) — **PC 점주만** 볼 거면 2)부터
+
+1) **Win → `cmd` → Enter** (PowerShell도 OK · 한 줄씩 붙여넣고 Enter)
+
+2) **PC 웹 — 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) 브라우저 → `https://popup-cube-web.vercel.app` 또는 `http://localhost:5173` → **`Ctrl+F5`**
+
+4) **Expo 재시작 ❌** — Metro **이미 켜져 있으면 5) 생략** · **꺼져 있을 때만**:
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+5) **점주** `demo@owner.com` / `demo` → 홈 → 매장 **편집** → **상품**
+   - 옵션 있는 상품 → **판매 옵션** 표 머리글이 **입력칸**인지
+   - 머리글 「컬러」 → **「소재」**로 고쳐 쓰기
+   - **「+ 옵션명 추가」** → 3번째 옵션명 (예: **각인**)
+   - 「옵션값 한 번에 채우기」 칸이 **3개**로 늘었는지 → 값 넣고 **「조합 표에 반영」**
+   - **「옵션 저장」**
+
+6) **손님** `demo@shopper.com` / `demo` → 홈 → 매장 카드 → 입장 → 상품 상세
+   - 옵션명 **2개 이상 → 드롭다운** · **1개 → 칩 한 줄**
+   - 앞 칸을 고르면 **조합 안 되는 값·품절 값이 회색으로 잠기는지**
+   - 다 고르면 **선택 옵션 · 단가 · 남은 재고** 줄이 뜨는지
+   - 장바구니 → 주문
+
+7) **점주 주문 확인** — 판매자센터 **주문** 또는 **발주·배송**(자동수락 상품이면 이쪽 · ISS-061) 탭에 **옵션 라벨**(`블랙 / M / 이니셜`)이 들어왔는지
+
+8) **합격**
+   - ✅ 점주가 **옵션명을 직접 지어** 저장됨 (색·사이즈 고정 ❌)
+   - ✅ **기존 상품 옵션 라벨이 그대로** (`노무현색 / XXXXXXXXXXXXL` · `블랙 / M` · `화이트 / M`)
+   - ✅ 옵션 **± 금액**이 장바구니·주문 금액에 반영 (AD-087 · ISS-062)
+
 #### 다음
 
-- [ ] **User 실기 확인** — 옵션명 3개 상품 만들어 보고 → 손님 드롭다운 → 주문 → 점주 주문서 라벨 ⬜  
+- [ ] **User 실기 확인** — 위 5)~8) ⬜  
 - [ ] `products.product_code` 신설 + 상품 폼 입력칸 (AD-088) ⬜  
 - [ ] **엑셀 일괄등록 파서** (§7.96 양식 v1 — 이제 옵션 N개를 받을 수 있다) ⬜  
 - [ ] **ISS-054** 반품·판매통계 RPC 3개에 `option_label` 추가 ⬜  
@@ -4527,7 +4581,12 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-07 pm4 — AD-090 **상품 옵션 자유 N개 구현 완료** (DB + 점주 + 손님) · ISS-050 Fixed
 - **Author:** Cursor Agent / User
 - **Changed:** migration `20261007_ad090_product_sku_free_options.sql` **원격 적용 ✅** · `types.ts`(`ProductSkuOptionValue`·`option_values`·`MAX_PRODUCT_OPTION_GROUPS=3`) · `productSkus.ts` · **신규** `skuOptionGroups.ts` · `OwnerProductSkusEditor`(옵션명 동적 열·N중 조합) · `ProductDetailModal`(1개 칩 / 2개↑ 드롭다운) · `owner-product-skus.css` · `ko.ts` · `CartContext`(죽은 API 제거) · §7.97
-- **Notes:** 점주가 **옵션명을 직접 지음** — 색·사이즈 고정 해제, **최대 3개** · 기존 색·사이즈 **백필 완료 · 라벨 변화 0**(`노무현색 / XXXXXXXXXXXXL` 등 그대로) · 손님 화면은 **조합 불가 값·품절 값 비활성** · `color`/`size` 칼럼은 **한 사이클 유지 후 DROP** · **Expo 재시작 ❌**(`apps/web`만) → **Vercel 1~2분 + Ctrl+F5** · 다음 = AD-088 상품코드·엑셀 파서
+- **Notes:** 점주가 **옵션명을 직접 지음** — 색·사이즈 고정 해제, **최대 3개** · 기존 색·사이즈 **백필 완료 · 라벨 변화 0**(`노무현색 / XXXXXXXXXXXXL` 등 그대로) · 손님 화면은 **조합 불가 값·품절 값 비활성** · `color`/`size` 칼럼은 **한 사이클 유지 후 DROP** · **Expo 재시작 ❌**(`apps/web`만) → **Vercel 1~2분 + Ctrl+F5** · **User 실기 cmd 블록 = §7.97** · 다음 = AD-088 상품코드·엑셀 파서
+
+### 2026-10-07 pm5 — §0 실기 안내 규칙 위반 정정 (User 지적)
+- **Author:** Cursor Agent / User
+- **Changed:** **§0 #8 금지 예시에 「새 위반 유형」 추가** · **§7.97 「Expo 재시작 여부」표 + 「User 실기」 cmd 블록** 보강
+- **Notes:** **위반 내용** — AD-090 안내에서 **클릭 순서를 코드 블록에 넣어 cmd 블록인 척** 내보냈고, **Win→cmd 한 줄 · PC 3줄 · Expo 4줄 · SDK 52 · 데모 계정**을 **전부 생략**했다. 「Expo 재시작 ❌」를 **블록 생략 사유로 착각**한 것이 원인 → §0 #9는 **재시작 ❌여도 두 블록 모두 제시**를 요구. **에이전트:** 테스트 안내를 쓸 때 **§0 「표준 PC 웹 3줄」·「표준 Expo 4줄」을 그대로 복사**해 오고, 클릭 순서는 **일반 글로** 쓴다
 
 ### 2026-10-07 pm3 — AD-090 **상품 옵션 자유 N개** 확정 (AD-085 2개 고정 폐기)
 - **Author:** Cursor Agent / User
