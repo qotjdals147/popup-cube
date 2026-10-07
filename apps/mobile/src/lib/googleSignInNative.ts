@@ -17,8 +17,33 @@ function loadGoogleSignin(): GoogleSigninModule | null {
   return cached;
 }
 
+function isExpoGoRuntime(): boolean {
+  return Constants.appOwnership === 'expo';
+}
+
+/** JS 패키지는 Expo Go에도 있지만 RNGoogleSignin 네이티브는 Dev Client 빌드에만 있음 */
+function isNativeGoogleModuleLinked(): boolean {
+  try {
+    const { TurboModuleRegistry } = require('react-native') as typeof import('react-native');
+    const get = TurboModuleRegistry.get;
+    if (typeof get === 'function' && get('RNGoogleSignin') != null) {
+      return true;
+    }
+  } catch {
+    // ignore
+  }
+  try {
+    const { NativeModules } = require('react-native') as typeof import('react-native');
+    return NativeModules.RNGoogleSignin != null;
+  } catch {
+    return false;
+  }
+}
+
 export function isNativeGoogleSignInAvailable(): boolean {
-  return loadGoogleSignin() !== null;
+  if (isExpoGoRuntime()) return false;
+  if (loadGoogleSignin() === null) return false;
+  return isNativeGoogleModuleLinked();
 }
 
 function getWebClientId(): string | undefined {
@@ -86,6 +111,10 @@ export async function signInWithGoogleNative(): Promise<{ error: string | null; 
     }
     return { error: null };
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('RNGoogleSignin') || msg.includes('TurboModuleRegistry')) {
+      return { error: 'native-unavailable' };
+    }
     if (isErrorWithCode(err)) {
       if (err.code === statusCodes.SIGN_IN_CANCELLED) {
         return { error: null, cancelled: true };

@@ -4325,6 +4325,10 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-07 — Expo Go Google 로그인 RNGoogleSignin 크래시
+- **Changed:** `googleSignInNative.ts` — Expo Go·네이티브 미연결 시 **브라우저 OAuth**로만
+- **Notes:** **`apps/mobile`** → Metro **`--clear` 재시작** · QR → **Expo Go** 선택
+
 ### 2026-10-06 pm5 — ISS-058/057/060 스크롤 락 · 옵션 결제 검증
 - **Changed:** `overlayScrollLock.ts` · `useOverlayScrollLock` · `validateCheckoutCartLines` · `CartContext` merge · mobile `webviewScrollLock` · `ProductDetailModal`/`CartView`/dialogs · `ko.ts`
 - **Notes:** **web Vercel 1~2min + 앱 Expo `--clear`** · 옵션 결제 실패 시 **「옵션 정보가 빠졌어요…」** · 점주 **배송 처리** 탭(자동수락)
