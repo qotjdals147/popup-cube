@@ -4,6 +4,7 @@ import { getProductSkus } from '../lib/productSkus';
 import {
   buildSkuOptionGroups,
   findSkuBySelection,
+  optionValuePriceSuffix,
   optionValueState,
   pruneSelection,
 } from '../lib/skuOptionGroups';
@@ -400,7 +401,14 @@ export function ProductDetailModal({
                       <option value="">{t('productDetail.optionSelectPlaceholder', { name: group.name })}</option>
                       {group.values.map((value) => {
                         const state = optionValueState(skus, optionSelection, gi, value);
-                        // 할인/추가금은 SKU(조합) 단위 1번만 — 칸마다 ± 표시 시 「5만+5만=10만?」 오해 (ISS-064)
+                        const priceSuffix = optionValuePriceSuffix(
+                          skus,
+                          optionSelection,
+                          optionGroups,
+                          gi,
+                          value,
+                          formatPrice
+                        );
                         const suffix = !state.exists
                           ? ` · ${t('productDetail.optionUnavailable')}`
                           : !state.inStock
@@ -409,6 +417,7 @@ export function ProductDetailModal({
                         return (
                           <option key={value} value={value} disabled={!state.exists || !state.inStock}>
                             {value}
+                            {priceSuffix}
                             {suffix}
                           </option>
                         );
@@ -417,10 +426,21 @@ export function ProductDetailModal({
                   </label>
                 ))}
                 {selectedSku && (
-                  <p style={styleFor(light, S.optionPickedLayout, S.optionPickedDark)}>
-                    {selectedSku.option_label ?? ''} · {formatPrice(displayUnitPrice)} ·{' '}
-                    {t('productDetail.optionStockLeft', { count: selectedSku.stock_quantity })}
-                  </p>
+                  <>
+                    <p style={styleFor(light, S.optionPickedLayout, S.optionPickedDark)}>
+                      {selectedSku.option_label ?? ''} · {formatPrice(displayUnitPrice)} ·{' '}
+                      {t('productDetail.optionStockLeft', { count: selectedSku.stock_quantity })}
+                    </p>
+                    {(selectedSku.price_delta ?? 0) !== 0 && (
+                      <p style={styleFor(light, S.optionPriceExplainLayout, S.optionPriceExplainDark)}>
+                        {t('productDetail.optionPriceExplain', {
+                          base: formatPrice(product.price),
+                          delta: formatPriceDeltaLabel(selectedSku.price_delta ?? 0, formatPrice),
+                          final: formatPrice(displayUnitPrice),
+                        })}
+                      </p>
+                    )}
+                  </>
                 )}
                 {skuErr && <p style={S.optionErr}>{skuErr}</p>}
               </div>
@@ -689,6 +709,8 @@ const S = {
   optionSelectDark: { border: '1px solid #2c4270', background: '#0d1730', color: '#d8e4ff' },
   optionPickedLayout: { margin: 0, fontSize: 12, fontWeight: 600, color: '#2563eb' },
   optionPickedDark: { color: '#8ce0b0' },
+  optionPriceExplainLayout: { margin: '4px 0 0', fontSize: 11, lineHeight: 1.45, color: '#4e5968' },
+  optionPriceExplainDark: { color: '#9aa8c4' },
   optionChipLayout: {
     padding: '8px 12px',
     borderRadius: 8,

@@ -851,7 +851,7 @@ popup_store/                          # Turborepo root
 | ISS-059 | ~~옵션(SKU) — 장바구니·결제~~ | **Fixed (web+mobile · ISS-059+060)** | WebView hydrate · **담기 직후 persist** · **결제 전 `validateCheckoutCartLines`** · 옵션 누락 시 **`cart.skuRequiredCheckout`** · 가짜 성공 방지(`no_valid_items`) |
 | ISS-060 | ~~옵션 담긴 뒤에도 `sku_id` 없이 결제 시도~~ | **Fixed (ISS-060 · ISS-059 연계)** | hydrate 타이밍·빈 storage merge로 **옵션 라인 skuId 소실** 가능 → **checkout 검증** + Cart **mergeFromStorage** |
 | ISS-061 | ~~「옵션 상품 주문이 점주 **주문** 탭에 안 들어온다」~~ — **실제로는 주문 정상 · 탭이 다름** | **Fixed (web · ISS-061)** | **DB 확인(2026-10-07)**: 옵션 주문 `#30·31·33`(GUCCI)·`#19` 모두 **정상 저장 · `option_label` 포함**. 원인 = 옵션 넣은 상품(스카프·목도리)이 **`auto_accept_enabled=true`** → `status='accepted'` → **발주·배송** 큐. 옵션 **없는** 테스트 상품은 자동수락 **off** → 주문 탭. **옵션과 무관 · 상품별 자동수락 설정 차이**. **조치** = 주문 탭에 **「자동 수락된 주문 N건 — 발주·배송 탭」 + 이동 버튼** (`OwnerOrdersPanel`) |
-| ISS-064 | **손님 옵션 드롭다운에 할인 금액이 칸마다 중복 표시** — 조합 SKU `price_delta` 1번인데 컬러·사이즈 각각 `(-50,000원)` → **10만 할인?** 오해 | **Fixed (web · 2026-10-07)** | **2개 이상 드롭다운**에서는 옵션값에 ± **미표시** · **확정 조합 1줄**에만 최종 판매가 (`ProductDetailModal`) |
+| ISS-064 | **손님 옵션 — 할인 이유가 보여야 함 + 중복 ± 오해** | **Fixed (web+DB · 2026-10-07 pm)** | **칸별 `adjustment`**(점주 옵션값 아래 ±) → 드롭다운에 `브라운(-50,000원)` 등 **한 칸에만** · 없으면 **가격이 갈리는 옵션 칸**에만 ± · 조합 확정 시 `기본가 · 옵션 ± · 판매가` (`skuOptionGroups.optionValuePriceSuffix` · `20261007c`) |
 | ISS-063 | **옵션 저장 실패** — `save_owner_product_skus`가 **전량 DELETE** 후 INSERT · **주문(`order_items.product_sku_id`)이 붙은 SKU는 FK로 DELETE 불가** | **Fixed (DB · 2026-10-07)** | 테스트 상품(목도리·스카프)은 **이미 주문 11건** → 저장마다 **23503 FK** · **조치** = 라벨 기준 **UPDATE/INSERT** · 주문 참조 SKU는 **삭제 대신 `is_active=false`** · migration `20261007b_*` **원격 적용 ✅** |
 | ISS-062 | ~~AD-087 옵션 ±가격이 **원격 DB 미적용**~~ — `product_skus.price_delta` **칼럼 없음** | **Fixed (DB · 2026-10-07)** | HANDOFF엔 적용된 것처럼 기재돼 있었으나 `schema_migrations`는 **`20261002015906`에서 멈춤**. 옵션별 추가금액이 **결제에 전혀 반영되지 않던 상태**. **조치** = `20261003_ad087_product_sku_price_delta.sql`(+`DROP FUNCTION` 2건·GRANT 보강) · `20261003b_place_order_sku_price_delta.sql` **원격 적용 ✅** · 이력 2건 기록 |
 | ISS-057 | ~~반품·교환 모달이 주문 상세 뒤~~ | **Fixed (web · ISS-057)** | `OrderReturnRequestDialog` → **`oh-stacked-dialog-portal`** (z-index 12050 · 상세 시트 11000 위) |
@@ -2024,8 +2024,10 @@ npm run dev
 | **shared** | `ProductSkuOptionValue` · `ProductSku.option_values` · `MAX_PRODUCT_OPTION_GROUPS = 3` |
 | **web lib** | `productSkus.ts` (`OwnerSkuRow.values: string[]` · `deriveOptionGroupNames`) · **신규** `skuOptionGroups.ts` (그룹 유도·조합 매칭·불가 조합 비우기) |
 | **점주 UI** | `OwnerProductSkusEditor` — 표 헤더가 **옵션명 입력칸**(이름 직접 수정·삭제) · 「+ 옵션명 추가」 · **N중 곱집합** 조합 생성 · 조합 **60개 초과 경고** |
-| **손님 UI** | `ProductDetailModal` — 옵션 1개 칩 / 2개↑ **드롭다운**. 다른 칸 선택과 **조합 불가한 값은 비활성**, 품절도 비활성 · 확정 시 **라벨·단가·남은 재고** 표시 |
-| **i18n** | `ownerProducts.skus*` 재정비(색·사이즈 전용 문구 제거) · `productDetail.optionSelectPlaceholder`·`optionUnavailable`·`optionStockLeft` |
+| **손님 UI** | `ProductDetailModal` — 옵션 1개 칩 / 2개↑ **드롭다운**. 다른 칸 선택과 **조합 불가한 값은 비활성**, 품절도 비활성 · 확정 시 **라벨·단가·남은 재고** · **ISS-064 v2:** 드롭다운 값 옆 **쇼핑몰형 ±**(중복 없음) · 확정 아래 **`기본가 · 옵션 ± · 판매가`** (`optionValuePriceSuffix`) |
+| **점주 UI (ISS-064 v2)** | `OwnerProductSkusEditor` — 각 **옵션값 아래 칸별 ±**(선택) · `option_values[].adjustment` · 합계 = 행 `price_delta` · **화이트 -5만 + XL +2,500** 같은 **분리 표시**용 |
+| **i18n** | `ownerProducts.skus*` · `skusTipCellAdj` · `skusCellAdjPh` · `productDetail.optionPriceExplain` |
+| **migration (ISS-064 v2)** | `20261007c_iss064_option_value_adjustment.sql` — `save_owner_product_skus` 가 **adjustment** jsonb 보존 · **원격 적용 ✅** |
 
 - **`color`/`size` 칼럼은 롤백 여지로 한 사이클 남겨둠** — 다음 마이그레이션에서 `DROP COLUMN`. `save_owner_product_skus` 는 구 형식(`color`/`size`) payload 도 받아준다(구버전 브라우저 캐시 대비).
 - **ISS-055 일부 해소** — `format_product_sku_label` 에 `search_path` 고정.
@@ -2074,11 +2076,13 @@ npx expo start --tunnel --port 8082 --clear
    - **「+ 옵션명 추가」** → 3번째 옵션명 (예: **각인**)
    - 「옵션값 한 번에 채우기」 칸이 **3개**로 늘었는지 → 값 넣고 **「조합 표에 반영」**
    - **「옵션 저장」**
+   - **ISS-064 v2 (선택):** 옵션값 아래 **칸별 ±** — 예: 화이트 `-50000` · XL `2500` → 저장 후 손님 드롭다운에 **각각** ± 표시
 
 6) **손님** `demo@shopper.com` / `demo` → 홈 → 매장 카드 → 입장 → 상품 상세
    - 옵션명 **2개 이상 → 드롭다운** · **1개 → 칩 한 줄**
    - 앞 칸을 고르면 **조합 안 되는 값·품절 값이 회색으로 잠기는지**
-   - 다 고르면 **선택 옵션 · 단가 · 남은 재고** 줄이 뜨는지
+   - **ISS-064 v2:** 드롭다운에 **할인·추가가 붙는 옵션값**이 보이는지(컬러·사이즈 **둘 다 -5만**처럼 **이중 표시 ❌**)
+   - 다 고르면 **선택 옵션 · 단가 · 남은 재고** + **`기본가 · 옵션 ± · 판매가`** 줄(± 있을 때)
    - 장바구니 → 주문
 
 7) **점주 주문 확인** — 판매자센터 **주문** 또는 **발주·배송**(자동수락 상품이면 이쪽 · ISS-061) 탭에 **옵션 라벨**(`블랙 / M / 이니셜`)이 들어왔는지
@@ -2087,10 +2091,11 @@ npx expo start --tunnel --port 8082 --clear
    - ✅ 점주가 **옵션명을 직접 지어** 저장됨 (색·사이즈 고정 ❌)
    - ✅ **기존 상품 옵션 라벨이 그대로** (`노무현색 / XXXXXXXXXXXXL` · `블랙 / M` · `화이트 / M`)
    - ✅ 옵션 **± 금액**이 장바구니·주문 금액에 반영 (AD-087 · ISS-062)
+   - ✅ **ISS-064 v2:** 손님이 **왜 가격이 바뀌는지** 드롭다운·확정 줄에서 이해 가능 · **10만 할인 오해 ❌**
 
 #### 다음
 
-- [ ] **User 실기 확인** — 위 5)~8) ⬜  
+- [ ] **User 실기 확인** — 위 5)~8) **ISS-064 v2 포함** ⬜  
 - [ ] `products.product_code` 신설 + 상품 폼 입력칸 (AD-088) ⬜  
 - [ ] **엑셀 일괄등록 파서** (§7.96 양식 v1 — 이제 옵션 N개를 받을 수 있다) ⬜  
 - [ ] **ISS-054** 반품·판매통계 RPC 3개에 `option_label` 추가 ⬜  
@@ -4593,6 +4598,15 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-07 pm9 — ISS-064 v2 **옵션별 할인 표시**(쇼핑몰형) + 칸별 ±
+- **Author:** Cursor Agent / User
+- **Changed:** `skuOptionGroups.ts`(`optionValuePriceSuffix`) · `ProductDetailModal`(드롭다운 ± + 확정 시 `기본·옵션·판매가`) · `OwnerProductSkusEditor`(옵션값 아래 **칸별 ±**) · `productSkus.ts` · `types.ts`(`adjustment`) · `owner-product-skus.css` · `ko.ts` · migration `20261007c_iss064_option_value_adjustment.sql` **원격 적용 ✅** · §7.97 · §6 ISS-064
+- **Notes:** 행 ±만 쓰면 **가격이 갈리는 옵션 칸**에만 ± · **화이트 -5만 + XL +2,500** = **칸별 ±** · pm8(± 전부 숨김) **대체** · **Expo 재시작 ❌** (`apps/web`+`shared`+DB RPC) · Vercel 1~2min + Ctrl+F5 · User实机 = **§7.97** 5)~8)
+
+### 2026-10-07 pm8 — ISS-064 손님 옵션 **할인 금액 중복 표시** (드롭다운) — pm9에서 **대체**
+- **Changed:** `ProductDetailModal` — 옵션명 **2개↑** 드롭다운에서 **± 문구 제거** · 조합 확정 후 **한 줄 판매가**만
+- **Notes:** 할인 `-50,000`은 **조합 1번** · 컬러·사이즈 각각 붙이면 **이중 할인처럼 보임** · **Expo 재시작 ❌** · Vercel 1~2min + Ctrl+F5
 
 ### 2026-10-07 pm7 — ISS-063 **옵션 저장 실패** (주문 FK · DELETE ALL)
 - **Author:** Cursor Agent / User

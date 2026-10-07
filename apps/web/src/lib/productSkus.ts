@@ -4,6 +4,8 @@ import { supabase } from './supabase';
 /** AD-090 — 표 한 행. `values[i]` 는 `groupNames[i]` 옵션의 값. */
 export interface OwnerSkuRow {
   values: string[];
+  /** 옵션 칸별 ±(원). 있으면 저장 시 `price_delta` = 합 */
+  adjustments: number[];
   stock_quantity: number;
   price_delta: number;
 }
@@ -14,8 +16,19 @@ export function normalizeOptionValues(raw: unknown): ProductSkuOptionValue[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .map((el) => {
-      const o = (el ?? {}) as { name?: unknown; value?: unknown };
-      return { name: String(o.name ?? '').trim(), value: String(o.value ?? '').trim() };
+      const o = (el ?? {}) as { name?: unknown; value?: unknown; adjustment?: unknown };
+      const adjRaw = o.adjustment;
+      const adjustment =
+        typeof adjRaw === 'number' && Number.isFinite(adjRaw)
+          ? Math.trunc(adjRaw)
+          : typeof adjRaw === 'string' && /^-?\d+$/.test(adjRaw.trim())
+            ? parseInt(adjRaw.trim(), 10)
+            : undefined;
+      return {
+        name: String(o.name ?? '').trim(),
+        value: String(o.value ?? '').trim(),
+        ...(adjustment !== undefined && adjustment !== 0 ? { adjustment } : {}),
+      };
     })
     .filter((o) => o.value.length > 0)
     .slice(0, MAX_PRODUCT_OPTION_GROUPS);
@@ -62,13 +75,21 @@ export async function saveOwnerProductSkus(
 
   rows.forEach((row) => {
     const option_values = names
-      .map((name, i) => ({ name: name.trim() || `옵션 ${i + 1}`, value: (row.values[i] ?? '').trim() }))
-      .filter((o) => o.value.length > 0);
+      .map((name, i) => {
+        const value = (row.values[i] ?? '').trim();
+        if (!value) return null;
+        const adj = row.adjustments?.[i] ?? 0;
+        const base = { name: name.trim() || `옵션 ${i + 1}`, value };
+        return adj !== 0 ? { ...base, adjustment: adj } : base;
+      })
+      .filter((o): o is ProductSkuOptionValue => o !== null && o.value.length > 0);
     if (option_values.length === 0) return;
+    const adjSum = (row.adjustments ?? []).reduce((s, a) => s + (a ?? 0), 0);
+    const price_delta = adjSum !== 0 ? adjSum : row.price_delta ?? 0;
     payload.push({
       option_values,
       stock_quantity: row.stock_quantity,
-      price_delta: row.price_delta ?? 0,
+      price_delta,
       sort_order: payload.length,
       is_active: true,
     });

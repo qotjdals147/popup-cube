@@ -20,7 +20,17 @@ interface OwnerProductSkusEditorProps {
 const COMBINATION_WARN_THRESHOLD = 60;
 
 function emptyRow(groupCount: number): OwnerSkuRow {
-  return { values: Array.from({ length: groupCount }, () => ''), stock_quantity: 0, price_delta: 0 };
+  return {
+    values: Array.from({ length: groupCount }, () => ''),
+    adjustments: Array.from({ length: groupCount }, () => 0),
+    stock_quantity: 0,
+    price_delta: 0,
+  };
+}
+
+function rowEffectiveDelta(row: OwnerSkuRow): number {
+  const sum = (row.adjustments ?? []).reduce((s, a) => s + (a ?? 0), 0);
+  return sum !== 0 ? sum : row.price_delta ?? 0;
 }
 
 function rowKey(values: string[]): string {
@@ -96,14 +106,22 @@ function mergeGeneratedRows(existing: OwnerSkuRow[], generated: string[][]): Own
   }
   for (const values of generated) {
     const k = rowKey(values);
-    if (!byKey.has(k)) byKey.set(k, { values, stock_quantity: 0, price_delta: 0 });
+    if (!byKey.has(k)) {
+      byKey.set(k, {
+        values,
+        adjustments: values.map(() => 0),
+        stock_quantity: 0,
+        price_delta: 0,
+      });
+    }
   }
   return [...byKey.values()];
 }
 
 function resizeRow(row: OwnerSkuRow, groupCount: number): OwnerSkuRow {
   const values = Array.from({ length: groupCount }, (_, i) => row.values[i] ?? '');
-  return { ...row, values };
+  const adjustments = Array.from({ length: groupCount }, (_, i) => row.adjustments?.[i] ?? 0);
+  return { ...row, values, adjustments };
 }
 
 export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSkusEditorProps) {
@@ -118,6 +136,7 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
   );
   /** ± 칸 — `-` 입력 직후 parse=0 이면 value가 지워지는 버그 방지 (입력 중 문자열 유지) */
   const [deltaDraft, setDeltaDraft] = useState<Record<number, string>>({});
+  const [cellAdjDraft, setCellAdjDraft] = useState<Record<string, string>>({});
 
   const activeRows = useMemo(() => rows.filter((r) => !rowIsEmpty(r)), [rows]);
   const totalOptionStock = useMemo(
@@ -148,11 +167,13 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
             ? [emptyRow(nextNames.length)]
             : source.map((s) => ({
                 values: nextNames.map((_, i) => s.option_values[i]?.value ?? ''),
+                adjustments: nextNames.map((_, i) => s.option_values[i]?.adjustment ?? 0),
                 stock_quantity: s.stock_quantity,
                 price_delta: s.price_delta ?? 0,
               }))
         );
         setDeltaDraft({});
+        setCellAdjDraft({});
       } catch {
         if (!cancelled) setErr(t('ownerProducts.skusLoadError'));
       } finally {
@@ -168,7 +189,7 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
     setSaving(true);
     setErr(null);
     setMsg(null);
-    const negativeSale = activeRows.find((r) => basePrice + (r.price_delta ?? 0) < 0);
+    const negativeSale = activeRows.find((r) => basePrice + rowEffectiveDelta(r) < 0);
     if (negativeSale) {
       setSaving(false);
       setErr(t('ownerProducts.skusSaveErrorNegativeSale'));
@@ -205,7 +226,11 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
     setGroupNames((prev) => prev.filter((_, i) => i !== idx));
     setBulkValues((prev) => prev.filter((_, i) => i !== idx));
     setRows((prev) =>
-      prev.map((r) => ({ ...r, values: r.values.filter((_, i) => i !== idx) }))
+      prev.map((r) => ({
+        ...r,
+        values: r.values.filter((_, i) => i !== idx),
+        adjustments: (r.adjustments ?? []).filter((_, i) => i !== idx),
+      }))
     );
   }
 
@@ -239,8 +264,22 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
     );
   }
 
+  function updateRowCellAdjustment(idx: number, groupIdx: number, raw: string) {
+    const key = `${idx}-${groupIdx}`;
+    setCellAdjDraft((prev) => ({ ...prev, [key]: raw }));
+    setRows((prev) =>
+      prev.map((r, i) => {
+        if (i !== idx) return r;
+        const adjustments = [...(r.adjustments ?? r.values.map(() => 0))];
+        adjustments[groupIdx] = parseSignedDelta(raw);
+        return { ...r, adjustments };
+      })
+    );
+  }
+
   function removeRow(idx: number) {
     setDeltaDraft({});
+    setCellAdjDraft({});
     setRows((prev) => {
       const next = prev.filter((_, i) => i !== idx);
       return next.length > 0 ? next : [emptyRow(groupNames.length)];
@@ -251,7 +290,17 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
     if (Object.prototype.hasOwnProperty.call(deltaDraft, idx)) {
       return deltaDraft[idx]!;
     }
+    const sum = (row.adjustments ?? []).reduce((s, a) => s + (a ?? 0), 0);
+    if (sum !== 0) return formatSignedDeltaDisplay(sum);
     return formatSignedDeltaDisplay(row.price_delta);
+  }
+
+  function cellAdjInputValue(idx: number, groupIdx: number, row: OwnerSkuRow): string {
+    const key = `${idx}-${groupIdx}`;
+    if (Object.prototype.hasOwnProperty.call(cellAdjDraft, key)) {
+      return cellAdjDraft[key]!;
+    }
+    return formatSignedDeltaDisplay(row.adjustments?.[groupIdx] ?? 0);
   }
 
   if (loading) {
@@ -283,6 +332,7 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
         <p>{t('ownerProducts.skusTipGroups')}</p>
         <p>{t('ownerProducts.skusTipStock')}</p>
         <p>{t('ownerProducts.skusTipPrice')}</p>
+        <p>{t('ownerProducts.skusTipCellAdj')}</p>
       </div>
 
       <div className="owner-sku-gen">
@@ -355,7 +405,7 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
           </thead>
           <tbody>
             {rows.map((row, idx) => {
-              const salePrice = basePrice + (row.price_delta ?? 0);
+              const salePrice = basePrice + rowEffectiveDelta(row);
               const labelPreview =
                 row.values.map((v) => v.trim()).filter(Boolean).join(' / ') ||
                 t('ownerProducts.skusRowEmpty');
@@ -364,14 +414,35 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
                   <td className="col-no">{idx + 1}</td>
                   {groupNames.map((name, gi) => (
                     <td key={gi}>
-                      <input
-                        className="owner-sku-cell-input"
-                        aria-label={`${name.trim() || t('ownerProducts.skusGroupFallback', { index: gi + 1 })} ${idx + 1}`}
-                        placeholder={t('ownerProducts.skusValuePh')}
-                        value={row.values[gi] ?? ''}
-                        onChange={(e) => updateRowValue(idx, gi, e.target.value)}
-                        maxLength={40}
-                      />
+                      <div className="owner-sku-cell-stack">
+                        <input
+                          className="owner-sku-cell-input"
+                          aria-label={`${name.trim() || t('ownerProducts.skusGroupFallback', { index: gi + 1 })} ${idx + 1}`}
+                          placeholder={t('ownerProducts.skusValuePh')}
+                          value={row.values[gi] ?? ''}
+                          onChange={(e) => updateRowValue(idx, gi, e.target.value)}
+                          maxLength={40}
+                        />
+                        <input
+                          className="owner-sku-cell-input owner-sku-cell-adj"
+                          aria-label={`${name.trim() || t('ownerProducts.skusGroupFallback', { index: gi + 1 })} ${t('ownerProducts.skusCellAdjLabel')}`}
+                          placeholder={t('ownerProducts.skusCellAdjPh')}
+                          value={cellAdjInputValue(idx, gi, row)}
+                          onChange={(e) =>
+                            updateRowCellAdjustment(idx, gi, sanitizeSignedDeltaInput(e.target.value))
+                          }
+                          onBlur={() => {
+                            const key = `${idx}-${gi}`;
+                            setCellAdjDraft((prev) => {
+                              if (!Object.prototype.hasOwnProperty.call(prev, key)) return prev;
+                              const next = { ...prev };
+                              delete next[key];
+                              return next;
+                            });
+                          }}
+                          inputMode="text"
+                        />
+                      </div>
                     </td>
                   ))}
                   <td className="col-num">

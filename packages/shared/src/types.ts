@@ -194,6 +194,8 @@ export interface CartItem {
 export interface ProductSkuOptionValue {
   name: string;
   value: string;
+  /** 칸별 추가·할인(원). 조합 `price_delta` = 합(있을 때) · 손님 드롭다운 ± 표시용 */
+  adjustment?: number;
 }
 
 /** AD-085/AD-090 — 손님·점주 조회용 SKU */

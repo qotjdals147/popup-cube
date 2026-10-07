@@ -279,6 +279,19 @@
   text-align: right;
 }
 
+.owner-sku-cell-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.owner-sku-cell-adj {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #4e5968;
+  background: #f9fafb;
+}
+
 .owner-sku-delta-wrap {
   display: flex;
   align-items: center;

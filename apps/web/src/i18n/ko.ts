@@ -518,6 +518,7 @@ export const ko = {
     optionUnavailable: '선택 불가',
     optionStockLeft: '{count}개 남음',
     priceFromBase: '옵션 선택 시 금액이 바뀌어요',
+    optionPriceExplain: '기본 {base} · 옵션 {delta} · 판매가 {final}',
     loading: '불러오는 중...',
     writeReview: '리뷰 쓰기',
     alreadyReviewedNote: '이미 리뷰를 남겼어요. 소중한 후기 감사해요!',
@@ -657,6 +658,10 @@ export const ko = {
     skusTipStock: '옵션을 저장하면 아래 표의 재고만 팔려요. 위 「단일 재고」 칸은 옵션이 없을 때만 써요.',
     skusTipPrice:
       '추가·할인(원) 칸 — 더 비싸게: 1000 · 할인: -1000 (마이너스 붙임). 0이면 기본가. 오른쪽 「판매가」로 확인.',
+    skusTipCellAdj:
+      '옵션값 아래 작은 ± 칸 — 손님 화면에 「브라운(-50,000)」「XL(+2,500)」처럼 어느 옵션에서 할인·추가인지 보여줘요. 칸별 ±를 넣으면 행 합계가 판매가에 반영돼요. 비우면 오른쪽 행 ±만 씁니다.',
+    skusCellAdjLabel: '칸별 ±',
+    skusCellAdjPh: '± (선택)',
     skusPriceDeltaPh: '0 · 1000 · -1000',
     skusStockSum: '옵션 재고 {count}개',
     skusTipGroups:
