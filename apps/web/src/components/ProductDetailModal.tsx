@@ -1,6 +1,12 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import type { OrderStatus, Product, ProductDetailBlock, ProductReview, ProductSku } from '@popup-cube/shared';
 import { getProductSkus } from '../lib/productSkus';
+import {
+  buildSkuOptionGroups,
+  findSkuBySelection,
+  optionValueState,
+  pruneSelection,
+} from '../lib/skuOptionGroups';
 import { formatPriceDeltaLabel, skuUnitPrice } from '../lib/skuPrice';
 import { listProductDetailBlocks } from '../lib/productDetailBlocks';
 import { getMyReviewKeys, getProductReviews, reviewKey } from '../lib/reviews';
@@ -87,6 +93,8 @@ export function ProductDetailModal({
   const [skus, setSkus] = useState<ProductSku[]>([]);
   const [selectedSkuId, setSelectedSkuId] = useState<string | null>(null);
   const [skuErr, setSkuErr] = useState<string | null>(null);
+  /** AD-090 — 옵션명이 2개 이상이면 칸별로 고른다. 인덱스 = 옵션명 순서 */
+  const [optionSelection, setOptionSelection] = useState<string[]>([]);
 
   const [reviewableOrder, setReviewableOrder] = useState<ReviewableOrder | null>(null);
   const [alreadyReviewedByMe, setAlreadyReviewedByMe] = useState(false);
@@ -145,6 +153,7 @@ export function ProductDetailModal({
         setReviews(reviewList);
         setSkus(skuList);
         setSelectedSkuId(null);
+        setOptionSelection(buildSkuOptionGroups(skuList).map(() => ''));
         setSkuErr(null);
       })
       .catch(() => {
@@ -184,6 +193,20 @@ export function ProductDetailModal({
     setSkuErr(null);
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1200);
+  }
+
+  const optionGroups = useMemo(() => buildSkuOptionGroups(skus), [skus]);
+  /** 옵션명 1개면 조합 칩 한 줄로 충분하고, 2개 이상이면 칩이 수십 개가 되므로 칸별 선택으로 바꾼다. */
+  const useGroupedOptionPicker = optionGroups.length > 1;
+
+  function handleOptionGroupChange(groupIdx: number, value: string) {
+    const draft = optionGroups.map((_, i) => (i === groupIdx ? value : optionSelection[i] ?? ''));
+    const pruned = pruneSelection(skus, optionGroups, draft);
+    setOptionSelection(pruned);
+    const matched = findSkuBySelection(skus, optionGroups, pruned);
+    setSelectedSkuId(matched?.sku_id ?? null);
+    setSkuErr(null);
+    if (matched) setQty((q) => Math.min(q, Math.max(1, matched.stock_quantity)));
   }
 
   const selectedSku = skus.find((s) => s.sku_id === selectedSkuId) ?? null;
@@ -364,9 +387,49 @@ export function ProductDetailModal({
 
         {!previewMode && !shoppingBlocked && (
           <div className="product-detail-buy-bar" style={styleFor(light, S.buyBarLayout, S.buyBarDark)}>
-            {skus.length > 0 && (
+            {skus.length > 0 && useGroupedOptionPicker && (
               <div style={S.optionBlock}>
-                <span style={styleFor(light, S.optionLabelLayout, S.optionLabelDark)}>{t('productDetail.optionLabel')}</span>
+                {optionGroups.map((group, gi) => (
+                  <label key={gi} style={S.optionGroupRow}>
+                    <span style={styleFor(light, S.optionLabelLayout, S.optionLabelDark)}>{group.name}</span>
+                    <select
+                      style={styleFor(light, S.optionSelectLayout, S.optionSelectDark)}
+                      value={optionSelection[gi] ?? ''}
+                      onChange={(e) => handleOptionGroupChange(gi, e.target.value)}
+                    >
+                      <option value="">{t('productDetail.optionSelectPlaceholder', { name: group.name })}</option>
+                      {group.values.map((value) => {
+                        const state = optionValueState(skus, optionSelection, gi, value);
+                        const delta = state.onlySku?.price_delta ?? 0;
+                        const suffix = !state.exists
+                          ? ` · ${t('productDetail.optionUnavailable')}`
+                          : !state.inStock
+                            ? ` · ${t('productDetail.optionSoldOut')}`
+                            : formatPriceDeltaLabel(delta, formatPrice);
+                        return (
+                          <option key={value} value={value} disabled={!state.exists || !state.inStock}>
+                            {value}
+                            {suffix}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </label>
+                ))}
+                {selectedSku && (
+                  <p style={styleFor(light, S.optionPickedLayout, S.optionPickedDark)}>
+                    {selectedSku.option_label ?? ''} · {formatPrice(displayUnitPrice)} ·{' '}
+                    {t('productDetail.optionStockLeft', { count: selectedSku.stock_quantity })}
+                  </p>
+                )}
+                {skuErr && <p style={S.optionErr}>{skuErr}</p>}
+              </div>
+            )}
+            {skus.length > 0 && !useGroupedOptionPicker && (
+              <div style={S.optionBlock}>
+                <span style={styleFor(light, S.optionLabelLayout, S.optionLabelDark)}>
+                  {optionGroups[0]?.name ?? t('productDetail.optionLabel')}
+                </span>
                 <div style={S.optionChipRow}>
                   {skus.map((sku) => {
                     const soldOut = sku.stock_quantity < 1;
@@ -612,6 +675,20 @@ const S = {
   optionLabelLayout: { fontSize: 12, fontWeight: 600, color: '#4e5968' },
   optionLabelDark: { color: '#c9d4ee' },
   optionChipRow: { display: 'flex', flexWrap: 'wrap' as const, gap: 8 },
+  optionGroupRow: { display: 'flex', flexDirection: 'column' as const, gap: 4, width: '100%' },
+  optionSelectLayout: {
+    width: '100%',
+    boxSizing: 'border-box' as const,
+    padding: '10px 12px',
+    fontSize: 14,
+    border: '1px solid #d1d6db',
+    borderRadius: 8,
+    background: '#fff',
+    color: '#191f28',
+  },
+  optionSelectDark: { border: '1px solid #2c4270', background: '#0d1730', color: '#d8e4ff' },
+  optionPickedLayout: { margin: 0, fontSize: 12, fontWeight: 600, color: '#2563eb' },
+  optionPickedDark: { color: '#8ce0b0' },
   optionChipLayout: {
     padding: '8px 12px',
     borderRadius: 8,

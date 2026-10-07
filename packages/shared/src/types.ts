@@ -190,17 +190,27 @@ export interface CartItem {
   optionLabel?: string | null;
 }
 
-/** AD-085 — 손님·점주 조회용 SKU */
+/** AD-090 — 옵션 한 칸 (점주가 옵션명을 직접 만든다) */
+export interface ProductSkuOptionValue {
+  name: string;
+  value: string;
+}
+
+/** AD-085/AD-090 — 손님·점주 조회용 SKU */
 export interface ProductSku {
   sku_id: string;
-  color: string | null;
-  size: string | null;
+  /** AD-090 — 옵션 자유 N개 (최대 3). 순서 = 점주가 만든 옵션 순서 */
+  option_values: ProductSkuOptionValue[];
   option_label: string | null;
   stock_quantity: number;
   /** AD-087 — 기본 판매가(product.price) 대비 추가(+)/할인(-) */
   price_delta?: number;
+  is_active?: boolean;
   sort_order?: number;
 }
+
+/** AD-090 — 옵션명 상한 (스마트스토어·쿠팡 조합형과 동일) */
+export const MAX_PRODUCT_OPTION_GROUPS = 3;
 
 /** 매장별 프로모션 기본 설정 (AD-028, §10). */
 export interface StorePromotion {

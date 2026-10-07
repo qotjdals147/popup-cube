@@ -835,7 +835,7 @@ popup_store/                          # Turborepo root
 | ISS-047 | **통합 결제 부분 실패 → 재시도 시 중복 주문** — `CartView.executeCheckout`이 매장별 `place_order`를 **순차 호출**(매장마다 별 트랜잭션), 중간 실패 시 **앞 매장 주문은 이미 확정** | **P1** | 장바구니는 **성공 화면의 `handleFinish()`에서만** 비워짐 → 실패하면 **앞 매장 상품이 장바구니에 그대로** 남고, 손님이 결제 재시도 → **같은 매장 주문 2건·재고 2중 차감**. `place_order`에 **멱등키 없음**. 조치 = 성공 매장 라인 **즉시 제거** + 부분 성공 안내 + 멱등키 |
 | ISS-048 | **동시 주문 시 1건이 통째로 실패** — `place_order`가 주문번호를 `MAX(order_number)+1`로 생성, `orders_store_id_order_number_key` **UNIQUE** 존재 | **P1** | 같은 매장에 동시 결제 2건 → 뒤 건이 **23505 unique violation**으로 롤백(손님은 원인 불명 오류 · 매출 유실). **번호 중복·재고 꼬임은 없음**(UNIQUE가 막고 트랜잭션 롤백). 조치 = per-store **sequence** 또는 `FOR UPDATE` 잠금 / 재시도 |
 | ISS-049 | **손님이 자기 `role`·`store_id` 변경 가능** — `authenticated`에 `profiles` **UPDATE GRANT(전 컬럼)** + `profiles_self_update`에 **`WITH CHECK` 없음** | **P1 (보안)** | `role='owner'`·`store_id` 임의 설정 → 점주 UI·라우팅 진입, `update_my_nickname` **검증(길이·금칙어) 우회**. **실피해 제한적** — 반품·주문·가챠 RPC는 전부 **`stores.owner_id = auth.uid()`** 로 검증(감사에서 확인) → **타 매장 데이터 침투 불가**. 조치 = 컬럼 제한 GRANT 또는 RPC 전용화 |
-| ISS-050 | **옵션 상품 주문 후 「안 산 옵션」까지 장바구니에서 사라짐** — `CartContext.removeItemsByProductIds`가 **`productId`만** 비교, **`skuId` 무시** | **P2 (AD-085)** | 장바구니 라인 식별은 전부 `cartLineKey({productId, skuId})`인데 주문 후 정리만 productId 기준 → 같은 상품의 **선택 안 한 다른 옵션 라인이 삭제**됨. 조치 = **lineKey 기준** 제거 |
+| ISS-050 | ~~옵션 상품 주문 후 「안 산 옵션」까지 장바구니에서 사라짐~~ | **Fixed (2026-10-07 · AD-090)** | 재확인 결과 `CartView` 는 **이미 `removeItemsByLineKeys`(= `cartLineKey`)만** 사용 중이었고, `removeItemsByProductIds` 는 **호출처 0의 죽은 코드**였다(증상은 이미 없었음). 다시 잘못 쓰이지 않게 **`CartContext` 에서 제거** · §7.97 |
 | ISS-051 | **자동 수락 quota 초과 가능** — `place_order`의 `auto_accept_remaining` 감소 `UPDATE` 뒤 **`IF NOT FOUND` 검사 없음** | **P2** | quota 소진·비활성 상태에서도 **주문은 자동 수락으로 진행**(감소만 실패) → 점주가 설정한 자동 수락 건수 초과. 음수는 안 됨. 조치 = `NOT FOUND` 시 수동 수락으로 폴백 |
 | ISS-052 | **운영 DB를 repo로 재현 불가** — 원격 `schema_migrations` **93건** vs repo `supabase/migrations` **41개 파일** | **P2** | 예: `20261002003108 product_skus_rpcs`는 **원격에만 존재**(repo 파일 없음) · `return_evidence_urls_rpc_v2/v3`·`store_kpi_ad084_b` 등 다수. → **스테이징 분리·재배포·롤백 불가**(§63.9 전제 붕괴). 조치 = `supabase db pull`로 누락 migration **repo 역동기화** |
 | ISS-053 | **장바구니 표시 금액 ≠ 실제 청구 금액** — 담을 때 `price`를 **localStorage에 스냅샷** 저장, 점주가 가격 변경해도 갱신 안 됨 | **P2 (AD-068)** | `place_order`는 **DB `products.price`로 재계산**하므로 **금전 손실은 없음**. 다만 결제 전 합계와 결제 후 금액이 달라 **「고객 의문 제로」 위반**. 조치 = 장바구니 진입 시 가격 재조회 + 변동 시 고지 |
@@ -1990,16 +1990,41 @@ npm run dev
 | **타입** | `ProductSku.color/size` → `option_values` · `OwnerSkuRow` |
 | **영향 없음** | `order_items.option_label` 스냅샷 · 장바구니 `skuId` · `_restore_order_stock` · 자동수락 |
 
-#### 같이 처리할 기존 버그 (옵션 경로)
+#### User 결정 (2026-10-07)
 
-- **ISS-050** 주문 후 **선택 안 한 옵션 라인까지 삭제** (`removeItemsByProductIds` 가 `skuId` 무시) — **P2**
-- **ISS-054** 옵션이 **반품·상품별 판매통계 RPC에 미연동** — **P3**
+| | |
+|---|---|
+| **옵션명 최대 개수** | **3개** (스마트스토어·쿠팡 조합형과 동일 · 상한은 `MAX_PRODUCT_OPTION_GROUPS` + `save_owner_product_skus` 에서 검사 — **테이블 CHECK 에는 안 넣음**, 상한 변경 시 재작성 피하려고) |
+| **손님 화면** | **자동** — 옵션명 **1개면 조합 칩**, **2개 이상이면 옵션명별 드롭다운** |
+| **착수** | 즉시 (엑셀 선행 작업) |
 
-#### 결정 필요 (User)
+#### 구현 결과 (**완료 · 2026-10-07**)
 
-- [ ] **옵션명 최대 개수** — 스마트스토어·쿠팡은 **3개**가 상한. 우리도 **3개 권장**(그 이상은 조합 수가 수백 개로 폭발) / 또는 무제한 ⬜  
-- [ ] **손님 화면** — 지금처럼 **조합 칩 한 줄** 유지 / **옵션명별 드롭다운**으로 격상 ⬜  
-- [ ] 착수 시점 — **지금 바로** (엑셀 선행 작업) / 다른 버그 먼저 ⬜  
+| 레이어 | 파일 |
+|---|---|
+| **migration** | `20261007_ad090_product_sku_free_options.sql` — **원격 적용 ✅** (이력 `20261007000000`) |
+| **DB** | `product_skus.option_values jsonb` 추가 · **색·사이즈 백필 ✅**(`컬러`/`사이즈` 이름 부여 · 라벨 **변화 0**) · CHECK `product_skus_option_present` → `product_skus_option_values_present`(배열 1개↑) · **신규** `format_sku_option_label(jsonb)` · `get_product_skus`·`get_owner_product_skus` **DROP 후 재생성**(반환 타입 변경 42P13) · `save_owner_product_skus` 재작성 · `place_order` 라벨 생성부 교체 |
+| **shared** | `ProductSkuOptionValue` · `ProductSku.option_values` · `MAX_PRODUCT_OPTION_GROUPS = 3` |
+| **web lib** | `productSkus.ts` (`OwnerSkuRow.values: string[]` · `deriveOptionGroupNames`) · **신규** `skuOptionGroups.ts` (그룹 유도·조합 매칭·불가 조합 비우기) |
+| **점주 UI** | `OwnerProductSkusEditor` — 표 헤더가 **옵션명 입력칸**(이름 직접 수정·삭제) · 「+ 옵션명 추가」 · **N중 곱집합** 조합 생성 · 조합 **60개 초과 경고** |
+| **손님 UI** | `ProductDetailModal` — 옵션 1개 칩 / 2개↑ **드롭다운**. 다른 칸 선택과 **조합 불가한 값은 비활성**, 품절도 비활성 · 확정 시 **라벨·단가·남은 재고** 표시 |
+| **i18n** | `ownerProducts.skus*` 재정비(색·사이즈 전용 문구 제거) · `productDetail.optionSelectPlaceholder`·`optionUnavailable`·`optionStockLeft` |
+
+- **`color`/`size` 칼럼은 롤백 여지로 한 사이클 남겨둠** — 다음 마이그레이션에서 `DROP COLUMN`. `save_owner_product_skus` 는 구 형식(`color`/`size`) payload 도 받아준다(구버전 브라우저 캐시 대비).
+- **ISS-055 일부 해소** — `format_product_sku_label` 에 `search_path` 고정.
+
+#### 같이 처리한 기존 버그
+
+- **ISS-050 Fixed** — 확인해보니 `CartView` 는 이미 `removeItemsByLineKeys`(= `cartLineKey`)만 쓰고 있었고 `removeItemsByProductIds` 는 **호출처 0의 죽은 코드**였다. 다시 잘못 쓰이지 않게 **context에서 제거**.
+- **ISS-054 미해결 (P3)** — 옵션이 `get_order_return`·`request_return`·`get_store_product_sales` 에 **여전히 미연동**. `option_label` 스냅샷은 `order_items` 에 있으므로 **해당 RPC 3개에 칼럼만 추가**하면 된다.
+
+#### 다음
+
+- [ ] **User 실기 확인** — 옵션명 3개 상품 만들어 보고 → 손님 드롭다운 → 주문 → 점주 주문서 라벨 ⬜  
+- [ ] `products.product_code` 신설 + 상품 폼 입력칸 (AD-088) ⬜  
+- [ ] **엑셀 일괄등록 파서** (§7.96 양식 v1 — 이제 옵션 N개를 받을 수 있다) ⬜  
+- [ ] **ISS-054** 반품·판매통계 RPC 3개에 `option_label` 추가 ⬜  
+- [ ] 다음 사이클에 `product_skus.color`·`size` **DROP COLUMN** ⬜  
 
 ---
 
@@ -4499,10 +4524,15 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-07 pm4 — AD-090 **상품 옵션 자유 N개 구현 완료** (DB + 점주 + 손님) · ISS-050 Fixed
+- **Author:** Cursor Agent / User
+- **Changed:** migration `20261007_ad090_product_sku_free_options.sql` **원격 적용 ✅** · `types.ts`(`ProductSkuOptionValue`·`option_values`·`MAX_PRODUCT_OPTION_GROUPS=3`) · `productSkus.ts` · **신규** `skuOptionGroups.ts` · `OwnerProductSkusEditor`(옵션명 동적 열·N중 조합) · `ProductDetailModal`(1개 칩 / 2개↑ 드롭다운) · `owner-product-skus.css` · `ko.ts` · `CartContext`(죽은 API 제거) · §7.97
+- **Notes:** 점주가 **옵션명을 직접 지음** — 색·사이즈 고정 해제, **최대 3개** · 기존 색·사이즈 **백필 완료 · 라벨 변화 0**(`노무현색 / XXXXXXXXXXXXL` 등 그대로) · 손님 화면은 **조합 불가 값·품절 값 비활성** · `color`/`size` 칼럼은 **한 사이클 유지 후 DROP** · **Expo 재시작 ❌**(`apps/web`만) → **Vercel 1~2분 + Ctrl+F5** · 다음 = AD-088 상품코드·엑셀 파서
+
 ### 2026-10-07 pm3 — AD-090 **상품 옵션 자유 N개** 확정 (AD-085 2개 고정 폐기)
 - **Author:** Cursor Agent / User
 - **Changed:** **AD-090** · **AD-085 경고 주석** · **신규 §7.97** (모델·범위·기존 버그·결정 3) · §7.96 리스크 1 **해소 처리**
-- **Notes:** **「색·사이즈 2개」는 User 지시가 아니라 에이전트가 AD-085에서 임의로 좁힌 것** (User 2026-10-07 지적) · HANDOFF에 「자유 옵션 = v3」로 적어 **합의된 범위처럼 굳어진 것이 문제** → **범위를 좁힐 때는 「v1만」으로 적지 말고 User에게 묻는다** · 손님 화면은 **이미 `option_label` 평면 칩**이라 영향 작음 · **엑셀 일괄등록(AD-088)의 선행 작업** · **코드 변경 없음 · Expo 재시작 ❌**
+- **Notes:** **「색·사이즈 2개」는 User 지시가 아니라 에이전트가 AD-085에서 임의로 좁힌 것** (User 2026-10-07 지적) · HANDOFF에 「자유 옵션 = v3」로 적어 **합의된 범위처럼 굳어진 것이 문제** → **범위를 좁힐 때는 「v1만」으로 적지 말고 User에게 묻는다**
 
 ### 2026-10-07 pm2 — 셀메이트 **계정·API ❌ / 엑셀 업로드 전제** · §7.96 일괄등록 양식 분석
 - **Author:** Cursor Agent / User

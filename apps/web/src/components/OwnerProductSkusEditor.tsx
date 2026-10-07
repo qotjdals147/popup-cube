@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getOwnerProductSkus, saveOwnerProductSkus, type OwnerSkuRow } from '../lib/productSkus';
+import { MAX_PRODUCT_OPTION_GROUPS } from '@popup-cube/shared';
+import {
+  DEFAULT_OPTION_GROUP_NAMES,
+  deriveOptionGroupNames,
+  getOwnerProductSkus,
+  saveOwnerProductSkus,
+  type OwnerSkuRow,
+} from '../lib/productSkus';
 import { formatIntegerDisplay, formatIntegerInputRaw, parseIntegerInput } from '../lib/formatInteger';
 import { t } from '../i18n';
 import '../styles/owner-product-skus.css';
@@ -9,12 +16,19 @@ interface OwnerProductSkusEditorProps {
   basePrice: number;
 }
 
-function emptyRow(): OwnerSkuRow {
-  return { color: '', size: '', stock_quantity: 0, price_delta: 0 };
+/** 조합 수가 이보다 많아지면 점주에게 경고 (실수로 수백 행 만드는 것 방지) */
+const COMBINATION_WARN_THRESHOLD = 60;
+
+function emptyRow(groupCount: number): OwnerSkuRow {
+  return { values: Array.from({ length: groupCount }, () => ''), stock_quantity: 0, price_delta: 0 };
 }
 
-function rowKey(r: OwnerSkuRow): string {
-  return `${r.color.trim().toLowerCase()}|${r.size.trim().toLowerCase()}`;
+function rowKey(values: string[]): string {
+  return values.map((v) => v.trim().toLowerCase()).join('\u0000');
+}
+
+function rowIsEmpty(row: OwnerSkuRow): boolean {
+  return row.values.every((v) => !v.trim());
 }
 
 function parseSignedDelta(raw: string): number {
@@ -43,50 +57,63 @@ function parseOptionList(raw: string): string[] {
   return out;
 }
 
-function buildCombinations(colors: string[], sizes: string[]): OwnerSkuRow[] {
-  if (colors.length === 0 && sizes.length === 0) return [];
-  if (colors.length === 0) {
-    return sizes.map((size) => ({ color: '', size, stock_quantity: 0, price_delta: 0 }));
-  }
-  if (sizes.length === 0) {
-    return colors.map((color) => ({ color, size: '', stock_quantity: 0, price_delta: 0 }));
-  }
-  return colors.flatMap((color) =>
-    sizes.map((size) => ({ color, size, stock_quantity: 0, price_delta: 0 }))
-  );
+/** AD-090 — 2중 곱집합 → N중 곱집합. 값이 비어 있는 옵션은 건너뛴다. */
+function buildCombinations(lists: string[][]): string[][] {
+  let acc: string[][] = [[]];
+  lists.forEach((list, i) => {
+    const values = list.length > 0 ? list : [''];
+    const next: string[][] = [];
+    for (const row of acc) {
+      for (const v of values) {
+        const copy = [...row];
+        copy[i] = v;
+        next.push(copy);
+      }
+    }
+    acc = next;
+  });
+  return acc.filter((values) => values.some((v) => v.trim()));
 }
 
-function mergeGeneratedRows(existing: OwnerSkuRow[], generated: OwnerSkuRow[]): OwnerSkuRow[] {
+function mergeGeneratedRows(existing: OwnerSkuRow[], generated: string[][]): OwnerSkuRow[] {
   const byKey = new Map<string, OwnerSkuRow>();
   for (const r of existing) {
-    if (!r.color.trim() && !r.size.trim()) continue;
-    byKey.set(rowKey(r), r);
+    if (rowIsEmpty(r)) continue;
+    byKey.set(rowKey(r.values), r);
   }
-  for (const g of generated) {
-    const k = rowKey(g);
-    if (!byKey.has(k)) byKey.set(k, g);
+  for (const values of generated) {
+    const k = rowKey(values);
+    if (!byKey.has(k)) byKey.set(k, { values, stock_quantity: 0, price_delta: 0 });
   }
-  const merged = [...byKey.values()];
-  return merged.length > 0 ? merged : [emptyRow()];
+  return [...byKey.values()];
+}
+
+function resizeRow(row: OwnerSkuRow, groupCount: number): OwnerSkuRow {
+  const values = Array.from({ length: groupCount }, (_, i) => row.values[i] ?? '');
+  return { ...row, values };
 }
 
 export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSkusEditorProps) {
-  const [rows, setRows] = useState<OwnerSkuRow[]>([emptyRow()]);
+  const [groupNames, setGroupNames] = useState<string[]>(DEFAULT_OPTION_GROUP_NAMES);
+  const [rows, setRows] = useState<OwnerSkuRow[]>([emptyRow(DEFAULT_OPTION_GROUP_NAMES.length)]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [bulkColors, setBulkColors] = useState('');
-  const [bulkSizes, setBulkSizes] = useState('');
-
-  const activeRows = useMemo(
-    () => rows.filter((r) => r.color.trim() || r.size.trim()),
-    [rows]
+  const [bulkValues, setBulkValues] = useState<string[]>(() =>
+    DEFAULT_OPTION_GROUP_NAMES.map(() => '')
   );
+
+  const activeRows = useMemo(() => rows.filter((r) => !rowIsEmpty(r)), [rows]);
   const totalOptionStock = useMemo(
     () => activeRows.reduce((sum, r) => sum + Math.max(0, r.stock_quantity), 0),
     [activeRows]
   );
+  const pendingCombinationCount = useMemo(() => {
+    const lists = groupNames.map((_, i) => parseOptionList(bulkValues[i] ?? ''));
+    if (lists.every((l) => l.length === 0)) return 0;
+    return lists.reduce((n, l) => n * Math.max(1, l.length), 1);
+  }, [groupNames, bulkValues]);
 
   useEffect(() => {
     let cancelled = false;
@@ -95,18 +122,19 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
       try {
         const data = await getOwnerProductSkus(productId);
         if (cancelled) return;
-        if (data.length === 0) {
-          setRows([emptyRow()]);
-        } else {
-          setRows(
-            data.map((s) => ({
-              color: s.color ?? '',
-              size: s.size ?? '',
-              stock_quantity: s.stock_quantity,
-              price_delta: s.price_delta ?? 0,
-            }))
-          );
-        }
+        const names = deriveOptionGroupNames(data);
+        const nextNames = names.length > 0 ? names : DEFAULT_OPTION_GROUP_NAMES;
+        setGroupNames(nextNames);
+        setBulkValues(nextNames.map(() => ''));
+        setRows(
+          data.length === 0
+            ? [emptyRow(nextNames.length)]
+            : data.map((s) => ({
+                values: nextNames.map((_, i) => s.option_values[i]?.value ?? ''),
+                stock_quantity: s.stock_quantity,
+                price_delta: s.price_delta ?? 0,
+              }))
+        );
       } catch {
         if (!cancelled) setErr(t('ownerProducts.skusLoadError'));
       } finally {
@@ -123,7 +151,7 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
     setErr(null);
     setMsg(null);
     try {
-      await saveOwnerProductSkus(productId, rows);
+      await saveOwnerProductSkus(productId, groupNames, rows);
       setMsg(t('ownerProducts.skusSaved'));
     } catch {
       setErr(t('ownerProducts.skusSaveError'));
@@ -132,16 +160,35 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
     }
   }
 
+  function addGroup() {
+    if (groupNames.length >= MAX_PRODUCT_OPTION_GROUPS) return;
+    const next = [...groupNames, ''];
+    setGroupNames(next);
+    setBulkValues((prev) => [...prev, '']);
+    setRows((prev) => prev.map((r) => resizeRow(r, next.length)));
+  }
+
+  function removeGroup(idx: number) {
+    if (groupNames.length <= 1) return;
+    setGroupNames((prev) => prev.filter((_, i) => i !== idx));
+    setBulkValues((prev) => prev.filter((_, i) => i !== idx));
+    setRows((prev) =>
+      prev.map((r) => ({ ...r, values: r.values.filter((_, i) => i !== idx) }))
+    );
+  }
+
   function handleGenerateCombinations() {
-    const colors = parseOptionList(bulkColors);
-    const sizes = parseOptionList(bulkSizes);
-    const generated = buildCombinations(colors, sizes);
+    const lists = groupNames.map((_, i) => parseOptionList(bulkValues[i] ?? ''));
+    const generated = buildCombinations(lists);
     if (generated.length === 0) {
       setErr(t('ownerProducts.skusGenEmpty'));
       return;
     }
     setErr(null);
-    setRows((prev) => mergeGeneratedRows(prev, generated));
+    setRows((prev) => {
+      const merged = mergeGeneratedRows(prev, generated);
+      return merged.length > 0 ? merged : [emptyRow(groupNames.length)];
+    });
     setMsg(t('ownerProducts.skusGenDone', { count: generated.length }));
   }
 
@@ -149,10 +196,21 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
     setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
   }
 
+  function updateRowValue(idx: number, groupIdx: number, value: string) {
+    setRows((prev) =>
+      prev.map((r, i) => {
+        if (i !== idx) return r;
+        const values = [...r.values];
+        values[groupIdx] = value;
+        return { ...r, values };
+      })
+    );
+  }
+
   function removeRow(idx: number) {
     setRows((prev) => {
       const next = prev.filter((_, i) => i !== idx);
-      return next.length > 0 ? next : [emptyRow()];
+      return next.length > 0 ? next : [emptyRow(groupNames.length)];
     });
   }
 
@@ -182,6 +240,7 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
       </div>
 
       <div className="owner-sku-panel__tips">
+        <p>{t('ownerProducts.skusTipGroups')}</p>
         <p>{t('ownerProducts.skusTipStock')}</p>
         <p>{t('ownerProducts.skusTipPrice')}</p>
       </div>
@@ -189,32 +248,29 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
       <div className="owner-sku-gen">
         <p className="owner-sku-gen__title">{t('ownerProducts.skusGenTitle')}</p>
         <div className="owner-sku-gen__fields">
-          <div>
-            <label className="owner-sku-gen__label" htmlFor={`sku-bulk-colors-${productId}`}>
-              {t('ownerProducts.skusGenColors')}
-            </label>
-            <input
-              id={`sku-bulk-colors-${productId}`}
-              className="owner-sku-gen__input"
-              value={bulkColors}
-              onChange={(e) => setBulkColors(e.target.value)}
-              placeholder={t('ownerProducts.skusGenColorsPh')}
-            />
-          </div>
-          <div>
-            <label className="owner-sku-gen__label" htmlFor={`sku-bulk-sizes-${productId}`}>
-              {t('ownerProducts.skusGenSizes')}
-            </label>
-            <input
-              id={`sku-bulk-sizes-${productId}`}
-              className="owner-sku-gen__input"
-              value={bulkSizes}
-              onChange={(e) => setBulkSizes(e.target.value)}
-              placeholder={t('ownerProducts.skusGenSizesPh')}
-            />
-          </div>
+          {groupNames.map((name, i) => (
+            <div key={i}>
+              <label className="owner-sku-gen__label" htmlFor={`sku-bulk-${productId}-${i}`}>
+                {name.trim() || t('ownerProducts.skusGroupFallback', { index: i + 1 })}
+              </label>
+              <input
+                id={`sku-bulk-${productId}-${i}`}
+                className="owner-sku-gen__input"
+                value={bulkValues[i] ?? ''}
+                onChange={(e) =>
+                  setBulkValues((prev) => prev.map((v, j) => (j === i ? e.target.value : v)))
+                }
+                placeholder={t('ownerProducts.skusGenValuesPh')}
+              />
+            </div>
+          ))}
         </div>
         <p className="owner-sku-gen__hint">{t('ownerProducts.skusGenHint')}</p>
+        {pendingCombinationCount > COMBINATION_WARN_THRESHOLD && (
+          <p className="owner-sku-gen__warn">
+            {t('ownerProducts.skusGenTooMany', { count: pendingCombinationCount })}
+          </p>
+        )}
         <button type="button" className="owner-sku-gen__btn" onClick={handleGenerateCombinations}>
           {t('ownerProducts.skusGenButton')}
         </button>
@@ -225,8 +281,32 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
           <thead>
             <tr>
               <th className="col-no">#</th>
-              <th>{t('ownerProducts.skusColColor')}</th>
-              <th>{t('ownerProducts.skusColSize')}</th>
+              {groupNames.map((name, i) => (
+                <th key={i} className="col-group">
+                  <div className="owner-sku-group-head">
+                    <input
+                      className="owner-sku-group-name"
+                      aria-label={t('ownerProducts.skusGroupNameLabel', { index: i + 1 })}
+                      placeholder={t('ownerProducts.skusGroupNamePh')}
+                      value={name}
+                      onChange={(e) =>
+                        setGroupNames((prev) => prev.map((n, j) => (j === i ? e.target.value : n)))
+                      }
+                      maxLength={40}
+                    />
+                    <button
+                      type="button"
+                      className="owner-sku-group-del"
+                      disabled={groupNames.length <= 1}
+                      onClick={() => removeGroup(i)}
+                      aria-label={t('ownerProducts.skusRemoveGroup')}
+                      title={t('ownerProducts.skusRemoveGroup')}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </th>
+              ))}
               <th className="col-num">{t('ownerProducts.skusColStock')}</th>
               <th className="col-num">{t('ownerProducts.skusColPriceDelta')}</th>
               <th className="col-sale">{t('ownerProducts.skusColSalePrice')}</th>
@@ -237,31 +317,23 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
             {rows.map((row, idx) => {
               const salePrice = basePrice + (row.price_delta ?? 0);
               const labelPreview =
-                [row.color.trim(), row.size.trim()].filter(Boolean).join(' / ') ||
+                row.values.map((v) => v.trim()).filter(Boolean).join(' / ') ||
                 t('ownerProducts.skusRowEmpty');
               return (
                 <tr key={idx}>
                   <td className="col-no">{idx + 1}</td>
-                  <td>
-                    <input
-                      className="owner-sku-cell-input"
-                      aria-label={`${t('ownerProducts.skusColColor')} ${idx + 1}`}
-                      placeholder={t('ownerProducts.skusColorExample')}
-                      value={row.color}
-                      onChange={(e) => updateRow(idx, { color: e.target.value })}
-                      maxLength={40}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className="owner-sku-cell-input"
-                      aria-label={`${t('ownerProducts.skusColSize')} ${idx + 1}`}
-                      placeholder={t('ownerProducts.skusSizeExample')}
-                      value={row.size}
-                      onChange={(e) => updateRow(idx, { size: e.target.value })}
-                      maxLength={40}
-                    />
-                  </td>
+                  {groupNames.map((name, gi) => (
+                    <td key={gi}>
+                      <input
+                        className="owner-sku-cell-input"
+                        aria-label={`${name.trim() || t('ownerProducts.skusGroupFallback', { index: gi + 1 })} ${idx + 1}`}
+                        placeholder={t('ownerProducts.skusValuePh')}
+                        value={row.values[gi] ?? ''}
+                        onChange={(e) => updateRowValue(idx, gi, e.target.value)}
+                        maxLength={40}
+                      />
+                    </td>
+                  ))}
                   <td className="col-num">
                     <input
                       className="owner-sku-cell-input owner-sku-cell-input--num"
@@ -309,8 +381,25 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
 
       <div className="owner-sku-footer">
         <div className="owner-sku-footer__left">
-          <button type="button" className="owner-sku-btn" onClick={() => setRows((p) => [...p, emptyRow()])}>
+          <button
+            type="button"
+            className="owner-sku-btn"
+            onClick={() => setRows((p) => [...p, emptyRow(groupNames.length)])}
+          >
             {t('ownerProducts.skusAddRow')}
+          </button>
+          <button
+            type="button"
+            className="owner-sku-btn"
+            disabled={groupNames.length >= MAX_PRODUCT_OPTION_GROUPS}
+            onClick={addGroup}
+            title={
+              groupNames.length >= MAX_PRODUCT_OPTION_GROUPS
+                ? t('ownerProducts.skusGroupMax', { max: MAX_PRODUCT_OPTION_GROUPS })
+                : undefined
+            }
+          >
+            {t('ownerProducts.skusAddGroup')}
           </button>
         </div>
         <button
@@ -323,6 +412,11 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
         </button>
       </div>
 
+      {groupNames.length >= MAX_PRODUCT_OPTION_GROUPS && (
+        <p className="owner-sku-gen__hint">
+          {t('ownerProducts.skusGroupMax', { max: MAX_PRODUCT_OPTION_GROUPS })}
+        </p>
+      )}
       {msg && <p className="owner-sku-msg-ok">{msg}</p>}
       {err && <p className="owner-sku-msg-err">{err}</p>}
     </section>

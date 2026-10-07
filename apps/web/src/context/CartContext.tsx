@@ -25,9 +25,7 @@ interface CartContextValue {
   incrementQuantity: (lineKey: string) => void;
   decrementQuantity: (lineKey: string) => void;
   removeItem: (lineKey: string) => void;
-  /** 결제 완료된 product_id만 제거 (레거시 · 옵션 라인 오삭제 — ISS-050) */
-  removeItemsByProductIds: (productIds: string[]) => void;
-  /** 결제 완료된 cartLineKey 라인만 제거 (옵션 SKU 구분) */
+  /** 결제 완료된 cartLineKey 라인만 제거 (옵션 SKU 구분 — ISS-050) */
   removeItemsByLineKeys: (lineKeys: string[]) => void;
   clearCart: () => void;
   /** 매장별 결제 완료 시 — 해당 매장 품목만 제거 (§60 v1) */
@@ -141,12 +139,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => prev.filter((item) => cartLineKey(item) !== lineKey));
   }
 
-  function removeItemsByProductIds(productIds: string[]) {
-    if (productIds.length === 0) return;
-    const drop = new Set(productIds);
-    setItems((prev) => prev.filter((item) => !drop.has(item.productId)));
-  }
-
   function removeItemsByLineKeys(lineKeys: string[]) {
     if (lineKeys.length === 0) return;
     const drop = new Set(lineKeys);
@@ -174,7 +166,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         incrementQuantity,
         decrementQuantity,
         removeItem,
-        removeItemsByProductIds,
         removeItemsByLineKeys,
         clearCart,
         clearStoreItems,
