@@ -851,6 +851,7 @@ popup_store/                          # Turborepo root
 | ISS-059 | ~~옵션(SKU) — 장바구니·결제~~ | **Fixed (web+mobile · ISS-059+060)** | WebView hydrate · **담기 직후 persist** · **결제 전 `validateCheckoutCartLines`** · 옵션 누락 시 **`cart.skuRequiredCheckout`** · 가짜 성공 방지(`no_valid_items`) |
 | ISS-060 | ~~옵션 담긴 뒤에도 `sku_id` 없이 결제 시도~~ | **Fixed (ISS-060 · ISS-059 연계)** | hydrate 타이밍·빈 storage merge로 **옵션 라인 skuId 소실** 가능 → **checkout 검증** + Cart **mergeFromStorage** |
 | ISS-061 | ~~「옵션 상품 주문이 점주 **주문** 탭에 안 들어온다」~~ — **실제로는 주문 정상 · 탭이 다름** | **Fixed (web · ISS-061)** | **DB 확인(2026-10-07)**: 옵션 주문 `#30·31·33`(GUCCI)·`#19` 모두 **정상 저장 · `option_label` 포함**. 원인 = 옵션 넣은 상품(스카프·목도리)이 **`auto_accept_enabled=true`** → `status='accepted'` → **발주·배송** 큐. 옵션 **없는** 테스트 상품은 자동수락 **off** → 주문 탭. **옵션과 무관 · 상품별 자동수락 설정 차이**. **조치** = 주문 탭에 **「자동 수락된 주문 N건 — 발주·배송 탭」 + 이동 버튼** (`OwnerOrdersPanel`) |
+| ISS-064 | **손님 옵션 드롭다운에 할인 금액이 칸마다 중복 표시** — 조합 SKU `price_delta` 1번인데 컬러·사이즈 각각 `(-50,000원)` → **10만 할인?** 오해 | **Fixed (web · 2026-10-07)** | **2개 이상 드롭다운**에서는 옵션값에 ± **미표시** · **확정 조합 1줄**에만 최종 판매가 (`ProductDetailModal`) |
 | ISS-063 | **옵션 저장 실패** — `save_owner_product_skus`가 **전량 DELETE** 후 INSERT · **주문(`order_items.product_sku_id`)이 붙은 SKU는 FK로 DELETE 불가** | **Fixed (DB · 2026-10-07)** | 테스트 상품(목도리·스카프)은 **이미 주문 11건** → 저장마다 **23503 FK** · **조치** = 라벨 기준 **UPDATE/INSERT** · 주문 참조 SKU는 **삭제 대신 `is_active=false`** · migration `20261007b_*` **원격 적용 ✅** |
 | ISS-062 | ~~AD-087 옵션 ±가격이 **원격 DB 미적용**~~ — `product_skus.price_delta` **칼럼 없음** | **Fixed (DB · 2026-10-07)** | HANDOFF엔 적용된 것처럼 기재돼 있었으나 `schema_migrations`는 **`20261002015906`에서 멈춤**. 옵션별 추가금액이 **결제에 전혀 반영되지 않던 상태**. **조치** = `20261003_ad087_product_sku_price_delta.sql`(+`DROP FUNCTION` 2건·GRANT 보강) · `20261003b_place_order_sku_price_delta.sql` **원격 적용 ✅** · 이력 2건 기록 |
 | ISS-057 | ~~반품·교환 모달이 주문 상세 뒤~~ | **Fixed (web · ISS-057)** | `OrderReturnRequestDialog` → **`oh-stacked-dialog-portal`** (z-index 12050 · 상세 시트 11000 위) |
@@ -4592,6 +4593,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-07 pm7 — ISS-063 **옵션 저장 실패** (주문 FK · DELETE ALL)
+- **Author:** Cursor Agent / User
+- **Changed:** migration `20261007b_save_owner_product_skus_no_delete_orders.sql` **원격 적용 ✅** · `OwnerProductSkusEditor` (비활성 SKU 편집표 제외 · 오류 코드별 문구) · `ko.ts`
+- **Notes:** **원인** = AD-090 저장 RPC가 **옵션 전부 지우고 다시 넣기** → **이미 주문된 옵션 SKU**는 DB가 **지우지 못함** · **Expo 재시작 ❌** · **DB는 이미 반영** → **Vercel 1~2분 + Ctrl+F5** 후 **옵션 저장** 재시도 · §7.97 User实机
 
 ### 2026-10-07 pm6 — §7.96 **판매자센터 탭 = 엑셀 업로드 동일 데이터** 인수인계 보강
 - **Author:** Cursor Agent / User

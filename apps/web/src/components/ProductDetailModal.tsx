@@ -400,12 +400,12 @@ export function ProductDetailModal({
                       <option value="">{t('productDetail.optionSelectPlaceholder', { name: group.name })}</option>
                       {group.values.map((value) => {
                         const state = optionValueState(skus, optionSelection, gi, value);
-                        const delta = state.onlySku?.price_delta ?? 0;
+                        // 할인/추가금은 SKU(조합) 단위 1번만 — 칸마다 ± 표시 시 「5만+5만=10만?」 오해 (ISS-064)
                         const suffix = !state.exists
                           ? ` · ${t('productDetail.optionUnavailable')}`
                           : !state.inStock
                             ? ` · ${t('productDetail.optionSoldOut')}`
-                            : formatPriceDeltaLabel(delta, formatPrice);
+                            : '';
                         return (
                           <option key={value} value={value} disabled={!state.exists || !state.inStock}>
                             {value}
