@@ -655,7 +655,9 @@ export const ko = {
     skusTitle: '판매 옵션',
     skusBasePriceLabel: '기본 판매가',
     skusTipStock: '옵션을 저장하면 아래 표의 재고만 팔려요. 위 「단일 재고」 칸은 옵션이 없을 때만 써요.',
-    skusTipPrice: '± 칸 = 기본 판매가에서 더하거나 빼는 금액(원)이에요. 0이면 기본가 그대로.',
+    skusTipPrice:
+      '추가·할인(원) 칸 — 더 비싸게: 1000 · 할인: -1000 (마이너스 붙임). 0이면 기본가. 오른쪽 「판매가」로 확인.',
+    skusPriceDeltaPh: '0 · 1000 · -1000',
     skusStockSum: '옵션 재고 {count}개',
     skusTipGroups:
       '옵션명은 직접 지으면 돼요. 색상·사이즈뿐 아니라 소재·길이·각인 문구처럼 뭐든 괜찮아요. 최대 3개까지.',
@@ -688,6 +690,7 @@ export const ko = {
     skusSaveError: '옵션 저장에 실패했어요. 잠시 후 다시 시도해 주세요.',
     skusSaveErrorOwner: '이 매장 점주 계정으로만 옵션을 저장할 수 있어요.',
     skusSaveErrorTooManyGroups: '옵션명은 3개까지예요. 옵션명을 줄인 뒤 다시 저장해 주세요.',
+    skusSaveErrorNegativeSale: '판매가가 0원 미만인 옵션이 있어요. 할인 금액을 줄이거나 기본 판매가를 올려 주세요.',
   },
   ownerOrders: {
     title: '📊 주문 관리',

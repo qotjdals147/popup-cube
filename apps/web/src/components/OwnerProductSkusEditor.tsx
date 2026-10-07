@@ -32,7 +32,11 @@ function rowIsEmpty(row: OwnerSkuRow): boolean {
 }
 
 function parseSignedDelta(raw: string): number {
-  const cleaned = raw.replace(/\s/g, '').replace(/,/g, '');
+  const cleaned = raw
+    .replace(/\s/g, '')
+    .replace(/,/g, '')
+    .replace(/\u2212/g, '-')
+    .replace(/\uFF0D/g, '-');
   if (!cleaned || cleaned === '-' || cleaned === '+') return 0;
   const n = parseInt(cleaned, 10);
   return Number.isFinite(n) ? n : 0;
@@ -152,6 +156,12 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
     setSaving(true);
     setErr(null);
     setMsg(null);
+    const negativeSale = activeRows.find((r) => basePrice + (r.price_delta ?? 0) < 0);
+    if (negativeSale) {
+      setSaving(false);
+      setErr(t('ownerProducts.skusSaveErrorNegativeSale'));
+      return;
+    }
     try {
       await saveOwnerProductSkus(productId, groupNames, rows);
       setMsg(t('ownerProducts.skusSaved'));
@@ -362,10 +372,10 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
                       <input
                         className="owner-sku-cell-input owner-sku-cell-input--num"
                         aria-label={`${labelPreview} ${t('ownerProducts.skusColPriceDelta')}`}
-                        placeholder="0"
+                        placeholder={t('ownerProducts.skusPriceDeltaPh')}
                         value={formatSignedDeltaDisplay(row.price_delta)}
                         onChange={(e) => updateRow(idx, { price_delta: parseSignedDelta(e.target.value) })}
-                        inputMode="numeric"
+                        inputMode="text"
                       />
                     </div>
                   </td>
