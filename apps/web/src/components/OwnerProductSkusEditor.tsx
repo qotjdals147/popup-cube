@@ -47,6 +47,15 @@ function formatSignedDeltaDisplay(value: number): string {
   return value.toLocaleString('ko-KR');
 }
 
+/** 입력 중 `-`만 있어도 칸이 비지 않게 — 숫자·쉼표·앞쪽 ±만 허용 */
+function sanitizeSignedDeltaInput(raw: string): string {
+  let s = raw.replace(/\u2212/g, '-').replace(/\uFF0D/g, '-');
+  s = s.replace(/[^\d,\-+]/g, '');
+  const m = s.match(/^([+-]?)([\d,]*)/);
+  if (!m) return '';
+  return `${m[1] ?? ''}${m[2] ?? ''}`;
+}
+
 function parseOptionList(raw: string): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
@@ -107,6 +116,8 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
   const [bulkValues, setBulkValues] = useState<string[]>(() =>
     DEFAULT_OPTION_GROUP_NAMES.map(() => '')
   );
+  /** ± 칸 — `-` 입력 직후 parse=0 이면 value가 지워지는 버그 방지 (입력 중 문자열 유지) */
+  const [deltaDraft, setDeltaDraft] = useState<Record<number, string>>({});
 
   const activeRows = useMemo(() => rows.filter((r) => !rowIsEmpty(r)), [rows]);
   const totalOptionStock = useMemo(
@@ -141,6 +152,7 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
                 price_delta: s.price_delta ?? 0,
               }))
         );
+        setDeltaDraft({});
       } catch {
         if (!cancelled) setErr(t('ownerProducts.skusLoadError'));
       } finally {
@@ -164,6 +176,7 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
     }
     try {
       await saveOwnerProductSkus(productId, groupNames, rows);
+      setDeltaDraft({});
       setMsg(t('ownerProducts.skusSaved'));
     } catch (e) {
       const raw = e && typeof e === 'object' && 'message' in e ? String((e as { message: string }).message) : '';
@@ -227,10 +240,18 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
   }
 
   function removeRow(idx: number) {
+    setDeltaDraft({});
     setRows((prev) => {
       const next = prev.filter((_, i) => i !== idx);
       return next.length > 0 ? next : [emptyRow(groupNames.length)];
     });
+  }
+
+  function deltaInputValue(idx: number, row: OwnerSkuRow): string {
+    if (Object.prototype.hasOwnProperty.call(deltaDraft, idx)) {
+      return deltaDraft[idx]!;
+    }
+    return formatSignedDeltaDisplay(row.price_delta);
   }
 
   if (loading) {
@@ -373,8 +394,20 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
                         className="owner-sku-cell-input owner-sku-cell-input--num"
                         aria-label={`${labelPreview} ${t('ownerProducts.skusColPriceDelta')}`}
                         placeholder={t('ownerProducts.skusPriceDeltaPh')}
-                        value={formatSignedDeltaDisplay(row.price_delta)}
-                        onChange={(e) => updateRow(idx, { price_delta: parseSignedDelta(e.target.value) })}
+                        value={deltaInputValue(idx, row)}
+                        onChange={(e) => {
+                          const raw = sanitizeSignedDeltaInput(e.target.value);
+                          setDeltaDraft((prev) => ({ ...prev, [idx]: raw }));
+                          updateRow(idx, { price_delta: parseSignedDelta(raw) });
+                        }}
+                        onBlur={() => {
+                          setDeltaDraft((prev) => {
+                            if (!Object.prototype.hasOwnProperty.call(prev, idx)) return prev;
+                            const next = { ...prev };
+                            delete next[idx];
+                            return next;
+                          });
+                        }}
                         inputMode="text"
                       />
                     </div>
