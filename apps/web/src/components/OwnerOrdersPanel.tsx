@@ -27,6 +27,7 @@ import {
   type OwnerOrderFilters,
   type OwnerOrderQueue,
 } from '../lib/ownerOrderFilters';
+import { anchorIsoInSeoulDateRange } from '../lib/ownerOrderSeoulDates';
 import type { OwnerOrderFocus } from '../lib/ownerOrderFocus';
 import { orderStatusBadgeStyle } from '../lib/ownerOrderStatusBadge';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
@@ -158,6 +159,20 @@ export function OwnerOrdersPanel({
     }
     return list;
   }, [orders, activeQueue, filters]);
+
+  /**
+   * ISS-061 — 자동 수락된 주문은 `accepted`로 저장돼 **발주·배송** 탭에만 보인다.
+   * 「주문」 탭만 보던 점주는 주문이 안 들어온 줄 알게 되므로 건수와 이동 버튼을 띄운다.
+   */
+  const autoAcceptedInFulfillment = useMemo(() => {
+    if (activeQueue !== 'pending') return 0;
+    return orders.filter(
+      (o) =>
+        o.auto_accepted &&
+        isFulfillmentOrderStatus(o.status) &&
+        anchorIsoInSeoulDateRange(o.created_at, filters.dateFrom, filters.dateTo),
+    ).length;
+  }, [orders, activeQueue, filters.dateFrom, filters.dateTo]);
 
   const finishFocus = useCallback(() => {
     setAutoOpenClaimHistory(false);
@@ -380,6 +395,30 @@ export function OwnerOrdersPanel({
       </div>
 
       <div style={styles.listArea}>
+        {!loading && !error && autoAcceptedInFulfillment > 0 && (
+          <div style={styles.autoAcceptNotice}>
+            <span style={styles.autoAcceptNoticeText}>
+              {t('ownerOrders.autoAcceptedElsewhere', { count: autoAcceptedInFulfillment })}
+            </span>
+            <button
+              type="button"
+              style={styles.autoAcceptNoticeBtn}
+              onClick={() => {
+                if (queue) {
+                  onNavigateRelated?.({
+                    tab: 'fulfillment',
+                    dateFrom: filters.dateFrom,
+                    dateTo: filters.dateTo,
+                  });
+                } else {
+                  setInternalQueue('fulfillment');
+                }
+              }}
+            >
+              {t('ownerOrders.autoAcceptedElsewhereGo')}
+            </button>
+          </div>
+        )}
         {loading && <p style={styles.hint}>{t('ownerOrders.loading')}</p>}
         {!loading && error && <p style={styles.error}>{t('ownerOrders.errorLoad')}</p>}
         {!loading && !error && filtered.length === 0 && (
@@ -1147,5 +1186,33 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: fs.xs,
     color: oc.textMuted,
     lineHeight: 1.45,
+  },
+  autoAcceptNotice: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 12,
+    padding: '10px 12px',
+    borderRadius: 8,
+    border: `1px solid ${oc.warningBorder}`,
+    background: oc.warningBg,
+  },
+  autoAcceptNoticeText: {
+    fontSize: fs.sm,
+    fontWeight: 600,
+    color: oc.warningText,
+  },
+  autoAcceptNoticeBtn: {
+    padding: '7px 12px',
+    borderRadius: 8,
+    border: `1px solid ${oc.primary}`,
+    background: oc.primary,
+    color: '#fff',
+    fontSize: fs.xs,
+    fontWeight: 700,
+    cursor: 'pointer',
+    fontFamily: ownerFont,
   },
 };

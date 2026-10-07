@@ -724,6 +724,8 @@ export const ko = {
     purchaseConfirmedAt: '구매확정:',
     purchaseConfirmedAutoBadge: '주문일+7일 자동 구매확정',
     autoAcceptedBadge: '⚡ 자동 수락된 주문',
+    autoAcceptedElsewhere: '자동 수락된 주문 {count}건 — 「발주·배송」 탭에 있습니다',
+    autoAcceptedElsewhereGo: '발주·배송 탭으로',
     buyer: '구매자',
     orderRef: '주문번호',
     filterSearchPlaceholder: '주문번호 · 구매자 검색',

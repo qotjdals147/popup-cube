@@ -9,6 +9,10 @@ ALTER TABLE public.product_skus
 ALTER TABLE public.product_skus
   ADD CONSTRAINT product_skus_price_delta_range CHECK (price_delta >= -5000000 AND price_delta <= 5000000);
 
+-- price_delta 칼럼이 늘어 반환 타입이 바뀜 → CREATE OR REPLACE 불가 (42P13)
+DROP FUNCTION IF EXISTS public.get_product_skus(uuid);
+DROP FUNCTION IF EXISTS public.get_owner_product_skus(uuid);
+
 CREATE OR REPLACE FUNCTION public.get_product_skus(p_product_id uuid)
 RETURNS TABLE(
   sku_id uuid,
@@ -154,3 +158,12 @@ BEGIN
   END LOOP;
 END;
 $function$;
+
+REVOKE ALL ON FUNCTION public.get_product_skus(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_product_skus(uuid) TO anon, authenticated;
+
+REVOKE ALL ON FUNCTION public.get_owner_product_skus(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_owner_product_skus(uuid) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.save_owner_product_skus(uuid, jsonb) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.save_owner_product_skus(uuid, jsonb) TO authenticated;
