@@ -1,31 +1,73 @@
-.owner-bulk-upload {
-  margin-bottom: 12px;
+.owner-bulk-upload--toolbar {
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
-.owner-bulk-upload__toggle {
-  padding: 8px 14px;
+.owner-bulk-upload--toolbar.owner-bulk-upload--open {
+  flex: 1 1 100%;
+  width: 100%;
+}
+
+.owner-bulk-upload__toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.owner-bulk-upload__menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
   font-size: 14px;
   font-weight: 600;
-  color: #2563eb;
-  background: #eef4ff;
-  border: 1px solid #dbeafe;
+  color: #191f28;
+  background: #fff;
+  border: 1px solid #d1d6db;
   border-radius: 8px;
   cursor: pointer;
 }
 
-.owner-bulk-upload__panel {
-  margin-top: 10px;
-  padding: 14px;
-  border: 1px solid #e5e8eb;
-  border-radius: 10px;
-  background: #fafbfc;
+.owner-bulk-upload__menu-btn:hover {
+  border-color: #3182f6;
+  color: #2563eb;
 }
 
-.owner-bulk-upload__intro {
+.owner-bulk-upload__chevron {
+  font-size: 11px;
+  color: #8b95a1;
+}
+
+.owner-bulk-upload__card {
+  margin-top: 10px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e5e8eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.owner-bulk-upload__card-head {
+  margin-bottom: 8px;
+}
+
+.owner-bulk-upload__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #191f28;
+}
+
+.owner-bulk-upload__tip {
   margin: 0 0 12px;
+  padding: 10px 12px;
   font-size: 13px;
   line-height: 1.5;
   color: #4e5968;
+  background: #f9fafb;
+  border: 1px solid #e5e8eb;
+  border-radius: 8px;
 }
 
 .owner-bulk-upload__actions {
@@ -35,11 +77,15 @@
 }
 
 .owner-bulk-upload__btn {
-  padding: 8px 14px;
+  flex: 1 1 140px;
+  min-height: 44px;
+  padding: 10px 16px;
   font-size: 14px;
+  font-weight: 600;
   border-radius: 8px;
   border: 1px solid #d1d6db;
   background: #fff;
+  color: #191f28;
   cursor: pointer;
 }
 

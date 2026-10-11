@@ -4601,6 +4601,10 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-12 late — §7.96 **엑셀 UI·양식** 개선 (User 피드백)
+- **Changed:** `OwnerProductBulkUpload` — **툴바 한 줄**(+ 새 상품 · 엑셀 ▾) · 펼치면 **판매 옵션 패널형 카드** · `downloadBulkProductTemplate` — **`작성안내` 시트** · 예시 3행(무옵션+옵션2) · **#예시** 자동 제외 · freeze 헤더 · 파일명 `POPUP-CUBE_상품일괄등록양식_v1.xlsx`
+- **Notes:** **Expo 재시작 ❌** · Vercel + Ctrl+F5 · **양식 다시 다운로드** 후 확인
+
 ### 2026-10-12 pm — §7.96 **엑셀 일괄등록 v1** (다운로드·업로드)
 - **Author:** Cursor Agent / User
 - **Changed:** `xlsx` dep · `lib/bulkProductUpload/*` · `OwnerProductBulkUpload.tsx` · `OwnerProductPanel` · `products.ts`(`imageUrl`) · `owner-product-bulk-upload.css` · `ko.ts` · §7.96

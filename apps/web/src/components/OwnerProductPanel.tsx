@@ -300,21 +300,27 @@ export function OwnerProductPanel({
         {embedded && onOpenStatsTab && <OwnerStatsShortcutBanner onOpenStats={onOpenStatsTab} />}
 
         <div style={styles.toolbar}>
-          <button
-            type="button"
-            style={styles.addToggle}
-            onClick={() => {
-              setCreateFormOpen((open) => {
-                if (open) resetCreateForm();
-                return !open;
-              });
-            }}
-          >
-            {createFormOpen ? t('ownerProducts.addProductCollapse') : t('ownerProducts.addProductToggle')}
-          </button>
+          <div style={styles.toolbarRow}>
+            <button
+              type="button"
+              style={styles.addToggle}
+              onClick={() => {
+                setCreateFormOpen((open) => {
+                  if (open) resetCreateForm();
+                  return !open;
+                });
+              }}
+            >
+              {createFormOpen ? t('ownerProducts.addProductCollapse') : t('ownerProducts.addProductToggle')}
+            </button>
+            <OwnerProductBulkUpload
+              layout="toolbar"
+              storeId={storeId}
+              userId={userId}
+              onImported={() => void reload()}
+            />
+          </div>
         </div>
-
-        <OwnerProductBulkUpload storeId={storeId} userId={userId} onImported={() => void reload()} />
 
         {createFormOpen && (
         <div style={styles.formCard}>
@@ -684,7 +690,15 @@ const styles: Record<string, React.CSSProperties> = {
     background: oc.surfaceMuted,
     borderBottom: `1px solid ${oc.border}`,
   },
+  toolbarRow: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 8,
+    width: '100%',
+  },
   addToggle: {
+    flex: '0 0 auto',
     padding: '10px 16px',
     borderRadius: 8,
     border: `1px solid ${oc.primary}`,

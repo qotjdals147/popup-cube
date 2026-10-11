@@ -1,6 +1,11 @@
 import * as XLSX from 'xlsx';
 import { MAX_PRODUCT_OPTION_GROUPS } from '@popup-cube/shared';
-import { BULK_PRODUCT_HEADERS, type BulkProductHeader } from './columns';
+import {
+  BULK_DATA_SHEET_NAME,
+  BULK_PRODUCT_HEADERS,
+  BULK_SAMPLE_CODE_PREFIX,
+  type BulkProductHeader,
+} from './columns';
 
 export interface BulkRowError {
   row: number;
@@ -126,7 +131,10 @@ function groupKey(code: string | null, name: string): string {
 export function parseBulkProductXlsx(buffer: ArrayBuffer): ParseBulkProductResult {
   const errors: BulkRowError[] = [];
   const wb = XLSX.read(buffer, { type: 'array' });
-  const sheet = wb.Sheets[wb.SheetNames[0] ?? ''];
+  const dataSheetName = wb.SheetNames.includes(BULK_DATA_SHEET_NAME)
+    ? BULK_DATA_SHEET_NAME
+    : wb.SheetNames[0];
+  const sheet = dataSheetName ? wb.Sheets[dataSheetName] : undefined;
   if (!sheet) {
     return { groups: [], errors: [{ row: 0, message: '시트를 찾을 수 없어요.' }] };
   }
@@ -153,6 +161,7 @@ export function parseBulkProductXlsx(buffer: ArrayBuffer): ParseBulkProductResul
 
     const name = cell(row, col, '상품명');
     const codeRaw = cell(row, col, '판매자 상품코드');
+    if (codeRaw.startsWith(BULK_SAMPLE_CODE_PREFIX)) continue;
     const productCode = codeRaw ? codeRaw.slice(0, 40) : null;
 
     if (!name) {

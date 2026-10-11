@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-import type { Product } from '@popup-cube/shared';
 import { listMyProducts } from '../lib/products';
 import { downloadBulkProductTemplate } from '../lib/bulkProductUpload/downloadBulkProductTemplate';
 import { importBulkProductGroups } from '../lib/bulkProductUpload/importBulkProductGroups';
@@ -11,9 +10,16 @@ interface OwnerProductBulkUploadProps {
   storeId: string;
   userId: string;
   onImported: () => void;
+  /** 상품 툴바 안에 붙일 때 */
+  layout?: 'toolbar';
 }
 
-export function OwnerProductBulkUpload({ storeId, userId, onImported }: OwnerProductBulkUploadProps) {
+export function OwnerProductBulkUpload({
+  storeId,
+  userId,
+  onImported,
+  layout = 'toolbar',
+}: OwnerProductBulkUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -48,9 +54,7 @@ export function OwnerProductBulkUpload({ storeId, userId, onImported }: OwnerPro
           updated: String(result.updated),
         })
       );
-      if (result.errors.length === 0) {
-        onImported();
-      } else if (result.created + result.updated > 0) {
+      if (result.errors.length === 0 || result.created + result.updated > 0) {
         onImported();
       }
     } catch {
@@ -61,20 +65,36 @@ export function OwnerProductBulkUpload({ storeId, userId, onImported }: OwnerPro
     }
   }
 
+  const rootClass = [
+    'owner-bulk-upload',
+    layout === 'toolbar' ? 'owner-bulk-upload--toolbar' : '',
+    open && layout === 'toolbar' ? 'owner-bulk-upload--open' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <section className="owner-bulk-upload">
-      <button
-        type="button"
-        className="owner-bulk-upload__toggle"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-      >
-        {open ? t('ownerProducts.bulkCollapse') : t('ownerProducts.bulkExpand')}
-      </button>
+    <section className={rootClass}>
+      <div className="owner-bulk-upload__toolbar-row">
+        <button
+          type="button"
+          className="owner-bulk-upload__menu-btn"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {t('ownerProducts.bulkMenuLabel')}
+          <span className="owner-bulk-upload__chevron" aria-hidden>
+            {open ? '▴' : '▾'}
+          </span>
+        </button>
+      </div>
 
       {open && (
-        <div className="owner-bulk-upload__panel">
-          <p className="owner-bulk-upload__intro">{t('ownerProducts.bulkIntro')}</p>
+        <div className="owner-bulk-upload__card">
+          <div className="owner-bulk-upload__card-head">
+            <h4 className="owner-bulk-upload__title">{t('ownerProducts.bulkTitle')}</h4>
+          </div>
+          <p className="owner-bulk-upload__tip">{t('ownerProducts.bulkIntro')}</p>
           <div className="owner-bulk-upload__actions">
             <button type="button" className="owner-bulk-upload__btn" onClick={() => downloadBulkProductTemplate()}>
               {t('ownerProducts.bulkDownloadTemplate')}

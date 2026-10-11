@@ -582,10 +582,10 @@ export const ko = {
     productCodePlaceholder: '엑셀·셀메이트용 (선택)',
     productCodeListHint: '상품코드 {code}',
     errorDuplicateProductCode: '이 매장에 같은 상품코드가 이미 있어요.',
-    bulkExpand: '엑셀 일괄 등록',
-    bulkCollapse: '엑셀 일괄 등록 닫기',
+    bulkMenuLabel: '엑셀 일괄 등록',
+    bulkTitle: '엑셀로 여러 상품 등록',
     bulkIntro:
-      '우리 양식(xlsx)만 올릴 수 있어요. 한 행 = 옵션 조합 1개 · 같은 판매자 상품코드(또는 상품명)끼리 한 상품으로 묶입니다.',
+      '「양식 다운로드」 파일만 업로드 · 한 행 = 옵션 조합 1개 · #예시 행은 자동 제외 · 자세한 설명은 엑셀 「작성안내」 시트',
     bulkDownloadTemplate: '양식 다운로드',
     bulkUpload: '엑셀 업로드',
     bulkUploading: '올리는 중…',
