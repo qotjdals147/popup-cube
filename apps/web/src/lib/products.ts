@@ -4,7 +4,21 @@ import { supabase } from './supabase';
 /** 상품 이미지 업로드 최대 크기 (createStore 썸네일과 동일 기준) */
 export const MAX_PRODUCT_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
 
-export type ProductErrorCode = 'IMAGE_TOO_LARGE' | 'UPLOAD_FAILED' | 'SAVE_FAILED';
+export type ProductErrorCode =
+  | 'IMAGE_TOO_LARGE'
+  | 'UPLOAD_FAILED'
+  | 'SAVE_FAILED'
+  | 'DUPLICATE_PRODUCT_CODE';
+
+export function normalizeProductCode(raw: string): string | null {
+  const s = raw.trim();
+  if (!s) return null;
+  return s.slice(0, 40);
+}
+
+function isDuplicateProductCodeError(message: string): boolean {
+  return message.includes('products_store_product_code_unique') || message.includes('duplicate key');
+}
 
 export class ProductError extends Error {
   code: ProductErrorCode;
@@ -15,7 +29,7 @@ export class ProductError extends Error {
 }
 
 const PRODUCT_SELECT =
-  'id, store_id, name, description, price, image_url, is_active, stock_quantity, auto_accept_enabled, auto_accept_limit, auto_accept_remaining, created_at, detail_description, promo_mode, promo_discount_percent';
+  'id, store_id, product_code, name, description, price, image_url, is_active, stock_quantity, auto_accept_enabled, auto_accept_limit, auto_accept_remaining, created_at, detail_description, promo_mode, promo_discount_percent';
 
 /**
  * 소비자용 — 특정 매장의 활성 상품만 조회 (RLS `products_public_read`).
@@ -63,6 +77,7 @@ async function uploadProductImage(userId: string, file: File): Promise<string> {
 
 export interface CreateProductInput {
   storeId: string;
+  productCode?: string;
   name: string;
   description: string;
   price: number;
@@ -79,10 +94,13 @@ export async function createProduct(userId: string, input: CreateProductInput): 
 
   const imageUrl = input.imageFile ? await uploadProductImage(userId, input.imageFile) : null;
 
+  const product_code = normalizeProductCode(input.productCode ?? '');
+
   const { data, error } = await supabase
     .from('products')
     .insert({
       store_id: input.storeId,
+      product_code,
       name: input.name.trim(),
       description: input.description.trim() || null,
       price: input.price,
@@ -91,7 +109,12 @@ export async function createProduct(userId: string, input: CreateProductInput): 
     .select(PRODUCT_SELECT)
     .single();
 
-  if (error) throw new ProductError('SAVE_FAILED', error.message);
+  if (error) {
+    if (isDuplicateProductCodeError(error.message)) {
+      throw new ProductError('DUPLICATE_PRODUCT_CODE', error.message);
+    }
+    throw new ProductError('SAVE_FAILED', error.message);
+  }
   return data as Product;
 }
 
@@ -130,6 +153,7 @@ export async function updateProductDetailDescription(productId: string, detailDe
 }
 
 export interface UpdateProductInput {
+  productCode?: string;
   name: string;
   description: string;
   price: number;
@@ -142,11 +166,13 @@ export async function updateProduct(
   input: UpdateProductInput
 ): Promise<void> {
   const patch: {
+    product_code: string | null;
     name: string;
     description: string | null;
     price: number;
     image_url?: string;
   } = {
+    product_code: normalizeProductCode(input.productCode ?? ''),
     name: input.name.trim(),
     description: input.description.trim() || null,
     price: input.price,
@@ -161,5 +187,10 @@ export async function updateProduct(
 
   const { error } = await supabase.from('products').update(patch).eq('id', productId);
 
-  if (error) throw new ProductError('SAVE_FAILED', error.message);
+  if (error) {
+    if (isDuplicateProductCodeError(error.message)) {
+      throw new ProductError('DUPLICATE_PRODUCT_CODE', error.message);
+    }
+    throw new ProductError('SAVE_FAILED', error.message);
+  }
 }

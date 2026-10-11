@@ -104,6 +104,8 @@ export interface StoreSummary extends StorePolicy {
 export interface Product {
   id: string;
   store_id: string;
+  /** AD-088 — 엑셀 「판매자 상품코드」·셀메이트 매칭 (매장 내 유일, 선택) */
+  product_code: string | null;
   name: string;
   description: string | null;
   price: number;

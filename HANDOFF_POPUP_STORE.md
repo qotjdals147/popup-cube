@@ -830,7 +830,7 @@ popup_store/                          # Turborepo root
 
 | ID | Issue | Severity | Action |
 |---|---|---|---|
-| ISS-044 | **옵션(SKU) 주문 취소·거절 시 재고 꼬임** — `_restore_order_stock`이 `products.stock_quantity`만 복구하고 **`product_skus.stock_quantity`는 복구 안 함** | **P0 (데이터 오염 · 진행 중)** | `place_order`는 SKU 상품이면 **`product_skus`만 차감**(`products` 미차감) → 취소/거절 때마다 ① **옵션 재고 영구 소멸**(반복 시 품절·판매 불가) ② **`products.stock_quantity` 무한 증식**(총재고·품절 판정 왜곡). 호출자 = `cancel_order_by_shopper`·`reject_order`. 조치 = restore에 `order_items.product_sku_id` 분기 추가 + **기존 오염 데이터 수동 보정** |
+| ISS-044 | **옵션(SKU) 주문 취소·거절 시 재고 꼬임** | **Fixed (DB · `iss_audit_p0_p1_fixes` · 2026-10-02)** | `_restore_order_stock` — `product_sku_id` 있으면 **`product_skus`만** 복구 · **과거 오염** = 취소/거절 SKU 주문 **0건** (2026-10-12 집계) → **별도 보정 불필요** |
 | ISS-045 | **손님이 자기 주문 금액·상태 직접 변경 가능** — `authenticated`에 `orders` **UPDATE GRANT(전 컬럼)** + RLS `orders_update_own`이 **소유자만 확인**(`USING/WITH CHECK auth.uid()=user_id`), **컬럼 제한 없음** | **P0 (보안)** | `PATCH /rest/v1/orders?id=eq...`로 `total_amount`·`status`·`discount_percent`·`shipping_address_id` 위조 → 정산·KPI 왜곡, **PG 연동 시 결제금액 조작**. 클라이언트 코드에 `.from('orders').update(` **0건**(SELECT만) → **GRANT·정책 제거해도 기능 영향 없음**(권장) |
 | ISS-046 | **비로그인(anon)도 임의 유저에게 알림 생성 가능** — `_enqueue_order_notification` SECURITY DEFINER · **EXECUTE to PUBLIC** | **P0 (보안)** | `/rest/v1/rpc/_enqueue_order_notification`로 **아무 `user_id`에 임의 제목·본문** 알림 삽입 → 사칭·피싱("결제 실패, 여기로 입금"). 내부 헬퍼라 외부 노출 불필요 → **`REVOKE EXECUTE FROM PUBLIC, anon, authenticated`** |
 | ISS-047 | **통합 결제 부분 실패 → 재시도 시 중복 주문** — `CartView.executeCheckout`이 매장별 `place_order`를 **순차 호출**(매장마다 별 트랜잭션), 중간 실패 시 **앞 매장 주문은 이미 확정** | **P1** | 장바구니는 **성공 화면의 `handleFinish()`에서만** 비워짐 → 실패하면 **앞 매장 상품이 장바구니에 그대로** 남고, 손님이 결제 재시도 → **같은 매장 주문 2건·재고 2중 차감**. `place_order`에 **멱등키 없음**. 조치 = 성공 매장 라인 **즉시 제거** + 부분 성공 안내 + 멱등키 |
@@ -1922,7 +1922,7 @@ npm run dev
 | **엑셀 파일** | **우리 양식** (§7.96 v1 초안 **약 13열**) · 판매자센터에 **「양식 다운로드」**(빈 파일 + 샘플 1행) 제공 예정 |
 | **한 줄의 의미** | 상품 등록 탭 **기본 칸**(상품명·판매가·재고·이미지·설명·자동 수락 등) + **판매 옵션** 탭(`OwnerProductSkusEditor` · AD-090 **옵션명 최대 3개**)과 **동일 데이터** |
 | **업로드 후** | `xlsx` 읽기 → **행별 검증** → 통과분만 `products` / `product_skus` **일괄 저장** (= `save_owner_product_skus` 등 **수동 저장과 같은 결과**) → **몇 번째 줄·무슨 칸이 틀렸는지** 오류 리포트 |
-| **아직 없음 (구현 ⬜)** | 업로드 UI · 파서 · 양식 다운로드 · `products.product_code` (AD-088) |
+| **아직 없음 (구현 ⬜)** | 업로드 UI · 파서 · 양식 다운로드 · ~~`products.product_code`~~ ✅ |
 | **엑셀에 안 넣음** | **배송비**(매장 설정) · **카테고리**(CEO 확정 후 열 추가) · 네이버 전용 고시·템플릿코드 등 |
 
 **선행 완료:** AD-090 옵션 자유 N개 → 엑셀 **옵션명/옵션값** 열과 판매 옵션 탭 **1:1** (§7.97 ✅).
@@ -1931,7 +1931,7 @@ npm run dev
 
 | 스마트스토어 열 | 우리 | 상태 |
 |---|---|---|
-| 판매자 상품코드 (A) | — | **❌ 칼럼 없음 → 신설 필요** (AD-088 상품코드 = 엑셀 매칭 키) |
+| 판매자 상품코드 (A) | `products.product_code` | ✅ **AD-088** (2026-10-12 · migration `20261012_ad088_product_code` · 점주 상품 폼) |
 | 상품명 (C) | `products.name` | ✅ |
 | 판매가 (E) | `products.price` | ✅ |
 | 재고수량 (L) | `products.stock_quantity` | ✅ (옵션 있으면 `product_skus`만 씀 — §7.91) |
@@ -1975,7 +1975,7 @@ npm run dev
 #### 다음
 
 - [x] **리스크 1** — 옵션 **자유 N개(최대 3)** · **AD-090 ✅**  
-- [ ] `products.product_code` 신설 migration + 점주 상품 폼 입력 칸 (AD-088) ⬜  
+- [x] `products.product_code` + 점주 상품 폼 (AD-088) ✅ (2026-10-12)  
 - [ ] 업로드 파서(`xlsx` → 검증 → `products`/`product_skus` · **판매자센터 수동 저장과 동일**) + **행별 오류 리포트** ⬜  
 - [ ] 양식 **다운로드 버튼**(빈 양식 + 샘플 1행) — **우리 13열 xlsx** ⬜  
 
@@ -2095,8 +2095,8 @@ npx expo start --tunnel --port 8082 --clear
 
 #### 다음
 
-- [ ] **User 실기 확인** — 위 5)~8) **ISS-064 v2 포함** ⬜  
-- [ ] `products.product_code` 신설 + 상품 폼 입력칸 (AD-088) ⬜  
+- [x] **User 실기 확인** — 위 5)~8) **ISS-064 v2 포함** ✅ (User 2026-10-12 · `622d8d6`/`9bd25a5`)
+- [x] `products.product_code` + 상품 폼 입력칸 (AD-088) ✅ (2026-10-12)  
 - [ ] **엑셀 일괄등록 파서** (§7.96 양식 v1 — 이제 옵션 N개를 받을 수 있다) ⬜  
 - [ ] **ISS-054** 반품·판매통계 RPC 3개에 `option_label` 추가 ⬜  
 - [ ] 다음 사이클에 `product_skus.color`·`size` **DROP COLUMN** ⬜  

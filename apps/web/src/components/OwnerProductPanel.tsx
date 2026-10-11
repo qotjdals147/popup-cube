@@ -54,6 +54,7 @@ export function OwnerProductPanel({
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [name, setName] = useState('');
+  const [productCode, setProductCode] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -63,6 +64,7 @@ export function OwnerProductPanel({
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [editProductCode, setEditProductCode] = useState('');
   const [editPrice, setEditPrice] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [editStock, setEditStock] = useState('');
@@ -133,6 +135,7 @@ export function OwnerProductPanel({
 
   function resetCreateForm() {
     setName('');
+    setProductCode('');
     setPrice('');
     setDescription('');
     setCreateStock('');
@@ -174,6 +177,7 @@ export function OwnerProductPanel({
     try {
       const created = await createProduct(userId, {
         storeId,
+        productCode,
         name,
         description,
         price: Math.round(priceNumber),
@@ -187,6 +191,7 @@ export function OwnerProductPanel({
         });
       }
       setName('');
+      setProductCode('');
       setPrice('');
       setDescription('');
       setCreateStock('');
@@ -200,6 +205,8 @@ export function OwnerProductPanel({
     } catch (err) {
       if (err instanceof ProductError && err.code === 'IMAGE_TOO_LARGE') {
         setFormError(t('ownerProducts.errorImageTooLarge'));
+      } else if (err instanceof ProductError && err.code === 'DUPLICATE_PRODUCT_CODE') {
+        setFormError(t('ownerProducts.errorDuplicateProductCode'));
       } else {
         setFormError(t('ownerProducts.errorGeneric'));
       }
@@ -227,6 +234,7 @@ export function OwnerProductPanel({
     }
     setEditingId(product.id);
     setEditName(product.name);
+    setEditProductCode(product.product_code ?? '');
     setEditPrice(formatIntegerDisplay(product.price));
     setEditDescription(product.description ?? '');
     setEditStock(formatIntegerDisplay(product.stock_quantity));
@@ -249,6 +257,7 @@ export function OwnerProductPanel({
     setEditSaving(true);
     try {
       await updateProduct(userId, productId, {
+        productCode: editProductCode,
         name: editName,
         description: editDescription,
         price: Math.round(priceNumber),
@@ -264,6 +273,8 @@ export function OwnerProductPanel({
     } catch (err) {
       if (err instanceof ProductError && err.code === 'IMAGE_TOO_LARGE') {
         setLoadError(t('ownerProducts.errorImageTooLarge'));
+      } else if (err instanceof ProductError && err.code === 'DUPLICATE_PRODUCT_CODE') {
+        setLoadError(t('ownerProducts.errorDuplicateProductCode'));
       } else {
         setLoadError(t('ownerProducts.errorGeneric'));
       }
@@ -312,6 +323,14 @@ export function OwnerProductPanel({
             onChange={(e) => setName(e.target.value)}
             placeholder={t('ownerProducts.namePlaceholder')}
             maxLength={120}
+          />
+          <label style={styles.fieldLabel}>{t('ownerProducts.productCodeLabel')}</label>
+          <input
+            style={styles.inputFull}
+            value={productCode}
+            onChange={(e) => setProductCode(e.target.value)}
+            placeholder={t('ownerProducts.productCodePlaceholder')}
+            maxLength={40}
           />
           <label style={styles.fieldLabel}>{t('ownerProducts.priceLabel')}</label>
           <input
@@ -389,6 +408,14 @@ export function OwnerProductPanel({
                       onChange={(e) => setEditName(e.target.value)}
                       placeholder={t('ownerProducts.namePlaceholder')}
                       maxLength={120}
+                    />
+                    <label style={styles.fieldLabel}>{t('ownerProducts.productCodeLabel')}</label>
+                    <input
+                      style={styles.inputFull}
+                      value={editProductCode}
+                      onChange={(e) => setEditProductCode(e.target.value)}
+                      placeholder={t('ownerProducts.productCodePlaceholder')}
+                      maxLength={40}
                     />
                     <label style={styles.fieldLabel}>{t('ownerProducts.priceLabel')}</label>
                     <input
@@ -533,6 +560,11 @@ export function OwnerProductPanel({
                       )}
 
                       <div style={styles.metaRow}>
+                        {product.product_code?.trim() ? (
+                          <span style={styles.metaItem}>
+                            {t('ownerProducts.productCodeListHint', { code: product.product_code.trim() })}
+                          </span>
+                        ) : null}
                         <span style={styles.metaItem}>
                           {t('ownerProducts.stockHint', {
                             stock: formatIntegerDisplay(product.stock_quantity),
