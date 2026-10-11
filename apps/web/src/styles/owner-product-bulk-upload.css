@@ -1,0 +1,74 @@
+.owner-bulk-upload {
+  margin-bottom: 12px;
+}
+
+.owner-bulk-upload__toggle {
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2563eb;
+  background: #eef4ff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.owner-bulk-upload__panel {
+  margin-top: 10px;
+  padding: 14px;
+  border: 1px solid #e5e8eb;
+  border-radius: 10px;
+  background: #fafbfc;
+}
+
+.owner-bulk-upload__intro {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #4e5968;
+}
+
+.owner-bulk-upload__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.owner-bulk-upload__btn {
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d6db;
+  background: #fff;
+  cursor: pointer;
+}
+
+.owner-bulk-upload__btn--primary {
+  border-color: #3182f6;
+  background: #3182f6;
+  color: #fff;
+}
+
+.owner-bulk-upload__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.owner-bulk-upload__file {
+  display: none;
+}
+
+.owner-bulk-upload__summary {
+  margin: 12px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #191f28;
+}
+
+.owner-bulk-upload__errors {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #e94560;
+}

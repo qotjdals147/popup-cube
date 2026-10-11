@@ -82,6 +82,8 @@ export interface CreateProductInput {
   description: string;
   price: number;
   imageFile: File | null;
+  /** 엑셀 일괄등록 — URL만 있을 때 */
+  imageUrl?: string | null;
 }
 
 /**
@@ -92,7 +94,9 @@ export async function createProduct(userId: string, input: CreateProductInput): 
     throw new ProductError('IMAGE_TOO_LARGE');
   }
 
-  const imageUrl = input.imageFile ? await uploadProductImage(userId, input.imageFile) : null;
+  const imageUrl = input.imageFile
+    ? await uploadProductImage(userId, input.imageFile)
+    : input.imageUrl?.trim() || null;
 
   const product_code = normalizeProductCode(input.productCode ?? '');
 
@@ -158,6 +162,7 @@ export interface UpdateProductInput {
   description: string;
   price: number;
   imageFile?: File | null;
+  imageUrl?: string | null;
 }
 
 export async function updateProduct(
@@ -183,6 +188,8 @@ export async function updateProduct(
       throw new ProductError('IMAGE_TOO_LARGE');
     }
     patch.image_url = await uploadProductImage(userId, input.imageFile);
+  } else if (input.imageUrl?.trim()) {
+    patch.image_url = input.imageUrl.trim();
   }
 
   const { error } = await supabase.from('products').update(patch).eq('id', productId);

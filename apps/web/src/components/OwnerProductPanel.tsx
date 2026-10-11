@@ -21,6 +21,7 @@ import {
   ownerHelpText,
 } from '../styles/ownerAdminTheme';
 import { OwnerProductBlockEditor } from './OwnerProductBlockEditor';
+import { OwnerProductBulkUpload } from './OwnerProductBulkUpload';
 import { OwnerProductSkusEditor } from './OwnerProductSkusEditor';
 import { OwnerStatsShortcutBanner } from './OwnerStatsShortcutBanner';
 import { ProductDetailModal } from './ProductDetailModal';
@@ -312,6 +313,8 @@ export function OwnerProductPanel({
             {createFormOpen ? t('ownerProducts.addProductCollapse') : t('ownerProducts.addProductToggle')}
           </button>
         </div>
+
+        <OwnerProductBulkUpload storeId={storeId} userId={userId} onImported={() => void reload()} />
 
         {createFormOpen && (
         <div style={styles.formCard}>
