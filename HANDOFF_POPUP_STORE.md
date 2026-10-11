@@ -4599,6 +4599,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-12 — §7.97 User实机 ✅ · AD-088 **판매자 상품코드**
+- **Author:** Cursor Agent / User
+- **Changed:** §7.97 User实机 **ISS-064 v2 확인 ✅** · **ISS-044** §6 정리(원격 `iss_audit` 이미 적용 · SKU 취소/거절 0건) · migration `20261012_ad088_product_code.sql` **원격 적용 ✅** · `types.ts` · `products.ts` · `OwnerProductPanel` · `ko.ts` · §7.96 매핑표
+- **Notes:** **Expo 재시작 ❌** · Vercel 1~2min + Ctrl+F5 · **다음 = §7.96 엑셀 다운로드·업로드 파서**
+
 ### 2026-10-07 pm9 — ISS-064 v2 **옵션별 할인 표시**(쇼핑몰형) + 칸별 ±
 - **Author:** Cursor Agent / User
 - **Changed:** `skuOptionGroups.ts`(`optionValuePriceSuffix`) · `ProductDetailModal`(드롭다운 ± + 확정 시 `기본·옵션·판매가`) · `OwnerProductSkusEditor`(옵션값 아래 **칸별 ±**) · `productSkus.ts` · `types.ts`(`adjustment`) · `owner-product-skus.css` · `ko.ts` · migration `20261007c_iss064_option_value_adjustment.sql` **원격 적용 ✅** · §7.97 · §6 ISS-064
