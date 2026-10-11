@@ -1897,7 +1897,7 @@ npm run dev
 
 - [x] **셀메이트 계정·연동 방식** 확인 — **계정 ❌ · API ❌ · 엑셀 업로드식** (User 2026-10-07) ✅  
 - [x] **§7.96** POP-UP CUBE **일괄등록 양식 v1 초안** (열 이름 = 스마트스토어 호환 · **우리 13열**) — **설계 ✅** · 구현(다운로드·업로드) ⬜  
-- [ ] AD-088 **상품코드 입력 칸** 구현 시 **엑셀 매칭 키**로 명시 ⬜  
+- [x] AD-088 **상품코드** + 엑셀 매칭 키 ✅ (2026-10-12)  
 - [x] **옵션 그룹 자유화** — **AD-090 ✅** (엑셀 선행 조건 충족)  
 
 ---
@@ -1976,8 +1976,10 @@ npm run dev
 
 - [x] **리스크 1** — 옵션 **자유 N개(최대 3)** · **AD-090 ✅**  
 - [x] `products.product_code` + 점주 상품 폼 (AD-088) ✅ (2026-10-12)  
-- [ ] 업로드 파서(`xlsx` → 검증 → `products`/`product_skus` · **판매자센터 수동 저장과 동일**) + **행별 오류 리포트** ⬜  
-- [ ] 양식 **다운로드 버튼**(빈 양식 + 샘플 1행) — **우리 13열 xlsx** ⬜  
+- [x] 업로드 파서 + **행별 오류 리포트** ✅ (2026-10-12)  
+- [x] 양식 **다운로드** (13열 + 샘플 1행) ✅ (2026-10-12)  
+- [ ] **User实机** — 양식 다운 → 샘플 URL 바꿔 업로드 → 상품·옵션 탭과 동일한지 ⬜  
+- [ ] v2 — 이미지 **파일명→업로드** · `promo_mode` 열 · 카테고리(CEO) ⬜  
 
 ---
 
@@ -2097,7 +2099,7 @@ npx expo start --tunnel --port 8082 --clear
 
 - [x] **User 실기 확인** — 위 5)~8) **ISS-064 v2 포함** ✅ (User 2026-10-12 · `622d8d6`/`9bd25a5`)
 - [x] `products.product_code` + 상품 폼 입력칸 (AD-088) ✅ (2026-10-12)  
-- [ ] **엑셀 일괄등록 파서** (§7.96 양식 v1 — 이제 옵션 N개를 받을 수 있다) ⬜  
+- [x] **엑셀 일괄등록 v1** (§7.96 · 다운로드·업로드) ✅ (2026-10-12) · **User实机 ⬜**  
 - [ ] **ISS-054** 반품·판매통계 RPC 3개에 `option_label` 추가 ⬜  
 - [ ] 다음 사이클에 `product_skus.color`·`size` **DROP COLUMN** ⬜  
 
@@ -4598,6 +4600,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-12 pm — §7.96 **엑셀 일괄등록 v1** (다운로드·업로드)
+- **Author:** Cursor Agent / User
+- **Changed:** `xlsx` dep · `lib/bulkProductUpload/*` · `OwnerProductBulkUpload.tsx` · `OwnerProductPanel` · `products.ts`(`imageUrl`) · `owner-product-bulk-upload.css` · `ko.ts` · §7.96
+- **Notes:** **Expo 재시작 ❌** · Vercel 1~2min + Ctrl+F5 · 점주 **상품** 탭 → **엑셀 일괄 등록** · **다음 = User实机 §7.96** · 이후 **ISS-047** 또는 엑셀 v2
 
 ### 2026-10-12 — §7.97 User实机 ✅ · AD-088 **판매자 상품코드**
 - **Author:** Cursor Agent / User
