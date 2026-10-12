@@ -6,6 +6,12 @@ import {
   BULK_SAMPLE_CODE_PREFIX,
   type BulkProductHeader,
 } from './columns';
+import {
+  cellAt,
+  findHeaderRowIndex,
+  isLegendRow,
+  mapHeaders,
+} from './headerMap';
 
 export interface BulkRowError {
   row: number;
@@ -40,46 +46,8 @@ export interface ParseBulkProductResult {
   errors: BulkRowError[];
 }
 
-function normHeader(h: unknown): string {
-  return String(h ?? '')
-    .replace(/\s+/g, '')
-    .trim();
-}
-
-const HEADER_ALIASES: Record<string, BulkProductHeader> = {
-  판매자상품코드: '판매자 상품코드',
-  상품명: '상품명',
-  판매가: '판매가',
-  재고수량: '재고수량',
-  옵션명: '옵션명',
-  옵션값: '옵션값',
-  옵션가: '옵션가',
-  '옵션재고수량': '옵션 재고수량',
-  대표이미지: '대표이미지',
-  요약설명: '요약설명',
-  상세설명: '상세설명',
-  '주문자동수락': '주문 자동 수락',
-  '자동수락건수': '자동 수락 건수',
-};
-
-function mapHeaders(row: unknown[]): Map<BulkProductHeader, number> | null {
-  const idx = new Map<BulkProductHeader, number>();
-  row.forEach((cell, i) => {
-    const key = normHeader(cell);
-    const mapped = HEADER_ALIASES[key];
-    if (mapped) idx.set(mapped, i);
-  });
-  for (const h of BULK_PRODUCT_HEADERS) {
-    if (!idx.has(h)) return null;
-  }
-  return idx;
-}
-
 function cell(row: unknown[], col: Map<BulkProductHeader, number>, h: BulkProductHeader): string {
-  const i = col.get(h)!;
-  const v = row[i];
-  if (v === null || v === undefined) return '';
-  return String(v).trim();
+  return cellAt(row, col, h);
 }
 
 function parseIntCell(raw: string, allowEmpty = false): number | null {
@@ -144,20 +112,25 @@ export function parseBulkProductXlsx(buffer: ArrayBuffer): ParseBulkProductResul
     return { groups: [], errors: [{ row: 0, message: '데이터 행이 없어요. (헤더 + 최소 1행)' }] };
   }
 
-  const col = mapHeaders(rows[0] ?? []);
-  if (!col) {
+  const headerRowIdx = findHeaderRowIndex(rows);
+  if (headerRowIdx < 0) {
     return {
       groups: [],
-      errors: [{ row: 1, message: '첫 줄 헤더가 우리 양식과 다릅니다. 「양식 다운로드」 파일을 쓰세요.' }],
+      errors: [{ row: 1, message: '헤더 행을 찾지 못했어요. 「양식 다운로드」 파일을 쓰세요.' }],
     };
   }
 
+  const col = mapHeaders(rows[headerRowIdx] ?? [])!;
+
   const draft = new Map<string, ParsedBulkProductGroup>();
 
-  for (let r = 1; r < rows.length; r += 1) {
+  for (let r = headerRowIdx + 1; r < rows.length; r += 1) {
     const excelRow = r + 1;
     const row = rows[r] ?? [];
     if (row.every((c) => !String(c ?? '').trim())) continue;
+    if (isLegendRow(row, col)) continue;
+    const firstCell = String(row[0] ?? '').trim();
+    if (firstCell.startsWith('(') && firstCell.includes('열')) continue;
 
     const name = cell(row, col, '상품명');
     const codeRaw = cell(row, col, '판매자 상품코드');

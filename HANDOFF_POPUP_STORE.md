@@ -4601,6 +4601,10 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-12 late2 — §7.96 **엑셀 양식 스마트스토어형 꾸밈** (User 피드백)
+- **Changed:** `exceljs` · `styledTemplate.ts` — **타이틀/안내 밴드** · **헤더(3행)·필수·권장(4행)·입력힌트(5행)** · **칸 너비** · 테두리·zebra 예시 · autofilter · **`작성안내` 시트** 스타일 · `headerMap.ts` — 업로드 시 **헤더 동적 탐색** · legend/hint 행 스kip · 예시 이미지 URL 정리
+- **Notes:** **Expo 재시작 ❌** · Vercel + Ctrl+F5 · **「양식 다운로드」** 다시 받아서 열 너비·상단 5행 확인 · **다음 = User实机 §7.96**
+
 ### 2026-10-12 late — §7.96 **엑셀 UI·양식** 개선 (User 피드백)
 - **Changed:** `OwnerProductBulkUpload` — **툴바 한 줄**(+ 새 상품 · 엑셀 ▾) · 펼치면 **판매 옵션 패널형 카드** · `downloadBulkProductTemplate` — **`작성안내` 시트** · 예시 3행(무옵션+옵션2) · **#예시** 자동 제외 · freeze 헤더 · 파일명 `POPUP-CUBE_상품일괄등록양식_v1.xlsx`
 - **Notes:** **Expo 재시작 ❌** · Vercel + Ctrl+F5 · **양식 다시 다운로드** 후 확인

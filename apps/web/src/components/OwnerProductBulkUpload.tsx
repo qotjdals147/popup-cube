@@ -96,7 +96,11 @@ export function OwnerProductBulkUpload({
           </div>
           <p className="owner-bulk-upload__tip">{t('ownerProducts.bulkIntro')}</p>
           <div className="owner-bulk-upload__actions">
-            <button type="button" className="owner-bulk-upload__btn" onClick={() => downloadBulkProductTemplate()}>
+            <button
+              type="button"
+              className="owner-bulk-upload__btn"
+              onClick={() => void downloadBulkProductTemplate()}
+            >
               {t('ownerProducts.bulkDownloadTemplate')}
             </button>
             <button
