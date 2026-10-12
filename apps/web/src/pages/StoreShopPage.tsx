@@ -57,6 +57,10 @@ export function StoreShopPage() {
 
   const theme = useShopperThemeMode();
   const insetTop = useMemo(() => readInsetTopFromSearch(), []);
+  const initialProductId = useMemo(() => {
+    const raw = new URLSearchParams(window.location.search).get('product');
+    return raw?.trim() || null;
+  }, []);
   const pageStyle = useMemo(
     () => ({ '--shop-inset-top': `${insetTop}px` }) as CSSProperties,
     [insetTop]
@@ -171,6 +175,7 @@ export function StoreShopPage() {
           variant="page"
           onOpenCart={openCart}
           shoppingBlocked={shoppingBlocked}
+          initialProductId={initialProductId}
         />
       </main>
 

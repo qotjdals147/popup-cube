@@ -885,7 +885,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-12 eve)** | **AD-088 홈 01~02 ✅** (배ner·칩·상품 피드) · **심1 손님만 ✅** · **다음** = 상세 05~07 · CEO **카테고리 칩** · 엑셀实机 |
+| **한 줄 요약 (2026-10-12 eve)** | **AD-088 홈→상품 상세 ✅** · **Phase 2** 상세 UX 05~07 **진행 중** · CEO **카테고리 칩** · 엑셀实机 |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
 | **User实기** | **§7.100 ISS-053 ✅** · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
@@ -1872,6 +1872,7 @@ npm run dev
 - [x] **ISS-057** · **ISS-058** · **ISS-060** · **ISS-061** ✅  
 - [ ] CEO **홈 카테고리** 확정 ⬜ (칩 = 전체/신규/마감임박 · **의류/뷰티 등 = CEO 후**)  
 - [x] AD-088 **Phase 1 홈** — 앱 `home.tsx` **상품 피드** · 배ner · 칩 (벤치 **01~02**) · 2026-10-12  
+- [x] AD-088 **Phase 1b** — 홈 상품 탭 → `/shop?product=` · **ProductDetailModal** 자동 (§7.104) · 2026-10-12  
 - [ ] AD-088 **Phase 2** 상세 연관·펼치기 (벤치 **05~07**) ⬜  
 - [ ] **셀메이트 계정·연동 스펙** CEO 확인 (§7.95) ⬜  
 
@@ -2301,6 +2302,23 @@ npx supabase db pull
 | | |
 |---|---|
 | ISS-052 tooling/문서 | **❌** · 코드 변경 없음 |
+
+---
+
+### 7.104 **AD-088 홈 → 상품 상세 딥링크** (2026-10-12)
+
+| | |
+|---|---|
+| **User 질문** | 홈에서 상품 눌렀을 때 **매장만** 열림 → **1b 미구현**이었음 · **순차 진행 ✅** |
+| **동작** | 앱 홈 카드 → `store/[storeId]?productId=` → WebView `/shop?product=uuid` → **`ProductDetailModal` 자동** |
+| **코드** | `home.tsx` · `store/[storeId].tsx` · `StoreShopPage` · `StoreShopCatalog.initialProductId` |
+| **아직 ❌** | Phase 2 — 상세 **펼치기·연관상품** (벤치 05~07) · 목록 스크롤 포커스 |
+
+#### Expo 재시작
+
+| | |
+|---|---|
+| mobile + web(Vercel) | **✅ mobile `--clear`** · **Vercel 1~2min** (`apps/web`) |
 
 ---
 
@@ -4855,6 +4873,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-12 eve — AD-088 홈 → 상품 상세 딥링크 (§7.104)
+- **Changed:** `StoreShopCatalog` · `StoreShopPage` · mobile `home` · `store/[storeId]`
+- **Notes:** **`apps/web` + mobile** · Vercel **1~2min** · Expo **`--clear`** · §0 PC 3줄 + Expo 4줄
 
 ### 2026-10-12 eve — AD-088 홈 UX · 벤치 01~02 (상품 피드)
 - **Changed:** `home.tsx` · `homeProducts.ts` · `HomeProductCard` · `HomePromoBanner` · `HomeFeedChips` · `ko.ts` · §7.94

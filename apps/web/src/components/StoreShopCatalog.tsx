@@ -13,6 +13,8 @@ export interface StoreShopCatalogProps {
   onOpenCart?: () => void;
   /** §58 #5 — popup_ends_at 지난 매장: 담기·결제 차단 */
   shoppingBlocked?: boolean;
+  /** AD-088 — 홈 피드 등에서 들어올 때 해당 상품 상세 자동 오픈 */
+  initialProductId?: string | null;
 }
 
 function formatPrice(price: number): string {
@@ -25,6 +27,7 @@ export function StoreShopCatalog({
   variant = 'overlay',
   onOpenCart,
   shoppingBlocked = false,
+  initialProductId = null,
 }: StoreShopCatalogProps) {
   const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
@@ -52,6 +55,12 @@ export function StoreShopCatalog({
       mounted = false;
     };
   }, [storeId]);
+
+  useEffect(() => {
+    if (!initialProductId || products.length === 0) return;
+    const match = products.find((p) => p.id === initialProductId);
+    if (match) setDetailProduct(match);
+  }, [initialProductId, products]);
 
   function getQty(productId: string): number {
     return quantities[productId] ?? 1;

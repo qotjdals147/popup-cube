@@ -127,7 +127,10 @@ export default function HomeScreen() {
   }, [search]);
 
   function handleOpenProduct(item: HomeProductFeedItem) {
-    router.push(`/store/${item.store_id}`);
+    router.push({
+      pathname: '/store/[storeId]',
+      params: { storeId: item.store_id, productId: item.id },
+    });
   }
 
   const listHeader = (

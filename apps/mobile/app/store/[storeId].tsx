@@ -38,7 +38,7 @@ function readWebOrigin(): string {
  */
 export default function StoreScreen() {
   const router = useRouter();
-  const { storeId } = useLocalSearchParams<{ storeId: string }>();
+  const { storeId, productId } = useLocalSearchParams<{ storeId: string; productId?: string }>();
   const { userId, bootstrapping, loading, role } = useAuth();
   const authPending = bootstrapping || loading;
   const { handleWebViewMessage, itemsJson, bridgeReady } = useCartCount();
@@ -88,6 +88,8 @@ export default function StoreScreen() {
       }
       const origin = readWebOrigin();
       const shopQuery = new URLSearchParams({ theme: mode });
+      const productParam = typeof productId === 'string' ? productId.trim() : '';
+      if (productParam) shopQuery.set('product', productParam);
       const hash = new URLSearchParams({
         access_token: data.session.access_token,
         refresh_token: data.session.refresh_token,
@@ -101,7 +103,7 @@ export default function StoreScreen() {
     return () => {
       active = false;
     };
-  }, [storeId, userId, mode]);
+  }, [storeId, userId, mode, productId]);
 
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
