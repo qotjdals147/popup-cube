@@ -2064,7 +2064,7 @@ npm run dev
 #### 같이 처리한 기존 버그
 
 - **ISS-050 Fixed** — 확인해보니 `CartView` 는 이미 `removeItemsByLineKeys`(= `cartLineKey`)만 쓰고 있었고 `removeItemsByProductIds` 는 **호출처 0의 죽은 코드**였다. 다시 잘못 쓰이지 않게 **context에서 제거**.
-- **ISS-054 미해결 (P3)** — 옵션이 `get_order_return`·`request_return`·`get_store_product_sales` 에 **여전히 미연동**. `option_label` 스냅샷은 `order_items` 에 있으므로 **해당 RPC 3개에 칼럼만 추가**하면 된다.
+- **ISS-054 ✅ (2026-10-12)** — `request_return`·`get_order_return`·`get_store_product_sales` + UI · `73e0a91`
 
 #### Expo 재시작 여부 (§0 표 — **web-only 행**)
 
