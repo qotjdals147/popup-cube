@@ -857,7 +857,7 @@ popup_store/                          # Turborepo root
 | ISS-049 | ~~손님이 자기 `role`·`store_id` 변경 가능~~ | **Fixed (DB · 2026-10-02)** | `profiles` **UPDATE REVOKE** · `profiles_self_update` DROP · 닉네임 = RPC |
 | ISS-050 | ~~옵션 상품 주문 후 「안 산 옵션」까지 장바구니에서 사라짐~~ | **Fixed (2026-10-07 · AD-090)** | 재확인 결과 `CartView` 는 **이미 `removeItemsByLineKeys`(= `cartLineKey`)만** 사용 중이었고, `removeItemsByProductIds` 는 **호출처 0의 죽은 코드**였다(증상은 이미 없었음). 다시 잘못 쓰이지 않게 **`CartContext` 에서 제거** · §7.97 |
 | ISS-051 | ~~자동 수락 quota 초과 가능~~ | **Fixed (DB · 20261002b+)** | `auto_accept_remaining` UPDATE 후 **`IF FOUND`/`ELSE` → `awaiting_accept`** · 원격 `place_order` 확인 (2026-10-12) |
-| ISS-052 | **운영 DB ↔ repo migration 이력 불일치** | **P2 (진행 중 · §7.101)** | 원격 **105** vs repo **54** · snapshot/audit/scripts · **`supabase/README.md`** · **db pull ⬜** |
+| ISS-052 | **운영 DB ↔ repo migration 이력 불일치** | **P2 (완화 · §7.101)** | User **`link` ✅** · **`supabase/schemas`** declarative baseline ✅ · classic **`db pull`/1:1 이력** = **비목표**(묶음 vs 105건) |
 | ISS-054 | ~~AD-085 옵션이 반품·KPI 경로에 미연동~~ | **Fixed (DB+web · 2026-10-12)** | `request_return`·`get_order_return` items에 `product_name`·`option_label` · `get_store_product_sales` **옵션별 행** · UI 반품·TOP판매 |
 | ISS-055 | ~~Supabase advisor (search_path · RLS RPC-only)~~ | **Fixed (DB · 2026-10-12)** | `20261012_iss055` · search_path · RLS RPC-only ✅ · **Auth:** HIBP **Pro+만**(Free Save 거부 · User 2026-10-12) ⏸ · **Minimum password length = 8** User Save ✅ · `…/auth/providers?provider=Email` |
 | ISS-053 | ~~장바구니 표시 금액 ≠ 실제 청구 금액~~ | **Fixed (web · 2026-10-12)** | `refreshCartItemPrices.ts` · **CartView** 진입 시 DB 단가 재조회 · 변동 시 `cart.priceUpdatedNotice` · `CartContext.applyRefreshedItems` |
@@ -885,7 +885,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-12 eve)** | **§7.96 엑셀 ⏸** · **ISS-044 집계 ✅ §7.102** · **ISS-048 ✅** · **ISS-052 §7.101** (audit JSON) · **다음** = User PC **`supabase link` + `db pull`** |
+| **한 줄 요약 (2026-10-12 eve)** | **§7.96 엑셀 ⏸** · **ISS-052 User `link` ✅** · **`supabase/schemas` declarative ✅** · **다음** = migration **파일명 정리**(선택) · **AD-078** 소셜 |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
 | **User实기** | **§7.100 ISS-053 ✅** · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
@@ -2234,7 +2234,7 @@ npx expo start --tunnel --port 8082 --clear
 
 | | |
 |---|---|
-| **상태** | **진행 중** — 스냅샷·감사 스크립트 ✅ · **완전 `db pull` ⬜** (CLI `supabase link` 후) |
+| **상태** | **User `link` ✅ (2026-10-12)** · **declarative schema** `supabase/schemas` ✅ · **classic `db pull`** = 이력 불일치로 **User 추가 작업 ❌** (§7.101 하단) |
 | **원격 (2026-10-12)** | **`105`** rows · `supabase/remote_migrations.snapshot.json` |
 | **Repo** | **`54`** `.sql` (+ `iss048`) |
 | **감사** | `node scripts/audit-migration-sync.mjs` → `migration-audit.snapshot.json` · remote-only **33** · local-only **7** (이름/묶음 차이 · **정상**) |
@@ -2277,8 +2277,23 @@ npx supabase link --project-ref cvrtobxkvpcpcxrcspdp
 npx supabase db pull
 ```
 
-3) 생성된 `supabase/migrations/*` diff 확인 → **에이전트에게 「db pull 했어」** 한 줄 (다음 세션 HANDOFF 반영)  
-4) **Expo 재시작 ❌** · Metro **Ctrl+C 불필요**
+3) **결과 해석 (User — 중요)**  
+   - **`Finished supabase link`** → **User 할 일 끝** ✅  
+   - **`migration history does not match`** + **`migration repair` 목록** → **정상(예상)** · **User가 repair 명령 **일일이 치지 않음**** (운영 DB 이력 건드림 · ISS-052 원인 그대로)  
+   - **`Skipping migration … file name must match pattern`** → repo 파일명 `20260807b_` 등 **CLI 규칙과 안 맞음** (에이전트 정리)  
+   - **「db pull 했어」** 한 줄 보내면 에이전트가 **declarative pull** 등으로 마무리  
+
+4) **`link` privileges 오류** — `does not have the necessary privileges` → **`npx supabase logout`** → **`Yes`** → **`login`** 을 **Dashboard에서 `popup-platform` 보이는 계정**으로 다시  
+
+5) **Expo 재시작 ❌** · Metro **Ctrl+C 불필요**
+
+#### 에이전트 — `db pull` 막힐 때 (User PC link 후)
+
+| | |
+|---|---|
+| **명령** | `npx supabase db pull --declarative --linked` |
+| **결과** | `supabase/schemas/` — **지금 원격 DB 모양** (migration 이력表 **안 건드림**) |
+| **canonical DDL** | 여전히 `supabase/migrations/*.sql` + MCP **`apply_migration`** |
 
 #### Expo 재시작
 
@@ -4839,6 +4854,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-12 eve — ISS-052 User link ✅ · declarative schema (`supabase/schemas`)
+- **Author:** User (link) + Cursor Agent (declarative pull · HANDOFF)
+- **Changed:** `supabase/config.toml` · `supabase/.gitignore` · **`supabase/schemas/**`** · §7.101 (link 오류 · **repair 치지 말 것**)
+- **Notes:** User **`db pull`** = migration mismatch **예상** · **`migration repair` 목록 User 실행 ❌** · **Expo ❌**
 
 ### 2026-10-12 eve — §0 작업 큐 위임 · ISS-044 §7.102 · ISS-052 audit JSON
 - **Changed:** §0 **작업 큐·우선순위 (User 2026-10-12)** · **§7.102** ISS-044 집계(0건) · `migration-audit.snapshot.json` · `audit-migration-sync.mjs` · §7.101 **db pull** cmd · §63.14 동기화
