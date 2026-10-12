@@ -1,0 +1,423 @@
+{
+  "exported_at": "2026-10-12T05:48:18.198Z",
+  "project_ref": "cvrtobxkvpcpcxrcspdp",
+  "count": 104,
+  "migrations": [
+    {
+      "version": "20260713015534",
+      "name": "init_core_schema"
+    },
+    {
+      "version": "20260713015545",
+      "name": "seed_gucci_demo_store"
+    },
+    {
+      "version": "20260713022719",
+      "name": "setup_demo_owner"
+    },
+    {
+      "version": "20260713023209",
+      "name": "grant_table_permissions"
+    },
+    {
+      "version": "20260713043909",
+      "name": "add_store_home_hub_fields"
+    },
+    {
+      "version": "20260713045513",
+      "name": "owner_store_create_flow"
+    },
+    {
+      "version": "20260713045547",
+      "name": "tighten_store_assets_select_policy"
+    },
+    {
+      "version": "20260713045723",
+      "name": "create_owner_store_function"
+    },
+    {
+      "version": "20260713045742",
+      "name": "fix_create_owner_store_search_path"
+    },
+    {
+      "version": "20260713050114",
+      "name": "grant_stores_insert_update_authenticated"
+    },
+    {
+      "version": "20260713051354",
+      "name": "auto_publish_owner_created_stores"
+    },
+    {
+      "version": "20260713064927",
+      "name": "add_nickname_system"
+    },
+    {
+      "version": "20260713082036",
+      "name": "add_products_table"
+    },
+    {
+      "version": "20260713103228",
+      "name": "add_promotion_and_gacha_tables"
+    },
+    {
+      "version": "20260713103302",
+      "name": "fix_gacha_rolls_pool_entry_fk"
+    },
+    {
+      "version": "20260713103335",
+      "name": "create_roll_gacha_function"
+    },
+    {
+      "version": "20260713103350",
+      "name": "seed_gucci_promotion_and_gacha"
+    },
+    {
+      "version": "20260713103429",
+      "name": "fix_gucci_gacha_item_names"
+    },
+    {
+      "version": "20260713110616",
+      "name": "add_user_addresses_table"
+    },
+    {
+      "version": "20260713110637",
+      "name": "add_orders_tables"
+    },
+    {
+      "version": "20260713110719",
+      "name": "create_place_order_function"
+    },
+    {
+      "version": "20260713110743",
+      "name": "fix_place_order_search_path"
+    },
+    {
+      "version": "20260713110854",
+      "name": "create_get_store_orders_function"
+    },
+    {
+      "version": "20260713111000",
+      "name": "fix_orders_function_grants"
+    },
+    {
+      "version": "20260727022632",
+      "name": "phase4_display_fixtures"
+    },
+    {
+      "version": "20260727074900",
+      "name": "sprint3_draft_publish"
+    },
+    {
+      "version": "20260727083504",
+      "name": "fix_create_owner_store_overload"
+    },
+    {
+      "version": "20260731075421",
+      "name": "fix_demo_owner_profile_store_id_gucci"
+    },
+    {
+      "version": "20260803000520",
+      "name": "gacha_order_link_and_owner_view_v2"
+    },
+    {
+      "version": "20260803004716",
+      "name": "seller_center_orders_stock_auto_accept"
+    },
+    {
+      "version": "20260803004728",
+      "name": "seller_center_helper_and_place_order"
+    },
+    {
+      "version": "20260803072139",
+      "name": "fix_place_order_security_definer"
+    },
+    {
+      "version": "20260804060659",
+      "name": "owner_order_realtime_counts"
+    },
+    {
+      "version": "20260807003916",
+      "name": "delivery_complete_purchase_confirm"
+    },
+    {
+      "version": "20260807003949",
+      "name": "lock_down_auto_confirm_purchases_internal"
+    },
+    {
+      "version": "20260807004325",
+      "name": "owner_orders_delivery_columns"
+    },
+    {
+      "version": "20260807004437",
+      "name": "get_my_orders_add_auto_flag"
+    },
+    {
+      "version": "20260811030007",
+      "name": "store_code_order_number"
+    },
+    {
+      "version": "20260811030029",
+      "name": "store_code_order_number_rpcs"
+    },
+    {
+      "version": "20260811050742",
+      "name": "shopper_cancel_and_claims"
+    },
+    {
+      "version": "20260811072906",
+      "name": "store_policy_shipping"
+    },
+    {
+      "version": "20260812010916",
+      "name": "owner_delete_store"
+    },
+    {
+      "version": "20260812070532",
+      "name": "product_detail_and_reviews"
+    },
+    {
+      "version": "20260812081531",
+      "name": "product_detail_blocks"
+    },
+    {
+      "version": "20260820235606",
+      "name": "get_my_orders_product_image"
+    },
+    {
+      "version": "20260821004434",
+      "name": "place_order_popup_ended"
+    },
+    {
+      "version": "20260825012733",
+      "name": "product_promo_line_discount"
+    },
+    {
+      "version": "20260825012748",
+      "name": "product_promo_place_order_functions"
+    },
+    {
+      "version": "20260825012840",
+      "name": "product_promo_place_order_v1b"
+    },
+    {
+      "version": "20260825012847",
+      "name": "store_has_active_gacha_pool_rpc"
+    },
+    {
+      "version": "20260825021451",
+      "name": "place_order_discount_only_on_gacha"
+    },
+    {
+      "version": "20260825050348",
+      "name": "order_hold_supplement_ad069"
+    },
+    {
+      "version": "20260825050427",
+      "name": "order_hold_supplement_ad069"
+    },
+    {
+      "version": "20260825062446",
+      "name": "order_hold_supplement_ad069_schema"
+    },
+    {
+      "version": "20260825062456",
+      "name": "order_hold_supplement_ad069_tables"
+    },
+    {
+      "version": "20260825062512",
+      "name": "order_hold_supplement_ad069_functions"
+    },
+    {
+      "version": "20260825062522",
+      "name": "order_hold_supplement_ad069_rpcs"
+    },
+    {
+      "version": "20260825062554",
+      "name": "order_hold_supplement_ad069_submit_reject"
+    },
+    {
+      "version": "20260825062607",
+      "name": "order_hold_supplement_ad069_cancel_push"
+    },
+    {
+      "version": "20260825062626",
+      "name": "order_hold_supplement_ad069_counts_fix"
+    },
+    {
+      "version": "20260825062636",
+      "name": "order_hold_supplement_ad069_get_orders"
+    },
+    {
+      "version": "20260825062647",
+      "name": "order_hold_supplement_ad069_get_my_orders"
+    },
+    {
+      "version": "20260826084400",
+      "name": "delete_reason_template"
+    },
+    {
+      "version": "20260827064933",
+      "name": "get_store_order_counts_open_claims"
+    },
+    {
+      "version": "20260827073911",
+      "name": "order_claim_messages_ad077"
+    },
+    {
+      "version": "20260827073928",
+      "name": "order_claim_messages_ad077_rpcs"
+    },
+    {
+      "version": "20260827073939",
+      "name": "order_claim_messages_ad077_resolve_list"
+    },
+    {
+      "version": "20260827074010",
+      "name": "order_claim_messages_ad077_orders_rpc"
+    },
+    {
+      "version": "20260827074016",
+      "name": "order_claim_messages_ad077_my_orders_rpc"
+    },
+    {
+      "version": "20260827233713",
+      "name": "store_return_addresses_ad076"
+    },
+    {
+      "version": "20260827235919",
+      "name": "order_returns_ad073_r2"
+    },
+    {
+      "version": "20260828000004",
+      "name": "order_returns_ad073_r2_rpcs_part1"
+    },
+    {
+      "version": "20260828000014",
+      "name": "order_returns_ad073_r2_rpcs_part2"
+    },
+    {
+      "version": "20260828000024",
+      "name": "order_returns_ad073_r2_rpcs_part3"
+    },
+    {
+      "version": "20260828000034",
+      "name": "order_returns_ad073_r2_get_store_orders"
+    },
+    {
+      "version": "20260828000102",
+      "name": "order_returns_ad073_r2_get_my_orders"
+    },
+    {
+      "version": "20260901001828",
+      "name": "return_evidence_urls"
+    },
+    {
+      "version": "20260901002008",
+      "name": "return_evidence_urls_rpc_v2"
+    },
+    {
+      "version": "20260901002032",
+      "name": "return_evidence_urls_rpc_v3"
+    },
+    {
+      "version": "20260901002118",
+      "name": "restore_return_rpcs_evidence"
+    },
+    {
+      "version": "20260901030713",
+      "name": "shopper_notifications_ad076"
+    },
+    {
+      "version": "20260922045312",
+      "name": "owner_review_reply"
+    },
+    {
+      "version": "20260922045321",
+      "name": "owner_review_reply_rpc"
+    },
+    {
+      "version": "20260922053107",
+      "name": "fix_get_store_reviews_store_id_type"
+    },
+    {
+      "version": "20260922055356",
+      "name": "get_store_reviews_product_image"
+    },
+    {
+      "version": "20260929031528",
+      "name": "oauth_profile_nickname"
+    },
+    {
+      "version": "20260929043416",
+      "name": "update_my_nickname"
+    },
+    {
+      "version": "20260929054829",
+      "name": "20260929_store_kpi_ad084"
+    },
+    {
+      "version": "20260929054838",
+      "name": "20260929_store_kpi_ad084_b"
+    },
+    {
+      "version": "20261002003059",
+      "name": "20261002_product_skus_ad085"
+    },
+    {
+      "version": "20261002003108",
+      "name": "20261002_product_skus_rpcs"
+    },
+    {
+      "version": "20261002003848",
+      "name": "20261002_product_skus_order_rpc"
+    },
+    {
+      "version": "20261002003940",
+      "name": "20261002_product_skus_place_order"
+    },
+    {
+      "version": "20261002015906",
+      "name": "iss_audit_p0_p1_fixes"
+    },
+    {
+      "version": "20261003000000",
+      "name": "20261003_ad087_product_sku_price_delta"
+    },
+    {
+      "version": "20261003000001",
+      "name": "20261003b_place_order_sku_price_delta"
+    },
+    {
+      "version": "20261007000000",
+      "name": "ad090_product_sku_free_options"
+    },
+    {
+      "version": "20261007000001",
+      "name": "save_owner_product_skus_no_delete_orders"
+    },
+    {
+      "version": "20261007072729",
+      "name": "iss064_option_value_adjustment"
+    },
+    {
+      "version": "20261011151258",
+      "name": "ad088_product_code"
+    },
+    {
+      "version": "20261012043225",
+      "name": "iss047_place_order_idempotency"
+    },
+    {
+      "version": "20261012044944",
+      "name": "iss054_option_label_returns_kpi"
+    },
+    {
+      "version": "20261012054743",
+      "name": "ad090_drop_product_skus_color_size"
+    },
+    {
+      "version": "20261012054804",
+      "name": "iss055_advisor_hardening"
+    }
+  ]
+}

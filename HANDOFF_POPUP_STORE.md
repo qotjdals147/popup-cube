@@ -852,7 +852,7 @@ popup_store/                          # Turborepo root
 | ISS-049 | **손님이 자기 `role`·`store_id` 변경 가능** — `authenticated`에 `profiles` **UPDATE GRANT(전 컬럼)** + `profiles_self_update`에 **`WITH CHECK` 없음** | **P1 (보안)** | `role='owner'`·`store_id` 임의 설정 → 점주 UI·라우팅 진입, `update_my_nickname` **검증(길이·금칙어) 우회**. **실피해 제한적** — 반품·주문·가챠 RPC는 전부 **`stores.owner_id = auth.uid()`** 로 검증(감사에서 확인) → **타 매장 데이터 침투 불가**. 조치 = 컬럼 제한 GRANT 또는 RPC 전용화 |
 | ISS-050 | ~~옵션 상품 주문 후 「안 산 옵션」까지 장바구니에서 사라짐~~ | **Fixed (2026-10-07 · AD-090)** | 재확인 결과 `CartView` 는 **이미 `removeItemsByLineKeys`(= `cartLineKey`)만** 사용 중이었고, `removeItemsByProductIds` 는 **호출처 0의 죽은 코드**였다(증상은 이미 없었음). 다시 잘못 쓰이지 않게 **`CartContext` 에서 제거** · §7.97 |
 | ISS-051 | **자동 수락 quota 초과 가능** — `place_order`의 `auto_accept_remaining` 감소 `UPDATE` 뒤 **`IF NOT FOUND` 검사 없음** | **P2** | quota 소진·비활성 상태에서도 **주문은 자동 수락으로 진행**(감소만 실패) → 점주가 설정한 자동 수락 건수 초과. 음수는 안 됨. 조치 = `NOT FOUND` 시 수동 수락으로 폴백 |
-| ISS-052 | **운영 DB를 repo로 재현 불가** — 원격 `schema_migrations` **93건** vs repo `supabase/migrations` **41개 파일** | **P2** | 예: `20261002003108 product_skus_rpcs`는 **원격에만 존재**(repo 파일 없음) · `return_evidence_urls_rpc_v2/v3`·`store_kpi_ad084_b` 등 다수. → **스테이징 분리·재배포·롤백 불가**(§63.9 전제 붕괴). 조치 = `supabase db pull`로 누락 migration **repo 역동기화** |
+| ISS-052 | **운영 DB ↔ repo migration 이력 불일치** | **P2 (진행 중 · §7.101)** | **2026-10-12:** 원격 **104** vs repo **53** · `remote_migrations.snapshot.json` · `export-remote-migrations.mjs` · `audit-migration-sync.mjs` · **완전 db pull ⬜** · **`apply-sql-file` → schema_migrations** 옵션 추가 |
 | ISS-054 | ~~AD-085 옵션이 반품·KPI 경로에 미연동~~ | **Fixed (DB+web · 2026-10-12)** | `request_return`·`get_order_return` items에 `product_name`·`option_label` · `get_store_product_sales` **옵션별 행** · UI 반품·TOP판매 |
 | ISS-055 | ~~Supabase advisor (search_path · RLS RPC-only)~~ | **Fixed (DB · 2026-10-12)** | `20261012_iss055` · search_path · RLS RPC-only ✅ · **Auth:** HIBP **Pro+만**(Free Save 거부 · User 2026-10-12) ⏸ · **Minimum password length = 8** User Save ✅ · `…/auth/providers?provider=Email` |
 | ISS-053 | ~~장바구니 표시 금액 ≠ 실제 청구 금액~~ | **Fixed (web · 2026-10-12)** | `refreshCartItemPrices.ts` · **CartView** 진입 시 DB 단가 재조회 · 변동 시 `cart.priceUpdatedNotice` · `CartContext.applyRefreshedItems` |
@@ -880,9 +880,9 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-12 pm)** | **§7.96 엑셀 ⏸** · **ISS-053 ✅** · **ISS-055** Auth min 8 ✅ · HIBP **Pro+** ⏸ · **다음 코드** = **ISS-052** (migration 역동기화) |
+| **한 줄 요약 (2026-10-12 pm)** | **§7.96 엑셀 ⏸** · **§7.100 ISS-053实机 ✅** · **ISS-052 §7.101 진행** (snapshot+audit) · **다음** = ISS-052 `db pull` 또는 **ISS-051** |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
-| **User实기** | **§7.100 ISS-053** ⬜ · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
+| **User实기** | **§7.100 ISS-053 ✅** · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
 | **출시 불안·건강검진** | **§63 (AD-086)** — **1차 감사 (2026-10-02) ✅** · **2차 최종 = 기능·CEO 항목 완료 후 동일 §63 재실시** (§63.8 · User 2026-10-06) |
 | **🚨 즉시 (User 2026-10-06~07)** | **ISS-056~062** ✅ push 후 Vercel 1~2분 · **앱 `apps/mobile` 변경 → Expo `--clear`** · **옵션 주문 「안 들어옴」 = 자동수락 → 발주·배송 탭** (ISS-061 · 주문 탭에 안내 추가) |
@@ -2173,6 +2173,8 @@ PG 코드를 **새로 짜기 전** · **스테이징 승인 전** 아래를 **§
 
 ### 7.100 **ISS-053 장바구니 가격 갱신** (AD-068 · User实机 · 2026-10-12)
 
+> **User实机 ✅ (2026-10-12 pm)** — 점주 **판매가 변경** → 손님 **앱** 장바구니 **합계·안내 문구** 확인 · **옵션 저장** 시 판매가 동시 반영 = `af20335`
+
 > **쉬운 말:** 장바구니에 담아 둔 **옛날 가격**을, 장바구니를 **열 때** 서버 최신 가격으로 맞춘다. 바뀌었으면 **한 줄 안내**가 뜬다.
 
 #### Expo 재시작 여부 (§0 표 — **web-only 행**)
@@ -2218,6 +2220,34 @@ npx expo start --tunnel --port 8082 --clear
 7) **이번에 볼 것**
    - 합계가 **변경된 판매가**와 맞는지
    - **「판매 가격이 바뀐 상품이 있어요. 합계를 다시 확인해 주세요.」** 한 줄이 뜨는지 (가격이 실제로 바뀐 경우)
+
+---
+
+### 7.101 **ISS-052 migration repo ↔ 원격** (§63.9 · 2026-10-12 착수)
+
+> **쉬운 말:** Supabase **원격**에 쌓인 migration **이력 104건**과, Git **`supabase/migrations` 53파일**이 **1:1이 아님** — 예전에 **대시보드/MCP**로 잘게 넣은 것 + 로컬은 **묶음 SQL** + `apply-sql-file`은 **이력表에 안 남김**(ISS-052 원인).
+
+| | |
+|---|---|
+| **상태** | **진행 중** — 스냅샷·감사 스크립트 ✅ · **완전 `db pull` ⬜** (CLI `supabase link` 후) |
+| **원격 (2026-10-12)** | **`104`** rows · `supabase/remote_migrations.snapshot.json` |
+| **Repo** | **`53`** `.sql` |
+| **감사** | `node scripts/audit-migration-sync.mjs` → remote-only **33** · local-only **7** (이름/묶음 차이) |
+| **규칙 (앞으로)** | DDL = **`apply_migration`(MCP)** 또는 **`npx supabase migration`** · `apply-sql-file.mjs` = **비상용** + 3번째 인자 `migration_name`으로 `schema_migrations` 기록 |
+| **원격 보정 (2026-10-12)** | `ad090_drop_product_skus_color_size` · `iss055_advisor_hardening` — **MCP apply ✅** (이전 pg-only 적용분 이력 보강) |
+
+#### 에이전트 절차
+
+1. `node scripts/export-remote-migrations.mjs` ( `../.env.local` 의 `POPUP_DATABASE_URL` )
+2. `node scripts/audit-migration-sync.mjs`
+3. 신규 DDL → repo 파일 + **동일 내용** MCP `apply_migration`
+4. 스테이징 DB 신설 시 → **`npx supabase db pull`** ( `config.toml` + link 후 · User PC)
+
+#### Expo 재시작
+
+| | |
+|---|---|
+| ISS-052 tooling/문서 | **❌** · 코드 변경 없음 |
 
 ---
 
@@ -4753,6 +4783,13 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-12 pm — §7.100 User实机 ✅ · ISS-052 §7.101 착수
+- **Notes:** User — 앱 **판매가·장바구니 안내** 확인 ✅ · **ISS-052** snapshot(104) · audit scripts · 원격 `ad090_drop`·`iss055` MCP 이력 보강 · **Expo ❌**
+
+### 2026-10-12 pm — ISS-052 migration audit (snapshot · scripts)
+- **Changed:** `supabase/remote_migrations.snapshot.json` · `scripts/export-remote-migrations.mjs` · `scripts/audit-migration-sync.mjs` · `apply-sql-file.mjs` (migration_name) · **§7.101**
+- **Notes:** `audit-migration-sync` remote-only **33** · local-only **7** · **db pull ⬜** · **Expo ❌**
 
 ### 2026-10-12 pm — 점주 상품 판매가 저장 (옵션 저장과 분리 UX)
 - **Changed:** `OwnerProductPanel.persistProductBasicsFromEdit` · `OwnerProductSkusEditor` 옵션 저장 시 **판매가·이름 등 동시 반영** · `updateProduct` **0행 UPDATE** 시 오류 · `ko.ts` `skusSaved`
@@ -8335,7 +8372,7 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 | **ISS-049** | `profiles` UPDATE 무제한 → 자가 `role`/`store_id` 변경 | **P1** | **Fixed (원격)** | `iss_audit_p0_p1_fixes` |
 | **ISS-050** | 주문 후 장바구니 정리가 `skuId` 무시 → 안 산 옵션 삭제 | **P2** | **Fixed (web)** | `removeItemsByLineKeys` |
 | **ISS-051** | `auto_accept_remaining` 감소 `NOT FOUND` 미검사 | **P2** | **Fixed** | `20261002b` · User SQL Editor ✅ |
-| **ISS-052** | 원격 migration 93 vs repo 41 → 운영 DB 재현 불가 | **P2** | Open | 감사 발견 |
+| **ISS-052** | 원격 migration vs repo SQL 불일치 | **P2** | **In progress** | §7.101 · snapshot 104 / repo 53 |
 | **ISS-053** | 장바구니 가격 stale → 표시 금액 ≠ 청구 금액 | **P2** | **Fixed (web)** | `refreshCartItemPrices` · CartView 진입 갱신 |
 | **ISS-054** | AD-085 옵션이 반품·KPI RPC에 미연동 (§62) | **P3** | Open | 감사 발견 |
 | **ISS-055** | advisor (search_path · RLS RPC-only) | **P3** | **Fixed (DB)** | HIBP 유출비번 = **Pro+만** (Free Save 거부 · User 2026-10-12 확인) |
