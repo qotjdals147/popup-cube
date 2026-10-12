@@ -247,6 +247,20 @@ export function OwnerProductPanel({
     setEditPreviewUrl(product.image_url);
   }
 
+  async function persistProductBasicsFromEdit(productId: string): Promise<void> {
+    const priceNumber = parseIntegerInput(editPrice);
+    if (!editName.trim() || !Number.isFinite(priceNumber) || priceNumber < 0) {
+      throw new ProductError('SAVE_FAILED');
+    }
+    await updateProduct(userId, productId, {
+      productCode: editProductCode,
+      name: editName,
+      description: editDescription,
+      price: Math.round(priceNumber),
+      imageFile: editImageFile,
+    });
+  }
+
   async function handleSaveEdit(productId: string) {
     const priceNumber = parseIntegerInput(editPrice);
     const stockNumber = parseIntegerInput(editStock);
@@ -257,13 +271,7 @@ export function OwnerProductPanel({
 
     setEditSaving(true);
     try {
-      await updateProduct(userId, productId, {
-        productCode: editProductCode,
-        name: editName,
-        description: editDescription,
-        price: Math.round(priceNumber),
-        imageFile: editImageFile,
-      });
+      await persistProductBasicsFromEdit(productId);
       await updateProductFulfillment(productId, {
         stockQuantity: Math.round(stockNumber),
         autoAcceptEnabled: editAutoEnabled,
@@ -472,6 +480,8 @@ export function OwnerProductPanel({
                     <OwnerProductSkusEditor
                       productId={product.id}
                       basePrice={parseIntegerInput(editPrice) || product.price}
+                      onSyncProductBasics={() => persistProductBasicsFromEdit(product.id)}
+                      onSkusSaved={() => void reload()}
                     />
 
                     <label style={styles.fieldLabel}>{t('ownerProducts.stockLabel')}</label>

@@ -729,7 +729,7 @@ export const ko = {
     skusAddRow: '+ 조합 추가',
     skusRemoveRow: '삭제',
     skusSave: '옵션 저장',
-    skusSaved: '저장됨',
+    skusSaved: '옵션·판매가 반영됨',
     skusLoading: '옵션 불러오는 중…',
     skusLoadError: '옵션을 불러오지 못했어요.',
     skusSaveError: '옵션 저장에 실패했어요. 잠시 후 다시 시도해 주세요.',

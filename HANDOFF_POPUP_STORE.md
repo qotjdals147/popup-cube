@@ -4754,6 +4754,10 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-12 pm — 점주 상품 판매가 저장 (옵션 저장과 분리 UX)
+- **Changed:** `OwnerProductPanel.persistProductBasicsFromEdit` · `OwnerProductSkusEditor` 옵션 저장 시 **판매가·이름 등 동시 반영** · `updateProduct` **0행 UPDATE** 시 오류 · `ko.ts` `skusSaved`
+- **Notes:** **원인** = 「옵션 저장」만 누르면 **옵션만** DB 저장 · 판매가는 아래 **「저장」** 또는 (수정 후) **옵션 저장** 시 함께 반영 · **`apps/web`만** · Expo **재시작 ❌** · Vercel 1~2min + **Ctrl+F5**
+
 ### 2026-10-12 pm — ISS-053 장바구니 가격 갱신 (AD-068)
 - **Changed:** `refreshCartItemPrices.ts` · `CartContext.applyRefreshedItems` · `CartView` · `ko.ts` (`cart.priceUpdatedNotice`) · **§7.100** User实机
 - **Notes:** **`apps/web`만** · Expo(Metro) **재시작 ❌** · Metro **Ctrl+C 불필요** · Vercel **1~2min** · 장바구니 **탭 재진입** · User实机 = **§7.100** (§0 **PC 3줄 + Expo 4줄** 생략 금지)

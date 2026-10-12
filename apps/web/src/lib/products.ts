@@ -192,12 +192,20 @@ export async function updateProduct(
     patch.image_url = input.imageUrl.trim();
   }
 
-  const { error } = await supabase.from('products').update(patch).eq('id', productId);
+  const { data, error } = await supabase
+    .from('products')
+    .update(patch)
+    .eq('id', productId)
+    .select('id')
+    .maybeSingle();
 
   if (error) {
     if (isDuplicateProductCodeError(error.message)) {
       throw new ProductError('DUPLICATE_PRODUCT_CODE', error.message);
     }
     throw new ProductError('SAVE_FAILED', error.message);
+  }
+  if (!data) {
+    throw new ProductError('SAVE_FAILED', 'not_updated');
   }
 }

@@ -14,6 +14,9 @@ import '../styles/owner-product-skus.css';
 interface OwnerProductSkusEditorProps {
   productId: string;
   basePrice: number;
+  /** 수정 중인 상품명·판매가 등 — 옵션 저장 전에 함께 DB 반영 */
+  onSyncProductBasics?: () => Promise<void>;
+  onSkusSaved?: () => void;
 }
 
 /** 조합 수가 이보다 많아지면 점주에게 경고 (실수로 수백 행 만드는 것 방지) */
@@ -124,7 +127,12 @@ function resizeRow(row: OwnerSkuRow, groupCount: number): OwnerSkuRow {
   return { ...row, values, adjustments };
 }
 
-export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSkusEditorProps) {
+export function OwnerProductSkusEditor({
+  productId,
+  basePrice,
+  onSyncProductBasics,
+  onSkusSaved,
+}: OwnerProductSkusEditorProps) {
   const [groupNames, setGroupNames] = useState<string[]>(DEFAULT_OPTION_GROUP_NAMES);
   const [rows, setRows] = useState<OwnerSkuRow[]>([emptyRow(DEFAULT_OPTION_GROUP_NAMES.length)]);
   const [loading, setLoading] = useState(true);
@@ -196,8 +204,12 @@ export function OwnerProductSkusEditor({ productId, basePrice }: OwnerProductSku
       return;
     }
     try {
+      if (onSyncProductBasics) {
+        await onSyncProductBasics();
+      }
       await saveOwnerProductSkus(productId, groupNames, rows);
       setDeltaDraft({});
+      onSkusSaved?.();
       setMsg(t('ownerProducts.skusSaved'));
     } catch (e) {
       const raw = e && typeof e === 'object' && 'message' in e ? String((e as { message: string }).message) : '';
