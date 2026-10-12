@@ -41,7 +41,7 @@ export async function uploadReturnEvidenceFiles(userId: string, files: File[]): 
 function mapReturnDetail(row: Record<string, unknown>): OrderReturnDetail {
   const rawItems = row.items;
   const items = Array.isArray(rawItems)
-    ? (rawItems as { order_item_id: string; quantity: number }[])
+    ? (rawItems as OrderReturnDetail['items'])
     : [];
   const rawEvidence = row.evidence_urls;
   const evidence_urls = Array.isArray(rawEvidence) ? (rawEvidence as string[]) : [];

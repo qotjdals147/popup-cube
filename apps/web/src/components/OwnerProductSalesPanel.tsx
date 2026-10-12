@@ -93,8 +93,9 @@ export function OwnerProductSalesPanel({ storeId, variant = 'page' }: OwnerProdu
               <ul style={styles.topList}>
                 {topProducts.map((p) => {
                   const w = Math.round((p.revenue / maxProductRev) * 100);
+                  const rowKey = `${p.product_id}:${p.option_label ?? ''}`;
                   return (
-                    <li key={p.product_id} style={styles.topRow}>
+                    <li key={rowKey} style={styles.topRow}>
                       <div style={styles.thumbWrap}>
                         {p.image_url ? (
                           <img src={p.image_url} alt="" style={styles.thumb} />
@@ -103,7 +104,10 @@ export function OwnerProductSalesPanel({ storeId, variant = 'page' }: OwnerProdu
                         )}
                       </div>
                       <div style={styles.topMain}>
-                        <span style={styles.topName}>{p.product_name}</span>
+                        <span style={styles.topName}>
+                          {p.product_name}
+                          {p.option_label ? ` · ${p.option_label}` : ''}
+                        </span>
                         <div style={styles.miniBarTrack}>
                           <div style={{ ...styles.miniBarFill, width: `${w}%` }} />
                         </div>

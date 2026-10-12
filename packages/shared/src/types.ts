@@ -431,7 +431,12 @@ export interface OrderReturnDetail {
   reason_code: string;
   reason_detail: string | null;
   status: OrderReturnStatus;
-  items: { order_item_id: string; quantity: number }[];
+  items: {
+    order_item_id: string;
+    quantity: number;
+    product_name?: string | null;
+    option_label?: string | null;
+  }[];
   exchange_memo: string | null;
   return_recipient_name: string | null;
   return_phone: string | null;

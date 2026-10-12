@@ -854,7 +854,7 @@ popup_store/                          # Turborepo root
 | ISS-051 | **자동 수락 quota 초과 가능** — `place_order`의 `auto_accept_remaining` 감소 `UPDATE` 뒤 **`IF NOT FOUND` 검사 없음** | **P2** | quota 소진·비활성 상태에서도 **주문은 자동 수락으로 진행**(감소만 실패) → 점주가 설정한 자동 수락 건수 초과. 음수는 안 됨. 조치 = `NOT FOUND` 시 수동 수락으로 폴백 |
 | ISS-052 | **운영 DB를 repo로 재현 불가** — 원격 `schema_migrations` **93건** vs repo `supabase/migrations` **41개 파일** | **P2** | 예: `20261002003108 product_skus_rpcs`는 **원격에만 존재**(repo 파일 없음) · `return_evidence_urls_rpc_v2/v3`·`store_kpi_ad084_b` 등 다수. → **스테이징 분리·재배포·롤백 불가**(§63.9 전제 붕괴). 조치 = `supabase db pull`로 누락 migration **repo 역동기화** |
 | ISS-053 | **장바구니 표시 금액 ≠ 실제 청구 금액** — 담을 때 `price`를 **localStorage에 스냅샷** 저장, 점주가 가격 변경해도 갱신 안 됨 | **P2 (AD-068)** | `place_order`는 **DB `products.price`로 재계산**하므로 **금전 손실은 없음**. 다만 결제 전 합계와 결제 후 금액이 달라 **「고객 의문 제로」 위반**. 조치 = 장바구니 진입 시 가격 재조회 + 변동 시 고지 |
-| ISS-054 | **AD-085 옵션이 반품·KPI 경로에 미연동** — `option_label`이 `get_my_orders`·`get_store_orders`에는 **있으나** `get_order_return`·`request_return`·`get_store_product_sales`에는 **없음** | **P3 (§62)** | 반품 상세·반품 신청 화면에서 **어떤 옵션인지 표시 안 됨** · 상품별 판매 통계 **옵션별 집계 불가**. 품목 식별 자체는 `order_items.id` 기준이라 **데이터 무결성은 정상** |
+| ISS-054 | ~~AD-085 옵션이 반품·KPI 경로에 미연동~~ | **Fixed (DB+web · 2026-10-12)** | `request_return`·`get_order_return` items에 `product_name`·`option_label` · `get_store_product_sales` **옵션별 행** · UI 반품·TOP판매 |
 | ISS-055 | **Supabase advisor 잔여 경고** — `function_search_path_mutable` 3건(`resolve_effective_promo`·`format_product_sku_label`·`set_display_fixture_updated_at`) · `auth_leaked_password_protection` **비활성** · RLS 정책 0개 2건(`order_returns`·`order_claim_messages`) | **P3** | search_path 3건은 `place_order`(자체 `search_path` 고정) 내부에서 호출돼 **실위험 낮음** · RLS 0개 = **deny-all**이고 클라이언트는 RPC만 사용 → **안전**(의도 명시 필요) · 유출 비밀번호 차단은 **대시보드 토글** 1회. ISS-013과 동계열 |
 
 **↓ CEO 회의 실기 버그 (2026-10-02 · User 2026-10-06 — **1순위 수정** · AD-088과 별도 · §7.94)**
@@ -880,7 +880,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-12 pm)** | **§7.96 엑셀 ⏸ CEO 상의** · **ISS-047 ✅** (멱등키 mock · §7.99) · **다음 코드 = ISS-054** (반품·판매통계 `option_label`) |
+| **한 줄 요약 (2026-10-12 pm)** | **§7.96 엑셀 ⏸ CEO 상의** · **ISS-047 ✅** · **ISS-054 ✅** · **다음** = `product_skus.color`/`size` DROP 또는 ISS-055 |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
 | **User实기** | §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
@@ -2128,7 +2128,7 @@ npx expo start --tunnel --port 8082 --clear
 - [x] `products.product_code` + 상품 폼 입력칸 (AD-088) ✅ (2026-10-12)  
 - [x] **엑셀 일괄등록 v1** (§7.96 · 다운로드·업로드) ✅ (2026-10-12) · **User实机 ⏸ CEO 상의 후**  
 - [x] **ISS-047** 통합 결제 부분 실패·멱등키 (mock) ✅ (2026-10-12 · §7.99)  
-- [ ] **ISS-054** 반품·판매통계 RPC 3개에 `option_label` 추가 ⬜  
+- [x] **ISS-054** 반품·판매통계 RPC 3개 + UI `option_label` ✅ (2026-10-12)  
 - [ ] 다음 사이클에 `product_skus.color`·`size` **DROP COLUMN** ⬜  
 
 ---
@@ -4703,6 +4703,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-12 pm — ISS-054 반품·판매통계 `option_label`
+- **Changed:** `20261012_iss054_option_label_returns_kpi.sql` · `storeKpi` · `orderReturns` · `OrderReturnRequestDialog` · `OwnerReturnsPanel` · `OwnerProductSalesPanel` · shared `OrderReturnDetail`
+- **Notes:** 원격 POPUP migration 적용 ✅ · **Expo 재시작 ❌** · Vercel + Ctrl+F5
 
 ### 2026-10-12 pm — ISS-047 멱등키 mock · §7.99 (PG 때 재검수)
 - **Author:** User / Cursor Agent

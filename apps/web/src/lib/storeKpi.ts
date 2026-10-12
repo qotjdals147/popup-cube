@@ -24,6 +24,7 @@ export interface StoreProductSalesRow {
   product_id: string;
   product_name: string;
   image_url: string | null;
+  option_label: string | null;
   units_sold: number;
   revenue: number;
 }

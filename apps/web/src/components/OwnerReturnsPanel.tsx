@@ -246,7 +246,10 @@ export function OwnerReturnsPanel({
                 <ul style={styles.itemList}>
                   {order.items.map((item) => (
                     <li key={item.id} style={styles.itemRow}>
-                      <span style={styles.itemName}>{item.product_name}</span>
+                      <span style={styles.itemName}>
+                        {item.product_name}
+                        {item.option_label ? ` · ${item.option_label}` : ''}
+                      </span>
                       <span style={styles.itemQty}>× {item.quantity}</span>
                     </li>
                   ))}

@@ -293,7 +293,12 @@ export function OrderReturnRequestDialog({
                   <ul className="oh-return-item-list">
                     {order.items.map((item) => (
                       <li key={item.id} className="oh-return-item-row">
-                        <span className="oh-return-item-name">{item.product_name}</span>
+                        <span className="oh-return-item-name">
+                          {item.product_name}
+                          {item.option_label ? (
+                            <span className="oh-return-item-option"> · {item.option_label}</span>
+                          ) : null}
+                        </span>
                         <QuantityStepper
                           className="oh-return-qty-stepper"
                           compact
