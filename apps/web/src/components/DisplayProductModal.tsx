@@ -4,6 +4,7 @@ import { listActiveProducts } from '../lib/products';
 import { listFixtureDisplayProducts } from '../lib/displayFixtures';
 import { getActivePromotion, GachaError, rollGacha } from '../lib/gacha';
 import { createAddress, listMyAddresses } from '../lib/addresses';
+import { createCheckoutIdempotencyKey } from '../lib/checkoutIdempotency';
 import { OrderError, placeOrder } from '../lib/orders';
 import { useCart } from '../context/CartContext';
 import {
@@ -210,7 +211,14 @@ export function DisplayProductModal({
         setRewardError(t('cart.discountUnavailable'));
         return;
       }
-      const result = await placeOrder(storeId, selectedAddressId, [cartLine], 'discount', percent);
+      const result = await placeOrder(
+        storeId,
+        selectedAddressId,
+        [cartLine],
+        'discount',
+        percent,
+        createCheckoutIdempotencyKey(),
+      );
       setOrderId(result.orderId);
       setOrderRef(result.orderRef);
       setDiscountPercent(percent);
@@ -228,7 +236,14 @@ export function DisplayProductModal({
     setRewardError(null);
     setBuyPhase('gachaRolling');
     try {
-      const orderResult = await placeOrder(storeId, selectedAddressId, [cartLine], 'gacha', null);
+      const orderResult = await placeOrder(
+        storeId,
+        selectedAddressId,
+        [cartLine],
+        'gacha',
+        null,
+        createCheckoutIdempotencyKey(),
+      );
       setOrderId(orderResult.orderId);
       setOrderRef(orderResult.orderRef);
       setOrderTotal(orderResult.totalAmount);

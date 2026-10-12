@@ -18,6 +18,7 @@ import { useCart } from '../context/CartContext';
 import { cartLineKey } from '../lib/cartLineKey';
 import { getActivePromotion, GachaError, rollGacha } from '../lib/gacha';
 import { createAddress, listMyAddresses } from '../lib/addresses';
+import { createCheckoutIdempotencyKey } from '../lib/checkoutIdempotency';
 import { OrderError, placeOrder } from '../lib/orders';
 import { validateCheckoutCartLines } from '../lib/validateCheckoutCartLines';
 import { useOverlayScrollLock } from '../hooks/useOverlayScrollLock';
@@ -87,8 +88,9 @@ async function placeUnifiedStoreOrder(
   ordering: CartLineItem[],
   mode: 'discount' | 'gacha',
   shouldRollGacha: boolean,
+  idempotencyKey: string,
 ): Promise<{ totalAmount: number; gachaResult: GachaRollResult | null }> {
-  const result = await placeOrder(storeId, addressId, ordering, mode, null);
+  const result = await placeOrder(storeId, addressId, ordering, mode, null, idempotencyKey);
   if (mode !== 'gacha' || !shouldRollGacha) {
     return { totalAmount: result.totalAmount, gachaResult: null };
   }
@@ -164,6 +166,7 @@ export function CartView({
   const [gachaResult, setGachaResult] = useState<GachaRollResult | null>(null);
   const [gachaResultsByStore, setGachaResultsByStore] = useState<GachaResultWithStore[]>([]);
   const [rewardError, setRewardError] = useState<string | null>(null);
+  const [checkoutPartialNotice, setCheckoutPartialNotice] = useState<string | null>(null);
   const [storeNames, setStoreNames] = useState<Record<string, string>>({});
   const [storeInfoById, setStoreInfoById] = useState<Record<string, StoreSummary>>({});
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
@@ -433,10 +436,12 @@ export function CartView({
   ) {
     if (checkoutTargetStoreIds.length === 0 || !selectedAddressId) return;
     setRewardError(null);
+    setCheckoutPartialNotice(null);
     setCheckoutBusy(true);
     if (userChoice === 'gacha') setPhase('gachaRolling');
     const rollingStarted = userChoice === 'gacha' ? Date.now() : 0;
     const orderedLineKeys: string[] = [];
+    const idempotencyKey = createCheckoutIdempotencyKey();
     try {
       let totalAmount = 0;
       let preSubtotal = 0;
@@ -464,6 +469,7 @@ export function CartView({
           ordering,
           mode,
           shouldRollGacha,
+          idempotencyKey,
         );
         orderedLineKeys.push(...ordering.map((item) => cartLineKey(item)));
         totalAmount += storeTotal;
@@ -532,9 +538,11 @@ export function CartView({
     } catch (err) {
       if (orderedLineKeys.length > 0) {
         removeItemsByLineKeys(orderedLineKeys);
+        setCheckoutPartialNotice(t('cart.checkoutPartialRemoved'));
       }
       setRewardError(orderErrorMessage(err));
       if (userChoice) setPhase('reward');
+      else if (orderedLineKeys.length > 0) setPhase('cart');
     } finally {
       setCheckoutBusy(false);
     }
@@ -811,6 +819,7 @@ export function CartView({
               {t('cart.rewardPromoOnceHint')}
             </p>
           )}
+          {checkoutPartialNotice && <p className="cart-drawer-hint">{checkoutPartialNotice}</p>}
           {rewardError && <p className="cart-drawer-error">{rewardError}</p>}
           <div className="cart-drawer-reward-row">
             {benefitUi.showDiscountButton && (
@@ -910,6 +919,8 @@ export function CartView({
             {showPromoOrderOnceHint && (
               <p className="cart-drawer-promo-once-note">{t('cart.promoOrderOnceHint')}</p>
             )}
+            {checkoutPartialNotice && <p className="cart-drawer-hint">{checkoutPartialNotice}</p>}
+            {rewardError && phase === 'cart' && <p className="cart-drawer-error">{rewardError}</p>}
             {storeGroups.map((group) => {
               const storeLineKeys = group.items.map((item) => cartLineKey(item));
               const storeAllSelected =

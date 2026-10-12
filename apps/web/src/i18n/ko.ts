@@ -476,6 +476,7 @@ export const ko = {
     invalidRewardChoice: '이 주문에는 선택할 수 없는 혜택이에요. 다시 시도해 주세요.',
     checkoutProcessing: '주문 준비 중...',
     insufficientStock: '재고가 부족해요. 수량을 줄이거나 나중에 다시 시도해 주세요.',
+    checkoutPartialRemoved: '일부 매장만 주문됐어요. 완료된 상품은 장바구니에서 뺐어요.',
     storeCheckoutBadge: '이 매장 결제',
     otherStoresRemain: '다른 매장 상품 {count}건은 결제 후에도 장바구니에 남아 있어요.',
     emptyThisStore: '이 매장에 담긴 상품이 없어요.',

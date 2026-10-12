@@ -31,7 +31,9 @@ export async function placeOrder(
 
   rewardType: RewardType,
 
-  discountPercent: number | null
+  discountPercent: number | null,
+
+  idempotencyKey?: string | null,
 
 ): Promise<PlaceOrderResult> {
 
@@ -58,7 +60,7 @@ export async function placeOrder(
 
 
 
-  const { data, error } = await supabase.rpc('place_order', {
+  const rpcArgs: Record<string, unknown> = {
 
     p_store_id: storeId,
 
@@ -70,7 +72,13 @@ export async function placeOrder(
 
     p_discount_percent: discountPercent,
 
-  });
+  };
+
+  if (idempotencyKey) {
+    rpcArgs.p_idempotency_key = idempotencyKey;
+  }
+
+  const { data, error } = await supabase.rpc('place_order', rpcArgs);
 
 
 
