@@ -56,6 +56,23 @@ export function isLegendRow(row: unknown[], col: Map<BulkProductHeader, number>)
   return false;
 }
 
+/** 양식 5행 — 입력 예시(회색) 행 */
+export function isInputHintRow(row: unknown[], col: Map<BulkProductHeader, number>): boolean {
+  if (cellAt(row, col, '상품명')) return false;
+  const code = cellAt(row, col, '판매자 상품코드');
+  if (code && !/유일|덮어|매장/.test(code)) return false;
+  const price = cellAt(row, col, '판매가');
+  if (/원\s*·|숫자/.test(price)) return true;
+  if (/유일|덮어/.test(code)) return true;
+  const optName = cellAt(row, col, '옵션명');
+  const optVal = cellAt(row, col, '옵션값');
+  if (optName === '컬러|사이즈' && optVal === '블랙|M') return true;
+  if (cellAt(row, col, '대표이미지') === 'https://…') return true;
+  const auto = cellAt(row, col, '주문 자동 수락');
+  if (auto === 'Y / N') return true;
+  return false;
+}
+
 export function cellAt(row: unknown[], col: Map<BulkProductHeader, number>, h: BulkProductHeader): string {
   const i = col.get(h)!;
   const v = row[i];

@@ -4602,6 +4602,14 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-12 — §7.96 **엑셀 업로드** (5행 힌트·이어쓰기·가격 쉼표)
+- **Changed:** `headerMap` `isInputHintRow` · `parseBulkProductXlsx` — **같은 상품코드 윗줄 상속**(이름·가격·이미지) · 옵션명 불일치 **안내 문구** · `styledTemplate` — **가격·재고 열 `#,##0`** · 작성안내 보강
+- **Notes:** **Expo 재시작 ❌** · Vercel + Ctrl+F5 · **양식 다시 다운로드** · 옵션 = **한 행에 컬러|사이즈 · 블랙|M** (스마트스토어 조합형)
+
+### 2026-10-12 — §7.96 **양식 다운로드 무반응** (ISS-065)
+- **Changed:** `styledTemplate.ts` — `작성안내` **mergeCells 1회** · 버퍼 캐시·preload · `OwnerProductBulkUpload` — **양식 준비 중…** · 실패 문구 · `ko.ts` · §6 ISS-065
+- **Notes:** **Expo 재시작 ❌** · Vercel 1~2min + **Ctrl+F5** · **엑셀 ▾** → **양식 다운로드** · **다음 = User实机 §7.96**
+
 ### 2026-10-12 late2 — §7.96 **엑셀 양식 스마트스토어형 꾸밈** (User 피드백)
 - **Changed:** `exceljs` · `styledTemplate.ts` — **타이틀/안내 밴드** · **헤더(3행)·필수·권장(4행)·입력힌트(5행)** · **칸 너비** · 테두리·zebra 예시 · autofilter · **`작성안내` 시트** 스타일 · `headerMap.ts` — 업로드 시 **헤더 동적 탐색** · legend/hint 행 스kip · 예시 이미지 URL 정리
 - **Notes:** **Expo 재시작 ❌** · Vercel + Ctrl+F5 · **「양식 다운로드」** 다시 받아서 열 너비·상단 5행 확인 · **다음 = User实机 §7.96**

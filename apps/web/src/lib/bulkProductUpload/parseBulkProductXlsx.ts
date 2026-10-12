@@ -9,9 +9,22 @@ import {
 import {
   cellAt,
   findHeaderRowIndex,
+  isInputHintRow,
   isLegendRow,
   mapHeaders,
 } from './headerMap';
+
+/** 같은 상품코드 — 아래 행은 옵션·재고만 적어도 됨 */
+type CarryProduct = {
+  productCode: string | null;
+  name: string;
+  price: number;
+  imageUrl: string;
+  summary: string;
+  detail: string;
+  autoAcceptEnabled: boolean;
+  autoAcceptLimit: number;
+};
 
 export interface BulkRowError {
   row: number;
@@ -123,34 +136,57 @@ export function parseBulkProductXlsx(buffer: ArrayBuffer): ParseBulkProductResul
   const col = mapHeaders(rows[headerRowIdx] ?? [])!;
 
   const draft = new Map<string, ParsedBulkProductGroup>();
+  let carry: CarryProduct | null = null;
 
   for (let r = headerRowIdx + 1; r < rows.length; r += 1) {
     const excelRow = r + 1;
     const row = rows[r] ?? [];
     if (row.every((c) => !String(c ?? '').trim())) continue;
     if (isLegendRow(row, col)) continue;
+    if (isInputHintRow(row, col)) continue;
     const firstCell = String(row[0] ?? '').trim();
     if (firstCell.startsWith('(') && firstCell.includes('열')) continue;
 
-    const name = cell(row, col, '상품명');
-    const codeRaw = cell(row, col, '판매자 상품코드');
+    let codeRaw = cell(row, col, '판매자 상품코드');
     if (codeRaw.startsWith(BULK_SAMPLE_CODE_PREFIX)) continue;
-    const productCode = codeRaw ? codeRaw.slice(0, 40) : null;
+
+    let name = cell(row, col, '상품명');
+    let price = parseIntCell(cell(row, col, '판매가'));
+    let imageUrl = cell(row, col, '대표이미지');
+    let summary = cell(row, col, '요약설명');
+    let detail = cell(row, col, '상세설명');
+    const autoAcceptRaw = cell(row, col, '주문 자동 수락');
+    let autoLimitRaw = parseIntCell(cell(row, col, '자동 수락 건수'), true);
+
+    if (carry) {
+      if (!codeRaw.trim()) codeRaw = carry.productCode ?? '';
+      if (!name) name = carry.name;
+      if (price === null || !Number.isFinite(price)) price = carry.price;
+      if (!imageUrl.trim()) imageUrl = carry.imageUrl;
+      if (!summary) summary = carry.summary;
+      if (!detail) detail = carry.detail;
+      if (!autoAcceptRaw.trim()) {
+        // inherit bool + limit from carry when row leaves them blank
+      }
+    }
+
+    const productCode = codeRaw.trim() ? codeRaw.trim().slice(0, 40) : null;
 
     if (!name) {
-      errors.push({ row: excelRow, message: '상품명이 비어 있어요.' });
+      errors.push({ row: excelRow, message: '상품명이 비어 있어요. (윗줄 상품코드·이름을 먼저 채우세요)' });
       continue;
     }
 
-    const price = parseIntCell(cell(row, col, '판매가'));
     if (price === null || !Number.isFinite(price) || price < 0) {
       errors.push({ row: excelRow, message: '판매가를 확인해 주세요.' });
       continue;
     }
 
-    const imageUrl = cell(row, col, '대표이미지');
     if (!isHttpUrl(imageUrl)) {
-      errors.push({ row: excelRow, message: '대표이미지는 http(s) URL이어야 해요.' });
+      errors.push({
+        row: excelRow,
+        message: '대표이미지는 http(s) URL이어야 해요. (같은 상품 첫 줄에 넣으면 아래 줄은 비워도 됨)',
+      });
       continue;
     }
 
@@ -194,18 +230,30 @@ export function parseBulkProductXlsx(buffer: ArrayBuffer): ParseBulkProductResul
       }
     }
 
-    const autoAcceptEnabled = parseBool(cell(row, col, '주문 자동 수락'));
-    const autoLimitRaw = parseIntCell(cell(row, col, '자동 수락 건수'), true);
+    const autoAcceptEnabled = autoAcceptRaw.trim()
+      ? parseBool(autoAcceptRaw)
+      : (carry?.autoAcceptEnabled ?? false);
     const autoAcceptLimit =
-      autoLimitRaw !== null && Number.isFinite(autoLimitRaw) ? Math.max(0, autoLimitRaw) : 0;
+      autoLimitRaw !== null && Number.isFinite(autoLimitRaw)
+        ? Math.max(0, autoLimitRaw)
+        : (carry?.autoAcceptLimit ?? 0);
     if (autoAcceptEnabled && autoAcceptLimit <= 0) {
       errors.push({ row: excelRow, message: '자동 수락 Y면 자동 수락 건수를 1 이상 넣어 주세요.' });
       continue;
     }
 
-    const summary = cell(row, col, '요약설명');
-    const detail = cell(row, col, '상세설명');
     const key = groupKey(productCode, name);
+
+    carry = {
+      productCode,
+      name: name.slice(0, 120),
+      price,
+      imageUrl,
+      summary: summary.slice(0, 300),
+      detail,
+      autoAcceptEnabled,
+      autoAcceptLimit,
+    };
 
     const skuLine: ParsedBulkSkuLine | null = hasOptions
       ? { excelRow, optionNames, optionValues, priceDelta, skuStock }
@@ -243,7 +291,11 @@ export function parseBulkProductXlsx(buffer: ArrayBuffer): ParseBulkProductResul
       const namesKey = skuLine.optionNames.join('\0');
       const refNames = existing.skuLines[0]?.optionNames.join('\0') ?? namesKey;
       if (existing.skuLines.length > 0 && refNames !== namesKey) {
-        errors.push({ row: excelRow, message: '같은 상품인데 옵션명 구성이 달라요.' });
+        errors.push({
+          row: excelRow,
+          message:
+            '옵션은 행마다 「컬러」「사이즈」처럼 나누지 않아요. 옵션명=컬러|사이즈 · 옵션값=블랙|M (한 행=조합 1개)',
+        });
         continue;
       }
       existing.skuLines.push(skuLine);

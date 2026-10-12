@@ -96,7 +96,11 @@ function buildDataSheet(wb: ExcelJS.Workbook): void {
   });
 
   BULK_PRODUCT_HEADERS.forEach((h, i) => {
-    ws.getColumn(i + 1).width = BULK_COLUMN_WIDTHS[h];
+    const col = ws.getColumn(i + 1);
+    col.width = BULK_COLUMN_WIDTHS[h];
+    if (h === '판매가' || h === '옵션가' || h === '재고수량' || h === '옵션 재고수량' || h === '자동 수락 건수') {
+      col.numFmt = '#,##0';
+    }
   });
 
   ws.mergeCells(1, 1, 1, LAST_COL);
@@ -196,6 +200,8 @@ function buildGuideSheet(wb: ExcelJS.Workbook): void {
     ['재고수량', '옵션 없을 때 필수', '옵션이 있으면 칸 비움 → 옵션 재고수량 사용'],
     ['옵션명·옵션값·옵션가·옵션 재고', '옵션 있을 때', '한 행 = 조합 1개. 같은 상품코드로 행 추가'],
     ['옵션명·값 구분', '', '셀 안에서 컬러|사이즈 · 값은 블랙|M (| 구분)'],
+    ['옵션 여러 개', '조합형', '컬러·사이즈를 **행 두 개로 나누지 않음**. 블랙·M / 화이트·L = **행 2개** · 각 행에 옵션명·값 **전부**'],
+    ['아래 줄 이어쓰기', '', '같은 판매자 상품코드면 상품명·판매가·대표이미지 **비워도** 윗줄 값 사용'],
     ['주문 자동 수락', '선택', 'Y 또는 N · Y면 자동 수락 건수 1 이상'],
     ['', '', ''],
     ['업로드', '', '판매자센터 → 상품 → 엑셀 일괄 등록 → 「상품일괄등록」 시트 기준'],
