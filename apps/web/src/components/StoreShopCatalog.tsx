@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Product } from '@popup-cube/shared';
 import { listActiveProducts } from '../lib/products';
 import { getProductSkus } from '../lib/productSkus';
@@ -61,6 +61,11 @@ export function StoreShopCatalog({
     const match = products.find((p) => p.id === initialProductId);
     if (match) setDetailProduct(match);
   }, [initialProductId, products]);
+
+  const relatedForDetail = useMemo(() => {
+    if (!detailProduct) return [];
+    return products.filter((p) => p.id !== detailProduct.id).slice(0, 12);
+  }, [products, detailProduct]);
 
   function getQty(productId: string): number {
     return quantities[productId] ?? 1;
@@ -169,6 +174,8 @@ export function StoreShopCatalog({
           storeId={storeId}
           appearance={variant === 'page' ? 'light' : 'dark'}
           shoppingBlocked={shoppingBlocked}
+          relatedProducts={relatedForDetail}
+          onSelectRelated={(p) => setDetailProduct(p)}
           onClose={() => setDetailProduct(null)}
           onOpenCart={() => {
             setDetailProduct(null);

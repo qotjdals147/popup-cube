@@ -885,7 +885,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-12 eve)** | **AD-088 홈→상품 상세 ✅** · **Phase 2** 상세 UX 05~07 **진행 중** · CEO **카테고리 칩** · 엑셀实机 |
+| **한 줄 요약 (2026-10-12 eve)** | **AD-088 Phase 2 ✅** 펼치기·연관상품 · **CEO 카테고리 칩** · 엑셀实机 · 코디(점주) 2차 |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
 | **User实기** | **§7.100 ISS-053 ✅** · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
@@ -1873,7 +1873,7 @@ npm run dev
 - [ ] CEO **홈 카테고리** 확정 ⬜ (칩 = 전체/신규/마감임박 · **의류/뷰티 등 = CEO 후**)  
 - [x] AD-088 **Phase 1 홈** — 앱 `home.tsx` **상품 피드** · 배ner · 칩 (벤치 **01~02**) · 2026-10-12  
 - [x] AD-088 **Phase 1b** — 홈 상품 탭 → `/shop?product=` · **ProductDetailModal** 자동 (§7.104) · 2026-10-12  
-- [ ] AD-088 **Phase 2** 상세 연관·펼치기 (벤치 **05~07**) ⬜  
+- [x] AD-088 **Phase 2** 상세 **펼치기·연관상품** (벤치 **05~07** v1) · 2026-10-12  
 - [ ] **셀메이트 계정·연동 스펙** CEO 확인 (§7.95) ⬜  
 
 ---
@@ -2312,13 +2312,31 @@ npx supabase db pull
 | **User 질문** | 홈에서 상품 눌렀을 때 **매장만** 열림 → **1b 미구현**이었음 · **순차 진행 ✅** |
 | **동작** | 앱 홈 카드 → `store/[storeId]?productId=` → WebView `/shop?product=uuid` → **`ProductDetailModal` 자동** |
 | **코드** | `home.tsx` · `store/[storeId].tsx` · `StoreShopPage` · `StoreShopCatalog.initialProductId` |
-| **아직 ❌** | Phase 2 — 상세 **펼치기·연관상품** (벤치 05~07) · 목록 스크롤 포커스 |
+| **Phase 2 ✅** | **상품 정보 펼쳐보기** · **이 매장의 다른 상품** 가로 스크롤 (코디 DB 전) · §7.105 |
+| **아직 ❌** | 상세 **탭**(정보/리뷰) · **코디 SKU** · 목록 스크롤 포커스 · 벤치 **08** 소식·태그 |
 
 #### Expo 재시작
 
 | | |
 |---|---|
 | mobile + web(Vercel) | **✅ mobile `--clear`** · **Vercel 1~2min** (`apps/web`) |
+
+---
+
+### 7.105 **AD-088 Phase 2 — 상품 상세 펼치기·연관** (2026-10-12)
+
+| | |
+|---|---|
+| **벤치** | `05~07` — 상세 본문 · **연관** · **상품 정보 펼쳐보기** |
+| **동작** | 상세 블록 **240px 접힘** + 펼치기/접기 · **이 매장의 다른 상품** 최대 12 · 탭하면 **같은 모달에서 상품 전환** |
+| **코드** | `ProductDetailModal` · `StoreShopCatalog` · `product-detail-shop.css` · `ko.ts` |
+| **아직 ❌** | 점주 **코디 링크** · 상품 **태그·소식**(벤치 08) · 정보/리뷰 **탭 UI** |
+
+#### Expo 재시작
+
+| | |
+|---|---|
+| `apps/web` only | **❌ Expo** · **Vercel 1~2min** + shop WebView **새로고침** |
 
 ---
 
@@ -4873,6 +4891,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-12 eve — AD-088 Phase 2 상세 펼치기·연관 (§7.105)
+- **Changed:** `ProductDetailModal` · `StoreShopCatalog` · `product-detail-shop.css` · `ko.ts` · §7.94 · §7.104
+- **Notes:** **`apps/web` only** · Vercel **1~2min** · 홈 딥링크(§7.104)와 함께 실기
 
 ### 2026-10-12 eve — AD-088 홈 → 상품 상세 딥링크 (§7.104)
 - **Changed:** `StoreShopCatalog` · `StoreShopPage` · mobile `home` · `store/[storeId]`

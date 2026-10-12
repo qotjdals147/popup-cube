@@ -527,6 +527,9 @@ export const ko = {
     reviewPurchaserHint: '구매하신 상품이에요. 배송 후 리뷰를 남길 수 있어요.',
     reviewNeedConfirmHint: '구매확정 후 리뷰 등록이 가능해요. 버튼을 누르면 안내가 나와요.',
     reviewConfirmError: '구매확정에 실패했어요. 주문내역에서 다시 시도해 주세요.',
+    expandDetail: '상품 정보 펼쳐보기',
+    collapseDetail: '상품 정보 접기',
+    relatedTitle: '이 매장의 다른 상품',
   },
   /** §54 — 리뷰 작성 (구매확정 게이트) */
   review: {

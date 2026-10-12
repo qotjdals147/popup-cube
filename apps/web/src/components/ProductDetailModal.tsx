@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { OrderStatus, Product, ProductDetailBlock, ProductReview, ProductSku } from '@popup-cube/shared';
 import { getProductSkus } from '../lib/productSkus';
 import {
@@ -31,6 +31,9 @@ interface ProductDetailModalProps {
   appearance?: 'light' | 'dark';
   /** §58 #5 — 종료 팝업: 담기 숨김 */
   shoppingBlocked?: boolean;
+  /** AD-088 Phase 2 — 같은 매장 다른 상품 (코디 DB 전 · 목록에서 제외한 나머지) */
+  relatedProducts?: Product[];
+  onSelectRelated?: (product: Product) => void;
 }
 
 /** layout = 항상 적용 · dark = 다크일 때만 추가(색·테두리) */
@@ -80,9 +83,12 @@ export function ProductDetailModal({
   previewMode = false,
   appearance = 'light',
   shoppingBlocked = false,
+  relatedProducts = [],
+  onSelectRelated,
 }: ProductDetailModalProps) {
   const light = appearance === 'light';
   const rootClass = light ? 'product-detail--light' : undefined;
+  const scrollRef = useRef<HTMLDivElement>(null);
   useOverlayScrollLock(true);
   const { addToCart } = useCart();
   const { userId } = useAuth();
@@ -105,6 +111,11 @@ export function ProductDetailModal({
     null
   );
   const [reviewConfirmOpen, setReviewConfirmOpen] = useState(false);
+  const [detailExpanded, setDetailExpanded] = useState(false);
+
+  const hasDetailContent = detailBlocks.some(
+    (b) => (b.block_type === 'image' && b.image_url) || (b.text_content && b.text_content.trim())
+  );
 
   async function loadReviewEligibility() {
     if (previewMode || !userId) {
@@ -143,6 +154,7 @@ export function ProductDetailModal({
     let mounted = true;
     setLoading(true);
     setReviewConfirmError(null);
+    setDetailBlocks([]);
     Promise.all([
       listProductDetailBlocks(product.id),
       getProductReviews(product.id),
@@ -168,6 +180,11 @@ export function ProductDetailModal({
       mounted = false;
     };
   }, [product.id, userId, previewMode, storeId]);
+
+  useEffect(() => {
+    setDetailExpanded(false);
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [product.id]);
 
   const avgRating =
     reviews.length > 0 ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length) * 10) / 10 : null;
@@ -264,7 +281,7 @@ export function ProductDetailModal({
           {previewMode && <span style={S.previewBadge}>{t('productDetail.previewBadge')}</span>}
         </div>
 
-        <div style={S.scrollArea}>
+        <div ref={scrollRef} style={S.scrollArea}>
           <div style={S.topSection}>
             <div className="product-detail-main-thumb-wrap" style={styleFor(light, S.thumbWrapLayout, S.thumbWrapDark)}>
               {product.image_url ? (
@@ -299,28 +316,77 @@ export function ProductDetailModal({
             <>
               <section className="product-detail-section" style={styleFor(light, S.sectionLayout, S.sectionDark)}>
                 <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>{t('productDetail.descTitle')}</h4>
-                {detailBlocks.length === 0 ? (
+                {!hasDetailContent ? (
                   <p className="product-detail-hint" style={styleFor(light, S.hintLayout, S.hintDark)}>{t('productDetail.noDetail')}</p>
                 ) : (
-                  <div style={S.blockStack}>
-                    {detailBlocks.map((block) =>
-                      block.block_type === 'image' ? (
-                        block.image_url && (
-                          <img key={block.id} src={block.image_url} alt="" loading="lazy" style={S.detailImage} />
-                        )
-                      ) : block.text_content && block.text_content.trim() ? (
-                        <div key={block.id} className="product-detail-desc-body" style={styleFor(light, S.descBodyLayout, S.descBodyDark)}>
-                          {block.text_content.split('\n').map((line, i) => (
-                            <p key={i} className="product-detail-desc-line" style={S.descLineLayout}>
-                              {line || '\u00A0'}
-                            </p>
-                          ))}
-                        </div>
-                      ) : null
-                    )}
-                  </div>
+                  <>
+                    <div
+                      className={
+                        detailExpanded ? 'product-detail-block-stack' : 'product-detail-block-stack product-detail-block-stack--collapsed'
+                      }
+                      style={S.blockStack}
+                    >
+                      {detailBlocks.map((block) =>
+                        block.block_type === 'image' ? (
+                          block.image_url && (
+                            <img key={block.id} src={block.image_url} alt="" loading="lazy" style={S.detailImage} />
+                          )
+                        ) : block.text_content && block.text_content.trim() ? (
+                          <div key={block.id} className="product-detail-desc-body" style={styleFor(light, S.descBodyLayout, S.descBodyDark)}>
+                            {block.text_content.split('\n').map((line, i) => (
+                              <p key={i} className="product-detail-desc-line" style={S.descLineLayout}>
+                                {line || '\u00A0'}
+                              </p>
+                            ))}
+                          </div>
+                        ) : null
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className="product-detail-expand-btn"
+                      style={styleFor(light, S.expandBtnLayout, S.expandBtnDark)}
+                      onClick={() => setDetailExpanded((v) => !v)}
+                    >
+                      {detailExpanded ? t('productDetail.collapseDetail') : t('productDetail.expandDetail')}
+                      <span aria-hidden>{detailExpanded ? ' ▲' : ' ▼'}</span>
+                    </button>
+                  </>
                 )}
               </section>
+
+              {relatedProducts.length > 0 && onSelectRelated && (
+                <section className="product-detail-section product-detail-related-section" style={styleFor(light, S.sectionLayout, S.sectionDark)}>
+                  <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>
+                    {t('productDetail.relatedTitle')}
+                  </h4>
+                  <div className="product-detail-related-row">
+                    {relatedProducts.map((rp) => (
+                      <button
+                        key={rp.id}
+                        type="button"
+                        className="product-detail-related-card"
+                        style={styleFor(light, S.relatedCardLayout, S.relatedCardDark)}
+                        onClick={() => onSelectRelated(rp)}
+                      >
+                        <div className="product-detail-related-thumb-wrap" style={styleFor(light, S.relatedThumbWrapLayout, S.relatedThumbWrapDark)}>
+                          {rp.image_url ? (
+                            <img src={rp.image_url} alt="" className="product-detail-related-thumb" />
+                          ) : (
+                            <span className="product-detail-related-placeholder">🛍️</span>
+                          )}
+                        </div>
+                        <span className="product-detail-related-name" style={styleFor(light, S.relatedNameLayout, S.relatedNameDark)}>
+                          {rp.name}
+                        </span>
+                        <span className="product-detail-related-price" style={styleFor(light, S.relatedPriceLayout, S.relatedPriceDark)}>
+                          {formatPrice(rp.price)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               <section className="product-detail-section" style={styleFor(light, S.sectionLayout, S.sectionDark)}>
                 <div style={S.reviewsSectionHeader}>
@@ -722,4 +788,53 @@ const S = {
   optionChipDark: { border: '1px solid #2c4270', background: '#0d1730', color: '#d8e4ff' },
   optionChipActiveDark: { borderColor: '#3182f6', background: 'rgba(49,130,246,0.2)' },
   optionErr: { margin: 0, fontSize: 12, color: '#e94560' },
+  expandBtnLayout: {
+    width: '100%',
+    marginTop: 10,
+    padding: '12px 14px',
+    borderRadius: 8,
+    border: '1px solid #e5e8eb',
+    background: '#f9fafb',
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+    color: '#191f28',
+  },
+  expandBtnDark: { border: '1px solid #2c4270', background: '#0d1730', color: '#d8e4ff' },
+  relatedCardLayout: {
+    flex: '0 0 108px',
+    width: 108,
+    padding: 0,
+    border: 'none',
+    background: 'transparent',
+    cursor: 'pointer',
+    textAlign: 'left' as const,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: 6,
+  },
+  relatedCardDark: {},
+  relatedThumbWrapLayout: {
+    width: 108,
+    height: 108,
+    borderRadius: 8,
+    overflow: 'hidden',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: '#f2f4f6',
+  },
+  relatedThumbWrapDark: { background: '#0d1730' },
+  relatedNameLayout: {
+    fontSize: 11,
+    lineHeight: 1.35,
+    color: '#191f28',
+    display: '-webkit-box' as const,
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical' as const,
+    overflow: 'hidden',
+  },
+  relatedNameDark: { color: '#d8e4ff' },
+  relatedPriceLayout: { fontSize: 12, fontWeight: 700, color: '#e94560' },
+  relatedPriceDark: { color: '#e94560' },
 };
