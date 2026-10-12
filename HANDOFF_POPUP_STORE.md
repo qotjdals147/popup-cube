@@ -882,7 +882,7 @@ popup_store/                          # Turborepo root
 |---|---|
 | **한 줄 요약 (2026-10-12 pm)** | **§7.96 엑셀 ⏸** · **ISS-053 ✅** · **ISS-055** Auth min 8 ✅ · HIBP **Pro+** ⏸ · **다음 코드** = **ISS-052** (migration 역동기화) |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
-| **User实기** | §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
+| **User实기** | **§7.100 ISS-053** ⬜ · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
 | **출시 불안·건강검진** | **§63 (AD-086)** — **1차 감사 (2026-10-02) ✅** · **2차 최종 = 기능·CEO 항목 완료 후 동일 §63 재실시** (§63.8 · User 2026-10-06) |
 | **🚨 즉시 (User 2026-10-06~07)** | **ISS-056~062** ✅ push 후 Vercel 1~2분 · **앱 `apps/mobile` 변경 → Expo `--clear`** · **옵션 주문 「안 들어옴」 = 자동수락 → 발주·배송 탭** (ISS-061 · 주문 탭에 안내 추가) |
@@ -2168,6 +2168,56 @@ PG 코드를 **새로 짜기 전** · **스테이징 승인 전** 아래를 **§
 | 변경 | Expo |
 |---|---|
 | `apps/web` only | **❌** · Vercel 1~2min + **Ctrl+F5** |
+
+---
+
+### 7.100 **ISS-053 장바구니 가격 갱신** (AD-068 · User实机 · 2026-10-12)
+
+> **쉬운 말:** 장바구니에 담아 둔 **옛날 가격**을, 장바구니를 **열 때** 서버 최신 가격으로 맞춘다. 바뀌었으면 **한 줄 안내**가 뜬다.
+
+#### Expo 재시작 여부 (§0 표 — **web-only 행**)
+
+| | |
+|---|---|
+| **이번에 수정한 곳** | **`apps/web`만** — `CartView` · `CartContext` · `refreshCartItemPrices.ts` · `apps/mobile` **없음** |
+| **Expo(Metro) 재시작** | ❌ **불필요** · Metro **Ctrl+C 불필요** |
+| **User가 할 일** | `main` push ✅ (`0f2d689`) → **Vercel 1~2min** → 손님 **장바구니 탭 나갔다 다시** · PC는 **`Ctrl+F5`** |
+
+#### User实机 (§0 전체 — **cmd 블록 생략 금지**)
+
+0) 폰 **Expo Go SDK 52** (Play 스토어 54+ ❌) — **PC 점주만** 볼 거면 2)부터
+
+1) **Win → `cmd` → Enter** (PowerShell도 OK · 한 줄씩 붙여넣고 Enter)
+
+2) **PC 웹 — 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+npm run dev
+```
+
+3) 브라우저 → `https://popup-cube-web.vercel.app` 또는 `http://localhost:5173` → **`Ctrl+F5`**
+
+4) **Expo 재시작 ❌** — Metro **이미 켜져 있으면 5) 생략** · **꺼져 있을 때만**:
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+npm install --legacy-peer-deps
+cd apps\mobile
+npx expo start --tunnel --port 8082 --clear
+```
+
+5) QR → 폰 **Expo Go SDK 52** · 손님 `demo@shopper.com` / `demo`
+
+6) **클릭 순서 (코드 블록 아님)**
+   - **손님(앱 또는 Vercel):** 매장 입장 → 상품 **담기** → **장바구니** 탭에 둔 채로 두기
+   - **점주(PC):** `demo@owner.com` / `demo` → 홈 → 매장 **편집** → **상품** → 방금 담은 상품 **판매가 변경** → 저장
+   - **손님:** **장바구니 탭**을 **나갔다가 다시** 열기 (또는 장바구니 서랍 다시 열기)
+
+7) **이번에 볼 것**
+   - 합계가 **변경된 판매가**와 맞는지
+   - **「판매 가격이 바뀐 상품이 있어요. 합계를 다시 확인해 주세요.」** 한 줄이 뜨는지 (가격이 실제로 바뀐 경우)
 
 ---
 
@@ -4705,8 +4755,8 @@ npx expo start --tunnel --port 8082 --clear
 ## 8. Changelog
 
 ### 2026-10-12 pm — ISS-053 장바구니 가격 갱신 (AD-068)
-- **Changed:** `refreshCartItemPrices.ts` · `CartContext.applyRefreshedItems` · `CartView` · `ko.ts` (`cart.priceUpdatedNotice`)
-- **Notes:** 장바구니 **열 때** DB `products.price`(+ SKU `price_delta`) 재조회 · 변동 시 localStorage·합계 갱신 + 한 줄 안내 · **Expo 재시작 ❌** · Vercel 1~2min + Ctrl+F5
+- **Changed:** `refreshCartItemPrices.ts` · `CartContext.applyRefreshedItems` · `CartView` · `ko.ts` (`cart.priceUpdatedNotice`) · **§7.100** User实机
+- **Notes:** **`apps/web`만** · Expo(Metro) **재시작 ❌** · Metro **Ctrl+C 불필요** · Vercel **1~2min** · 장바구니 **탭 재진입** · User实机 = **§7.100** (§0 **PC 3줄 + Expo 4줄** 생략 금지)
 
 ### 2026-10-12 pm — ISS-055 User: Auth (min 8 · HIBP Pro+)
 - **Notes:** **Sign In / Providers → Email** · **Minimum password length 8** Save ✅ · HIBP ON Save → **Pro Plans and up** (Free 차단 · User 확인) · **Expo ❌**
