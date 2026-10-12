@@ -76,13 +76,19 @@
   color: #4e5968;
 }
 
-.owner-bulk-guide__figure {
-  display: block;
-  width: 100%;
-  height: auto;
+.owner-bulk-guide__figure-wrap {
+  margin: 0;
   border: 1px solid #e5e8eb;
   border-radius: 8px;
   background: #f9fafb;
+  overflow: hidden;
+}
+
+.owner-bulk-guide__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
 }
 
 .owner-bulk-guide__checklist {

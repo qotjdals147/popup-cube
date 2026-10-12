@@ -112,13 +112,6 @@ export function OwnerProductBulkUpload({
             {open ? '▴' : '▾'}
           </span>
         </button>
-        <button
-          type="button"
-          className="owner-bulk-upload__manual-btn"
-          onClick={() => setGuideOpen(true)}
-        >
-          {t('ownerProducts.bulkGuideBtn')}
-        </button>
       </div>
 
       <OwnerProductBulkGuideModal
