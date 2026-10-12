@@ -1,7 +1,7 @@
 {
-  "exported_at": "2026-10-12T05:48:18.198Z",
+  "exported_at": "2026-10-12T05:58:55.427Z",
   "project_ref": "cvrtobxkvpcpcxrcspdp",
-  "count": 104,
+  "count": 105,
   "migrations": [
     {
       "version": "20260713015534",
@@ -418,6 +418,10 @@
     {
       "version": "20261012054804",
       "name": "iss055_advisor_hardening"
+    },
+    {
+      "version": "20261012055844",
+      "name": "iss048_store_order_counter"
     }
   ]
 }

@@ -845,14 +845,14 @@ popup_store/                          # Turborepo root
 | ID | Issue | Severity | Action |
 |---|---|---|---|
 | ISS-044 | **옵션(SKU) 주문 취소·거절 시 재고 꼬임** | **Fixed (DB · `iss_audit_p0_p1_fixes` · 2026-10-02)** | `_restore_order_stock` — `product_sku_id` 있으면 **`product_skus`만** 복구 · **과거 오염** = 취소/거절 SKU 주문 **0건** (2026-10-12 집계) → **별도 보정 불필요** |
-| ISS-045 | **손님이 자기 주문 금액·상태 직접 변경 가능** — `authenticated`에 `orders` **UPDATE GRANT(전 컬럼)** + RLS `orders_update_own`이 **소유자만 확인**(`USING/WITH CHECK auth.uid()=user_id`), **컬럼 제한 없음** | **P0 (보안)** | `PATCH /rest/v1/orders?id=eq...`로 `total_amount`·`status`·`discount_percent`·`shipping_address_id` 위조 → 정산·KPI 왜곡, **PG 연동 시 결제금액 조작**. 클라이언트 코드에 `.from('orders').update(` **0건**(SELECT만) → **GRANT·정책 제거해도 기능 영향 없음**(권장) |
-| ISS-046 | **비로그인(anon)도 임의 유저에게 알림 생성 가능** — `_enqueue_order_notification` SECURITY DEFINER · **EXECUTE to PUBLIC** | **P0 (보안)** | `/rest/v1/rpc/_enqueue_order_notification`로 **아무 `user_id`에 임의 제목·본문** 알림 삽입 → 사칭·피싱("결제 실패, 여기로 입금"). 내부 헬퍼라 외부 노출 불필요 → **`REVOKE EXECUTE FROM PUBLIC, anon, authenticated`** |
+| ISS-045 | ~~손님이 자기 주문 금액·상태 직접 변경 가능~~ | **Fixed (DB · 2026-10-02)** | `20261002_iss_audit_p0_p1_fixes` — `orders` **UPDATE REVOKE** · `orders_update_own` DROP · 원격 **UPDATE 권한 없음** 확인 (2026-10-12) |
+| ISS-046 | ~~비로그인(anon)도 임의 유저에게 알림 생성 가능~~ | **Fixed (DB · 2026-10-02)** | `_enqueue_order_notification` **EXECUTE REVOKE** (PUBLIC/anon/authenticated) |
 | ISS-047 | ~~통합 결제 부분 실패 → 재시도 시 중복 주문~~ | **Fixed (web+DB · 2026-10-12 · AD-091)** | **장바구니** = 실패 시 성공 라인 즉시 제거 + `checkoutPartialRemoved` · **DB** = `order_place_idempotency` + `place_order(p_idempotency_key)` · **클라** = 결제 시도당 UUID → 매장별 RPC 동일 키 · **PG 때** = §7.99 재검수 필수 |
-| ISS-048 | **동시 주문 시 1건이 통째로 실패** — `place_order`가 주문번호를 `MAX(order_number)+1`로 생성, `orders_store_id_order_number_key` **UNIQUE** 존재 | **P1** | 같은 매장에 동시 결제 2건 → 뒤 건이 **23505 unique violation**으로 롤백(손님은 원인 불명 오류 · 매출 유실). **번호 중복·재고 꼬임은 없음**(UNIQUE가 막고 트랜잭션 롤백). 조치 = per-store **sequence** 또는 `FOR UPDATE` 잠금 / 재시도 |
-| ISS-049 | **손님이 자기 `role`·`store_id` 변경 가능** — `authenticated`에 `profiles` **UPDATE GRANT(전 컬럼)** + `profiles_self_update`에 **`WITH CHECK` 없음** | **P1 (보안)** | `role='owner'`·`store_id` 임의 설정 → 점주 UI·라우팅 진입, `update_my_nickname` **검증(길이·금칙어) 우회**. **실피해 제한적** — 반품·주문·가챠 RPC는 전부 **`stores.owner_id = auth.uid()`** 로 검증(감사에서 확인) → **타 매장 데이터 침투 불가**. 조치 = 컬럼 제한 GRANT 또는 RPC 전용화 |
+| ISS-048 | ~~동시 주문 시 order_number 경합~~ | **Fixed (DB · 2026-10-12)** | `store_order_counters` + `place_order` UPSERT 할당 · `20261012_iss048_store_order_counter` · 원격 적용 ✅ |
+| ISS-049 | ~~손님이 자기 `role`·`store_id` 변경 가능~~ | **Fixed (DB · 2026-10-02)** | `profiles` **UPDATE REVOKE** · `profiles_self_update` DROP · 닉네임 = RPC |
 | ISS-050 | ~~옵션 상품 주문 후 「안 산 옵션」까지 장바구니에서 사라짐~~ | **Fixed (2026-10-07 · AD-090)** | 재확인 결과 `CartView` 는 **이미 `removeItemsByLineKeys`(= `cartLineKey`)만** 사용 중이었고, `removeItemsByProductIds` 는 **호출처 0의 죽은 코드**였다(증상은 이미 없었음). 다시 잘못 쓰이지 않게 **`CartContext` 에서 제거** · §7.97 |
-| ISS-051 | **자동 수락 quota 초과 가능** — `place_order`의 `auto_accept_remaining` 감소 `UPDATE` 뒤 **`IF NOT FOUND` 검사 없음** | **P2** | quota 소진·비활성 상태에서도 **주문은 자동 수락으로 진행**(감소만 실패) → 점주가 설정한 자동 수락 건수 초과. 음수는 안 됨. 조치 = `NOT FOUND` 시 수동 수락으로 폴백 |
-| ISS-052 | **운영 DB ↔ repo migration 이력 불일치** | **P2 (진행 중 · §7.101)** | **2026-10-12:** 원격 **104** vs repo **53** · `remote_migrations.snapshot.json` · `export-remote-migrations.mjs` · `audit-migration-sync.mjs` · **완전 db pull ⬜** · **`apply-sql-file` → schema_migrations** 옵션 추가 |
+| ISS-051 | ~~자동 수락 quota 초과 가능~~ | **Fixed (DB · 20261002b+)** | `auto_accept_remaining` UPDATE 후 **`IF FOUND`/`ELSE` → `awaiting_accept`** · 원격 `place_order` 확인 (2026-10-12) |
+| ISS-052 | **운영 DB ↔ repo migration 이력 불일치** | **P2 (진행 중 · §7.101)** | 원격 **105** vs repo **54** · snapshot/audit/scripts · **`supabase/README.md`** · **db pull ⬜** |
 | ISS-054 | ~~AD-085 옵션이 반품·KPI 경로에 미연동~~ | **Fixed (DB+web · 2026-10-12)** | `request_return`·`get_order_return` items에 `product_name`·`option_label` · `get_store_product_sales` **옵션별 행** · UI 반품·TOP판매 |
 | ISS-055 | ~~Supabase advisor (search_path · RLS RPC-only)~~ | **Fixed (DB · 2026-10-12)** | `20261012_iss055` · search_path · RLS RPC-only ✅ · **Auth:** HIBP **Pro+만**(Free Save 거부 · User 2026-10-12) ⏸ · **Minimum password length = 8** User Save ✅ · `…/auth/providers?provider=Email` |
 | ISS-053 | ~~장바구니 표시 금액 ≠ 실제 청구 금액~~ | **Fixed (web · 2026-10-12)** | `refreshCartItemPrices.ts` · **CartView** 진입 시 DB 단가 재조회 · 변동 시 `cart.priceUpdatedNotice` · `CartContext.applyRefreshedItems` |
@@ -880,7 +880,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-12 pm)** | **§7.96 엑셀 ⏸** · **§7.100 ISS-053实机 ✅** · **ISS-052 §7.101 진행** (snapshot+audit) · **다음** = ISS-052 `db pull` 또는 **ISS-051** |
+| **한 줄 요약 (2026-10-12 pm)** | **§7.96 엑셀 ⏸** · **ISS-048 ✅** · **ISS-052 §7.101** (snapshot) · **다음** = ISS-052 `db pull` / **ISS-044 오염 집계 ⬜** |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
 | **User实기** | **§7.100 ISS-053 ✅** · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
@@ -2230,8 +2230,8 @@ npx expo start --tunnel --port 8082 --clear
 | | |
 |---|---|
 | **상태** | **진행 중** — 스냅샷·감사 스크립트 ✅ · **완전 `db pull` ⬜** (CLI `supabase link` 후) |
-| **원격 (2026-10-12)** | **`104`** rows · `supabase/remote_migrations.snapshot.json` |
-| **Repo** | **`53`** `.sql` |
+| **원격 (2026-10-12)** | **`105`** rows · `supabase/remote_migrations.snapshot.json` |
+| **Repo** | **`54`** `.sql` (+ `iss048`) |
 | **감사** | `node scripts/audit-migration-sync.mjs` → remote-only **33** · local-only **7** (이름/묶음 차이) |
 | **규칙 (앞으로)** | DDL = **`apply_migration`(MCP)** 또는 **`npx supabase migration`** · `apply-sql-file.mjs` = **비상용** + 3번째 인자 `migration_name`으로 `schema_migrations` 기록 |
 | **원격 보정 (2026-10-12)** | `ad090_drop_product_skus_color_size` · `iss055_advisor_hardening` — **MCP apply ✅** (이전 pg-only 적용분 이력 보강) |
@@ -4783,6 +4783,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-12 pm — ISS-048 store_order_counters (order_number 경합)
+- **Changed:** `20261012_iss048_store_order_counter.sql` · §6 ISS-045/046/049/051 정리
+- **Notes:** 원격 POPUP 적용 ✅ · **Expo ❌** · Vercel 불필요(DB-only) · PG 전 **동시 주문** smoke 권장
 
 ### 2026-10-12 pm — §7.100 User实机 ✅ · ISS-052 §7.101 착수
 - **Notes:** User — 앱 **판매가·장바구니 안내** 확인 ✅ · **ISS-052** snapshot(104) · audit scripts · 원격 `ad090_drop`·`iss055` MCP 이력 보강 · **Expo ❌**
