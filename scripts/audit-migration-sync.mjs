@@ -64,4 +64,15 @@ for (const l of localUnmatched) {
   console.log(l.file);
 }
 
+const reportPath = path.join(process.cwd(), 'supabase', 'migration-audit.snapshot.json');
+const report = {
+  generatedAt: new Date().toISOString(),
+  localCount: locals.length,
+  remoteCount: remotes.length,
+  remoteUnmatched: remoteUnmatched.map((r) => ({ version: r.version, name: r.name })),
+  localUnmatched: localUnmatched.map((l) => l.file),
+};
+fs.writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n');
+console.log('\nWrote', reportPath);
+
 process.exit(remoteUnmatched.length > 0 || localUnmatched.length > 0 ? 2 : 0);

@@ -1,0 +1,147 @@
+{
+  "generatedAt": "2026-10-12T06:09:58.803Z",
+  "localCount": 54,
+  "remoteCount": 105,
+  "remoteUnmatched": [
+    {
+      "version": "20260713015534",
+      "name": "init_core_schema"
+    },
+    {
+      "version": "20260713015545",
+      "name": "seed_gucci_demo_store"
+    },
+    {
+      "version": "20260713022719",
+      "name": "setup_demo_owner"
+    },
+    {
+      "version": "20260713023209",
+      "name": "grant_table_permissions"
+    },
+    {
+      "version": "20260713043909",
+      "name": "add_store_home_hub_fields"
+    },
+    {
+      "version": "20260713045513",
+      "name": "owner_store_create_flow"
+    },
+    {
+      "version": "20260713045547",
+      "name": "tighten_store_assets_select_policy"
+    },
+    {
+      "version": "20260713045723",
+      "name": "create_owner_store_function"
+    },
+    {
+      "version": "20260713045742",
+      "name": "fix_create_owner_store_search_path"
+    },
+    {
+      "version": "20260713050114",
+      "name": "grant_stores_insert_update_authenticated"
+    },
+    {
+      "version": "20260713051354",
+      "name": "auto_publish_owner_created_stores"
+    },
+    {
+      "version": "20260713064927",
+      "name": "add_nickname_system"
+    },
+    {
+      "version": "20260713082036",
+      "name": "add_products_table"
+    },
+    {
+      "version": "20260713103228",
+      "name": "add_promotion_and_gacha_tables"
+    },
+    {
+      "version": "20260713103302",
+      "name": "fix_gacha_rolls_pool_entry_fk"
+    },
+    {
+      "version": "20260713103335",
+      "name": "create_roll_gacha_function"
+    },
+    {
+      "version": "20260713103350",
+      "name": "seed_gucci_promotion_and_gacha"
+    },
+    {
+      "version": "20260713103429",
+      "name": "fix_gucci_gacha_item_names"
+    },
+    {
+      "version": "20260713110616",
+      "name": "add_user_addresses_table"
+    },
+    {
+      "version": "20260713110637",
+      "name": "add_orders_tables"
+    },
+    {
+      "version": "20260713110719",
+      "name": "create_place_order_function"
+    },
+    {
+      "version": "20260713110743",
+      "name": "fix_place_order_search_path"
+    },
+    {
+      "version": "20260713110854",
+      "name": "create_get_store_orders_function"
+    },
+    {
+      "version": "20260713111000",
+      "name": "fix_orders_function_grants"
+    },
+    {
+      "version": "20260731075421",
+      "name": "fix_demo_owner_profile_store_id_gucci"
+    },
+    {
+      "version": "20260803004728",
+      "name": "seller_center_helper_and_place_order"
+    },
+    {
+      "version": "20260807003949",
+      "name": "lock_down_auto_confirm_purchases_internal"
+    },
+    {
+      "version": "20260825012748",
+      "name": "product_promo_place_order_functions"
+    },
+    {
+      "version": "20260825012840",
+      "name": "product_promo_place_order_v1b"
+    },
+    {
+      "version": "20260825012847",
+      "name": "store_has_active_gacha_pool_rpc"
+    },
+    {
+      "version": "20260901002118",
+      "name": "restore_return_rpcs_evidence"
+    },
+    {
+      "version": "20260922053107",
+      "name": "fix_get_store_reviews_store_id_type"
+    },
+    {
+      "version": "20261002003108",
+      "name": "20261002_product_skus_rpcs"
+    }
+  ],
+  "localUnmatched": [
+    "20260730_sprint4_gucci_display_fixture_seed.sql",
+    "20260730_sprint4_gucci_slot_products.sql",
+    "20260731_fix_demo_owner_profile_gucci.sql",
+    "20260901_shopper_notification_delete.sql",
+    "20260922b_fix_get_store_reviews_store_id.sql",
+    "20261002b_iss_place_order_lock.sql"
+  ]
+}

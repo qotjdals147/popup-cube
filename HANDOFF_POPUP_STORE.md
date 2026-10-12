@@ -16,7 +16,7 @@
 
 - **사용자가 지시했든, 에이전트가 스스로 다음 작업을 이어가든 — 새 작업(요청/할 일)을 시작할 때마다** 이 `## 0. Handoff Protocol`을 다시 읽고 따른다.
 - 같은 세션 안에서 이미 한 번 읽었어도, 다음 작업으로 넘어갈 때 **다시** §0을 확인한다 `(대화가 길어지며 규칙을 놓치는 것을 방지)`.
-- 특히 아래는 매번 재확인: **브리핑 형식(§0 하단)**, **User-facing TMI·타사 비교 금지(§0 · User 2026-10-12)**, **모델 추천(§24)**, **출시 전 감사·QA(§63 · User 2026-10-02)**, **HANDOFF 실시간 갱신**, **Git commit+push 즉시(§0 · HANDOFF만 바꿔도 push)**, **한국어 대화 규칙**, **UI/UX · 쇼핑몰 퀄리티(§0)**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · **축약·「--clear 후 매장→」식 금지**), **Expo 재시작 여부 표(§0 · commit/push·테스트 안내 시 필수 동반)**, **기능 구현 연관점(§62 · 주문번호·알림·재고·RPC·양쪽 UI)**, **채팅 분리 인수인계(§0 · 감사 채팅↔작업 채팅 · 착수 전 `## 6` Open P0 확인 · User 2026-10-02)**.
+- 특히 아래는 매번 재확인: **작업 큐·우선순위(§0 · User 2026-10-12)**, **브리핑 형식(§0 하단)**, **User-facing TMI·타사 비교 금지(§0 · User 2026-10-12)**, **모델 추천(§24)**, **출시 전 감사·QA(§63 · User 2026-10-02)**, **HANDOFF 실시간 갱신**, **Git commit+push 즉시(§0 · HANDOFF만 바꿔도 push)**, **한국어 대화 규칙**, **UI/UX · 쇼핑몰 퀄리티(§0)**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · **축약·「--clear 후 매장→」식 금지**), **Expo 재시작 여부 표(§0 · commit/push·테스트 안내 시 필수 동반)**, **기능 구현 연관점(§62 · 주문번호·알림·재고·RPC·양쪽 UI)**, **채팅 분리 인수인계(§0 · 감사 채팅↔작업 채팅 · 착수 전 `## 6` Open P0 확인 · User 2026-10-02)**.
 - 규칙을 지키지 못했다고 사용자가 지적하면, 즉시 인정하고 그 지점부터 규칙대로 다시 수행한다.
 
 ### 세션 시작 시
@@ -215,12 +215,17 @@
 4. **중복 작업 방지** — §63.14에 **`담당 채팅`** 칸을 두고 「감사 발견 / 작업 수정 대기 / 작업 중 / 완료」로 표시.
 5. **감사 결과는 승인 전까지 수정 금지** (§63.4) — 작업 채팅이 §63.14를 보고 **자동으로 고치지 말고**, User 승인(D단계)을 받는다. 단 **P0는 「먼저 고치자」고 제안**한다.
 
-### 다음 작업 우선순위 판단 (User 요청, 2026-07-13)
+### 작업 큐·우선순위 (User 2026-07-13 · **강화 2026-10-12**)
 
-**"다음 작업은?" 질문에 여러 옵션을 나열해서 사용자가 고르게 하지 말 것.**
-대신 에이전트가 아래 기준으로 **객관적으로 우선순위를 판단**해서 **1개를 먼저 제안**한다 (그래도 착수 전 브리핑·승인 절차는 그대로 따름 — 아래 §0 하단 참고).
+| | 규칙 |
+|---|---|
+| **❌ 금지** | 「A vs B 뭐부터 할까요?」「다음 후보 골라주세요」처럼 **User에게 순서·메뉴를 넘기기** |
+| **✅ 필수** | User가 **「알아서」「우선순위 매겨서 진행」** 등 **위임**하면 → §6 Open · §7 한 줄 · §63 · **⏸(§7.96 엑셀·PG·CEO 대기 등)** 읽고 **스스로 1순위 착수** · **HANDOFF 갱신 + commit + push**까지 **끊지 않고** |
+| **대화** | User-facing에는 **지금 한 일 + 다음에 에이전트가 할 일** 짧게 — **선택지 나열 ❌** |
+| **브리핑** | User **위임·「시작해/진행해」** = **「작업 시작할까요?」 생략** · **착수 간주** (아래 「작업 시작 전 브리핑」예외) |
+| **예외 (User에게 먼저)** | **사업·CEO·PG·대규모 방향** · §63.4 **감사 D단계**(User 승인 전 수정 금지) · User **「커밋하지 마」** |
 
-**판단 기준 (우선순위 순):**
+**판단 기준 (같은 우선순위 안에서 — 위에서 아래 순):**
 1. **의존관계** — 다른 미구현 기능을 막고 있는 것 먼저 (예: **PG·사업자 미등록**처럼 User·사업 결정이 필요한 항목은 **맨 뒤** — AD-061)
 2. **투자자 데모 완성도** — §18 Demo Flow에 나오는 단계 중 아직 비어있는 것 우선 (로드맵 §2 Phase 순서 참고)
 3. **최근 작업과의 연속성** — 방금 끝난 기능과 자연스럽게 이어지는 것 (컨텍스트 낭비 최소화)
@@ -246,7 +251,7 @@
 5. **사용자 "응/시작/ㅇㅇ" 등 승인 전에는** 파일 생성·수정·DB 마이그레이션·배포 **시작 금지**
 6. 사용자가 다른 모델을 지정하면 그 모델 기준으로 진행 `(가능한 경우)`
 
-**예외 (브리핑 생략 가능):** HANDOFF만 업데이트, 순수 질문 답변, 사용자가 "브리핑 없이 바로 해"라고 명시한 경우
+**예외 (브리핑·「시작할까요?」 생략 가능):** HANDOFF만 업데이트, 순수 질문 답변, 사용자가 **「브리핑 없이 바로 해」「알아서 진행」「우선순위 매겨서」** 등 **위임**한 경우 (§0 **작업 큐·우선순위**)
 
 ### Windows에서 명령 실행 (cmd · PowerShell — User·에이전트 필독)
 
@@ -880,14 +885,14 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-12 pm)** | **§7.96 엑셀 ⏸** · **ISS-048 ✅** · **ISS-052 §7.101** (snapshot) · **다음** = ISS-052 `db pull` / **ISS-044 오염 집계 ⬜** |
+| **한 줄 요약 (2026-10-12 eve)** | **§7.96 엑셀 ⏸** · **ISS-044 집계 ✅ §7.102** · **ISS-048 ✅** · **ISS-052 §7.101** (audit JSON) · **다음** = User PC **`supabase link` + `db pull`** |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
 | **User实기** | **§7.100 ISS-053 ✅** · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
 | **출시 불안·건강검진** | **§63 (AD-086)** — **1차 감사 (2026-10-02) ✅** · **2차 최종 = 기능·CEO 항목 완료 후 동일 §63 재실시** (§63.8 · User 2026-10-06) |
 | **🚨 즉시 (User 2026-10-06~07)** | **ISS-056~062** ✅ push 후 Vercel 1~2분 · **앱 `apps/mobile` 변경 → Expo `--clear`** · **옵션 주문 「안 들어옴」 = 자동수락 → 발주·배송 탭** (ISS-061 · 주문 탭에 안내 추가) |
 | **📦 발주·배송 방향 (CEO 2026-10-07)** | **셀메이트 전제 · 자체 딥 개발 ❌** — 발주·배송 기능 착수 전 **§7.95 체크리스트** · **AD-089** |
-| **🚨 감사 잔여 (2026-10-02)** | **044~046·049·048·051** DB ✅ · **047·050** 웹 ✅ (047 = `20261012_iss047` · AD-091) · **044 과거 오염 보정** ⬜ · **052** migration 역동기화 |
+| **🚨 감사 잔여 (2026-10-02)** | **044~051·053~055** ✅ · **044 과거 오염** = SKU 취소/거절 **0건** (§7.102 · 보정 불필요) · **052** = §7.101 **`db pull` ⬜** |
 | **⏸ §7.96 엑셀 (User 2026-10-12 pm)** | **CEO 심현우** 상의 · User **재공유 전** — **实机·추가 개발 ❌** · 상세 **§7.96 보류** |
 | **⏸ 예약 (User 2026-10-12)** | **「TMI 작업」** — **§7.98** · User 말할 때까지 **본격 착수 ❌** |
 | **채팅 분리 (User 2026-10-02)** | 점검은 **별도 채팅** → 착수 전 **`## 6` Open ISS + §63.14** · 수정 시 ISS **Fixed(hash)** 갱신 |
@@ -2232,7 +2237,7 @@ npx expo start --tunnel --port 8082 --clear
 | **상태** | **진행 중** — 스냅샷·감사 스크립트 ✅ · **완전 `db pull` ⬜** (CLI `supabase link` 후) |
 | **원격 (2026-10-12)** | **`105`** rows · `supabase/remote_migrations.snapshot.json` |
 | **Repo** | **`54`** `.sql` (+ `iss048`) |
-| **감사** | `node scripts/audit-migration-sync.mjs` → remote-only **33** · local-only **7** (이름/묶음 차이) |
+| **감사** | `node scripts/audit-migration-sync.mjs` → `migration-audit.snapshot.json` · remote-only **33** · local-only **7** (이름/묶음 차이 · **정상**) |
 | **규칙 (앞으로)** | DDL = **`apply_migration`(MCP)** 또는 **`npx supabase migration`** · `apply-sql-file.mjs` = **비상용** + 3번째 인자 `migration_name`으로 `schema_migrations` 기록 |
 | **원격 보정 (2026-10-12)** | `ad090_drop_product_skus_color_size` · `iss055_advisor_hardening` — **MCP apply ✅** (이전 pg-only 적용분 이력 보강) |
 
@@ -2241,13 +2246,64 @@ npx expo start --tunnel --port 8082 --clear
 1. `node scripts/export-remote-migrations.mjs` ( `../.env.local` 의 `POPUP_DATABASE_URL` )
 2. `node scripts/audit-migration-sync.mjs`
 3. 신규 DDL → repo 파일 + **동일 내용** MCP `apply_migration`
-4. 스테이징 DB 신설 시 → **`npx supabase db pull`** ( `config.toml` + link 후 · User PC)
+4. 스테이징 DB 신설 시 → **`npx supabase db pull`** (아래 **User PC 1회** · DB 비밀번호 = Dashboard → Database)
+
+#### User PC — Supabase CLI link + db pull (1회 · **ISS-052 마무리**)
+
+1) **Win → cmd**  
+2) **아래 한 줄씩 복붙:**
+
+```
+cd C:\Users\qotjd\Downloads\Cursor\popup_store
+```
+
+```
+npm install -g supabase
+```
+
+```
+npx supabase login
+```
+
+```
+npx supabase init
+```
+
+```
+npx supabase link --project-ref cvrtobxkvpcpcxrcspdp
+```
+
+```
+npx supabase db pull
+```
+
+3) 생성된 `supabase/migrations/*` diff 확인 → **에이전트에게 「db pull 했어」** 한 줄 (다음 세션 HANDOFF 반영)  
+4) **Expo 재시작 ❌** · Metro **Ctrl+C 불필요**
 
 #### Expo 재시작
 
 | | |
 |---|---|
 | ISS-052 tooling/문서 | **❌** · 코드 변경 없음 |
+
+---
+
+### 7.102 **ISS-044 과거 재고 오염 집계** (읽기 전용 · 2026-10-12 ✅)
+
+> **쉬운 말:** 예전 버그로 **취소·거절된 옵션 주문**의 재고가 잘못 깎였을 수 있다 — **지금 고친 뒤** DB에 **그런 주문이 남아 있는지** 숫자만 세었다.
+
+| | |
+|---|---|
+| **쿼리** | `order_items.product_sku_id IS NOT NULL` AND `orders.status IN ('cancelled','rejected')` |
+| **결과 (POPUP 원격 · 2026-10-12)** | **주문 0건 · 라인 0건** |
+| **조치** | **데이터 보정 불필요** · §6 ISS-044 · §63.14 C 갱신 |
+| **재집계** | `node scripts/…` 없음 — MCP/SQL Editor 동일 쿼리 |
+
+#### Expo 재시작
+
+| | |
+|---|---|
+| §7.102 (DB 읽기만) | **❌** |
 
 ---
 
@@ -4783,6 +4839,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-12 eve — §0 작업 큐 위임 · ISS-044 §7.102 · ISS-052 audit JSON
+- **Changed:** §0 **작업 큐·우선순위 (User 2026-10-12)** · **§7.102** ISS-044 집계(0건) · `migration-audit.snapshot.json` · `audit-migration-sync.mjs` · §7.101 **db pull** cmd · §63.14 동기화
+- **Notes:** User **「알아서 우선순위」** → 에이전트 **선택지 질문 ❌** · **Expo ❌** · Vercel 불필요
 
 ### 2026-10-12 pm — ISS-048 store_order_counters (order_number 경합)
 - **Changed:** `20261012_iss048_store_order_counter.sql` · §6 ISS-045/046/049/051 정리
@@ -8368,17 +8428,17 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 
 | ISS | 한 줄 | 등급 | 상태 | **담당 채팅** |
 |---|---|---|---|---|
-| **ISS-044** | 옵션 주문 취소·거절 시 SKU 재고 미복구 + 대표 재고 증식 | **P0** | **Fixed (원격)** | `20261002_iss_audit_p0_p1_fixes` · **과거 오염 보정 ⬜** |
+| **ISS-044** | 옵션 주문 취소·거절 시 SKU 재고 미복구 + 대표 재고 증식 | **P0** | **Fixed (원격)** | `iss_audit` · **과거 오염 0건** · **§7.102** |
 | **ISS-045** | `orders` UPDATE 권한 무제한 → 손님이 금액·상태 위조 | **P0** | **Fixed (원격)** | 동 migration |
 | **ISS-046** | `_enqueue_order_notification` anon 호출 가능 → 사칭 알림 | **P0** | **Fixed (원격)** | 동 migration |
 | **ISS-047** | 통합 결제 부분 실패 → 장바구니 미정리 → 중복 주문 | **P1** | **Fixed (web+DB · AD-091)** | §7.99 · mock 멱등 ✅ · **PG 때 §7.99 재검수** |
-| **ISS-048** | `order_number` `MAX+1` 경합 → 동시 주문 1건 실패 | **P1** | **Fixed** | `20261002b` · User SQL Editor ✅ |
+| **ISS-048** | `order_number` `MAX+1` 경합 → 동시 주문 1건 실패 | **P1** | **Fixed** | `20261012_iss048_store_order_counter` · **`926047b`** |
 | **ISS-049** | `profiles` UPDATE 무제한 → 자가 `role`/`store_id` 변경 | **P1** | **Fixed (원격)** | `iss_audit_p0_p1_fixes` |
 | **ISS-050** | 주문 후 장바구니 정리가 `skuId` 무시 → 안 산 옵션 삭제 | **P2** | **Fixed (web)** | `removeItemsByLineKeys` |
 | **ISS-051** | `auto_accept_remaining` 감소 `NOT FOUND` 미검사 | **P2** | **Fixed** | `20261002b` · User SQL Editor ✅ |
-| **ISS-052** | 원격 migration vs repo SQL 불일치 | **P2** | **In progress** | §7.101 · snapshot 104 / repo 53 |
+| **ISS-052** | 원격 migration vs repo SQL 불일치 | **P2** | **In progress** | §7.101 · remote **105** / repo **54** · **`db pull` ⬜** |
 | **ISS-053** | 장바구니 가격 stale → 표시 금액 ≠ 청구 금액 | **P2** | **Fixed (web)** | `refreshCartItemPrices` · CartView 진입 갱신 |
-| **ISS-054** | AD-085 옵션이 반품·KPI RPC에 미연동 (§62) | **P3** | Open | 감사 발견 |
+| **ISS-054** | AD-085 옵션이 반품·KPI RPC에 미연동 (§62) | **P3** | **Fixed** | 2026-10-12 · §6 |
 | **ISS-055** | advisor (search_path · RLS RPC-only) | **P3** | **Fixed (DB)** | HIBP 유출비번 = **Pro+만** (Free Save 거부 · User 2026-10-12 확인) |
 
 **정상 확인(수정 불필요)** — `approve_return`·`complete_return`·`reject_return`·`set_gacha_return_status`·`get_store_order_counts`·`confirm_purchase` **점주 소유권 검증 ✅** · `roll_gacha` **주문 소유자 + `gacha_already_rolled` 중복 방지 ✅** · SKU/상품 재고 **차감 원자성 ✅** · `order_number` **UNIQUE 제약 존재 ✅** · 결제 버튼 **`checkoutBusy` 연타 가드 ✅** · `get_my_orders`/`get_store_orders` **`option_label` 양쪽 노출 ✅**
@@ -8388,7 +8448,7 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 | 항목 | 이유 |
 |---|---|
 | **테스트 계정 RLS 매트릭스 (§63.8)** | 손님/점주/비로그인 실제 토큰으로 CRUD 시도 **미실행** (읽기 전용 · DB 변경 금지) |
-| **ISS-044 오염 규모** | 이미 잘못 복구된 주문 건수·영향 상품 **집계 안 함**(집계 쿼리는 읽기 전용이라 가능 → **작업 채팅 1순위**) |
+| **ISS-044 오염 규모** | **✅ 2026-10-12** — SKU 취소/거절 **0건** · **§7.102** |
 | **반품 완료 시 재고 복구 정책** | `_restore_order_stock` 호출자는 **취소·거절 2곳뿐** → 반품 승인·완료 시 **재고 복구 없음**이 의도인지 **User 확인 필요** |
 | **진열 슬롯·fixture 인덱스 의존 (§63.13 #4)** | v1에서 월드 freeze(`VITE_WORLD_ENABLED=false`) → 우선순위 낮춰 **미점검** |
 | **Storage 버킷 정책** | 반품 증빙·상품 이미지 업로드 권한 **미점검** |
@@ -8401,10 +8461,10 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 |---|---|
 | **`get_my_orders` / `get_store_orders` / `get_store_order_counts` 3종** | `option_label` **양쪽 반영 ✅** · counts 정상 |
 | **AD-085 옵션 → 반품·KPI** | `get_order_return`·`request_return`·`get_store_product_sales` **미반영 ❌ (ISS-054)** |
-| **재고 연쇄 (§52.2)** | 차감 ✅ / **복구 ❌ (ISS-044 · P0)** — AD-085 추가 시 `_restore_order_stock`을 **같이 안 고친 전형적 §62 누락** |
+| **재고 연쇄 (§52.2)** | 차감 ✅ / **복구 ✅ (ISS-044 Fixed)** · 과거 오염 **0건** |
 | **자동 수락 quota 연쇄** | 복구(`_restore_auto_accept_quota`) ✅ / **차감 검사 ❌ (ISS-051)** |
 | **알림 연쇄** | 내부 삽입 동작 ✅ / **권한 노출 ❌ (ISS-046)** |
-| **주문번호 `{store_code}-{order_number}`** | 포맷·UNIQUE ✅ / **발급 경합 ❌ (ISS-048)** |
+| **주문번호 `{store_code}-{order_number}`** | 포맷·UNIQUE ✅ / **발급 경합 ✅ (ISS-048 · counters)** |
 
 #### E. User 실기 체크리스트 (코드 수정 **없이** 지금 확인 가능)
 

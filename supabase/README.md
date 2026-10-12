@@ -4,7 +4,7 @@
 |---|---|
 | **Canonical SQL** | `migrations/*.sql` |
 | **원격 이력 스냅샷** | `remote_migrations.snapshot.json` — `node scripts/export-remote-migrations.mjs` |
-| **Repo ↔ 원격 감사** | `node scripts/audit-migration-sync.mjs` |
+| **Repo ↔ 원격 감사** | `node scripts/audit-migration-sync.mjs` → `migration-audit.snapshot.json` |
 | **DDL 적용 (권장)** | Supabase MCP `apply_migration` 또는 Dashboard SQL |
 | **비상** | `node scripts/apply-sql-file.mjs <file.sql> <migration_name>` — `schema_migrations` 기록 |
 
