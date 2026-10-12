@@ -4652,6 +4652,10 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-12 — §7.96 매뉴얼 **상품 vs 조합(한 행)** 구분 · 매 행 채우기 OK
+- **Changed:** `bulkUploadGuideFigures` · `OwnerProductBulkGuideModal` · `ko.ts` · 양식 `작성안내`/`그림예시`
+- **Notes:** **Expo 재시작 ❌** · Vercel + Ctrl+F5
+
 ### 2026-10-12 — **§7.98 TMI 작업** 예약 (User-facing 문구·AI티 · 요청 시 착수)
 - **Changed:** **§7.98** · §7.0 · §0 · Glossary · User 트리거 키워드 목록
 - **Notes:** **미착수** — User **「TMI 작업하자」** 등 말할 때 §7.98 절차 실행

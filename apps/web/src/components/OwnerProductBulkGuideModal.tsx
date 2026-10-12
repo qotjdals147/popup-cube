@@ -37,6 +37,16 @@ export function OwnerProductBulkGuideModal({
 
         <div className="owner-bulk-guide__body">
           <p className="owner-bulk-guide__lead">{t('ownerProducts.bulkGuideLead')}</p>
+          <dl className="owner-bulk-guide__terms">
+            <div>
+              <dt>{t('ownerProducts.bulkGuideTermProduct')}</dt>
+              <dd>{t('ownerProducts.bulkGuideTermProductDesc')}</dd>
+            </div>
+            <div>
+              <dt>{t('ownerProducts.bulkGuideTermRow')}</dt>
+              <dd>{t('ownerProducts.bulkGuideTermRowDesc')}</dd>
+            </div>
+          </dl>
 
           {BULK_GUIDE_FIGURES.map((Figure, i) => (
             <section key={i} className="owner-bulk-guide__section">
@@ -53,6 +63,7 @@ export function OwnerProductBulkGuideModal({
           <ul className="owner-bulk-guide__checklist">
             <li>{t('ownerProducts.bulkGuideCheck1')}</li>
             <li>{t('ownerProducts.bulkGuideCheck2')}</li>
+            <li>{t('ownerProducts.bulkGuideCheck3')}</li>
           </ul>
         </div>
 

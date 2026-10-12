@@ -52,10 +52,41 @@
 }
 
 .owner-bulk-guide__lead {
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   font-size: 14px;
   line-height: 1.55;
   color: #4e5968;
+}
+
+.owner-bulk-guide__terms {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #e5e8eb;
+  border-radius: 8px;
+}
+
+.owner-bulk-guide__terms dt {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #191f28;
+}
+
+.owner-bulk-guide__terms dd {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #4e5968;
+}
+
+@media (max-width: 520px) {
+  .owner-bulk-guide__terms {
+    grid-template-columns: 1fr;
+  }
 }
 
 .owner-bulk-guide__section {
