@@ -880,7 +880,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-12 pm)** | **§7.96 엑셀 ⏸ CEO 상의** · **ISS-047 ✅** · **ISS-054 ✅** · **다음** = `product_skus.color`/`size` DROP 또는 ISS-055 |
+| **한 줄 요약 (2026-10-12 pm)** | **§7.96 엑셀 ⏸ CEO 상의** · **ISS-047/054 ✅** · **AD-090 `color`/`size` DROP ✅** · **다음** = ISS-055 또는 ISS-052/053 |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
 | **User实기** | §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
@@ -2058,7 +2058,7 @@ npm run dev
 | **i18n** | `ownerProducts.skus*` · `skusTipCellAdj` · `skusCellAdjPh` · `productDetail.optionPriceExplain` |
 | **migration (ISS-064 v2)** | `20261007c_iss064_option_value_adjustment.sql` — `save_owner_product_skus` 가 **adjustment** jsonb 보존 · **원격 적용 ✅** |
 
-- **`color`/`size` 칼럼은 롤백 여지로 한 사이클 남겨둠** — 다음 마이그레이션에서 `DROP COLUMN`. `save_owner_product_skus` 는 구 형식(`color`/`size`) payload 도 받아준다(구버전 브라우저 캐시 대비).
+- **`color`/`size` DROP ✅ (2026-10-12)** — `option_values` 전용 · `save_owner_product_skus`는 **`option_values` 배열만** · migration `20261012_ad090_drop_product_skus_color_size.sql`
 - **ISS-055 일부 해소** — `format_product_sku_label` 에 `search_path` 고정.
 
 #### 같이 처리한 기존 버그
@@ -2129,7 +2129,7 @@ npx expo start --tunnel --port 8082 --clear
 - [x] **엑셀 일괄등록 v1** (§7.96 · 다운로드·업로드) ✅ (2026-10-12) · **User实机 ⏸ CEO 상의 후**  
 - [x] **ISS-047** 통합 결제 부분 실패·멱등키 (mock) ✅ (2026-10-12 · §7.99)  
 - [x] **ISS-054** 반품·판매통계 RPC 3개 + UI `option_label` ✅ (2026-10-12)  
-- [ ] 다음 사이클에 `product_skus.color`·`size` **DROP COLUMN** ⬜  
+- [x] `product_skus.color`·`size` **DROP COLUMN** · `format_product_sku_label` 제거 ✅ (2026-10-12 · `20261012_ad090_drop_product_skus_color_size`)  
 
 ---
 
@@ -4703,6 +4703,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-12 pm — AD-090 `product_skus.color`/`size` DROP
+- **Changed:** `20261012_ad090_drop_product_skus_color_size.sql` — `save_owner_product_skus` legacy 분기 제거 · `format_product_sku_label` DROP
+- **Notes:** 원격 POPUP 적용 ✅ · **Expo 재시작 ❌** · Vercel + Ctrl+F5 · 점주 **옵션 저장** smoke 권장
 
 ### 2026-10-12 pm — ISS-054 반품·판매통계 `option_label`
 - **Changed:** `20261012_iss054_option_label_returns_kpi.sql` · `storeKpi` · `orderReturns` · `OrderReturnRequestDialog` · `OwnerReturnsPanel` · `OwnerProductSalesPanel` · shared `OrderReturnDetail`
