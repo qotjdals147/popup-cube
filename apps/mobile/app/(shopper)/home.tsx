@@ -1,4 +1,4 @@
-import { useRouter, type Href } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -9,18 +9,22 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { StoreSummary } from '../../src/types/domain';
+import { HomeFeedChips } from '../../src/components/HomeFeedChips';
+import { HomeProductCard } from '../../src/components/HomeProductCard';
+import { HomePromoBanner } from '../../src/components/HomePromoBanner';
 import { ShopperNotificationBell } from '../../src/components/ShopperNotificationBell';
-import { StoreEnterModal } from '../../src/components/StoreEnterModal';
-import { StoreMallCard } from '../../src/components/StoreMallCard';
 import { useAuth } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
 import { t } from '../../src/i18n/ko';
-import { sortStoresByPopupEnd } from '../../src/lib/popupPeriod';
-import { listPublishedStores } from '../../src/lib/stores';
+import {
+  listHomeProductFeed,
+  sortHomeProductFeed,
+  type HomeFeedSort,
+  type HomeProductFeedItem,
+} from '../../src/lib/homeProducts';
 import { useRestoreSystemChromeOnFocus } from '../../src/hooks/useWorldImmersiveChrome';
 
-/** §58 #3 — 몰(홈) 허브: 검색 · D-day · 설명 · 쇼핑하기 CTA */
+/** AD-088 · 벤치 01~02 — 검색 · 배ner · 칩 · 상품 피드 */
 export default function HomeScreen() {
   const router = useRouter();
   const { userId, bootstrapping, loading: authLoading, initError } = useAuth();
@@ -29,19 +33,22 @@ export default function HomeScreen() {
   useRestoreSystemChromeOnFocus();
 
   const [search, setSearch] = useState('');
-  const [stores, setStores] = useState<StoreSummary[]>([]);
+  const [feedSort, setFeedSort] = useState<HomeFeedSort>('all');
+  const [products, setProducts] = useState<HomeProductFeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [selectedStore, setSelectedStore] = useState<StoreSummary | null>(null);
 
-  const sortedStores = useMemo(() => sortStoresByPopupEnd(stores), [stores]);
+  const sortedProducts = useMemo(
+    () => sortHomeProductFeed(products, feedSort),
+    [products, feedSort],
+  );
 
   const styles = useMemo(
     () =>
       StyleSheet.create({
         safe: { flex: 1, backgroundColor: colors.bg },
         flex: { flex: 1 },
-        header: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 12, backgroundColor: colors.bgCard },
+        header: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 8, backgroundColor: colors.bgCard },
         headerTopRow: {
           flexDirection: 'row',
           alignItems: 'flex-start',
@@ -72,12 +79,19 @@ export default function HomeScreen() {
           paddingVertical: 11,
           fontSize: 15,
         },
+        listHeader: { paddingHorizontal: 16, paddingBottom: 8 },
+        feedTitle: {
+          marginTop: 16,
+          fontSize: 16,
+          fontWeight: '800',
+          color: colors.text,
+        },
         centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
         loadingText: { color: colors.textMuted, fontSize: 14 },
         error: { color: colors.danger, textAlign: 'center', padding: 20 },
         empty: { color: colors.textMuted, textAlign: 'center', padding: 32, fontSize: 15 },
-        list: { padding: 12, paddingBottom: 4 },
-        row: { gap: 12, marginBottom: 12 },
+        list: { paddingHorizontal: 12, paddingBottom: 16 },
+        row: { gap: 10, marginBottom: 10 },
       }),
     [colors],
   );
@@ -94,9 +108,9 @@ export default function HomeScreen() {
     setError(false);
 
     const timer = setTimeout(() => {
-      listPublishedStores(search)
+      listHomeProductFeed(search)
         .then((data) => {
-          if (active) setStores(data);
+          if (active) setProducts(data);
         })
         .catch(() => {
           if (active) setError(true);
@@ -112,10 +126,17 @@ export default function HomeScreen() {
     };
   }, [search]);
 
-  function handleEnterStore(storeId: string) {
-    setSelectedStore(null);
-    router.push(`/store/${storeId}`);
+  function handleOpenProduct(item: HomeProductFeedItem) {
+    router.push(`/store/${item.store_id}`);
   }
+
+  const listHeader = (
+    <View style={styles.listHeader}>
+      <HomePromoBanner />
+      <HomeFeedChips sort={feedSort} onChange={setFeedSort} />
+      <Text style={styles.feedTitle}>{t.home.feedTitle}</Text>
+    </View>
+  );
 
   if (authPending) {
     return (
@@ -173,34 +194,19 @@ export default function HomeScreen() {
 
         {error && !loading && <Text style={styles.error}>{t.home.error}</Text>}
 
-        {!loading && !error && stores.length === 0 && (
-          <Text style={styles.empty}>{t.home.empty}</Text>
-        )}
-
-        {!loading && !error && sortedStores.length > 0 && (
+        {!loading && !error && (
           <FlatList
-            data={sortedStores}
+            data={sortedProducts}
             keyExtractor={(item) => item.id}
             numColumns={2}
             columnWrapperStyle={styles.row}
             contentContainerStyle={styles.list}
             style={styles.flex}
+            ListHeaderComponent={listHeader}
+            ListEmptyComponent={<Text style={styles.empty}>{t.home.empty}</Text>}
             renderItem={({ item }) => (
-              <StoreMallCard
-                store={item}
-                onPreview={() => setSelectedStore(item)}
-                onEnter={() => handleEnterStore(item.id)}
-              />
+              <HomeProductCard product={item} onPress={() => handleOpenProduct(item)} />
             )}
-          />
-        )}
-
-        {selectedStore && (
-          <StoreEnterModal
-            store={selectedStore}
-            visible={!!selectedStore}
-            onEnter={() => handleEnterStore(selectedStore.id)}
-            onClose={() => setSelectedStore(null)}
           />
         )}
       </View>
