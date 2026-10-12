@@ -30,6 +30,8 @@ interface CartContextValue {
   clearCart: () => void;
   /** 매장별 결제 완료 시 — 해당 매장 품목만 제거 (§60 v1) */
   clearStoreItems: (storeId: string) => void;
+  /** ISS-053 — 가격 재조회 결과 반영 (lineKey·수량 유지) */
+  applyRefreshedItems: (next: CartItem[]) => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -153,6 +155,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => prev.filter((item) => item.storeId !== storeId));
   }
 
+  function applyRefreshedItems(next: CartItem[]) {
+    setItems(next);
+  }
+
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -169,6 +175,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         removeItemsByLineKeys,
         clearCart,
         clearStoreItems,
+        applyRefreshedItems,
       }}
     >
       {children}

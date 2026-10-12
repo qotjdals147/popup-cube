@@ -487,6 +487,7 @@ export const ko = {
     multiStoreCheckoutHint: '여러 매장 상품이 있어요. 매장별 「결제하기」로 나눠 주세요.',
     popupEnded: '팝업이 종료된 매장은 결제할 수 없어요.',
     popupEndedShort: '팝업 종료',
+    priceUpdatedNotice: '판매 가격이 바뀐 상품이 있어요. 합계를 다시 확인해 주세요.',
   },
   /** §54 — 상품 상세페이지 (긴 이미지 + 직접 쓴 설명 + 리뷰) */
   imageCrop: {

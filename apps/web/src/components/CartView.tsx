@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   CheckoutBenefitPlan,
   GachaRollResult,
@@ -20,6 +20,7 @@ import { getActivePromotion, GachaError, rollGacha } from '../lib/gacha';
 import { createAddress, listMyAddresses } from '../lib/addresses';
 import { createCheckoutIdempotencyKey } from '../lib/checkoutIdempotency';
 import { OrderError, placeOrder } from '../lib/orders';
+import { refreshCartItemPrices } from '../lib/refreshCartItemPrices';
 import { validateCheckoutCartLines } from '../lib/validateCheckoutCartLines';
 import { useOverlayScrollLock } from '../hooks/useOverlayScrollLock';
 import { getProductPromosByIds, getStorePromotion, shopperStoreHasGachaPool } from '../lib/promotions';
@@ -148,7 +149,8 @@ export function CartView({
   const rootClass = appearance === 'light' ? 'cart-drawer--light' : 'cart-drawer--dark';
   const isPageLayout = layout === 'page';
   useOverlayScrollLock(!isPageLayout);
-  const { items, incrementQuantity, decrementQuantity, removeItem, removeItemsByLineKeys } = useCart();
+  const { items, incrementQuantity, decrementQuantity, removeItem, removeItemsByLineKeys, applyRefreshedItems } =
+    useCart();
   const [phase, setPhase] = useState<Phase>('cart');
   const [checkoutStoreId, setCheckoutStoreId] = useState<string | null>(focusStoreId ?? null);
 
@@ -167,6 +169,8 @@ export function CartView({
   const [gachaResultsByStore, setGachaResultsByStore] = useState<GachaResultWithStore[]>([]);
   const [rewardError, setRewardError] = useState<string | null>(null);
   const [checkoutPartialNotice, setCheckoutPartialNotice] = useState<string | null>(null);
+  const [priceUpdatedNotice, setPriceUpdatedNotice] = useState(false);
+  const priceRefreshOnceRef = useRef(false);
   const [storeNames, setStoreNames] = useState<Record<string, string>>({});
   const [storeInfoById, setStoreInfoById] = useState<Record<string, StoreSummary>>({});
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
@@ -191,6 +195,25 @@ export function CartView({
   useEffect(() => {
     setSelectedIds(new Set(items.map((item) => cartLineKey(item))));
   }, [items]);
+
+  useEffect(() => {
+    if (items.length === 0) return;
+    if (priceRefreshOnceRef.current) return;
+    priceRefreshOnceRef.current = true;
+    setPriceUpdatedNotice(false);
+    const snapshot = items;
+    let cancelled = false;
+    void refreshCartItemPrices(snapshot)
+      .then((result) => {
+        if (cancelled || !result.changed) return;
+        applyRefreshedItems(result.items);
+        setPriceUpdatedNotice(true);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [items, applyRefreshedItems]);
 
   const selectedItems = useMemo(
     () => items.filter((item) => selectedIds.has(cartLineKey(item))),
@@ -919,6 +942,7 @@ export function CartView({
             {showPromoOrderOnceHint && (
               <p className="cart-drawer-promo-once-note">{t('cart.promoOrderOnceHint')}</p>
             )}
+            {priceUpdatedNotice && <p className="cart-drawer-hint">{t('cart.priceUpdatedNotice')}</p>}
             {checkoutPartialNotice && <p className="cart-drawer-hint">{checkoutPartialNotice}</p>}
             {rewardError && phase === 'cart' && <p className="cart-drawer-error">{rewardError}</p>}
             {storeGroups.map((group) => {
