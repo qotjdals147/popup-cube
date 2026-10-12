@@ -105,7 +105,7 @@ function buildDataSheet(wb: ExcelJS.Workbook): void {
 
   ws.mergeCells(1, 1, 1, LAST_COL);
   const title = ws.getCell(1, 1);
-  title.value = 'POP-UP CUBE  상품 일괄등록 양식  v1';
+  title.value = 'POP-UP CUBE  상품 일괄등록 양식  v1.1';
   title.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ARGB.titleBg } };
   title.font = { bold: true, size: 14, color: { argb: ARGB.titleFont } };
   title.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -114,7 +114,7 @@ function buildDataSheet(wb: ExcelJS.Workbook): void {
   ws.mergeCells(2, 1, 2, LAST_COL);
   const notice = ws.getCell(2, 1);
   notice.value =
-    '※ #예시 로 시작하는 판매자 상품코드는 업로드 시 자동 제외 · 한 행 = 옵션 조합 1개 · 네이버 93열 파일은 그대로 올릴 수 없음 · 자세한 설명 = 「작성안내」 시트';
+    '※ 한 줄 = 손님이 고르는 옵션 조합 1개 (예: 블랙+M) · 옵션 2개 이상 = 옵션명「컬러|사이즈」·옵션값「블랙|M」 · #예시·5행 회색줄 제외 · 그림 = 「그림예시」·판매자센터「작성 매뉴얼」';
   notice.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ARGB.noticeBg } };
   notice.font = { size: 10, color: { argb: ARGB.noticeFont } };
   notice.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
@@ -185,6 +185,101 @@ function buildDataSheet(wb: ExcelJS.Workbook): void {
   foot.alignment = { horizontal: 'left', vertical: 'middle' };
 }
 
+function paintBlock(
+  ws: ExcelJS.Worksheet,
+  r: number,
+  c1: number,
+  c2: number,
+  fill: string,
+  text: string,
+  fontColor = 'FF191F28',
+  bold = false,
+) {
+  for (let c = c1; c <= c2; c += 1) {
+    const cell = ws.getCell(r, c);
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
+    cell.border = THIN_BORDER;
+    cell.alignment = { vertical: 'middle', wrapText: true };
+  }
+  ws.mergeCells(r, c1, r, c2);
+  const head = ws.getCell(r, c1);
+  head.value = text;
+  head.font = { bold, size: 11, color: { argb: fontColor } };
+}
+
+function buildPictureExampleSheet(wb: ExcelJS.Workbook): void {
+  const ws = wb.addWorksheet('그림예시', { views: [{ showGridLines: true }] });
+  ws.getColumn(1).width = 14;
+  ws.getColumn(2).width = 14;
+  ws.getColumn(3).width = 12;
+  ws.getColumn(4).width = 14;
+  ws.getColumn(5).width = 14;
+  ws.getColumn(6).width = 10;
+  ws.getColumn(7).width = 22;
+
+  paintBlock(ws, 1, 1, 7, ARGB.titleBg, '옵션 적는 법 — 그림으로', ARGB.titleFont, true);
+  ws.getRow(1).height = 28;
+
+  paintBlock(ws, 3, 1, 7, 'FFFFEBEE', '❌ 이렇게 하면 안 됨 — 행마다 「컬러」「사이즈」만 나누기', 'FFC62828', true);
+  const badHeader = ws.getRow(4);
+  ['코드', '옵션명', '옵션값', '결과'].forEach((h, i) => {
+    const c = badHeader.getCell(i + 1);
+    c.value = h;
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ARGB.headerBg } };
+    c.font = { bold: true, color: { argb: ARGB.headerFont } };
+    c.border = THIN_BORDER;
+  });
+  badHeader.getCell(5).value = '';
+  ws.getCell(5, 1).value = 'TEST-01';
+  ws.getCell(5, 2).value = '컬러';
+  ws.getCell(5, 3).value = '블랙';
+  ws.getCell(5, 4).value = '「컬러만」 SKU (X)';
+  ws.getCell(6, 1).value = 'TEST-01';
+  ws.getCell(6, 2).value = '사이즈';
+  ws.getCell(6, 3).value = 'M';
+  ws.getCell(6, 4).value = '「사이즈만」 SKU (X)';
+  [5, 6].forEach((r) => {
+    for (let c = 1; c <= 4; c += 1) {
+      ws.getCell(r, c).border = THIN_BORDER;
+    }
+  });
+
+  paintBlock(ws, 8, 1, 7, 'FFE8F5E9', '✅ 이렇게 — 한 칸에 | 로 묶기 (스마트스토어·쿠팡과 동일)', 'FF2E7D32', true);
+  const goodHeader = ws.getRow(9);
+  ['코드', '옵션명', '옵션값', '손님 화면'].forEach((h, i) => {
+    const c = goodHeader.getCell(i + 1);
+    c.value = h;
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ARGB.headerBg } };
+    c.font = { bold: true, color: { argb: ARGB.headerFont } };
+    c.border = THIN_BORDER;
+  });
+  const goodRows: string[][] = [
+    ['SCARF-01', '컬러|사이즈', '블랙|M', '블랙 / M'],
+    ['SCARF-01', '컬러|사이즈', '화이트|L', '화이트 / L'],
+    ['(비워도 됨)', '컬러|사이즈', '블랙|L', '블랙 / L'],
+  ];
+  goodRows.forEach((line, idx) => {
+    const r = 10 + idx;
+    line.forEach((val, j) => {
+      const c = ws.getCell(r, j + 1);
+      c.value = val;
+      c.border = THIN_BORDER;
+      if (idx === 2 && j === 0) c.font = { color: { argb: ARGB.hintFont } };
+    });
+  });
+
+  paintBlock(
+    ws,
+    14,
+    1,
+    7,
+    ARGB.noticeBg,
+    '같은 상품코드 — 첫 줄에만 상품명·판매가·대표이미지(https) · 6행부터 입력 · PC「작성 매뉴얼」',
+    ARGB.noticeFont,
+    false,
+  );
+}
+
 function buildGuideSheet(wb: ExcelJS.Workbook): void {
   const ws = wb.addWorksheet('작성안내', { views: [{ showGridLines: true }] });
   ws.getColumn(1).width = 20;
@@ -239,6 +334,7 @@ async function buildTemplateBuffer(): Promise<ArrayBuffer> {
   wb.creator = 'POP-UP CUBE';
   wb.created = new Date();
   buildDataSheet(wb);
+  buildPictureExampleSheet(wb);
   buildGuideSheet(wb);
   const raw = await wb.xlsx.writeBuffer();
   if (raw instanceof ArrayBuffer) return raw;

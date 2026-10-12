@@ -17,7 +17,7 @@ export const BULK_PRODUCT_HEADERS = [
 
 export type BulkProductHeader = (typeof BULK_PRODUCT_HEADERS)[number];
 
-export const BULK_TEMPLATE_FILENAME = 'POPUP-CUBE_상품일괄등록양식_v1.xlsx';
+export const BULK_TEMPLATE_FILENAME = 'POPUP-CUBE_상품일괄등록양식_v1.1.xlsx';
 
 export const BULK_DATA_SHEET_NAME = '상품일괄등록';
 
@@ -88,5 +88,20 @@ export const BULK_SAMPLE_ROWS: SampleRow[] = [
     상세설명: '같은 판매자 상품코드 = 한 상품',
     '주문 자동 수락': 'Y',
     '자동 수락 건수': 20,
+  },
+  {
+    '판매자 상품코드': `${BULK_SAMPLE_CODE_PREFIX}-SCARF-01`,
+    상품명: '',
+    판매가: '',
+    재고수량: '',
+    옵션명: '컬러|사이즈',
+    옵션값: '블랙|L',
+    옵션가: 0,
+    '옵션 재고수량': 8,
+    대표이미지: '',
+    요약설명: '',
+    상세설명: '← 윗줄과 같은 코드 · 이름·이미지 비워도 됨',
+    '주문 자동 수락': '',
+    '자동 수락 건수': '',
   },
 ];

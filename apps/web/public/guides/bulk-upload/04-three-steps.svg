@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="120" viewBox="0 0 720 120" role="img" aria-label="‘Ý ä´\Ü Å\Ü ">
+  <rect width="720" height="120" fill="#f9fafb" rx="8"/>
+  <rect x="24" y="36" width="200" height="64" fill="#fff" stroke="#3182f6" rx="8"/>
+  <text x="124" y="58" text-anchor="middle" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" fill="#3182f6">1. ‘Ý ä´\Ü</text>
+  <text x="124" y="78" text-anchor="middle" font-family="Malgun Gothic, sans-serif" font-size="10" fill="#4e5968">6‰€0 …%</text>
+  <path d="M234 68h40" stroke="#8b95a1" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="284" y="36" width="200" height="64" fill="#fff" stroke="#3182f6" rx="8"/>
+  <text x="384" y="58" text-anchor="middle" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" fill="#3182f6">2. Ñ@ ‘1</text>
+  <text x="384" y="78" text-anchor="middle" font-family="Malgun Gothic, sans-serif" font-size="10" fill="#4e5968">ø¼Ü Ü¸ 8à</text>
+  <path d="M494 68h40" stroke="#8b95a1" stroke-width="2"/>
+  <polygon points="534,68 526,64 526,72" fill="#8b95a1"/>
+  <rect x="544" y="36" width="152" height="64" fill="#3182f6" rx="8"/>
+  <text x="620" y="58" text-anchor="middle" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" fill="#fff">3. Ñ@ Å\Ü</text>
+  <text x="620" y="78" text-anchor="middle" font-family="Malgun Gothic, sans-serif" font-size="10" fill="#e3f2fd">$X Ü ‰ ˆ8 \Ü</text>
+</svg>

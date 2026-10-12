@@ -8,6 +8,7 @@ import {
 import { importBulkProductGroups } from '../lib/bulkProductUpload/importBulkProductGroups';
 import { parseBulkProductXlsx } from '../lib/bulkProductUpload/parseBulkProductXlsx';
 import { t } from '../i18n';
+import { OwnerProductBulkGuideModal } from './OwnerProductBulkGuideModal';
 import '../styles/owner-product-bulk-upload.css';
 
 interface OwnerProductBulkUploadProps {
@@ -34,6 +35,7 @@ export function OwnerProductBulkUpload({
   const [summary, setSummary] = useState<string | null>(null);
   const [templateBusy, setTemplateBusy] = useState(false);
   const [templateError, setTemplateError] = useState<string | null>(null);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   useEffect(() => {
     if (open) preloadBulkProductTemplate();
@@ -110,7 +112,20 @@ export function OwnerProductBulkUpload({
             {open ? '▴' : '▾'}
           </span>
         </button>
+        <button
+          type="button"
+          className="owner-bulk-upload__manual-btn"
+          onClick={() => setGuideOpen(true)}
+        >
+          {t('ownerProducts.bulkGuideBtn')}
+        </button>
       </div>
+
+      <OwnerProductBulkGuideModal
+        open={guideOpen}
+        onClose={() => setGuideOpen(false)}
+        onDownloadTemplate={() => void handleDownloadTemplate()}
+      />
 
       {open && (
         <div className="owner-bulk-upload__card">
@@ -119,6 +134,13 @@ export function OwnerProductBulkUpload({
           </div>
           <p className="owner-bulk-upload__tip">{t('ownerProducts.bulkIntro')}</p>
           <div className="owner-bulk-upload__actions">
+            <button
+              type="button"
+              className="owner-bulk-upload__btn"
+              onClick={() => setGuideOpen(true)}
+            >
+              {t('ownerProducts.bulkGuideBtn')}
+            </button>
             <button
               type="button"
               className="owner-bulk-upload__btn"

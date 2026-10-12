@@ -1,0 +1,141 @@
+.owner-bulk-guide-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px 32px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.owner-bulk-guide {
+  width: min(760px, 100%);
+  max-height: none;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.owner-bulk-guide__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e8eb;
+}
+
+.owner-bulk-guide__head h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #191f28;
+}
+
+.owner-bulk-guide__close {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: #f2f4f6;
+  font-size: 22px;
+  line-height: 1;
+  color: #4e5968;
+  cursor: pointer;
+}
+
+.owner-bulk-guide__body {
+  padding: 16px 20px 8px;
+}
+
+.owner-bulk-guide__lead {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #4e5968;
+}
+
+.owner-bulk-guide__section {
+  margin-bottom: 20px;
+}
+
+.owner-bulk-guide__section-title {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #191f28;
+}
+
+.owner-bulk-guide__section-text {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #4e5968;
+}
+
+.owner-bulk-guide__figure {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #e5e8eb;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.owner-bulk-guide__checklist {
+  margin: 8px 0 0;
+  padding: 12px 12px 12px 28px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #191f28;
+  background: #f9fafb;
+  border: 1px solid #e5e8eb;
+  border-radius: 8px;
+}
+
+.owner-bulk-guide__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 12px 20px 20px;
+  border-top: 1px solid #e5e8eb;
+}
+
+.owner-bulk-guide__btn {
+  min-height: 44px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #d1d6db;
+  background: #fff;
+  color: #191f28;
+  cursor: pointer;
+}
+
+.owner-bulk-guide__btn--primary {
+  border-color: #3182f6;
+  background: #3182f6;
+  color: #fff;
+}
+
+.owner-bulk-upload__manual-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.owner-bulk-upload__manual-btn:hover {
+  background: #dbeafe;
+}

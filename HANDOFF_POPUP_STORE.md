@@ -4602,6 +4602,10 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-12 — §7.96 **엑셀 작성 매뉴얼**(시각) + 양식 `그림예시` 시트
+- **Changed:** `OwnerProductBulkGuideModal` · `public/guides/bulk-upload/*.svg` · 툴바 **「작성 매뉴얼」** · `styledTemplate` **「그림예시」** 시트 · 양식 **v1.1** · 예시 4행(이어쓰기) · `ko.ts`
+- **Notes:** **Expo 재시작 ❌** · Vercel + Ctrl+F5 · **양식 v1.1 다시 다운로드** · **다음 = User实机 §7.96**
+
 ### 2026-10-12 — §7.96 **엑셀 업로드** (5행 힌트·이어쓰기·가격 쉼표)
 - **Changed:** `headerMap` `isInputHintRow` · `parseBulkProductXlsx` — **같은 상품코드 윗줄 상속**(이름·가격·이미지) · 옵션명 불일치 **안내 문구** · `styledTemplate` — **가격·재고 열 `#,##0`** · 작성안내 보강
 - **Notes:** **Expo 재시작 ❌** · Vercel + Ctrl+F5 · **양식 다시 다운로드** · 옵션 = **한 행에 컬러|사이즈 · 블랙|M** (스마트스토어 조합형)

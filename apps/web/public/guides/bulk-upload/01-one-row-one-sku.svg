@@ -1,0 +1,20 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="720" height="200" viewBox="0 0 720 200" role="img">
+  <rect width="720" height="200" fill="#f9fafb" rx="8"/>
+  <text x="24" y="32" font-family="Malgun Gothic, sans-serif" font-size="16" font-weight="700" fill="#191f28">한 줄 = 손님이 고르는 조합 1개</text>
+  <text x="24" y="52" font-family="Malgun Gothic, sans-serif" font-size="12" fill="#4e5968">컬러·사이즈가 있으면 조합마다 줄 추가</text>
+  <rect x="24" y="68" width="672" height="28" fill="#37474f"/>
+  <text x="32" y="87" font-family="Malgun Gothic, sans-serif" font-size="11" fill="#fff">상품코드</text>
+  <text x="120" y="87" font-family="Malgun Gothic, sans-serif" font-size="11" fill="#fff">옵션명</text>
+  <text x="240" y="87" font-family="Malgun Gothic, sans-serif" font-size="11" fill="#fff">옵션값</text>
+  <text x="400" y="87" font-family="Malgun Gothic, sans-serif" font-size="11" fill="#fff">손님 화면</text>
+  <rect x="24" y="96" width="672" height="26" fill="#fff" stroke="#e5e8eb"/>
+  <text x="32" y="113" font-family="Consolas, monospace" font-size="11" fill="#191f28">SCARF-01</text>
+  <text x="120" y="113" font-family="Consolas, monospace" font-size="11" fill="#191f28">컬러|사이즈</text>
+  <text x="240" y="113" font-family="Consolas, monospace" font-size="11" fill="#191f28">블랙|M</text>
+  <text x="400" y="113" font-family="Malgun Gothic, sans-serif" font-size="11" fill="#1565c0">블랙 / M</text>
+  <rect x="24" y="122" width="672" height="26" fill="#f1f8e9" stroke="#e5e8eb"/>
+  <text x="32" y="139" font-family="Consolas, monospace" font-size="11" fill="#191f28">SCARF-01</text>
+  <text x="120" y="139" font-family="Consolas, monospace" font-size="11" fill="#191f28">컬러|사이즈</text>
+  <text x="240" y="139" font-family="Consolas, monospace" font-size="11" fill="#191f28">화이트|L</text>
+  <text x="400" y="139" font-family="Malgun Gothic, sans-serif" font-size="11" fill="#1565c0">화이트 / L</text>
+</svg>
