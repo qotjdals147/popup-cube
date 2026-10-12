@@ -104,6 +104,12 @@
   display: none;
 }
 
+.owner-bulk-upload__template-error {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: #c62828;
+}
+
 .owner-bulk-upload__summary {
   margin: 12px 0 0;
   font-size: 13px;

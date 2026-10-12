@@ -587,6 +587,8 @@ export const ko = {
     bulkIntro:
       '「양식 다운로드」 파일만 업로드 · 한 행 = 옵션 조합 1개 · #예시 행은 자동 제외 · 자세한 설명은 엑셀 「작성안내」 시트',
     bulkDownloadTemplate: '양식 다운로드',
+    bulkDownloadPreparing: '양식 준비 중…',
+    bulkDownloadFailed: '양식 다운로드 실패. 새로고침 후 다시 시도.',
     bulkUpload: '엑셀 업로드',
     bulkUploading: '올리는 중…',
     bulkEmpty: '등록할 행이 없어요.',

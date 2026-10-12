@@ -1,6 +1,10 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { listMyProducts } from '../lib/products';
-import { downloadBulkProductTemplate } from '../lib/bulkProductUpload/downloadBulkProductTemplate';
+import {
+  downloadBulkProductTemplate,
+  preloadBulkProductTemplate,
+  resetBulkProductTemplateCache,
+} from '../lib/bulkProductUpload/downloadBulkProductTemplate';
 import { importBulkProductGroups } from '../lib/bulkProductUpload/importBulkProductGroups';
 import { parseBulkProductXlsx } from '../lib/bulkProductUpload/parseBulkProductXlsx';
 import { t } from '../i18n';
@@ -28,6 +32,25 @@ export function OwnerProductBulkUpload({
     { row: number; productLabel: string; message: string }[]
   >([]);
   const [summary, setSummary] = useState<string | null>(null);
+  const [templateBusy, setTemplateBusy] = useState(false);
+  const [templateError, setTemplateError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open) preloadBulkProductTemplate();
+  }, [open]);
+
+  async function handleDownloadTemplate() {
+    setTemplateBusy(true);
+    setTemplateError(null);
+    try {
+      await downloadBulkProductTemplate();
+    } catch {
+      resetBulkProductTemplateCache();
+      setTemplateError(t('ownerProducts.bulkDownloadFailed'));
+    } finally {
+      setTemplateBusy(false);
+    }
+  }
 
   async function handleFile(file: File) {
     setBusy(true);
@@ -99,9 +122,10 @@ export function OwnerProductBulkUpload({
             <button
               type="button"
               className="owner-bulk-upload__btn"
-              onClick={() => void downloadBulkProductTemplate()}
+              disabled={templateBusy}
+              onClick={() => void handleDownloadTemplate()}
             >
-              {t('ownerProducts.bulkDownloadTemplate')}
+              {templateBusy ? t('ownerProducts.bulkDownloadPreparing') : t('ownerProducts.bulkDownloadTemplate')}
             </button>
             <button
               type="button"
@@ -122,6 +146,8 @@ export function OwnerProductBulkUpload({
               }}
             />
           </div>
+
+          {templateError && <p className="owner-bulk-upload__template-error">{templateError}</p>}
 
           {summary && <p className="owner-bulk-upload__summary">{summary}</p>}
 

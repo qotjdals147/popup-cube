@@ -1,1 +1,5 @@
-export { downloadStyledBulkProductTemplate as downloadBulkProductTemplate } from './styledTemplate';
+export {
+  downloadStyledBulkProductTemplate as downloadBulkProductTemplate,
+  preloadBulkProductTemplate,
+  resetBulkProductTemplateCache,
+} from './styledTemplate';

@@ -203,11 +203,13 @@ function buildGuideSheet(wb: ExcelJS.Workbook): void {
 
   rows.forEach((line, i) => {
     const r = i + 1;
+    if (r === 1) {
+      ws.mergeCells(1, 1, 1, 3);
+    }
     line.forEach((text, j) => {
       const c = ws.getCell(r, j + 1);
       c.value = text;
       if (r === 1) {
-        ws.mergeCells(1, 1, 1, 3);
         c.font = { bold: true, size: 13, color: { argb: ARGB.guideTitle } };
       } else if (r === 3) {
         c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ARGB.headerBg } };
@@ -224,14 +226,36 @@ function buildGuideSheet(wb: ExcelJS.Workbook): void {
   });
 }
 
-export async function downloadStyledBulkProductTemplate(): Promise<void> {
+let templateBufferPromise: Promise<ArrayBuffer> | null = null;
+
+async function buildTemplateBuffer(): Promise<ArrayBuffer> {
   const wb = new ExcelJS.Workbook();
   wb.creator = 'POP-UP CUBE';
   wb.created = new Date();
   buildDataSheet(wb);
   buildGuideSheet(wb);
+  const raw = await wb.xlsx.writeBuffer();
+  if (raw instanceof ArrayBuffer) return raw;
+  return new Uint8Array(raw as ArrayLike<number>).buffer;
+}
 
-  const buffer = await wb.xlsx.writeBuffer();
+/** 패널 열릴 때 미리 생성 — 첫 다운로드 대기 줄임 */
+export function preloadBulkProductTemplate(): void {
+  if (!templateBufferPromise) {
+    templateBufferPromise = buildTemplateBuffer().catch((err) => {
+      templateBufferPromise = null;
+      throw err;
+    });
+  }
+}
+
+export function resetBulkProductTemplateCache(): void {
+  templateBufferPromise = null;
+}
+
+export async function downloadStyledBulkProductTemplate(): Promise<void> {
+  if (!templateBufferPromise) templateBufferPromise = buildTemplateBuffer();
+  const buffer = await templateBufferPromise;
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   });
@@ -239,6 +263,9 @@ export async function downloadStyledBulkProductTemplate(): Promise<void> {
   const a = document.createElement('a');
   a.href = url;
   a.download = BULK_TEMPLATE_FILENAME;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
