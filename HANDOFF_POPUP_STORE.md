@@ -855,7 +855,7 @@ popup_store/                          # Turborepo root
 | ISS-052 | **운영 DB를 repo로 재현 불가** — 원격 `schema_migrations` **93건** vs repo `supabase/migrations` **41개 파일** | **P2** | 예: `20261002003108 product_skus_rpcs`는 **원격에만 존재**(repo 파일 없음) · `return_evidence_urls_rpc_v2/v3`·`store_kpi_ad084_b` 등 다수. → **스테이징 분리·재배포·롤백 불가**(§63.9 전제 붕괴). 조치 = `supabase db pull`로 누락 migration **repo 역동기화** |
 | ISS-053 | **장바구니 표시 금액 ≠ 실제 청구 금액** — 담을 때 `price`를 **localStorage에 스냅샷** 저장, 점주가 가격 변경해도 갱신 안 됨 | **P2 (AD-068)** | `place_order`는 **DB `products.price`로 재계산**하므로 **금전 손실은 없음**. 다만 결제 전 합계와 결제 후 금액이 달라 **「고객 의문 제로」 위반**. 조치 = 장바구니 진입 시 가격 재조회 + 변동 시 고지 |
 | ISS-054 | ~~AD-085 옵션이 반품·KPI 경로에 미연동~~ | **Fixed (DB+web · 2026-10-12)** | `request_return`·`get_order_return` items에 `product_name`·`option_label` · `get_store_product_sales` **옵션별 행** · UI 반품·TOP판매 |
-| ISS-055 | ~~Supabase advisor (search_path · RLS RPC-only)~~ | **Fixed (DB · 2026-10-12)** | `20261012_iss055` · `resolve_effective_promo`·`set_display_fixture_updated_at` search_path · `order_returns`·`order_claim_messages`·`order_place_idempotency` **deny direct API** · **`format_product_sku_label` = AD-090 DROP으로 제거** · **User ⬜** Auth **유출 비밀번호 차단** — [Supabase Dashboard](https://supabase.com/dashboard/project/cvrtobxkvpcpcxrcspdp/auth/providers) → **Email** → **Prevent use of leaked passwords** ON |
+| ISS-055 | ~~Supabase advisor (search_path · RLS RPC-only)~~ | **Fixed (DB · 2026-10-12)** | `20261012_iss055` · search_path · RLS RPC-only ✅ · **User ⬜ 유출 비번** — **❌ Emails·Templates / Security 알림 화면 아님** · **✅ Authentication → Sign In / Providers → Email(편집)** 또는 **Attack Protection → Configure in email provider** · 토글 **`Prevent use of leaked passwords`** · **Pro 플랜 이상만** (Free면 토글 **비활성·미표시** 가능 — [Password security](https://supabase.com/docs/guides/auth/password-security)) · deep link: `…/auth/providers?provider=Email` |
 
 **↓ CEO 회의 실기 버그 (2026-10-02 · User 2026-10-06 — **1순위 수정** · AD-088과 별도 · §7.94)**
 
@@ -4704,6 +4704,10 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-12 pm — ISS-055 Supabase advisor (search_path · RLS)
+- **Changed:** `20261012_iss055_advisor_hardening.sql`
+- **Notes:** advisor **search_path**·**RLS no policy** 경고 해소 ✅ · **User:** Auth **Prevent use of leaked passwords** ON (대시보드 · §6 ISS-055) · **Expo ❌**
+
 ### 2026-10-12 pm — AD-090 `product_skus.color`/`size` DROP
 - **Changed:** `20261012_ad090_drop_product_skus_color_size.sql` — `save_owner_product_skus` legacy 분기 제거 · `format_product_sku_label` DROP
 - **Notes:** 원격 POPUP 적용 ✅ · **Expo 재시작 ❌** · Vercel + Ctrl+F5 · 점주 **옵션 저장** smoke 권장
@@ -8273,7 +8277,7 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 | **ISS-052** | 원격 migration 93 vs repo 41 → 운영 DB 재현 불가 | **P2** | Open | 감사 발견 |
 | **ISS-053** | 장바구니 가격 stale → 표시 금액 ≠ 청구 금액 | **P2** | Open | 감사 발견 |
 | **ISS-054** | AD-085 옵션이 반품·KPI RPC에 미연동 (§62) | **P3** | Open | 감사 발견 |
-| **ISS-055** | advisor 잔여 (search_path 3 · 유출 비번 · RLS 0정책 2) | **P3** | Open | 감사 발견 |
+| **ISS-055** | advisor (search_path · RLS RPC-only) | **P3** | **Fixed (DB)** | Auth 유출비번 = User 대시보드 ⬜ |
 
 **정상 확인(수정 불필요)** — `approve_return`·`complete_return`·`reject_return`·`set_gacha_return_status`·`get_store_order_counts`·`confirm_purchase` **점주 소유권 검증 ✅** · `roll_gacha` **주문 소유자 + `gacha_already_rolled` 중복 방지 ✅** · SKU/상품 재고 **차감 원자성 ✅** · `order_number` **UNIQUE 제약 존재 ✅** · 결제 버튼 **`checkoutBusy` 연타 가드 ✅** · `get_my_orders`/`get_store_orders` **`option_label` 양쪽 노출 ✅**
 
@@ -8308,7 +8312,7 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 2. **ISS-047 (P1)** — 장바구니에 **서로 다른 매장 2곳** 상품을 담고, 한쪽 상품 재고를 **0**으로 만든 뒤 **한 번에 결제** → 오류 뜬 다음 **장바구니에 앞 매장 상품이 남아 있는지** 확인.
 3. **ISS-050 (P2)** — 같은 옵션 상품의 **옵션 A·옵션 B**를 둘 다 담고 **A만 선택 결제** → 완료 후 **B도 사라졌는지** 확인.
 4. **ISS-053 (P2)** — 장바구니에 담아둔 뒤 점주센터에서 **가격 변경** → 손님 장바구니 합계와 **결제 후 금액이 다른지** 확인.
-5. **ISS-055** — Supabase 대시보드 **Authentication → 유출된 비밀번호 차단** 토글 ON (코드 변경 아님, User 1클릭).
+5. **ISS-055 (User)** — **Authentication → Sign In / Providers → Email** (또는 **Attack Protection**에서 email provider로 이동) → **`Prevent use of leaked passwords`** ON · **Pro+** 필요 · Emails/Security 알림 ❌
 
 #### F. **다음 수정은 승인 후** (§63.4 D단계)
 
