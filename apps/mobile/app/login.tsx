@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -28,7 +28,14 @@ export default function LoginScreen() {
   const router = useRouter();
   const { role: roleParam } = useLocalSearchParams<{ role?: string }>();
   useRestoreSystemChromeOnFocus();
-  const isOwner = roleParam === 'owner';
+
+  useEffect(() => {
+    if (roleParam === 'owner') {
+      router.replace('/login');
+    }
+  }, [roleParam, router]);
+
+  const isOwner = false;
   const { signInWithPassword, signUp, signInWithGoogle, loading: authLoading } = useAuth();
 
   const [mode, setMode] = useState<Mode>('login');

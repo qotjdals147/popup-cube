@@ -4,8 +4,7 @@ export const t = {
     title: 'POP-UP CUBE',
     subtitle: '온라인 팝업 스토어 · 실제 상품 구매',
     tagline: '브랜드 팝업을 둘러보고 실물을 주문하세요',
-    shopperButton: '👤 일반 회원 로그인',
-    ownerButton: '🏪 스토어 관리자 로그인',
+    shopperButton: '로그인',
     ownerNote: '매장·주문 관리는 PC 웹에서 진행합니다',
   },
   login: {

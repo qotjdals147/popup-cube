@@ -6,7 +6,7 @@ import { t } from '../src/i18n/ko';
 import { colors } from '../src/theme/colors';
 import { useRestoreSystemChromeOnFocus } from '../src/hooks/useWorldImmersiveChrome';
 
-/** m01 — 일반 회원 / 스토어 관리자 로그인 분기 (AD-037) */
+/** m01 — 손님 전용 (CEO 회의 2026-10-02 · 심현우 1번: 앱에 점주 로그인 ❌) */
 export default function LandingScreen() {
   const router = useRouter();
   const { initError } = useAuth();
@@ -23,16 +23,9 @@ export default function LandingScreen() {
 
         <Pressable
           style={styles.primaryButton}
-          onPress={() => router.push({ pathname: '/login', params: { role: 'shopper' } })}
+          onPress={() => router.push('/login')}
         >
           <Text style={styles.primaryButtonText}>{t.landing.shopperButton}</Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.secondaryButton}
-          onPress={() => router.push({ pathname: '/login', params: { role: 'owner' } })}
-        >
-          <Text style={styles.secondaryButtonText}>{t.landing.ownerButton}</Text>
         </Pressable>
 
         <Text style={styles.ownerNote}>{t.landing.ownerNote}</Text>
@@ -94,16 +87,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   primaryButtonText: { color: colors.primaryText, fontSize: 16, fontWeight: '600' },
-  secondaryButton: {
-    width: '100%',
-    backgroundColor: colors.bgElevated,
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  secondaryButtonText: { color: colors.text, fontSize: 16, fontWeight: '600' },
   ownerNote: {
     color: colors.textMuted,
     fontSize: 12,
