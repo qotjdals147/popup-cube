@@ -855,7 +855,7 @@ popup_store/                          # Turborepo root
 | ISS-052 | **운영 DB를 repo로 재현 불가** — 원격 `schema_migrations` **93건** vs repo `supabase/migrations` **41개 파일** | **P2** | 예: `20261002003108 product_skus_rpcs`는 **원격에만 존재**(repo 파일 없음) · `return_evidence_urls_rpc_v2/v3`·`store_kpi_ad084_b` 등 다수. → **스테이징 분리·재배포·롤백 불가**(§63.9 전제 붕괴). 조치 = `supabase db pull`로 누락 migration **repo 역동기화** |
 | ISS-053 | **장바구니 표시 금액 ≠ 실제 청구 금액** — 담을 때 `price`를 **localStorage에 스냅샷** 저장, 점주가 가격 변경해도 갱신 안 됨 | **P2 (AD-068)** | `place_order`는 **DB `products.price`로 재계산**하므로 **금전 손실은 없음**. 다만 결제 전 합계와 결제 후 금액이 달라 **「고객 의문 제로」 위반**. 조치 = 장바구니 진입 시 가격 재조회 + 변동 시 고지 |
 | ISS-054 | ~~AD-085 옵션이 반품·KPI 경로에 미연동~~ | **Fixed (DB+web · 2026-10-12)** | `request_return`·`get_order_return` items에 `product_name`·`option_label` · `get_store_product_sales` **옵션별 행** · UI 반품·TOP판매 |
-| ISS-055 | **Supabase advisor 잔여 경고** — `function_search_path_mutable` 3건(`resolve_effective_promo`·`format_product_sku_label`·`set_display_fixture_updated_at`) · `auth_leaked_password_protection` **비활성** · RLS 정책 0개 2건(`order_returns`·`order_claim_messages`) | **P3** | search_path 3건은 `place_order`(자체 `search_path` 고정) 내부에서 호출돼 **실위험 낮음** · RLS 0개 = **deny-all**이고 클라이언트는 RPC만 사용 → **안전**(의도 명시 필요) · 유출 비밀번호 차단은 **대시보드 토글** 1회. ISS-013과 동계열 |
+| ISS-055 | ~~Supabase advisor (search_path · RLS RPC-only)~~ | **Fixed (DB · 2026-10-12)** | `20261012_iss055` · `resolve_effective_promo`·`set_display_fixture_updated_at` search_path · `order_returns`·`order_claim_messages`·`order_place_idempotency` **deny direct API** · **`format_product_sku_label` = AD-090 DROP으로 제거** · **User ⬜** Auth **유출 비밀번호 차단** — [Supabase Dashboard](https://supabase.com/dashboard/project/cvrtobxkvpcpcxrcspdp/auth/providers) → **Email** → **Prevent use of leaked passwords** ON |
 
 **↓ CEO 회의 실기 버그 (2026-10-02 · User 2026-10-06 — **1순위 수정** · AD-088과 별도 · §7.94)**
 
@@ -880,7 +880,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-12 pm)** | **§7.96 엑셀 ⏸ CEO 상의** · **ISS-047/054 ✅** · **AD-090 `color`/`size` DROP ✅** · **다음** = ISS-055 또는 ISS-052/053 |
+| **한 줄 요약 (2026-10-12 pm)** | **§7.96 엑셀 ⏸** · **ISS-055 DB ✅** (Auth 유출비번 = **User 1클릭 ⬜**) · **다음 코드** = **ISS-053** 또는 **ISS-052** |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
 | **User实기** | §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
