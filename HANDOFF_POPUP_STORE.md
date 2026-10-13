@@ -2397,6 +2397,22 @@ npx supabase db pull
 
 ---
 
+### 7.109 **점주 프로모션·가챠 탭 UI** (User 2026-10-13)
+
+| | |
+|---|---|
+| **화면** | `OwnerPromotionPanel` — **매장 기본** · **상품별** · **가챠 풀** 카드 분리 |
+| **가챠** | 당첨 **카드 행** · **가중치** 라벨 · **비율 %** · 추가 폼 **점선 박스** |
+| **저장** | §0 primary **우측** (`owner-section-actions`) |
+
+#### Expo 재시작
+
+| | |
+|---|---|
+| `apps/web` only | **❌ Expo** · **Vercel 1~2min** |
+
+---
+
 ### 7.102 **ISS-044 과거 재고 오염 집계** (읽기 전용 · 2026-10-12 ✅)
 
 > **쉬운 말:** 예전 버그로 **취소·거절된 옵션 주문**의 재고가 잘못 깎였을 수 있다 — **지금 고친 뒤** DB에 **그런 주문이 남아 있는지** 숫자만 세었다.
@@ -4948,6 +4964,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-13 — 점주 프로모션·가챠 탭 UI (§7.109)
+- **Changed:** `OwnerPromotionPanel` · `owner-promo-gacha.css` · `ko.ts` ownerPromo
+- **Notes:** **`apps/web` only** · Vercel **1~2min**
 
 ### 2026-10-13 — 상품 수정: 닫기 상단 · sticky 저장만 (§7.108)
 - **Changed:** `OwnerProductPanel` · `owner-product-edit.css` · `editClose` · 상세 섹션 박스

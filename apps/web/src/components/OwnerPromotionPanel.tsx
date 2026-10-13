@@ -17,8 +17,9 @@ import {
   type GachaEntryRow,
   type ProductPromoRow,
 } from '../lib/promotions';
-import { ownerColors as oc, ownerFieldLabel, ownerFontSize as fs, ownerHelpText } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
+import '../styles/owner-product-edit.css';
+import '../styles/owner-promo-gacha.css';
 
 interface OwnerPromotionPanelProps {
   storeId: string;
@@ -53,6 +54,10 @@ function effectiveModeLabel(mode: string, discount: number): string {
   return discount > 0 ? `${base} · ${discount}%` : base;
 }
 
+function activeWeightSum(entries: GachaEntryRow[]): number {
+  return entries.filter((e) => e.is_active).reduce((s, e) => s + Math.max(1, e.weight), 0);
+}
+
 export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,6 +84,7 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
   const [addProductWeight, setAddProductWeight] = useState('10');
 
   const activeProducts = useMemo(() => products.filter((p) => p.is_active), [products]);
+  const weightSum = useMemo(() => activeWeightSum(entries), [entries]);
 
   async function reload() {
     setLoading(true);
@@ -217,11 +223,26 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
     });
   }
 
+  function entryLabel(entry: GachaEntryRow): string {
+    return (
+      entry.exclusive_name ??
+      activeProducts.find((p) => p.id === entry.product_id)?.name ??
+      entry.product_id ??
+      ''
+    );
+  }
+
+  function entryPct(entry: GachaEntryRow): string {
+    if (!entry.is_active || weightSum <= 0) return '—';
+    const pct = Math.round((Math.max(1, entry.weight) / weightSum) * 1000) / 10;
+    return `${pct}%`;
+  }
+
   if (loading) {
     return (
-      <section style={styles.panel}>
-        <p style={styles.hint}>{t('ownerPromo.loading')}</p>
-      </section>
+      <div className="owner-promo-page">
+        <p className="owner-promo-page__intro">{t('ownerPromo.loading')}</p>
+      </div>
     );
   }
 
@@ -235,21 +256,21 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
     : null;
 
   return (
-    <section style={styles.panel}>
-      <p style={styles.intro}>{t('ownerPromo.intro')}</p>
+    <div className="owner-promo-page">
+      <p className="owner-promo-page__intro">{t('ownerPromo.intro')}</p>
 
-      <div style={styles.section}>
-        <h3 style={styles.sectionTitle}>{t('ownerPromo.storeDefaultTitle')}</h3>
-        <label style={styles.checkRow}>
+      <article className="owner-promo-card">
+        <h2 className="owner-promo-card__title">{t('ownerPromo.storeDefaultTitle')}</h2>
+        <label className="owner-promo-toggle">
           <input type="checkbox" checked={promoActive} onChange={(e) => setPromoActive(e.target.checked)} />
           {t('ownerPromo.storeActive')}
         </label>
         {promoActive && (
           <>
-            <p style={styles.label}>{t('ownerPromo.defaultModeLabel')}</p>
-            <div style={styles.modeRow}>
+            <p className="owner-promo-field__label">{t('ownerPromo.defaultModeLabel')}</p>
+            <div className="owner-promo-mode-grid">
               {MODE_OPTIONS.map((opt) => (
-                <label key={opt.value} style={styles.modeOption}>
+                <label key={opt.value} className="owner-promo-mode-option">
                   <input
                     type="radio"
                     name="defaultMode"
@@ -261,45 +282,47 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
               ))}
             </div>
             {(defaultMode === 'discount_only' || defaultMode === 'choice') && (
-              <>
-                <label style={styles.label}>{t('ownerPromo.defaultDiscountLabel')}</label>
+              <div className="owner-promo-field">
+                <label className="owner-promo-field__label">{t('ownerPromo.defaultDiscountLabel')}</label>
                 <input
-                  style={styles.inputShort}
+                  className="owner-promo-input-short"
                   type="number"
                   min={1}
                   max={100}
                   value={defaultDiscount}
                   onChange={(e) => setDefaultDiscount(parseInt(e.target.value, 10) || 0)}
                 />
-              </>
+              </div>
             )}
           </>
         )}
-        <button
-          type="button"
-          style={styles.saveBtn}
-          disabled={savingStore}
-          onClick={() => void handleSaveStoreDefault()}
-        >
-          {savingStore ? t('ownerPromo.saving') : t('ownerPromo.saveDefault')}
-        </button>
-      </div>
+        <div className="owner-section-actions">
+          <button
+            type="button"
+            className="owner-btn-primary"
+            disabled={savingStore}
+            onClick={() => void handleSaveStoreDefault()}
+          >
+            {savingStore ? t('ownerPromo.saving') : t('ownerPromo.saveDefault')}
+          </button>
+        </div>
+      </article>
 
-      <div style={styles.section}>
-        <h3 style={styles.sectionTitle}>{t('ownerPromo.productsTitle')}</h3>
-        <p style={styles.help}>{t('ownerPromo.productsHelp')}</p>
+      <article className="owner-promo-card">
+        <h2 className="owner-promo-card__title">{t('ownerPromo.productsTitle')}</h2>
+        <p className="owner-promo-card__lead">{t('ownerPromo.productsHelp')}</p>
         {products.length === 0 ? (
-          <p style={styles.hint}>{t('ownerPromo.noProducts')}</p>
+          <p className="owner-promo-page__intro">{t('ownerPromo.noProducts')}</p>
         ) : (
-          <div style={styles.tableWrap}>
-            <table style={styles.table}>
+          <div className="owner-promo-table-wrap">
+            <table className="owner-promo-table">
               <thead>
                 <tr>
-                  <th style={styles.thCheck} />
-                  <th style={styles.th}>{t('ownerPromo.colProduct')}</th>
-                  <th style={styles.th}>{t('ownerPromo.colMode')}</th>
-                  <th style={styles.th}>{t('ownerPromo.colDiscount')}</th>
-                  <th style={styles.th}>{t('ownerPromo.colEffective')}</th>
+                  <th style={{ width: 36 }} aria-label="select" />
+                  <th>{t('ownerPromo.colProduct')}</th>
+                  <th>{t('ownerPromo.colMode')}</th>
+                  <th>{t('ownerPromo.colDiscount')}</th>
+                  <th>{t('ownerPromo.colEffective')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -313,20 +336,22 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
                   );
                   return (
                     <tr key={product.id}>
-                      <td style={styles.td}>
+                      <td>
                         <input
                           type="checkbox"
                           checked={selectedIds.has(product.id)}
                           onChange={() => toggleSelect(product.id)}
                         />
                       </td>
-                      <td style={styles.td}>
+                      <td>
                         {product.name}
-                        {!product.is_active && ` (${t('ownerPromo.hidden')})`}
+                        {!product.is_active && (
+                          <span className="owner-promo-table__muted"> ({t('ownerPromo.hidden')})</span>
+                        )}
                       </td>
-                      <td style={styles.td}>
+                      <td>
                         <select
-                          style={styles.select}
+                          className="owner-promo-select"
                           value={product.promo_mode}
                           onChange={(e) => {
                             const mode = e.target.value as ProductPromoMode;
@@ -344,10 +369,10 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
                           ))}
                         </select>
                       </td>
-                      <td style={styles.td}>
+                      <td>
                         {product.promo_mode === 'discount_only' || product.promo_mode === 'choice' ? (
                           <input
-                            style={styles.inputShort}
+                            className="owner-promo-input-short"
                             type="number"
                             min={1}
                             max={100}
@@ -359,10 +384,10 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
                             }}
                           />
                         ) : (
-                          '—'
+                          <span className="owner-promo-table__muted">—</span>
                         )}
                       </td>
-                      <td style={styles.tdMuted}>
+                      <td className="owner-promo-table__muted">
                         {effectiveModeLabel(effective.mode, effective.discountPercent)}
                       </td>
                     </tr>
@@ -374,10 +399,12 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
         )}
 
         {selectedIds.size > 0 && (
-          <div style={styles.bulkBar}>
-            <span>{t('ownerPromo.bulkSelected', { count: selectedIds.size })}</span>
+          <div className="owner-promo-bulk">
+            <span className="owner-promo-bulk__count">
+              {t('ownerPromo.bulkSelected', { count: selectedIds.size })}
+            </span>
             <select
-              style={styles.select}
+              className="owner-promo-select"
               value={bulkMode}
               onChange={(e) => setBulkMode(e.target.value as BulkPreset)}
             >
@@ -389,7 +416,7 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
             </select>
             {(bulkMode === 'discount_only' || bulkMode === 'choice') && (
               <input
-                style={styles.inputShort}
+                className="owner-promo-input-short"
                 type="number"
                 min={1}
                 max={100}
@@ -400,7 +427,7 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
             )}
             <button
               type="button"
-              style={styles.secondaryBtn}
+              className="owner-btn-primary"
               disabled={applyingBulk}
               onClick={() => void handleBulkApply()}
             >
@@ -408,11 +435,11 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
             </button>
           </div>
         )}
-      </div>
+      </article>
 
-      <div style={styles.sectionLast}>
-        <h3 style={styles.sectionTitle}>{t('ownerPromo.gachaTitle')}</h3>
-        <label style={styles.checkRow}>
+      <article className="owner-promo-card">
+        <h2 className="owner-promo-card__title">{t('ownerPromo.gachaTitle')}</h2>
+        <label className="owner-promo-toggle">
           <input
             type="checkbox"
             checked={poolActive}
@@ -421,209 +448,131 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
           />
           {t('ownerPromo.gachaActive')}
         </label>
-        <p style={styles.help}>{t('ownerPromo.gachaHelp')}</p>
+        <p className="owner-promo-card__lead">{t('ownerPromo.gachaHelp')}</p>
 
         {entries.length > 0 && (
-          <ul style={styles.entryList}>
-            {entries.map((entry) => (
-              <li key={entry.id} style={styles.entryItem}>
-                <span>
-                  {entry.exclusive_name ??
-                    activeProducts.find((p) => p.id === entry.product_id)?.name ??
-                    entry.product_id}
-                </span>
-                <input
-                  style={styles.inputShort}
-                  type="number"
-                  min={1}
-                  value={entry.weight}
-                  onChange={(e) => {
-                    const w = parseInt(e.target.value, 10) || 1;
-                    void updateGachaEntry(entry.id, { weight: w }).then(() =>
-                      setEntries((prev) =>
-                        prev.map((en) => (en.id === entry.id ? { ...en, weight: w } : en)),
-                      ),
-                    );
-                  }}
-                />
-                <label style={styles.inlineCheck}>
-                  <input
-                    type="checkbox"
-                    checked={entry.is_active}
-                    onChange={(e) => {
-                      void updateGachaEntry(entry.id, { is_active: e.target.checked }).then(() =>
-                        setEntries((prev) =>
-                          prev.map((en) =>
-                            en.id === entry.id ? { ...en, is_active: e.target.checked } : en,
+          <>
+            <p className="owner-gacha-stats">
+              {t('ownerPromo.gachaEntriesTitle')} · {t('ownerPromo.gachaWeightSummary', { sum: String(weightSum) })}
+            </p>
+            <ul className="owner-gacha-list">
+              {entries.map((entry) => (
+                <li key={entry.id} className="owner-gacha-entry">
+                  <span className="owner-gacha-entry__name">{entryLabel(entry)}</span>
+                  <div className="owner-gacha-entry__weight">
+                    <span className="owner-gacha-entry__weight-label">{t('ownerPromo.gachaWeightLabel')}</span>
+                    <input
+                      className="owner-promo-input-short"
+                      type="number"
+                      min={1}
+                      value={entry.weight}
+                      onChange={(e) => {
+                        const w = parseInt(e.target.value, 10) || 1;
+                        void updateGachaEntry(entry.id, { weight: w }).then(() =>
+                          setEntries((prev) =>
+                            prev.map((en) => (en.id === entry.id ? { ...en, weight: w } : en)),
                           ),
-                        ),
-                      );
-                    }}
-                  />
-                  ON
-                </label>
-                <button
-                  type="button"
-                  style={styles.linkBtn}
-                  onClick={() =>
-                    void deleteGachaEntry(entry.id).then(() =>
-                      setEntries((prev) => prev.filter((en) => en.id !== entry.id)),
-                    )
-                  }
-                >
-                  {t('ownerPromo.deleteEntry')}
-                </button>
-              </li>
-            ))}
-          </ul>
+                        );
+                      }}
+                    />
+                  </div>
+                  <span className="owner-gacha-entry__pct">{entryPct(entry)}</span>
+                  <label className="owner-gacha-entry__active">
+                    <input
+                      type="checkbox"
+                      checked={entry.is_active}
+                      onChange={(e) => {
+                        void updateGachaEntry(entry.id, { is_active: e.target.checked }).then(() =>
+                          setEntries((prev) =>
+                            prev.map((en) =>
+                              en.id === entry.id ? { ...en, is_active: e.target.checked } : en,
+                            ),
+                          ),
+                        );
+                      }}
+                    />
+                    {t('ownerPromo.gachaEntryActive')}
+                  </label>
+                  <button
+                    type="button"
+                    className="owner-btn-ghost"
+                    style={{ color: '#c92a2a', borderColor: '#ffc9c9' }}
+                    onClick={() =>
+                      void deleteGachaEntry(entry.id).then(() =>
+                        setEntries((prev) => prev.filter((en) => en.id !== entry.id)),
+                      )
+                    }
+                  >
+                    {t('ownerPromo.deleteEntry')}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
         )}
 
-        <div style={styles.addRow}>
-          <input
-            style={styles.input}
-            placeholder={t('ownerPromo.exclusiveNamePlaceholder')}
-            value={newEntryName}
-            onChange={(e) => setNewEntryName(e.target.value)}
-          />
-          <input
-            style={styles.inputShort}
-            type="number"
-            min={1}
-            value={newEntryWeight}
-            onChange={(e) => setNewEntryWeight(e.target.value)}
-          />
-          <button type="button" style={styles.secondaryBtn} disabled={savingPool} onClick={() => void handleAddExclusive()}>
-            {t('ownerPromo.addExclusive')}
-          </button>
+        <div className="owner-gacha-add-block">
+          <p className="owner-gacha-add-block__title">{t('ownerPromo.gachaAddExclusiveTitle')}</p>
+          <div className="owner-gacha-add-row">
+            <input
+              className="owner-promo-input-flex"
+              placeholder={t('ownerPromo.exclusiveNamePlaceholder')}
+              value={newEntryName}
+              onChange={(e) => setNewEntryName(e.target.value)}
+            />
+            <div className="owner-gacha-entry__weight">
+              <span className="owner-gacha-entry__weight-label">{t('ownerPromo.gachaWeightLabel')}</span>
+              <input
+                className="owner-promo-input-short"
+                type="number"
+                min={1}
+                value={newEntryWeight}
+                onChange={(e) => setNewEntryWeight(e.target.value)}
+              />
+            </div>
+            <button type="button" className="owner-btn-primary" disabled={savingPool} onClick={() => void handleAddExclusive()}>
+              {t('ownerPromo.addExclusive')}
+            </button>
+          </div>
         </div>
 
         {activeProducts.length > 0 && (
-          <div style={styles.addRow}>
-            <select style={styles.select} value={addProductId} onChange={(e) => setAddProductId(e.target.value)}>
-              <option value="">{t('ownerPromo.pickProduct')}</option>
-              {activeProducts.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <input
-              style={styles.inputShort}
-              type="number"
-              min={1}
-              value={addProductWeight}
-              onChange={(e) => setAddProductWeight(e.target.value)}
-            />
-            <button type="button" style={styles.secondaryBtn} disabled={savingPool || !addProductId} onClick={() => void handleAddProductEntry()}>
-              {t('ownerPromo.addProductPrize')}
-            </button>
+          <div className="owner-gacha-add-block">
+            <p className="owner-gacha-add-block__title">{t('ownerPromo.gachaAddProductTitle')}</p>
+            <div className="owner-gacha-add-row">
+              <select className="owner-promo-select" style={{ flex: 1, minWidth: 160 }} value={addProductId} onChange={(e) => setAddProductId(e.target.value)}>
+                <option value="">{t('ownerPromo.pickProduct')}</option>
+                {activeProducts.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+              <div className="owner-gacha-entry__weight">
+                <span className="owner-gacha-entry__weight-label">{t('ownerPromo.gachaWeightLabel')}</span>
+                <input
+                  className="owner-promo-input-short"
+                  type="number"
+                  min={1}
+                  value={addProductWeight}
+                  onChange={(e) => setAddProductWeight(e.target.value)}
+                />
+              </div>
+              <button
+                type="button"
+                className="owner-btn-primary"
+                disabled={savingPool || !addProductId}
+                onClick={() => void handleAddProductEntry()}
+              >
+                {t('ownerPromo.addProductPrize')}
+              </button>
+            </div>
           </div>
         )}
-      </div>
+      </article>
 
-      {error && <p style={styles.error}>{error}</p>}
-      {savedMsg && <p style={styles.success}>{savedMsg}</p>}
-    </section>
+      {error && <p className="owner-promo-alert owner-promo-alert--error">{error}</p>}
+      {savedMsg && <p className="owner-promo-alert owner-promo-alert--ok">{savedMsg}</p>}
+    </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  panel: {
-    background: oc.surface,
-    borderRadius: 12,
-    padding: 24,
-    border: `1px solid ${oc.border}`,
-    boxShadow: oc.shadow,
-  },
-  intro: { color: oc.textSecondary, fontSize: fs.base, lineHeight: 1.55, margin: '0 0 20px' },
-  section: {
-    marginBottom: 20,
-    paddingBottom: 20,
-    borderBottom: `1px solid ${oc.border}`,
-  },
-  sectionLast: { marginBottom: 8 },
-  sectionTitle: { margin: '0 0 12px', fontSize: fs.lg, color: oc.text, fontWeight: 700 },
-  label: ownerFieldLabel,
-  hint: { color: oc.textSecondary, fontSize: fs.sm },
-  help: { ...ownerHelpText, margin: '0 0 12px' },
-  checkRow: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, cursor: 'pointer' },
-  modeRow: { display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 },
-  modeOption: { display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' },
-  input: {
-    flex: 1,
-    padding: '10px 12px',
-    borderRadius: 8,
-    border: `1px solid ${oc.borderStrong}`,
-    fontSize: fs.base,
-    boxSizing: 'border-box',
-  },
-  inputShort: {
-    width: 72,
-    padding: '8px 10px',
-    borderRadius: 8,
-    border: `1px solid ${oc.borderStrong}`,
-    fontSize: fs.base,
-  },
-  select: {
-    padding: '8px 10px',
-    borderRadius: 8,
-    border: `1px solid ${oc.borderStrong}`,
-    fontSize: fs.sm,
-    maxWidth: 160,
-  },
-  saveBtn: {
-    marginTop: 8,
-    padding: '10px 18px',
-    borderRadius: 8,
-    border: 'none',
-    background: oc.primary,
-    color: '#fff',
-    fontSize: fs.base,
-    cursor: 'pointer',
-  },
-  secondaryBtn: {
-    padding: '8px 14px',
-    borderRadius: 8,
-    border: `1px solid ${oc.borderStrong}`,
-    background: oc.surface,
-    fontSize: fs.sm,
-    cursor: 'pointer',
-    whiteSpace: 'nowrap',
-  },
-  tableWrap: { overflowX: 'auto' },
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: fs.sm },
-  th: { textAlign: 'left', padding: '8px 6px', borderBottom: `1px solid ${oc.border}`, color: oc.textMuted },
-  thCheck: { width: 32, borderBottom: `1px solid ${oc.border}` },
-  td: { padding: '10px 6px', borderBottom: `1px solid ${oc.border}`, verticalAlign: 'middle' },
-  tdMuted: { padding: '10px 6px', borderBottom: `1px solid ${oc.border}`, color: oc.textMuted, fontSize: fs.sm },
-  bulkBar: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 14,
-    padding: 12,
-    background: oc.surfaceMuted,
-    borderRadius: 8,
-  },
-  entryList: { listStyle: 'none', margin: '0 0 16px', padding: 0 },
-  entryItem: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: 10,
-    padding: '10px 0',
-    borderBottom: `1px solid ${oc.border}`,
-  },
-  inlineCheck: { display: 'flex', alignItems: 'center', gap: 4, fontSize: fs.sm },
-  linkBtn: {
-    border: 'none',
-    background: 'none',
-    color: oc.danger,
-    cursor: 'pointer',
-    fontSize: fs.sm,
-  },
-  addRow: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10, alignItems: 'center' },
-  error: { color: oc.danger, marginTop: 12 },
-  success: { color: oc.success, marginTop: 12 },
-};

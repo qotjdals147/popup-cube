@@ -1,0 +1,283 @@
+/* 점주 — 프로모션 · 가챠 (AD-028) */
+
+.owner-promo-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.owner-promo-page__intro {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #4e5968;
+}
+
+.owner-promo-card {
+  background: #ffffff;
+  border: 1px solid #e5e8eb;
+  border-radius: 12px;
+  padding: 18px 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.owner-promo-card__title {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #191f28;
+}
+
+.owner-promo-card__lead {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #8b95a1;
+}
+
+.owner-promo-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #191f28;
+  cursor: pointer;
+}
+
+.owner-promo-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.owner-promo-mode-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e5e8eb;
+  border-radius: 10px;
+  background: #f9fafb;
+  font-size: 14px;
+  color: #191f28;
+  cursor: pointer;
+  line-height: 1.35;
+}
+
+.owner-promo-mode-option:has(input:checked) {
+  border-color: #3182f6;
+  background: #eff6ff;
+  box-shadow: 0 0 0 1px #3182f6;
+}
+
+.owner-promo-field {
+  margin-bottom: 12px;
+}
+
+.owner-promo-field__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4e5968;
+}
+
+.owner-promo-input-short {
+  width: 80px;
+  padding: 8px 10px;
+  border: 1px solid #d1d6db;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.owner-promo-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e5e8eb;
+  border-radius: 10px;
+}
+
+.owner-promo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.owner-promo-table th {
+  text-align: left;
+  padding: 10px 12px;
+  background: #f9fafb;
+  color: #4e5968;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e8eb;
+}
+
+.owner-promo-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef0f2;
+  vertical-align: middle;
+  color: #191f28;
+}
+
+.owner-promo-table tr:last-child td {
+  border-bottom: none;
+}
+
+.owner-promo-table__muted {
+  color: #8b95a1;
+  font-size: 12px;
+}
+
+.owner-promo-select {
+  min-width: 140px;
+  max-width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d6db;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.owner-promo-bulk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: #f0f7ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+}
+
+.owner-promo-bulk__count {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.owner-gacha-stats {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4e5968;
+}
+
+.owner-gacha-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.owner-gacha-entry {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid #e5e8eb;
+  border-radius: 10px;
+  background: #fafbfc;
+}
+
+@media (max-width: 640px) {
+  .owner-gacha-entry {
+    grid-template-columns: 1fr;
+  }
+}
+
+.owner-gacha-entry__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #191f28;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.owner-gacha-entry__weight {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.owner-gacha-entry__weight-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8b95a1;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.owner-gacha-entry__pct {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+  min-width: 48px;
+  text-align: right;
+}
+
+.owner-gacha-entry__active {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4e5968;
+  white-space: nowrap;
+}
+
+.owner-gacha-add-block {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px dashed #d1d6db;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.owner-gacha-add-block__title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #191f28;
+}
+
+.owner-gacha-add-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.owner-gacha-add-row .owner-promo-input-flex {
+  flex: 1;
+  min-width: 160px;
+  padding: 10px 12px;
+  border: 1px solid #d1d6db;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.owner-promo-alert {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.owner-promo-alert--error {
+  color: #c92a2a;
+  background: #fff5f5;
+  border: 1px solid #ffc9c9;
+}
+
+.owner-promo-alert--ok {
+  color: #087f5b;
+  background: #ebfbee;
+  border: 1px solid #b2f2bb;
+}
