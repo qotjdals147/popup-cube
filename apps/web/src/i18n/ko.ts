@@ -440,7 +440,7 @@ export const ko = {
     tryOnApplied: '{name} 착용 중 (미리보기)',
   },
   cart: {
-    title: '🛒 장바구니',
+    title: '장바구니',
     empty: '장바구니가 비어있어요.',
     total: '상품 금액',
     shippingFee: '배송비',

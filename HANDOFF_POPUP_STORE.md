@@ -5034,6 +5034,10 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-13 — 장바구니 탭 제목 이모지 제거
+- **Changed:** `apps/web/src/i18n/ko.ts` (`cart.title`)
+- **Notes:** **`apps/web`** · Vercel **1~2min** · Expo **❌**
+
 ### 2026-10-13 — §0 손님 라인 아이콘 규칙 고정 (User 2026-10-13)
 - **Changed:** `HANDOFF_POPUP_STORE.md` §0 · §7.112 · UI/UX 체크
 - **Notes:** 문서만 · **Expo ❌**
