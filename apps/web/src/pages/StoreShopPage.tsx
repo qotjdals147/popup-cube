@@ -67,9 +67,12 @@ export function StoreShopPage() {
   );
   const [bootstrapping, setBootstrapping] = useState(true);
   const [storeName, setStoreName] = useState<string | null>(null);
+  const [storeThumbnailUrl, setStoreThumbnailUrl] = useState<string | null>(null);
   const [popupEndsAt, setPopupEndsAt] = useState<string | null>(null);
   const [storeError, setStoreError] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const isProductDeepLink = Boolean(initialProductId);
+  const [storeBrowseUnlocked, setStoreBrowseUnlocked] = useState(!isProductDeepLink);
 
   useEffect(() => {
     let active = true;
@@ -89,6 +92,7 @@ export function StoreShopPage() {
       .then((summary) => {
         if (!active) return;
         setStoreName(summary?.name ?? null);
+        setStoreThumbnailUrl(summary?.thumbnail_url ?? null);
         setPopupEndsAt(summary?.popup_ends_at ?? null);
         if (!summary) setStoreError(true);
       })
@@ -104,6 +108,31 @@ export function StoreShopPage() {
     postToApp('navigate_home');
     if (!window.ReactNativeWebView) {
       window.location.href = '/app-only';
+    }
+  }
+
+  function exitToFeed() {
+    postToApp('navigate_back');
+    if (!window.ReactNativeWebView && window.history.length > 1) {
+      window.history.back();
+    }
+  }
+
+  function handleHeaderBack() {
+    if (window.ReactNativeWebView) {
+      exitToFeed();
+      return;
+    }
+    goHome();
+  }
+
+  function unlockStoreBrowse() {
+    setStoreBrowseUnlocked(true);
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('product')) {
+      params.delete('product');
+      const q = params.toString();
+      window.history.replaceState(null, '', q ? `${window.location.pathname}?${q}` : window.location.pathname);
     }
   }
 
@@ -144,24 +173,32 @@ export function StoreShopPage() {
     );
   }
 
+  const productOnlyShell = isProductDeepLink && !storeBrowseUnlocked;
+
   return (
-    <div className={pageClass} data-theme={theme} style={pageStyle}>
+    <div
+      className={productOnlyShell ? `${pageClass} store-shop-page--product-only` : pageClass}
+      data-theme={theme}
+      style={pageStyle}
+    >
       <header className="store-shop-header">
         <div className="store-shop-header__toolbar">
           <button
             type="button"
             className="store-shop-icon-btn"
-            onClick={goHome}
-            aria-label={t('storeShop.backHomeLabel')}
+            onClick={handleHeaderBack}
+            aria-label={productOnlyShell ? t('storeShop.backFeedLabel') : t('storeShop.backHomeLabel')}
           >
             ←
           </button>
           <CartIconButton count={totalQuantity} onClick={openCart} className="store-shop-icon-btn store-shop-icon-btn--cart" />
         </div>
-        <div className="store-shop-header__title-block">
-          <h1 className="store-shop-title">{storeName ?? t('storeShop.loading')}</h1>
-          <p className="store-shop-subtitle">{t('storeShop.subtitle')}</p>
-        </div>
+        {!productOnlyShell && (
+          <div className="store-shop-header__title-block">
+            <h1 className="store-shop-title">{storeName ?? t('storeShop.loading')}</h1>
+            <p className="store-shop-subtitle">{t('storeShop.subtitle')}</p>
+          </div>
+        )}
       </header>
 
       <main className="store-shop-main">
@@ -176,9 +213,15 @@ export function StoreShopPage() {
           onOpenCart={openCart}
           shoppingBlocked={shoppingBlocked}
           initialProductId={initialProductId}
+          storeBrowseUnlocked={storeBrowseUnlocked}
+          storeName={storeName}
+          storeThumbnailUrl={storeThumbnailUrl}
+          onExitToFeed={exitToFeed}
+          onEnterStoreBrowse={unlockStoreBrowse}
         />
       </main>
 
+      {!productOnlyShell && (
       <div className="store-shop-sticky-bar">
         <button
           type="button"
@@ -193,6 +236,7 @@ export function StoreShopPage() {
               : t('storeShop.cartBarEmpty')}
         </button>
       </div>
+      )}
 
       {cartOpen && (
         <CartDrawer

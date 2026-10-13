@@ -2404,6 +2404,22 @@ npx supabase db pull
 
 ---
 
+### 7.111 **홈 → 상품 상세 → 뒤로 = 홈** (User 2026-10-13)
+
+| | |
+|---|---|
+| **문제** | 홈에서 상품 탭 → 상세 **뒤로** 시 **매장 전체 목록** 노출 (부자연스러움) |
+| **동작** | `?product=` 딥링크 = **상세만** · **←** = 앱 **`navigate_back`**(홈·스크롤 유지) · 상세 하단 **매장 행** → **매장 상품 전체** |
+| **코드** | `StoreShopPage` · `StoreShopCatalog` · `ProductDetailModal` · mobile `navigate_back` |
+
+#### Expo 재시작
+
+| | |
+|---|---|
+| **web + mobile** | **Vercel 1~2min** · Expo **`--clear`** (WebView + `navigate_back`) |
+
+---
+
 ### 7.110 **AD-088 홈 배ner 슬라이드** (User 2026-10-13 · 벤치 01)
 
 | | |
@@ -4988,6 +5004,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-13 — 홈 딥링크 상세 뒤로가기 · 매장 진입 행 (§7.111)
+- **Changed:** `StoreShopPage` · `StoreShopCatalog` · `ProductDetailModal` · CSS · `ko.ts` · mobile `[storeId].tsx`
+- **Notes:** **Vercel 1~2min** · Expo **`--clear`**
 
 ### 2026-10-13 — AD-088 홈 배ner 슬라이드 (§7.110)
 - **Changed:** `homeBanners.ts` · `HomePromoBanner.tsx` · `home.tsx` · §7.96 User实机 ✅

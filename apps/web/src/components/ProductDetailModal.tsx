@@ -37,6 +37,8 @@ interface ProductDetailModalProps {
   onSelectRelated?: (product: Product) => void;
   /** 함께 추천·연관 탭 시 catalog에서 전체 Product로 전환 */
   onOpenProductId?: (productId: string) => void;
+  /** 홈 딥링크 — 매장 전체 보기 진입 */
+  storeEntry?: { name: string; thumbnailUrl?: string | null; onEnter: () => void };
 }
 
 /** layout = 항상 적용 · dark = 다크일 때만 추가(색·테두리) */
@@ -89,6 +91,7 @@ export function ProductDetailModal({
   relatedProducts = [],
   onSelectRelated,
   onOpenProductId,
+  storeEntry,
 }: ProductDetailModalProps) {
   const light = appearance === 'light';
   const rootClass = light ? 'product-detail--light' : undefined;
@@ -447,6 +450,27 @@ export function ProductDetailModal({
                     {t('productDetail.relatedTitle')}
                   </h4>
                   {renderRelatedRow(relatedProducts, 'related')}
+                </section>
+              )}
+
+              {storeEntry && (
+                <section className="product-detail-section product-detail-store-entry">
+                  <button type="button" className="product-detail-store-entry__btn" onClick={storeEntry.onEnter}>
+                    {storeEntry.thumbnailUrl ? (
+                      <img src={storeEntry.thumbnailUrl} alt="" className="product-detail-store-entry__thumb" />
+                    ) : (
+                      <span className="product-detail-store-entry__thumb product-detail-store-entry__thumb--placeholder" aria-hidden>
+                        🏪
+                      </span>
+                    )}
+                    <span className="product-detail-store-entry__text">
+                      <span className="product-detail-store-entry__name">{storeEntry.name}</span>
+                      <span className="product-detail-store-entry__hint">{t('productDetail.enterStore')}</span>
+                    </span>
+                    <span className="product-detail-store-entry__chev" aria-hidden>
+                      ›
+                    </span>
+                  </button>
                 </section>
               )}
               </>

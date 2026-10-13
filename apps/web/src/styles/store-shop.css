@@ -25,6 +25,14 @@
   flex-direction: column;
 }
 
+.store-shop-page--product-only {
+  background: var(--shop-bg);
+}
+
+.store-shop-page--product-only .store-shop-header__title-block {
+  display: none;
+}
+
 html:has(.store-shop-page),
 html:has(.store-shop-page) body {
   margin: 0;

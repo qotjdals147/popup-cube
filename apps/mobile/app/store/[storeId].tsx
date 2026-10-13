@@ -117,6 +117,10 @@ export default function StoreScreen() {
         if (msg.type === 'navigate_home') {
           router.replace('/home');
         }
+        if (msg.type === 'navigate_back') {
+          if (router.canGoBack()) router.back();
+          else router.replace('/home');
+        }
         if (msg.type === 'webview_blank') {
           setWebError(t.store.shopNeedsDeploy);
         }

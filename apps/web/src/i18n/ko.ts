@@ -315,6 +315,7 @@ export const ko = {
     subtitle: '온라인 팝업 · 실물 배송',
     backHome: '← 매장 목록',
     backHomeLabel: '매장 목록으로',
+    backFeedLabel: '홈으로',
     cartLabel: '장바구니',
     notFound: '매장을 찾을 수 없어요.',
     cartBar: '장바구니 보기 ({count}개)',
@@ -544,6 +545,7 @@ export const ko = {
     linkedRecommendTitle: '함께 추천',
     tabInfo: '상품정보',
     tabReviews: '리뷰',
+    enterStore: '매장 상품 전체 보기',
   },
   /** §54 — 리뷰 작성 (구매확정 게이트) */
   review: {

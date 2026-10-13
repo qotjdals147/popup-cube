@@ -15,6 +15,12 @@ export interface StoreShopCatalogProps {
   shoppingBlocked?: boolean;
   /** AD-088 — 홈 피드 등에서 들어올 때 해당 상품 상세 자동 오픈 */
   initialProductId?: string | null;
+  /** 홈·배ner 딥링크 — false면 상품 그리드 숨김 · 뒤로 = 피드 */
+  storeBrowseUnlocked?: boolean;
+  storeName?: string | null;
+  storeThumbnailUrl?: string | null;
+  onExitToFeed?: () => void;
+  onEnterStoreBrowse?: () => void;
 }
 
 function formatPrice(price: number): string {
@@ -28,6 +34,11 @@ export function StoreShopCatalog({
   onOpenCart,
   shoppingBlocked = false,
   initialProductId = null,
+  storeBrowseUnlocked = true,
+  storeName = null,
+  storeThumbnailUrl = null,
+  onExitToFeed,
+  onEnterStoreBrowse,
 }: StoreShopCatalogProps) {
   const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
@@ -104,8 +115,24 @@ export function StoreShopCatalog({
     return <p className="store-shop-hint">{t('shop.empty')}</p>;
   }
 
+  const productOnlyEntry = Boolean(initialProductId) && !storeBrowseUnlocked;
+
+  function handleCloseDetail() {
+    if (productOnlyEntry && onExitToFeed) {
+      onExitToFeed();
+      return;
+    }
+    setDetailProduct(null);
+  }
+
+  function handleEnterStoreFromDetail() {
+    onEnterStoreBrowse?.();
+    setDetailProduct(null);
+  }
+
   return (
     <>
+      {storeBrowseUnlocked && (
       <div className={gridClass}>
         {products.map((product) => (
           <article key={product.id} className="store-shop-card">
@@ -167,6 +194,7 @@ export function StoreShopCatalog({
           </article>
         ))}
       </div>
+      )}
 
       {detailProduct && (
         <ProductDetailModal
@@ -180,7 +208,16 @@ export function StoreShopCatalog({
             const p = products.find((x) => x.id === id);
             if (p) setDetailProduct(p);
           }}
-          onClose={() => setDetailProduct(null)}
+          storeEntry={
+            variant === 'page' && productOnlyEntry && storeName
+              ? {
+                  name: storeName,
+                  thumbnailUrl: storeThumbnailUrl,
+                  onEnter: handleEnterStoreFromDetail,
+                }
+              : undefined
+          }
+          onClose={handleCloseDetail}
           onOpenCart={() => {
             setDetailProduct(null);
             onOpenCart?.();
