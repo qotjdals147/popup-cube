@@ -7,6 +7,32 @@
   padding-bottom: 8px;
 }
 
+.owner-product-edit__toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e8eb;
+  border-radius: 10px;
+}
+
+.owner-product-edit__toolbar-title {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #191f28;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .owner-product-edit__section {
   background: #ffffff;
   border: 1px solid #e5e8eb;

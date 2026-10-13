@@ -723,6 +723,7 @@ export const ko = {
     editSectionFulfillment: '재고 · 주문 자동 수락',
     editSectionDetail: '상세 페이지',
     editStickySave: '상품 저장',
+    editClose: '수정 닫기',
     skusCellAdjLabel: '칸별 ±',
     skusCellAdjMicro: '이 옵션만 추가·할인(원)',
     skusCellAdjPh: '0',

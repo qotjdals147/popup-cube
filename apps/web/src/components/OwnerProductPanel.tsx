@@ -420,6 +420,13 @@ export function OwnerProductPanel({
               <div key={product.id} style={styles.card}>
                 {editingId === product.id ? (
                   <div className="owner-product-edit">
+                    <div className="owner-product-edit__toolbar">
+                      <button type="button" className="owner-btn-ghost" onClick={cancelEdit}>
+                        ← {t('ownerProducts.editClose')}
+                      </button>
+                      <p className="owner-product-edit__toolbar-title">{editName.trim() || product.name}</p>
+                    </div>
+
                     <section className="owner-product-edit__section">
                       <h3 className="owner-product-edit__section-title">{t('ownerProducts.editSectionBasics')}</h3>
                       <div className="owner-field-gap">
@@ -541,9 +548,6 @@ export function OwnerProductPanel({
                     </section>
 
                     <div className="owner-product-edit__sticky">
-                      <button style={styles.smallGhostButton} type="button" onClick={cancelEdit}>
-                        {t('common.back')}
-                      </button>
                       <button
                         type="button"
                         className="owner-btn-primary"
@@ -554,8 +558,8 @@ export function OwnerProductPanel({
                       </button>
                     </div>
 
-                    <div className="owner-product-edit__detail">
-                      <h4 style={styles.detailSectionTitle}>{t('ownerProducts.detailSectionTitle')}</h4>
+                    <section className="owner-product-edit__section owner-product-edit__detail">
+                      <h3 className="owner-product-edit__section-title">{t('ownerProducts.editSectionDetail')}</h3>
                       <p style={styles.detailIntro}>{t('ownerProducts.detailIntro')}</p>
                       <OwnerProductBlockEditor product={product} userId={userId} onSaved={reload} />
                       <button
@@ -565,7 +569,7 @@ export function OwnerProductPanel({
                       >
                         {t('ownerProducts.previewButton')}
                       </button>
-                    </div>
+                    </section>
                   </div>
                 ) : (
                   <div style={styles.cardBody}>

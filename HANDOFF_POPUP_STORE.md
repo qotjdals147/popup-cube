@@ -117,7 +117,7 @@
 |---|---|
 | **Primary** | **`#3182f6`** · 클래스 **`owner-btn-primary`** / **`owner-sku-btn--primary`** — 검정 CTA **❌** |
 | **정렬** | 섹션별 저장 = **우측** (`owner-section-actions` · `owner-sku-footer`) |
-| **상품 수정** | **기본·재고** = 하단 **sticky 「상품 저장」** · **옵션** = 「옵션 저장」 · **함께 추천** = 「추천 저장」 (RPC 분리 유지) |
+| **상품 수정** | **닫기** = 상단 sticky **「수정 닫기」** · **기본·재고** = 하단 sticky **「상품 저장」만** · **옵션** / **추천** = 각 섹션 저장 · **상세 블록** = **저장 버튼 없음**(즉시 반영) |
 | **레이아웃** | 수정 펼침 = **`owner-product-edit__section`** 박스 구분 · §7.108 |
 
 **AI 티 금지 (User 2026-10-02):** 「~할 일」「~해보세요」「한곳에서」「~이에요」 남발 · 친절한 챗봇/매뉴얼체 **❌** — **짧은 라벨·명사구** · 문구 추가 전 **소리 내어 읽기** · §25·`ko.ts`·HANDOFF 본문 동일.
@@ -2386,7 +2386,7 @@ npx supabase db pull
 |---|---|
 | **옵션 칸** | 값 아래 **「이 옵션만 추가·할인(원)」** · placeholder `0` · `± (선택)` **❌** |
 | **상품코드** | placeholder **비움** · 「엑셀·셀메이트」 칸 placeholder **❌** (라벨만) |
-| **수정 펼침** | **기본 정보** · **판매 옵션** · **함께 추천** · **재고·자동수락** · **sticky 상품 저장** · 상세 블록 |
+| **수정 펼침** | 상단 **수정 닫기** · 섹션 박스 · sticky **상품 저장**(닫기 ❌) · **상세** = 블록 즉시 저장 |
 | **저장** | primary **파랑·우측** · §0 표 |
 
 #### Expo 재시작
@@ -4948,6 +4948,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-13 — 상품 수정: 닫기 상단 · sticky 저장만 (§7.108)
+- **Changed:** `OwnerProductPanel` · `owner-product-edit.css` · `editClose` · 상세 섹션 박스
+- **Notes:** 상세 블록 **별도 저장 ❌** · **`apps/web`** · Vercel **1~2min**
 
 ### 2026-10-13 — 점주 상품 수정 UX·옵션 칸 문구 (§7.108)
 - **Changed:** `OwnerProductPanel` · `OwnerProductSkusEditor` · `owner-product-edit.css` · linked recommend primary · `ko.ts` · §0 · §25
