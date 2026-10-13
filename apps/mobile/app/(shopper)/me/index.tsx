@@ -7,12 +7,13 @@ import { useTheme } from '../../../src/context/ThemeContext';
 import { useShopperNotificationBadge } from '../../../src/hooks/useShopperNotificationBadge';
 import { t } from '../../../src/i18n/ko';
 import { useRestoreSystemChromeOnFocus } from '../../../src/hooks/useWorldImmersiveChrome';
+import { ShopperLineIcon, type ShopperLineIconName } from '../../../src/components/ShopperLineIcon';
 
 const QUICK_ACTIONS = [
-  { id: 'orders', icon: '📦', labelKey: 'orders' as const, href: '/me/orders' as const, enabled: true },
-  { id: 'notifications', icon: '🔔', labelKey: 'notifications' as const, href: '/me/notifications' as const, enabled: true },
-  { id: 'addresses', icon: '📍', labelKey: 'addresses' as const, href: '/me/addresses' as const, enabled: true },
-  { id: 'recent', icon: '👁', labelKey: 'recent' as const, enabled: false },
+  { id: 'orders', icon: 'receipt' as ShopperLineIconName, labelKey: 'orders' as const, href: '/me/orders' as const, enabled: true },
+  { id: 'notifications', icon: 'bell' as ShopperLineIconName, labelKey: 'notifications' as const, href: '/me/notifications' as const, enabled: true },
+  { id: 'addresses', icon: 'location' as ShopperLineIconName, labelKey: 'addresses' as const, href: '/me/addresses' as const, enabled: true },
+  { id: 'recent', icon: 'time' as ShopperLineIconName, labelKey: 'recent' as const, enabled: false },
 ] as const;
 
 /** §60 4-B — 쿠팡형 「마이」 허브 (네이티브 · WebView는 주문/배송지 화면에서만) */
@@ -69,7 +70,6 @@ export default function MeHubScreen() {
           borderWidth: 1,
           borderColor: colors.border,
         },
-        gearIcon: { fontSize: 20 },
         quickGrid: {
           flexDirection: 'row',
           backgroundColor: colors.bgCard,
@@ -86,7 +86,7 @@ export default function MeHubScreen() {
           position: 'relative',
         },
         quickItemDisabled: { opacity: 0.45 },
-        quickIcon: { fontSize: 22, marginBottom: 6 },
+        quickIconWrap: { marginBottom: 6, height: 24, alignItems: 'center', justifyContent: 'center' },
         quickLabel: { fontSize: 11, fontWeight: '600', color: colors.text, textAlign: 'center' },
         quickLabelDisabled: { color: colors.textMuted },
         quickBadge: {
@@ -120,7 +120,7 @@ export default function MeHubScreen() {
           padding: 20,
           alignItems: 'center',
         },
-        ordersTeaserIcon: { fontSize: 36, marginBottom: 8 },
+        ordersTeaserIconWrap: { marginBottom: 8 },
         ordersTeaserTitle: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: 6 },
         ordersTeaserBody: {
           fontSize: 13,
@@ -179,7 +179,7 @@ export default function MeHubScreen() {
             accessibilityLabel={t.me.openSettings}
             onPress={() => router.push('/settings' as Href)}
           >
-            <Text style={styles.gearIcon}>⚙️</Text>
+            <ShopperLineIcon name="settings" size={22} color={colors.text} />
           </Pressable>
         </View>
 
@@ -198,7 +198,13 @@ export default function MeHubScreen() {
                 }
               }}
             >
-              <Text style={styles.quickIcon}>{action.icon}</Text>
+              <View style={styles.quickIconWrap}>
+                <ShopperLineIcon
+                  name={action.icon}
+                  size={24}
+                  color={action.enabled ? colors.text : colors.textMuted}
+                />
+              </View>
               {showBadge && (
                 <View style={styles.quickBadge}>
                   <Text style={styles.quickBadgeText}>{badgeLabel}</Text>
@@ -222,7 +228,9 @@ export default function MeHubScreen() {
           </View>
 
           <Pressable style={styles.ordersTeaser} onPress={() => router.push('/me/orders' as Href)}>
-            <Text style={styles.ordersTeaserIcon}>📦</Text>
+            <View style={styles.ordersTeaserIconWrap}>
+              <ShopperLineIcon name="receipt" size={40} color={colors.primary} />
+            </View>
             <Text style={styles.ordersTeaserTitle}>{t.me.ordersTeaserTitle}</Text>
             <Text style={styles.ordersTeaserBody}>{t.me.ordersTeaserBody}</Text>
             <View style={styles.ordersTeaserBtn}>

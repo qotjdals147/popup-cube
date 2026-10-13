@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useShopperNotificationBadge } from '../hooks/useShopperNotificationBadge';
 import { t } from '../i18n/ko';
+import { ShopperLineIcon } from './ShopperLineIcon';
 
 interface ShopperNotificationBellProps {
   /** 헤더용 = 44px 터치 · compact = 작은 아이콘 */
@@ -25,10 +26,6 @@ export function ShopperNotificationBell({ size = 'header' }: ShopperNotification
           position: 'relative',
           minWidth: size === 'header' ? 44 : 36,
           minHeight: size === 'header' ? 44 : 36,
-        },
-        icon: {
-          fontSize: size === 'header' ? 22 : 18,
-          lineHeight: size === 'header' ? 24 : 20,
         },
         badge: {
           position: 'absolute',
@@ -65,7 +62,11 @@ export function ShopperNotificationBell({ size = 'header' }: ShopperNotification
       }
       onPress={() => router.push('/me/notifications' as Href)}
     >
-      <Text style={styles.icon}>🔔</Text>
+      <ShopperLineIcon
+        name="bell"
+        size={size === 'header' ? 24 : 20}
+        color={colors.text}
+      />
       {unreadCount > 0 && (
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{badgeLabel}</Text>

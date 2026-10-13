@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { HomeFeedChips } from '../../src/components/HomeFeedChips';
 import { HomeProductCard } from '../../src/components/HomeProductCard';
 import { HomePromoBanner } from '../../src/components/HomePromoBanner';
+import { ShopperLineIcon } from '../../src/components/ShopperLineIcon';
 import { ShopperNotificationBell } from '../../src/components/ShopperNotificationBell';
 import { useAuth } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
@@ -74,7 +75,7 @@ export default function HomeScreen() {
           borderColor: colors.border,
           paddingHorizontal: 12,
         },
-        searchIcon: { fontSize: 16, marginRight: 8 },
+        searchIconWrap: { marginRight: 8 },
         search: {
           flex: 1,
           color: colors.text,
@@ -195,9 +196,9 @@ export default function HomeScreen() {
             <ShopperNotificationBell />
           </View>
           <View style={styles.searchWrap}>
-            <Text style={styles.searchIcon} accessibilityElementsHidden>
-              🔍
-            </Text>
+            <View style={styles.searchIconWrap} accessibilityElementsHidden>
+              <ShopperLineIcon name="search" size={18} color={colors.textMuted} />
+            </View>
             <TextInput
               style={styles.search}
               value={search}

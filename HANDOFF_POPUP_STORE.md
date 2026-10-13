@@ -127,6 +127,8 @@
 | **제목 ↔ 안내** | 제목 `margin-bottom` **≥10px** · 안내(lead) 아래 **≥18px** 후 본문/입력 |
 | **공통 클래스** | `owner-promo-card__title` / `__lead` · `owner-section-lead` · `owner-gacha-add-block__lead` |
 
+**손님 앱 아이콘 (CEO · User 2026-10-13 · §7.112):** 탭·헤더·마이 = **`ShopperLineIcon`** 라인형 · **이모지·입체 이모티콘 UI ❌**
+
 **AI 티 금지 (User 2026-10-02):** 「~할 일」「~해보세요」「한곳에서」「~이에요」 남발 · 친절한 챗봇/매뉴얼체 **❌** — **짧은 라벨·명사구** · 문구 추가 전 **소리 내어 읽기** · §25·`ko.ts`·HANDOFF 본문 동일.
 
 **User-facing TMI·타사 비교 금지 (User 2026-10-12 — §0 매 작업 재확인):**
@@ -901,7 +903,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-13)** | **엑셀实机 ✅** · **홈 배ner 슬라이드 ✅** · **벤치 08** 태그·소식 · CEO **카테고리** ⏸ |
+| **한 줄 요약 (2026-10-13)** | **라인 아이콘 ✅** · **벤치 08** 태그·소식 · CEO **카테고리** ⏸ |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
 | **User实기** | **§7.100 ISS-053 ✅** · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
@@ -2401,6 +2403,23 @@ npx supabase db pull
 | | |
 |---|---|
 | `apps/web` only | **❌ Expo** · **Vercel 1~2min** |
+
+---
+
+### 7.112 **손님 앱 라인 아이콘** (CEO 심현우 · User 2026-10-13)
+
+| | |
+|---|---|
+| **Why** | 하단·알림 등 **3D/이모지** → 쇼핑몰 **이질감** · 에이블리 등 **라인 아이콘** 표준 |
+| **규칙** | 손님 **탭·헤더·마이 퀵** = **`ShopperLineIcon`** (Ionicons outline) · **이모지 UI 아이콘 ❌** |
+| **범위** | 홈·마이·장바구니 탭 · 알림 · 검색 · 설정(알림·다크) · 마이 퀵 |
+| **회의록** | `2026.10.02_회의_내용.txt` · 벤치 **01** 하단 탭 |
+
+#### Expo 재시작
+
+| | |
+|---|---|
+| **`apps/mobile`** | **✅ `--clear`** |
 
 ---
 
@@ -5004,6 +5023,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-13 — 손님 앱 라인 아이콘 (§7.112 · CEO)
+- **Changed:** `ShopperLineIcon.tsx` · `ShopperBottomNav` · `ShopperNotificationBell` · `home` · `me` · `settings` · 회의록 · `ko.ts`
+- **Notes:** **`apps/mobile`** · Expo **`--clear`**
 
 ### 2026-10-13 — 홈 딥링크 상세 뒤로가기 · 매장 진입 행 (§7.111)
 - **Changed:** `StoreShopPage` · `StoreShopCatalog` · `ProductDetailModal` · CSS · `ko.ts` · mobile `[storeId].tsx`

@@ -6,13 +6,19 @@ import { useCartCount } from '../context/CartCountContext';
 import { useTheme } from '../context/ThemeContext';
 import { useShopperNotificationBadge } from '../hooks/useShopperNotificationBadge';
 import { t } from '../i18n/ko';
+import { ShopperLineIcon, type ShopperLineIconName } from './ShopperLineIcon';
 
 export type ShopperTab = 'home' | 'me' | 'cart';
 
-const TABS: { id: ShopperTab; label: string; icon: string; href: '/home' | '/me' | '/cart' }[] = [
-  { id: 'home', label: t.nav.home, icon: '🏠', href: '/home' },
-  { id: 'me', label: t.nav.me, icon: '👤', href: '/me' },
-  { id: 'cart', label: t.nav.cart, icon: '🛒', href: '/cart' },
+const TABS: {
+  id: ShopperTab;
+  label: string;
+  icon: ShopperLineIconName;
+  href: '/home' | '/me' | '/cart';
+}[] = [
+  { id: 'home', label: t.nav.home, icon: 'home', href: '/home' },
+  { id: 'me', label: t.nav.me, icon: 'person', href: '/me' },
+  { id: 'cart', label: t.nav.cart, icon: 'bag', href: '/cart' },
 ];
 
 /** §60 4-B — 쿠팡형 하단 3탭 (홈 · 마이 · 장바구니) · 설정=마이 ⚙️ */
@@ -54,10 +60,6 @@ export function ShopperBottomNav({
           height: 2,
           backgroundColor: colors.primary,
           borderRadius: 1,
-        },
-        icon: {
-          fontSize: 20,
-          lineHeight: 24,
         },
         iconWrap: {
           position: 'relative',
@@ -118,7 +120,12 @@ export function ShopperBottomNav({
           >
             {isActive && <View style={styles.activeIndicator} />}
             <View style={styles.iconWrap}>
-              <Text style={styles.icon}>{tab.icon}</Text>
+              <ShopperLineIcon
+                name={tab.icon}
+                size={22}
+                color={isActive ? colors.primary : colors.textMuted}
+                active={isActive}
+              />
               {showBadge && (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{badgeCount > 99 ? '99+' : badgeCount}</Text>

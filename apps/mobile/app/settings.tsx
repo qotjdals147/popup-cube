@@ -16,6 +16,7 @@ import { useAuth } from '../src/context/AuthContext';
 import { useTheme } from '../src/context/ThemeContext';
 import { t } from '../src/i18n/ko';
 import { useRestoreSystemChromeOnFocus } from '../src/hooks/useWorldImmersiveChrome';
+import { ShopperLineIcon } from '../src/components/ShopperLineIcon';
 import {
   checkNicknameAvailableForChange,
   isNicknameLengthValid,
@@ -148,7 +149,7 @@ export default function SettingsScreen() {
           minHeight: 48,
           opacity: 0.72,
         },
-        menuIcon: { fontSize: 18, width: 28, textAlign: 'center', marginRight: 4 },
+        menuIconSlot: { width: 28, marginRight: 4, alignItems: 'center', justifyContent: 'center' },
         menuLabelFlex: { flex: 1, fontSize: 15, color: colors.text, fontWeight: '500' },
         menuBadge: {
           fontSize: 11,
@@ -361,13 +362,17 @@ export default function SettingsScreen() {
         <Text style={styles.sectionHeading}>{t.settings.sectionPreferences}</Text>
         <View style={styles.card}>
           <View style={styles.menuRowDisabled}>
-            <Text style={styles.menuIcon}>🔔</Text>
+            <View style={styles.menuIconSlot}>
+              <ShopperLineIcon name="bell" size={20} color={colors.textMuted} />
+            </View>
             <Text style={styles.menuLabelFlex}>{t.settings.menuNotifications}</Text>
             <Text style={styles.menuBadge}>{t.settings.comingSoon}</Text>
           </View>
           <View style={styles.dividerInset} />
           <View style={styles.menuRow}>
-            <Text style={styles.menuIcon}>🌙</Text>
+            <View style={styles.menuIconSlot}>
+              <ShopperLineIcon name="moon" size={20} color={colors.textMuted} />
+            </View>
             <Text style={styles.menuLabelFlex}>{t.settings.menuDarkMode}</Text>
             <Switch
               value={isDark}

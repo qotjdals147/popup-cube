@@ -72,7 +72,7 @@ export const t = {
     emptyTitle: '장바구니가 비어 있어요',
     emptyBody: '매장에 들어가 상품을 담아보세요.',
     browseStores: '매장 둘러보기',
-    perStoreHint: 'v1에서는 매장별 장바구니입니다. 매장 쇼핑 화면 우측 🛒에서 확인할 수 있어요.',
+    perStoreHint: 'v1에서는 매장별 장바구니입니다. 매장 쇼핑 화면 우측 장바구니에서 확인할 수 있어요.',
   },
   settings: {
     title: '설정',
