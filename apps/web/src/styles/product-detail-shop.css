@@ -175,3 +175,8 @@
   font-size: 28px;
   opacity: 0.45;
 }
+
+.product-detail--light .product-detail-tab--active {
+  color: #191f28;
+  border-bottom-color: #191f28;
+}

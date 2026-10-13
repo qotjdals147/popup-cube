@@ -9,6 +9,7 @@ import {
   pruneSelection,
 } from '../lib/skuOptionGroups';
 import { formatPriceDeltaLabel, skuUnitPrice } from '../lib/skuPrice';
+import { getProductCoordiProducts, type CoordiProductSummary } from '../lib/productCoordi';
 import { listProductDetailBlocks } from '../lib/productDetailBlocks';
 import { getMyReviewKeys, getProductReviews, reviewKey } from '../lib/reviews';
 import { canFileClaim, confirmPurchase, listMyOrders } from '../lib/orders';
@@ -34,6 +35,8 @@ interface ProductDetailModalProps {
   /** AD-088 Phase 2 — 같은 매장 다른 상품 (코디 DB 전 · 목록에서 제외한 나머지) */
   relatedProducts?: Product[];
   onSelectRelated?: (product: Product) => void;
+  /** 코디·연관 탭 시 catalog에서 전체 Product로 전환 */
+  onOpenProductId?: (productId: string) => void;
 }
 
 /** layout = 항상 적용 · dark = 다크일 때만 추가(색·테두리) */
@@ -85,6 +88,7 @@ export function ProductDetailModal({
   shoppingBlocked = false,
   relatedProducts = [],
   onSelectRelated,
+  onOpenProductId,
 }: ProductDetailModalProps) {
   const light = appearance === 'light';
   const rootClass = light ? 'product-detail--light' : undefined;
@@ -112,6 +116,8 @@ export function ProductDetailModal({
   );
   const [reviewConfirmOpen, setReviewConfirmOpen] = useState(false);
   const [detailExpanded, setDetailExpanded] = useState(false);
+  const [coordiProducts, setCoordiProducts] = useState<CoordiProductSummary[]>([]);
+  const [detailTab, setDetailTab] = useState<'info' | 'reviews'>('info');
 
   const hasDetailContent = detailBlocks.some(
     (b) => (b.block_type === 'image' && b.image_url) || (b.text_content && b.text_content.trim())
@@ -159,12 +165,14 @@ export function ProductDetailModal({
       listProductDetailBlocks(product.id),
       getProductReviews(product.id),
       previewMode ? Promise.resolve([] as ProductSku[]) : getProductSkus(product.id).catch(() => [] as ProductSku[]),
+      previewMode ? Promise.resolve([] as CoordiProductSummary[]) : getProductCoordiProducts(product.id).catch(() => []),
     ])
-      .then(([blocks, reviewList, skuList]) => {
+      .then(([blocks, reviewList, skuList, coordiList]) => {
         if (!mounted) return;
         setDetailBlocks(blocks);
         setReviews(reviewList);
         setSkus(skuList);
+        setCoordiProducts(coordiList);
         setSelectedSkuId(null);
         setOptionSelection(buildSkuOptionGroups(skuList).map(() => ''));
         setSkuErr(null);
@@ -183,8 +191,53 @@ export function ProductDetailModal({
 
   useEffect(() => {
     setDetailExpanded(false);
+    setDetailTab('info');
     scrollRef.current?.scrollTo({ top: 0 });
   }, [product.id]);
+
+  function openLinkedProduct(linkedId: string) {
+    if (onOpenProductId) {
+      onOpenProductId(linkedId);
+      return;
+    }
+    const fromRelated = relatedProducts.find((p) => p.id === linkedId);
+    if (fromRelated && onSelectRelated) {
+      onSelectRelated(fromRelated);
+    }
+  }
+
+  function renderRelatedRow(
+    items: { id: string; name: string; price: number; image_url: string | null }[],
+    keyPrefix: string
+  ) {
+    return (
+      <div className="product-detail-related-row">
+        {items.map((rp) => (
+          <button
+            key={`${keyPrefix}-${rp.id}`}
+            type="button"
+            className="product-detail-related-card"
+            style={styleFor(light, S.relatedCardLayout, S.relatedCardDark)}
+            onClick={() => openLinkedProduct(rp.id)}
+          >
+            <div className="product-detail-related-thumb-wrap" style={styleFor(light, S.relatedThumbWrapLayout, S.relatedThumbWrapDark)}>
+              {rp.image_url ? (
+                <img src={rp.image_url} alt="" className="product-detail-related-thumb" />
+              ) : (
+                <span className="product-detail-related-placeholder">🛍️</span>
+              )}
+            </div>
+            <span className="product-detail-related-name" style={styleFor(light, S.relatedNameLayout, S.relatedNameDark)}>
+              {rp.name}
+            </span>
+            <span className="product-detail-related-price" style={styleFor(light, S.relatedPriceLayout, S.relatedPriceDark)}>
+              {formatPrice(rp.price)}
+            </span>
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   const avgRating =
     reviews.length > 0 ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length) * 10) / 10 : null;
@@ -310,10 +363,34 @@ export function ProductDetailModal({
             </div>
           </div>
 
+          {!previewMode && (
+            <div className="product-detail-tabs" style={styleFor(light, S.tabsLayout, S.tabsDark)}>
+              <button
+                type="button"
+                className={detailTab === 'info' ? 'product-detail-tab product-detail-tab--active' : 'product-detail-tab'}
+                style={styleFor(light, detailTab === 'info' ? S.tabActiveLayout : S.tabLayout, detailTab === 'info' ? S.tabActiveDark : S.tabDark)}
+                onClick={() => setDetailTab('info')}
+              >
+                {t('productDetail.tabInfo')}
+              </button>
+              <button
+                type="button"
+                className={detailTab === 'reviews' ? 'product-detail-tab product-detail-tab--active' : 'product-detail-tab'}
+                style={styleFor(light, detailTab === 'reviews' ? S.tabActiveLayout : S.tabLayout, detailTab === 'reviews' ? S.tabActiveDark : S.tabDark)}
+                onClick={() => setDetailTab('reviews')}
+              >
+                {t('productDetail.tabReviews')}
+                {reviews.length > 0 ? ` (${reviews.length})` : ''}
+              </button>
+            </div>
+          )}
+
           {loading ? (
             <p className="product-detail-hint" style={styleFor(light, S.hintLayout, S.hintDark)}>{t('productDetail.loading')}</p>
           ) : (
             <>
+              {(detailTab === 'info' || previewMode) && (
+              <>
               <section className="product-detail-section" style={styleFor(light, S.sectionLayout, S.sectionDark)}>
                 <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>{t('productDetail.descTitle')}</h4>
                 {!hasDetailContent ? (
@@ -355,39 +432,27 @@ export function ProductDetailModal({
                 )}
               </section>
 
-              {relatedProducts.length > 0 && onSelectRelated && (
+              {coordiProducts.length > 0 && (onOpenProductId || onSelectRelated) && (
+                <section className="product-detail-section product-detail-related-section" style={styleFor(light, S.sectionLayout, S.sectionDark)}>
+                  <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>
+                    {t('productDetail.coordiTitle')}
+                  </h4>
+                  {renderRelatedRow(coordiProducts, 'coordi')}
+                </section>
+              )}
+
+              {coordiProducts.length === 0 && relatedProducts.length > 0 && (onOpenProductId || onSelectRelated) && (
                 <section className="product-detail-section product-detail-related-section" style={styleFor(light, S.sectionLayout, S.sectionDark)}>
                   <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>
                     {t('productDetail.relatedTitle')}
                   </h4>
-                  <div className="product-detail-related-row">
-                    {relatedProducts.map((rp) => (
-                      <button
-                        key={rp.id}
-                        type="button"
-                        className="product-detail-related-card"
-                        style={styleFor(light, S.relatedCardLayout, S.relatedCardDark)}
-                        onClick={() => onSelectRelated(rp)}
-                      >
-                        <div className="product-detail-related-thumb-wrap" style={styleFor(light, S.relatedThumbWrapLayout, S.relatedThumbWrapDark)}>
-                          {rp.image_url ? (
-                            <img src={rp.image_url} alt="" className="product-detail-related-thumb" />
-                          ) : (
-                            <span className="product-detail-related-placeholder">🛍️</span>
-                          )}
-                        </div>
-                        <span className="product-detail-related-name" style={styleFor(light, S.relatedNameLayout, S.relatedNameDark)}>
-                          {rp.name}
-                        </span>
-                        <span className="product-detail-related-price" style={styleFor(light, S.relatedPriceLayout, S.relatedPriceDark)}>
-                          {formatPrice(rp.price)}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+                  {renderRelatedRow(relatedProducts, 'related')}
                 </section>
               )}
+              </>
+              )}
 
+              {(detailTab === 'reviews' || previewMode) && (
               <section className="product-detail-section" style={styleFor(light, S.sectionLayout, S.sectionDark)}>
                 <div style={S.reviewsSectionHeader}>
                   <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>
@@ -448,6 +513,7 @@ export function ProductDetailModal({
                   </div>
                 )}
               </section>
+              )}
             </>
           )}
         </div>
@@ -837,4 +903,38 @@ const S = {
   relatedNameDark: { color: '#d8e4ff' },
   relatedPriceLayout: { fontSize: 12, fontWeight: 700, color: '#e94560' },
   relatedPriceDark: { color: '#e94560' },
+  tabsLayout: {
+    display: 'flex',
+    gap: 8,
+    marginTop: 16,
+    borderBottom: '1px solid #e5e8eb',
+    paddingBottom: 0,
+  },
+  tabsDark: { borderBottom: '1px solid #2c4270' },
+  tabLayout: {
+    flex: 1,
+    padding: '10px 8px',
+    border: 'none',
+    background: 'transparent',
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+    color: '#8b95a1',
+    borderBottom: '2px solid transparent',
+    marginBottom: -1,
+  },
+  tabDark: { color: '#7c8db5' },
+  tabActiveLayout: {
+    flex: 1,
+    padding: '10px 8px',
+    border: 'none',
+    background: 'transparent',
+    fontSize: 13,
+    fontWeight: 700,
+    cursor: 'pointer',
+    color: '#191f28',
+    borderBottom: '2px solid #191f28',
+    marginBottom: -1,
+  },
+  tabActiveDark: { color: '#fff', borderBottom: '2px solid #e94560' },
 };

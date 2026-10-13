@@ -885,7 +885,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-12 eve)** | **AD-088 Phase 2 ✅** 펼치기·연관상품 · **CEO 카테고리 칩** · 엑셀实机 · 코디(점주) 2차 |
+| **한 줄 요약 (2026-10-13)** | **AD-088 코디 ✅** · **홈 배ner 슬라이드** · **§7.96 엑셀实机** · CEO **카테고리** |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
 | **User实기** | **§7.100 ISS-053 ✅** · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
@@ -1874,6 +1874,7 @@ npm run dev
 - [x] AD-088 **Phase 1 홈** — 앱 `home.tsx` **상품 피드** · 배ner · 칩 (벤치 **01~02**) · 2026-10-12  
 - [x] AD-088 **Phase 1b** — 홈 상품 탭 → `/shop?product=` · **ProductDetailModal** 자동 (§7.104) · 2026-10-12  
 - [x] AD-088 **Phase 2** 상세 **펼치기·연관상품** (벤치 **05~07** v1) · 2026-10-12  
+- [x] AD-088 **Phase 3 코디** — `product_coordi_links` · 점주 체크 · 손님 **함께 코디** · 상세 **탭** · §7.106 · 2026-10-13  
 - [ ] **셀메이트 계정·연동 스펙** CEO 확인 (§7.95) ⬜  
 
 ---
@@ -2330,13 +2331,32 @@ npx supabase db pull
 | **벤치** | `05~07` — 상세 본문 · **연관** · **상품 정보 펼쳐보기** |
 | **동작** | 상세 블록 **240px 접힘** + 펼치기/접기 · **이 매장의 다른 상품** 최대 12 · 탭하면 **같은 모달에서 상품 전환** |
 | **코드** | `ProductDetailModal` · `StoreShopCatalog` · `product-detail-shop.css` · `ko.ts` |
-| **아직 ❌** | 점주 **코디 링크** · 상품 **태그·소식**(벤치 08) · 정보/리뷰 **탭 UI** |
+| **Phase 3 ✅** | 점주 **코디 링크** · 손님 **함께 코디** · **상품정보/리뷰 탭** · §7.106 |
+| **아직 ❌** | 상품 **태그·소식**(벤치 08) · 홈 **배ner 다중** |
 
 #### Expo 재시작
 
 | | |
 |---|---|
 | `apps/web` only | **❌ Expo** · **Vercel 1~2min** + shop WebView **새로고침** |
+
+---
+
+### 7.106 **AD-088 Phase 3 — 코디 링크·상세 탭** (2026-10-13)
+
+| | |
+|---|---|
+| **회의** | 룩핀식 A→B/C · 점주 **상품탭**에서 선택 (회의록 19~20) |
+| **DB** | `product_coordi_links` · RPC `get_product_coordi_products` · `get/save_owner_product_coordi_links` · migration `20261013_ad088_product_coordi_links` **원격 ✅** |
+| **점주** | `OwnerProductCoordiEditor` — 수정 중 상품 · 최대 12개 · **코디 저장** |
+| **손님** | 코디 있으면 **「함께 코디」** (가격·탭 전환) · 없으면 **「이 매장의 다른 상품」** · **상품정보 / 리뷰** 탭 |
+| **다음** | §7.96 **엑셀实机** · 홈 **배ner 슬라이드** · 벤치 **08** 태그·소식 |
+
+#### Expo 재시작
+
+| | |
+|---|---|
+| web + DB | **❌ Expo** · **Vercel 1~2min** · 점주 PC **새로고침** |
 
 ---
 
@@ -4891,6 +4911,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-13 — AD-088 Phase 3 코디·상세 탭 (§7.106)
+- **Changed:** migration `20261013_ad088_product_coordi_links` · `OwnerProductCoordiEditor` · `productCoordi.ts` · `ProductDetailModal` · `StoreShopCatalog` · `OwnerProductPanel` · `ko.ts`
+- **Notes:** **POPUP DB 적용 ✅** · **`apps/web` only** · Vercel **1~2min** · 점주 상품 수정 → **함께 코디할 상품** 저장 후 손님 상세 확인
 
 ### 2026-10-12 eve — AD-088 Phase 2 상세 펼치기·연관 (§7.105)
 - **Changed:** `ProductDetailModal` · `StoreShopCatalog` · `product-detail-shop.css` · `ko.ts` · §7.94 · §7.104

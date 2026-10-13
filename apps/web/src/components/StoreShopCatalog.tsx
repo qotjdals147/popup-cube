@@ -176,6 +176,10 @@ export function StoreShopCatalog({
           shoppingBlocked={shoppingBlocked}
           relatedProducts={relatedForDetail}
           onSelectRelated={(p) => setDetailProduct(p)}
+          onOpenProductId={(id) => {
+            const p = products.find((x) => x.id === id);
+            if (p) setDetailProduct(p);
+          }}
           onClose={() => setDetailProduct(null)}
           onOpenCart={() => {
             setDetailProduct(null);

@@ -22,6 +22,7 @@ import {
 } from '../styles/ownerAdminTheme';
 import { OwnerProductBlockEditor } from './OwnerProductBlockEditor';
 import { OwnerProductBulkUpload } from './OwnerProductBulkUpload';
+import { OwnerProductCoordiEditor } from './OwnerProductCoordiEditor';
 import { OwnerProductSkusEditor } from './OwnerProductSkusEditor';
 import { OwnerStatsShortcutBanner } from './OwnerStatsShortcutBanner';
 import { ProductDetailModal } from './ProductDetailModal';
@@ -483,6 +484,8 @@ export function OwnerProductPanel({
                       onSyncProductBasics={() => persistProductBasicsFromEdit(product.id)}
                       onSkusSaved={() => void reload()}
                     />
+
+                    <OwnerProductCoordiEditor productId={product.id} products={products} />
 
                     <label style={styles.fieldLabel}>{t('ownerProducts.stockLabel')}</label>
                     <p style={styles.helpText}>{t('ownerProducts.stockWhenOptionsHelp')}</p>
