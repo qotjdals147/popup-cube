@@ -5,13 +5,17 @@ import {
   saveOwnerProductCoordiLinks,
 } from '../lib/productCoordi';
 import { t } from '../i18n';
-import { ownerColors as oc, ownerFieldLabel, ownerFontSize as fs, ownerHelpText } from '../styles/ownerAdminTheme';
+import '../styles/owner-product-linked-recommend.css';
 
 const MAX_LINKS = 12;
 
 interface OwnerProductCoordiEditorProps {
   productId: string;
   products: Product[];
+}
+
+function formatPrice(price: number): string {
+  return `${price.toLocaleString('ko-KR')}원`;
 }
 
 export function OwnerProductCoordiEditor({ productId, products }: OwnerProductCoordiEditorProps) {
@@ -21,9 +25,16 @@ export function OwnerProductCoordiEditor({ productId, products }: OwnerProductCo
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
+  const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
+
   const candidates = useMemo(
     () => products.filter((p) => p.id !== productId),
     [products, productId]
+  );
+
+  const selectedProducts = useMemo(
+    () => selected.map((id) => byId.get(id)).filter((p): p is Product => !!p),
+    [selected, byId]
   );
 
   useEffect(() => {
@@ -35,7 +46,7 @@ export function OwnerProductCoordiEditor({ productId, products }: OwnerProductCo
         if (mounted) setSelected(ids);
       })
       .catch(() => {
-        if (mounted) setError(t('ownerProducts.coordiLoadError'));
+        if (mounted) setError(t('ownerProducts.linkedRecommendLoadError'));
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -54,6 +65,11 @@ export function OwnerProductCoordiEditor({ productId, products }: OwnerProductCo
     });
   }
 
+  function remove(id: string) {
+    setSaved(false);
+    setSelected((prev) => prev.filter((x) => x !== id));
+  }
+
   async function handleSave() {
     setSaving(true);
     setError(null);
@@ -63,71 +79,109 @@ export function OwnerProductCoordiEditor({ productId, products }: OwnerProductCo
       setSaved(true);
       window.setTimeout(() => setSaved(false), 2000);
     } catch {
-      setError(t('ownerProducts.coordiSaveError'));
+      setError(t('ownerProducts.linkedRecommendSaveError'));
     } finally {
       setSaving(false);
     }
   }
 
   if (loading) {
-    return <p style={{ ...ownerHelpText, marginTop: 8 }}>{t('ownerProducts.coordiLoading')}</p>;
+    return (
+      <div className="owner-linked-panel">
+        <p className="owner-linked-panel__hint">{t('ownerProducts.linkedRecommendLoading')}</p>
+      </div>
+    );
   }
 
   if (candidates.length === 0) {
     return (
-      <p style={{ ...ownerHelpText, marginTop: 8 }}>{t('ownerProducts.coordiNeedMoreProducts')}</p>
+      <div className="owner-linked-panel">
+        <h4 className="owner-linked-panel__title">{t('ownerProducts.linkedRecommendLabel')}</h4>
+        <p className="owner-linked-panel__hint">{t('ownerProducts.linkedRecommendNeedMore')}</p>
+      </div>
     );
   }
 
   return (
-    <div style={{ marginTop: 4 }}>
-      <label style={ownerFieldLabel}>{t('ownerProducts.coordiLabel')}</label>
-      <p style={ownerHelpText}>{t('ownerProducts.coordiHelp', { max: String(MAX_LINKS) })}</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+    <div className="owner-linked-panel">
+      <div className="owner-linked-panel__head">
+        <h4 className="owner-linked-panel__title">{t('ownerProducts.linkedRecommendLabel')}</h4>
+        <span className="owner-linked-panel__count">
+          {t('ownerProducts.linkedRecommendCount', {
+            n: String(selected.length),
+            max: String(MAX_LINKS),
+          })}
+        </span>
+      </div>
+      <p className="owner-linked-panel__hint">{t('ownerProducts.linkedRecommendHint', { max: String(MAX_LINKS) })}</p>
+
+      {selectedProducts.length > 0 && (
+        <div className="owner-linked-selected">
+          <p className="owner-linked-selected__label">{t('ownerProducts.linkedRecommendOrder')}</p>
+          <div className="owner-linked-selected__row">
+            {selectedProducts.map((p, idx) => (
+              <div key={p.id} className="owner-linked-chip">
+                <span className="owner-linked-chip__order">{idx + 1}</span>
+                {p.image_url ? (
+                  <img src={p.image_url} alt="" className="owner-linked-chip__thumb" />
+                ) : (
+                  <span className="owner-linked-chip__thumb-ph">🛍️</span>
+                )}
+                <div className="owner-linked-chip__meta">
+                  <span className="owner-linked-chip__name">{p.name}</span>
+                  <span className="owner-linked-chip__price">{formatPrice(p.price)}</span>
+                </div>
+                <button
+                  type="button"
+                  className="owner-linked-chip__remove"
+                  aria-label={t('ownerProducts.linkedRecommendRemove')}
+                  onClick={() => remove(p.id)}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <p className="owner-linked-selected__label">{t('ownerProducts.linkedRecommendPick')}</p>
+      <div className="owner-linked-grid">
         {candidates.map((p) => {
-          const checked = selected.includes(p.id);
-          const disabled = !checked && selected.length >= MAX_LINKS;
+          const active = selected.includes(p.id);
+          const disabled = !active && selected.length >= MAX_LINKS;
           return (
-            <label
+            <button
               key={p.id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                fontSize: fs.base,
-                color: oc.text,
-                opacity: disabled ? 0.45 : 1,
-                cursor: disabled ? 'not-allowed' : 'pointer',
-              }}
+              type="button"
+              className={active ? 'owner-linked-card owner-linked-card--active' : 'owner-linked-card'}
+              disabled={disabled}
+              onClick={() => toggle(p.id)}
             >
-              <input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggle(p.id)} />
-              <span style={{ flex: 1, minWidth: 0 }}>{p.name}</span>
-              <span style={{ color: oc.textMuted, fontSize: fs.sm }}>
-                {p.price.toLocaleString('ko-KR')}원
-              </span>
-            </label>
+              {active && <span className="owner-linked-card__check">✓</span>}
+              <div className="owner-linked-card__thumb-wrap">
+                {p.image_url ? (
+                  <img src={p.image_url} alt="" className="owner-linked-card__thumb" />
+                ) : (
+                  <span style={{ fontSize: 28, opacity: 0.45 }}>🛍️</span>
+                )}
+              </div>
+              <div className="owner-linked-card__body">
+                <p className="owner-linked-card__name">{p.name}</p>
+                <p className="owner-linked-card__price">{formatPrice(p.price)}</p>
+              </div>
+            </button>
           );
         })}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => void handleSave()}
-          style={{
-            padding: '8px 14px',
-            borderRadius: 8,
-            border: `1px solid ${oc.border}`,
-            background: oc.surface,
-            fontWeight: 600,
-            cursor: saving ? 'wait' : 'pointer',
-          }}
-        >
-          {saving ? t('ownerProducts.coordiSaving') : t('ownerProducts.coordiSave')}
+
+      <div className="owner-linked-actions">
+        <button type="button" className="owner-linked-save-btn" disabled={saving} onClick={() => void handleSave()}>
+          {saving ? t('ownerProducts.linkedRecommendSaving') : t('ownerProducts.linkedRecommendSave')}
         </button>
-        {saved && <span style={{ color: oc.success, fontSize: fs.sm }}>{t('ownerProducts.coordiSaved')}</span>}
+        {saved && <span className="owner-linked-saved">{t('ownerProducts.linkedRecommendSaved')}</span>}
       </div>
-      {error && <p style={{ color: oc.danger, fontSize: fs.sm, marginTop: 6 }}>{error}</p>}
+      {error && <p className="owner-linked-error">{error}</p>}
     </div>
   );
 }

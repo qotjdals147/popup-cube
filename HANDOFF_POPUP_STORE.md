@@ -885,7 +885,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-13)** | **AD-088 코디 ✅** · **홈 배ner 슬라이드** · **§7.96 엑셀实机** · CEO **카테고리** |
+| **한 줄 요약 (2026-10-13)** | **함께 추천** UX·카피 ✅ · **§7.96 엑셀实机** · 홈 **배ner** · CEO **카테고리** |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
 | **User实기** | **§7.100 ISS-053 ✅** · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
@@ -1874,7 +1874,7 @@ npm run dev
 - [x] AD-088 **Phase 1 홈** — 앱 `home.tsx` **상품 피드** · 배ner · 칩 (벤치 **01~02**) · 2026-10-12  
 - [x] AD-088 **Phase 1b** — 홈 상품 탭 → `/shop?product=` · **ProductDetailModal** 자동 (§7.104) · 2026-10-12  
 - [x] AD-088 **Phase 2** 상세 **펼치기·연관상품** (벤치 **05~07** v1) · 2026-10-12  
-- [x] AD-088 **Phase 3 코디** — `product_coordi_links` · 점주 체크 · 손님 **함께 코디** · 상세 **탭** · §7.106 · 2026-10-13  
+- [x] AD-088 **Phase 3 함께 추천** — `product_coordi_links` · 점주 카드 UI · 손님 **함께 추천** · §7.106 · §7.107 · 2026-10-13  
 - [ ] **셀메이트 계정·연동 스펙** CEO 확인 (§7.95) ⬜  
 
 ---
@@ -2331,7 +2331,7 @@ npx supabase db pull
 | **벤치** | `05~07` — 상세 본문 · **연관** · **상품 정보 펼쳐보기** |
 | **동작** | 상세 블록 **240px 접힘** + 펼치기/접기 · **이 매장의 다른 상품** 최대 12 · 탭하면 **같은 모달에서 상품 전환** |
 | **코드** | `ProductDetailModal` · `StoreShopCatalog` · `product-detail-shop.css` · `ko.ts` |
-| **Phase 3 ✅** | 점주 **코디 링크** · 손님 **함께 코디** · **상품정보/리뷰 탭** · §7.106 |
+| **Phase 3 ✅** | **함께 추천** (User-facing · DB명 `product_coordi_links` 유지) · §7.106 · **§7.107** |
 | **아직 ❌** | 상품 **태그·소식**(벤치 08) · 홈 **배ner 다중** |
 
 #### Expo 재시작
@@ -2342,21 +2342,32 @@ npx supabase db pull
 
 ---
 
-### 7.106 **AD-088 Phase 3 — 코디 링크·상세 탭** (2026-10-13)
+### 7.106 **AD-088 Phase 3 — 함께 추천·상세 탭** (2026-10-13)
 
 | | |
 |---|---|
-| **회의** | 룩핀식 A→B/C · 점주 **상품탭**에서 선택 (회의록 19~20) |
-| **DB** | `product_coordi_links` · RPC `get_product_coordi_products` · `get/save_owner_product_coordi_links` · migration `20261013_ad088_product_coordi_links` **원격 ✅** |
-| **점주** | `OwnerProductCoordiEditor` — 수정 중 상품 · 최대 12개 · **코디 저장** |
-| **손님** | 코디 있으면 **「함께 코디」** (가격·탭 전환) · 없으면 **「이 매장의 다른 상품」** · **상품정보 / 리뷰** 탭 |
+| **회의** | A 상품 보면 B/C **가격·링크** 같이 노출 · 점주 **상품탭** (회의록 19~20) |
+| **DB** | `product_coordi_links` *(내부명 · 패션 「코디」 UI ❌)* · RPC `get_product_coordi_products` 등 · migration `20261013_*` **원격 ✅** |
+| **User-facing** | **「함께 추천」** · §7.107 카피·점주 카드 UI |
+| **손님** | 점주 추천 있으면 **「함께 추천」** · 없으면 **「이 매장의 다른 상품」** · **상품정보 / 리뷰** 탭 |
 | **다음** | §7.96 **엑셀实机** · 홈 **배ner 슬라이드** · 벤치 **08** 태그·소식 |
+
+---
+
+### 7.107 **함께 추천 — 카피·점주 UI** (User 2026-10-13)
+
+| | |
+|---|---|
+| **Why** | 팝업스토어 = **의류만 ❌** · 「코디」 표현 **User 거부** |
+| **카피** | 점주 **함께 추천할 상품** · **저장** · 손님 **함께 추천** · i18n `linkedRecommend*` |
+| **점주 UI** | 썸네일 **카드 그리드** · **노출 순서** 칩 · `owner-product-linked-recommend.css` |
+| **코드명** | `OwnerProductCoordiEditor` · `productCoordi.ts` — **리네임 보류**(DB/RPC와 짝) |
 
 #### Expo 재시작
 
 | | |
 |---|---|
-| web + DB | **❌ Expo** · **Vercel 1~2min** · 점주 PC **새로고침** |
+| `apps/web` only | **❌ Expo** · **Vercel 1~2min** · 점주 PC **Ctrl+F5** |
 
 ---
 
@@ -4912,9 +4923,13 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
-### 2026-10-13 — AD-088 Phase 3 코디·상세 탭 (§7.106)
+### 2026-10-13 — 함께 추천 카피·점주 카드 UI (§7.107)
+- **Changed:** `ko.ts` (`linkedRecommend*`) · `OwnerProductCoordiEditor` · `owner-product-linked-recommend.css` · `ProductDetailModal` · §23 · §25 · §7.106
+- **Notes:** **`apps/web` only** · Vercel **1~2min** · User-facing **「코디」 제거**
+
+### 2026-10-13 — AD-088 Phase 3 함께 추천·상세 탭 (§7.106)
 - **Changed:** migration `20261013_ad088_product_coordi_links` · `OwnerProductCoordiEditor` · `productCoordi.ts` · `ProductDetailModal` · `StoreShopCatalog` · `OwnerProductPanel` · `ko.ts`
-- **Notes:** **POPUP DB 적용 ✅** · **`apps/web` only** · Vercel **1~2min** · 점주 상품 수정 → **함께 코디할 상품** 저장 후 손님 상세 확인
+- **Notes:** **POPUP DB 적용 ✅** · **`apps/web` only** · Vercel **1~2min** · 카피/UI = **§7.107**
 
 ### 2026-10-12 eve — AD-088 Phase 2 상세 펼치기·연관 (§7.105)
 - **Changed:** `ProductDetailModal` · `StoreShopCatalog` · `product-detail-shop.css` · `ko.ts` · §7.94 · §7.104
@@ -8616,6 +8631,7 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 | **판매자센터 (AD-052)** | 네이버 스마트스토어처럼 점주 PC에서 **주문 들어옴 → 수락/거절 → 발송(송장)·배송 상태** 를 나눠 보는 **운영 화면**. POP-UP CUBE 점주 웹의 목표 UX. **갭 검토 §53** |
 | **주문번호 (`GUCCI-1042`)** | 손님·점주·CS가 쓰는 **사람용 번호** = **`{store_code}-{order_number}`** (매장명 한글과 분리). 내부 UUID ❌ · **`formatOrderRef()`** · 알림·검색·카드 **동일 형식** (§62) |
 | **기능 구현 연관점 (AD-075)** | 한 기능을 넣을 때 **주문번호·알림·재고·RPC·점주/손님 UI·뱃지** 등 **묶여 있는 것 전부** 같이 갱신. 체크리스트 **§62** |
+| **함께 추천 (AD-088 Phase 3)** | 이 상품 상세에 **점주가 고른 다른 상품**을 같이 보여줌 (굿즈·잡화 포함). **UI·i18n = 「함께 추천」** · DB 테이블명 = `product_coordi_links` *(legacy 내부명)* · §7.106~107 |
 | **반품지 관리 (AD-076)** | 점주 **반품·교환 수령지** — 손님 **배송지**와 같이 **여러 개·별명·기본 지정** + **우편번호 검색**. `store_return_addresses` · §7.50 |
 | **손님 알림 탭 (AD-076)** | 마이 › **알림** — `order_notifications` 목록 · 읽음 처리 · 탭하면 **해당 주문** · 푸시와 **짝** · §7.50 |
 | **주문 관리 vs 발주·배송** | **주문:** 신규·결제완료 — **수락/거절**. **발주·배송:** 수락된 건만 — 송장·배송중·완료. (탭 이름 **발주·배송** 확정, User 2026-08-03) |
@@ -8715,6 +8731,7 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 - **카피 톤 (User 2026-08-03):** §0 「UI·i18n 문구 규칙」 — 당연한 TMI·AI 매뉴얼체 금지. 긴 도움말은 User 요청 시만.
 - **라벨 직관성:** §0 — 주어 있는 짧은 문장 (재고 vs **주문 자동 수락** quota 구분). 상품 목록: `ownerProducts.autoAcceptOnBadge` · `autoAcceptQuotaShort`.
 - **점주 PC 탭명 (AD-058, 2026-08-12):** `ownerEdit.tabOverview` = **「매장 개요」** · `tabPolicy` = **「운영·배송 안내」** (발주·배송 처리 탭과 구분) · `tabFulfillment` = **「발주·배송」** · 사이드바/상단바 「대시보드로 이동」(화살표 없음).
+- **함께 추천 (2026-10-13):** `ownerProducts.linkedRecommend*` · `productDetail.linkedRecommendTitle` — **「코디」 User-facing ❌** · §7.107
 
 ### 향후 다국어 확장 (post-launch / 글로벌)
 | 단계 | 방법 |

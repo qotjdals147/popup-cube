@@ -32,10 +32,10 @@ interface ProductDetailModalProps {
   appearance?: 'light' | 'dark';
   /** §58 #5 — 종료 팝업: 담기 숨김 */
   shoppingBlocked?: boolean;
-  /** AD-088 Phase 2 — 같은 매장 다른 상품 (코디 DB 전 · 목록에서 제외한 나머지) */
+  /** AD-088 — 점주 「함께 추천」 미설정 시 같은 매장 다른 상품 */
   relatedProducts?: Product[];
   onSelectRelated?: (product: Product) => void;
-  /** 코디·연관 탭 시 catalog에서 전체 Product로 전환 */
+  /** 함께 추천·연관 탭 시 catalog에서 전체 Product로 전환 */
   onOpenProductId?: (productId: string) => void;
 }
 
@@ -435,7 +435,7 @@ export function ProductDetailModal({
               {coordiProducts.length > 0 && (onOpenProductId || onSelectRelated) && (
                 <section className="product-detail-section product-detail-related-section" style={styleFor(light, S.sectionLayout, S.sectionDark)}>
                   <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>
-                    {t('productDetail.coordiTitle')}
+                    {t('productDetail.linkedRecommendTitle')}
                   </h4>
                   {renderRelatedRow(coordiProducts, 'coordi')}
                 </section>
