@@ -84,6 +84,36 @@
   border-top: 1px solid #e5e8eb;
 }
 
+.owner-product-tags__input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d6db;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.owner-product-tags__preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.owner-product-tags__chip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3182f6;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .owner-product-edit__detail {
   margin-top: 4px;
   padding-top: 16px;

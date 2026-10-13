@@ -9,6 +9,7 @@ import {
   parseIntegerInput,
 } from '../lib/formatInteger';
 import { OwnerReturnAddressPanel } from './OwnerReturnAddressPanel';
+import { OwnerStoreNewsEditor } from './OwnerStoreNewsEditor';
 
 interface OwnerStorePolicyPanelProps {
   storeId: string;
@@ -169,6 +170,8 @@ export function OwnerStorePolicyPanel({ storeId }: OwnerStorePolicyPanelProps) {
           <span>{t('ownerPolicy.exchangeAllowedLabel')}</span>
         </label>
       </div>
+
+      <OwnerStoreNewsEditor storeId={storeId} />
 
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>{t('ownerPolicy.shippingFeeSection')}</h3>

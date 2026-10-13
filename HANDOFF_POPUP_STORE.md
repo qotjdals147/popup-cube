@@ -913,7 +913,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-13)** | **라인 아이콘 ✅** · **벤치 08** 태그·소식 · CEO **카테고리** ⏸ |
+| **한 줄 요약 (2026-10-13)** | **벤치 08 태그·소식 ✅** · CEO **카테고리** ⏸ · HQ **배ner DB** (v1.5) |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
 | **User实기** | **§7.100 ISS-053 ✅** · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
@@ -1903,6 +1903,7 @@ npm run dev
 - [x] AD-088 **Phase 1b** — 홈 상품 탭 → `/shop?product=` · **ProductDetailModal** 자동 (§7.104) · 2026-10-12  
 - [x] AD-088 **Phase 2** 상세 **펼치기·연관상품** (벤치 **05~07** v1) · 2026-10-12  
 - [x] AD-088 **Phase 3 함께 추천** — `product_coordi_links` · 점주 카드 UI · 손님 **함께 추천** · §7.106 · §7.107 · 2026-10-13  
+- [x] AD-088 **벤치 08 태그·매장 소식** — `product_tags` · `store_news_posts` · §7.113 · 2026-10-13  
 - [ ] **셀메이트 계정·연동 스펙** CEO 확인 (§7.95) ⬜  
 
 ---
@@ -2360,7 +2361,7 @@ npx supabase db pull
 | **동작** | 상세 블록 **240px 접힘** + 펼치기/접기 · **이 매장의 다른 상품** 최대 12 · 탭하면 **같은 모달에서 상품 전환** |
 | **코드** | `ProductDetailModal` · `StoreShopCatalog` · `product-detail-shop.css` · `ko.ts` |
 | **Phase 3 ✅** | **함께 추천** (User-facing · DB명 `product_coordi_links` 유지) · §7.106 · **§7.107** |
-| **아직 ❌** | 상품 **태그·소식**(벤치 08) |
+| **태그·소식** | **§7.113** ✅ |
 
 #### Expo 재시작
 
@@ -2378,7 +2379,25 @@ npx supabase db pull
 | **DB** | `product_coordi_links` *(내부명 · 패션 「코디」 UI ❌)* · RPC `get_product_coordi_products` 등 · migration `20261013_*` **원격 ✅** |
 | **User-facing** | **「함께 추천」** · §7.107 카피·점주 카드 UI |
 | **손님** | 점주 추천 있으면 **「함께 추천」** · 없으면 **「이 매장의 다른 상품」** · **상품정보 / 리뷰** 탭 |
-| **다음** | 벤치 **08** 태그·소식 · HQ **배ner DB** (v1.5) |
+| **다음** | ~~벤치 **08**~~ → **§7.113** ✅ · HQ **배ner DB** (v1.5) |
+
+---
+
+### 7.113 **AD-088 벤치 08 — 상품 태그·매장 새 소식** (2026-10-13)
+
+| | |
+|---|---|
+| **회의** | 벤치 **8** — **마켓 새 소식** · **관련 태그** · **태그 전체보기** (`2026.10.02_회의_내용.txt`) |
+| **DB** | `product_tags` · `store_news_posts` · RPC `get_product_tags` · `get_store_news_for_shop` · owner `save_owner_product_tags` · migration `20261013_ad088_product_tags_store_news` **원격 ✅** |
+| **점주** | 상품 수정 — **상품 태그**(쉼표 구분 · 최대 12) · **운영·배송** 탭 — **매장 새 소식**(최대 12 · 노출 on/off) |
+| **손님** | `ProductDetailModal` — 상세 펼치기 아래 **태그 칩** · **태그 전체보기**(6개 초과) · **매장 새 소식** 목록 |
+| **2차** | 태그 **검색·필터** · 홈 피드 연동 ⏸ |
+
+#### Expo 재시작
+
+| | |
+|---|---|
+| `apps/web` only | **❌ Expo** · **Vercel 1~2min** + shop WebView **새로고침** · 점주 PC **Ctrl+F5** |
 
 ---
 
@@ -5061,6 +5080,10 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-13 — 프로모·가챠 컴팩트 레이아웃 (§7.109c)
 - **Changed:** `owner-promo-gacha.css` · `OwnerPromotionPanel.tsx`
 - **Notes:** **`apps/web`** · Vercel **1~2min**
+
+### 2026-10-13 — AD-088 벤치 08 태그·매장 소식 (§7.113)
+- **Changed:** migration `20261013_ad088_product_tags_store_news` · `productTags.ts` · `storeNews.ts` · `OwnerProductTagsEditor` · `OwnerStoreNewsEditor` · `ProductDetailModal` · `OwnerProductPanel` · `OwnerStorePolicyPanel` · `product-detail-shop.css` · `ko.ts` · §7.94 · §7.0
+- **Notes:** **POPUP DB 적용 ✅** · **`apps/web` only** · Vercel **1~2min**
 
 ### 2026-10-13 — 가챠 추가 순서·카피·제목 간격 (§7.109)
 - **Changed:** `OwnerPromotionPanel` · `owner-promo-gacha.css` · linked/edit spacing · `ko.ts` · §0 타이포

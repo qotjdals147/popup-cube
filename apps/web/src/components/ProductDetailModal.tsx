@@ -10,6 +10,8 @@ import {
 } from '../lib/skuOptionGroups';
 import { formatPriceDeltaLabel, skuUnitPrice } from '../lib/skuPrice';
 import { getProductCoordiProducts, type CoordiProductSummary } from '../lib/productCoordi';
+import { getProductTags, type ProductTagRow } from '../lib/productTags';
+import { getStoreNewsForShop, type StoreNewsPost } from '../lib/storeNews';
 import { listProductDetailBlocks } from '../lib/productDetailBlocks';
 import { getMyReviewKeys, getProductReviews, reviewKey } from '../lib/reviews';
 import { canFileClaim, confirmPurchase, listMyOrders } from '../lib/orders';
@@ -120,7 +122,17 @@ export function ProductDetailModal({
   const [reviewConfirmOpen, setReviewConfirmOpen] = useState(false);
   const [detailExpanded, setDetailExpanded] = useState(false);
   const [coordiProducts, setCoordiProducts] = useState<CoordiProductSummary[]>([]);
+  const [productTags, setProductTags] = useState<ProductTagRow[]>([]);
+  const [storeNews, setStoreNews] = useState<StoreNewsPost[]>([]);
+  const [tagsExpanded, setTagsExpanded] = useState(false);
   const [detailTab, setDetailTab] = useState<'info' | 'reviews'>('info');
+
+  const TAGS_VISIBLE_COLLAPSED = 6;
+  const visibleTags =
+    tagsExpanded || productTags.length <= TAGS_VISIBLE_COLLAPSED
+      ? productTags
+      : productTags.slice(0, TAGS_VISIBLE_COLLAPSED);
+  const tagsCanExpand = productTags.length > TAGS_VISIBLE_COLLAPSED;
 
   const hasDetailContent = detailBlocks.some(
     (b) => (b.block_type === 'image' && b.image_url) || (b.text_content && b.text_content.trim())
@@ -169,13 +181,17 @@ export function ProductDetailModal({
       getProductReviews(product.id),
       previewMode ? Promise.resolve([] as ProductSku[]) : getProductSkus(product.id).catch(() => [] as ProductSku[]),
       previewMode ? Promise.resolve([] as CoordiProductSummary[]) : getProductCoordiProducts(product.id).catch(() => []),
+      previewMode ? Promise.resolve([] as ProductTagRow[]) : getProductTags(product.id).catch(() => []),
+      previewMode ? Promise.resolve([] as StoreNewsPost[]) : getStoreNewsForShop(storeId).catch(() => []),
     ])
-      .then(([blocks, reviewList, skuList, coordiList]) => {
+      .then(([blocks, reviewList, skuList, coordiList, tagList, newsList]) => {
         if (!mounted) return;
         setDetailBlocks(blocks);
         setReviews(reviewList);
         setSkus(skuList);
         setCoordiProducts(coordiList);
+        setProductTags(tagList);
+        setStoreNews(newsList);
         setSelectedSkuId(null);
         setOptionSelection(buildSkuOptionGroups(skuList).map(() => ''));
         setSkuErr(null);
@@ -194,6 +210,7 @@ export function ProductDetailModal({
 
   useEffect(() => {
     setDetailExpanded(false);
+    setTagsExpanded(false);
     setDetailTab('info');
     scrollRef.current?.scrollTo({ top: 0 });
   }, [product.id]);
@@ -434,6 +451,47 @@ export function ProductDetailModal({
                   </>
                 )}
               </section>
+
+              {productTags.length > 0 && (
+                <section className="product-detail-section product-detail-tags-section" style={styleFor(light, S.sectionLayout, S.sectionDark)}>
+                  <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>
+                    {t('productDetail.tagsTitle')}
+                  </h4>
+                  <div className="product-detail-tags">
+                    {visibleTags.map((tag) => (
+                      <span key={`${tag.sort_order}-${tag.label}`} className="product-detail-tag-chip">
+                        {tag.label}
+                      </span>
+                    ))}
+                  </div>
+                  {tagsCanExpand && (
+                    <button
+                      type="button"
+                      className="product-detail-tags-toggle"
+                      style={styleFor(light, S.expandBtnLayout, S.expandBtnDark)}
+                      onClick={() => setTagsExpanded((v) => !v)}
+                    >
+                      {tagsExpanded ? t('productDetail.tagsCollapse') : t('productDetail.tagsShowAll')}
+                    </button>
+                  )}
+                </section>
+              )}
+
+              {storeNews.length > 0 && (
+                <section className="product-detail-section product-detail-news-section" style={styleFor(light, S.sectionLayout, S.sectionDark)}>
+                  <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>
+                    {t('productDetail.storeNewsTitle')}
+                  </h4>
+                  <ul className="product-detail-news-list">
+                    {storeNews.map((post) => (
+                      <li key={post.id} className="product-detail-news-item">
+                        <p className="product-detail-news-item__title">{post.title}</p>
+                        {post.body?.trim() && <p className="product-detail-news-item__body">{post.body}</p>}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
 
               {coordiProducts.length > 0 && (onOpenProductId || onSelectRelated) && (
                 <section className="product-detail-section product-detail-related-section" style={styleFor(light, S.sectionLayout, S.sectionDark)}>

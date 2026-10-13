@@ -24,6 +24,7 @@ import '../styles/owner-product-edit.css';
 import { OwnerProductBlockEditor } from './OwnerProductBlockEditor';
 import { OwnerProductBulkUpload } from './OwnerProductBulkUpload';
 import { OwnerProductCoordiEditor } from './OwnerProductCoordiEditor';
+import { OwnerProductTagsEditor } from './OwnerProductTagsEditor';
 import { OwnerProductSkusEditor } from './OwnerProductSkusEditor';
 import { OwnerStatsShortcutBanner } from './OwnerStatsShortcutBanner';
 import { ProductDetailModal } from './ProductDetailModal';
@@ -502,6 +503,10 @@ export function OwnerProductPanel({
 
                     <section className="owner-product-edit__section owner-product-edit__section--flush">
                       <OwnerProductCoordiEditor productId={product.id} products={products} />
+                    </section>
+
+                    <section className="owner-product-edit__section owner-product-edit__section--flush">
+                      <OwnerProductTagsEditor productId={product.id} />
                     </section>
 
                     <section className="owner-product-edit__section">
