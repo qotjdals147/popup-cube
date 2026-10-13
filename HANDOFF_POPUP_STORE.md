@@ -2409,7 +2409,7 @@ npx supabase db pull
 | | |
 |---|---|
 | **화면** | `OwnerPromotionPanel` — **매장 기본** · **상품별** · **가챠 풀** 카드 분리 |
-| **가챠** | **추가 → 목록** 순 · **등록 상품 넣기** = 상품 탭 상품 · 제목·lead 간격 · §7.109b |
+| **가챠** | **추가 2열 → 목록** · 컴팩트 행 · 페이지 **max 920px** · §7.109c |
 | **저장** | §0 primary **우측** (`owner-section-actions`) |
 
 #### Expo 재시작
@@ -4971,6 +4971,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-13 — 프로모·가챠 컴팩트 레이아웃 (§7.109c)
+- **Changed:** `owner-promo-gacha.css` · `OwnerPromotionPanel.tsx`
+- **Notes:** **`apps/web`** · Vercel **1~2min**
 
 ### 2026-10-13 — 가챠 추가 순서·카피·제목 간격 (§7.109)
 - **Changed:** `OwnerPromotionPanel` · `owner-promo-gacha.css` · linked/edit spacing · `ko.ts` · §0 타이포

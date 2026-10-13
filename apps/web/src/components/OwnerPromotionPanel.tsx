@@ -260,29 +260,33 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
       <p className="owner-promo-page__intro">{t('ownerPromo.intro')}</p>
 
       <article className="owner-promo-card">
-        <h2 className="owner-promo-card__title">{t('ownerPromo.storeDefaultTitle')}</h2>
-        <label className="owner-promo-toggle">
-          <input type="checkbox" checked={promoActive} onChange={(e) => setPromoActive(e.target.checked)} />
-          {t('ownerPromo.storeActive')}
-        </label>
+        <div className="owner-promo-card__top">
+          <h2 className="owner-promo-card__title">{t('ownerPromo.storeDefaultTitle')}</h2>
+          <label className="owner-promo-toggle">
+            <input type="checkbox" checked={promoActive} onChange={(e) => setPromoActive(e.target.checked)} />
+            {t('ownerPromo.storeActive')}
+          </label>
+        </div>
         {promoActive && (
-          <>
-            <p className="owner-promo-field__label">{t('ownerPromo.defaultModeLabel')}</p>
-            <div className="owner-promo-mode-grid">
-              {MODE_OPTIONS.map((opt) => (
-                <label key={opt.value} className="owner-promo-mode-option">
-                  <input
-                    type="radio"
-                    name="defaultMode"
-                    checked={defaultMode === opt.value}
-                    onChange={() => setDefaultMode(opt.value)}
-                  />
-                  {t(opt.labelKey as 'ownerPromo.modeNone')}
-                </label>
-              ))}
+          <div className="owner-promo-store-body">
+            <div className="owner-promo-store-body__modes">
+              <p className="owner-promo-field__label">{t('ownerPromo.defaultModeLabel')}</p>
+              <div className="owner-promo-mode-grid">
+                {MODE_OPTIONS.map((opt) => (
+                  <label key={opt.value} className="owner-promo-mode-option">
+                    <input
+                      type="radio"
+                      name="defaultMode"
+                      checked={defaultMode === opt.value}
+                      onChange={() => setDefaultMode(opt.value)}
+                    />
+                    {t(opt.labelKey as 'ownerPromo.modeNone')}
+                  </label>
+                ))}
+              </div>
             </div>
             {(defaultMode === 'discount_only' || defaultMode === 'choice') && (
-              <div className="owner-promo-field">
+              <div className="owner-promo-field owner-promo-field--inline">
                 <label className="owner-promo-field__label">{t('ownerPromo.defaultDiscountLabel')}</label>
                 <input
                   className="owner-promo-input-short"
@@ -294,7 +298,7 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
                 />
               </div>
             )}
-          </>
+          </div>
         )}
         <div className="owner-section-actions">
           <button
@@ -438,150 +442,159 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
       </article>
 
       <article className="owner-promo-card">
-        <h2 className="owner-promo-card__title">{t('ownerPromo.gachaTitle')}</h2>
-        <p className="owner-promo-card__lead owner-promo-card__lead--tight-bottom">{t('ownerPromo.gachaHelp')}</p>
-        <label className="owner-promo-toggle">
-          <input
-            type="checkbox"
-            checked={poolActive}
-            disabled={savingPool}
-            onChange={(e) => void handlePoolToggle(e.target.checked)}
-          />
-          {t('ownerPromo.gachaActive')}
-        </label>
+        <div className="owner-promo-card__top">
+          <div className="owner-promo-card__top-main">
+            <h2 className="owner-promo-card__title">{t('ownerPromo.gachaTitle')}</h2>
+            <p className="owner-promo-card__lead owner-promo-card__lead--tight-bottom">{t('ownerPromo.gachaHelp')}</p>
+          </div>
+          <label className="owner-promo-toggle">
+            <input
+              type="checkbox"
+              checked={poolActive}
+              disabled={savingPool}
+              onChange={(e) => void handlePoolToggle(e.target.checked)}
+            />
+            {t('ownerPromo.gachaActive')}
+          </label>
+        </div>
 
         {poolActive && (
           <div className="owner-gacha-add-section">
-            <h3 className="owner-gacha-add-section__title">{t('ownerPromo.gachaAddSectionTitle')}</h3>
-            <div className="owner-gacha-add-block">
-              <p className="owner-gacha-add-block__title">{t('ownerPromo.gachaAddExclusiveTitle')}</p>
-              <p className="owner-gacha-add-block__lead">{t('ownerPromo.gachaAddExclusiveLead')}</p>
-              <div className="owner-gacha-add-row">
-                <input
-                  className="owner-promo-input-flex"
-                  placeholder={t('ownerPromo.exclusiveNamePlaceholder')}
-                  value={newEntryName}
-                  onChange={(e) => setNewEntryName(e.target.value)}
-                />
-                <div className="owner-gacha-entry__weight">
-                  <span className="owner-gacha-entry__weight-label">{t('ownerPromo.gachaWeightLabel')}</span>
-                  <input
-                    className="owner-promo-input-short"
-                    type="number"
-                    min={1}
-                    value={newEntryWeight}
-                    onChange={(e) => setNewEntryWeight(e.target.value)}
-                  />
-                </div>
-                <button
-                  type="button"
-                  className="owner-btn-primary"
-                  disabled={savingPool}
-                  onClick={() => void handleAddExclusive()}
-                >
-                  {t('ownerPromo.addExclusive')}
-                </button>
-              </div>
-            </div>
-
-            {activeProducts.length > 0 && (
+            <div className="owner-gacha-add-grid">
               <div className="owner-gacha-add-block">
-                <p className="owner-gacha-add-block__title">{t('ownerPromo.gachaAddProductTitle')}</p>
-                <p className="owner-gacha-add-block__lead">{t('ownerPromo.gachaAddProductLead')}</p>
+                <p className="owner-gacha-add-block__title">{t('ownerPromo.gachaAddExclusiveTitle')}</p>
+                <p className="owner-gacha-add-block__lead">{t('ownerPromo.gachaAddExclusiveLead')}</p>
                 <div className="owner-gacha-add-row">
-                  <select
-                    className="owner-promo-select"
-                    style={{ flex: 1, minWidth: 160 }}
-                    value={addProductId}
-                    onChange={(e) => setAddProductId(e.target.value)}
-                  >
-                    <option value="">{t('ownerPromo.pickProduct')}</option>
-                    {activeProducts.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="owner-gacha-entry__weight">
+                  <input
+                    className="owner-promo-input-flex"
+                    placeholder={t('ownerPromo.exclusiveNamePlaceholder')}
+                    value={newEntryName}
+                    onChange={(e) => setNewEntryName(e.target.value)}
+                  />
+                  <label className="owner-gacha-weight-inline">
                     <span className="owner-gacha-entry__weight-label">{t('ownerPromo.gachaWeightLabel')}</span>
                     <input
                       className="owner-promo-input-short"
                       type="number"
                       min={1}
-                      value={addProductWeight}
-                      onChange={(e) => setAddProductWeight(e.target.value)}
+                      value={newEntryWeight}
+                      onChange={(e) => setNewEntryWeight(e.target.value)}
                     />
-                  </div>
+                  </label>
                   <button
                     type="button"
                     className="owner-btn-primary"
-                    disabled={savingPool || !addProductId}
-                    onClick={() => void handleAddProductEntry()}
+                    disabled={savingPool}
+                    onClick={() => void handleAddExclusive()}
                   >
-                    {t('ownerPromo.addProductPrize')}
+                    {t('ownerPromo.addExclusive')}
                   </button>
                 </div>
               </div>
-            )}
+
+              {activeProducts.length > 0 && (
+                <div className="owner-gacha-add-block">
+                  <p className="owner-gacha-add-block__title">{t('ownerPromo.gachaAddProductTitle')}</p>
+                  <p className="owner-gacha-add-block__lead">{t('ownerPromo.gachaAddProductLead')}</p>
+                  <div className="owner-gacha-add-row">
+                    <select
+                      className="owner-promo-select"
+                      style={{ flex: 1, minWidth: 0 }}
+                      value={addProductId}
+                      onChange={(e) => setAddProductId(e.target.value)}
+                    >
+                      <option value="">{t('ownerPromo.pickProduct')}</option>
+                      {activeProducts.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                    <label className="owner-gacha-weight-inline">
+                      <span className="owner-gacha-entry__weight-label">{t('ownerPromo.gachaWeightLabel')}</span>
+                      <input
+                        className="owner-promo-input-short"
+                        type="number"
+                        min={1}
+                        value={addProductWeight}
+                        onChange={(e) => setAddProductWeight(e.target.value)}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      className="owner-btn-primary"
+                      disabled={savingPool || !addProductId}
+                      onClick={() => void handleAddProductEntry()}
+                    >
+                      {t('ownerPromo.addProductPrize')}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {poolActive && entries.length > 0 && (
           <>
-            <h3 className="owner-gacha-list-section__title">{t('ownerPromo.gachaListSectionTitle')}</h3>
-            <p className="owner-gacha-stats">
-              {t('ownerPromo.gachaWeightSummary', { sum: String(weightSum) })}
-            </p>
+            <div className="owner-gacha-list-head">
+              <h3 className="owner-gacha-list-section__title">{t('ownerPromo.gachaListSectionTitle')}</h3>
+              <p className="owner-gacha-stats">
+                {t('ownerPromo.gachaWeightSummary', { sum: String(weightSum) })}
+              </p>
+            </div>
             <ul className="owner-gacha-list">
               {entries.map((entry) => (
                 <li key={entry.id} className="owner-gacha-entry">
                   <span className="owner-gacha-entry__name">{entryLabel(entry)}</span>
-                  <div className="owner-gacha-entry__weight">
-                    <span className="owner-gacha-entry__weight-label">{t('ownerPromo.gachaWeightLabel')}</span>
-                    <input
-                      className="owner-promo-input-short"
-                      type="number"
-                      min={1}
-                      value={entry.weight}
-                      onChange={(e) => {
-                        const w = parseInt(e.target.value, 10) || 1;
-                        void updateGachaEntry(entry.id, { weight: w }).then(() =>
-                          setEntries((prev) =>
-                            prev.map((en) => (en.id === entry.id ? { ...en, weight: w } : en)),
-                          ),
-                        );
-                      }}
-                    />
-                  </div>
-                  <span className="owner-gacha-entry__pct">{entryPct(entry)}</span>
-                  <label className="owner-gacha-entry__active">
-                    <input
-                      type="checkbox"
-                      checked={entry.is_active}
-                      onChange={(e) => {
-                        void updateGachaEntry(entry.id, { is_active: e.target.checked }).then(() =>
-                          setEntries((prev) =>
-                            prev.map((en) =>
-                              en.id === entry.id ? { ...en, is_active: e.target.checked } : en,
+                  <div className="owner-gacha-entry__controls">
+                    <label className="owner-gacha-weight-inline">
+                      <span className="owner-gacha-entry__weight-label">{t('ownerPromo.gachaWeightLabel')}</span>
+                      <input
+                        className="owner-promo-input-short"
+                        type="number"
+                        min={1}
+                        value={entry.weight}
+                        onChange={(e) => {
+                          const w = parseInt(e.target.value, 10) || 1;
+                          void updateGachaEntry(entry.id, { weight: w }).then(() =>
+                            setEntries((prev) =>
+                              prev.map((en) => (en.id === entry.id ? { ...en, weight: w } : en)),
                             ),
-                          ),
-                        );
-                      }}
-                    />
-                    {t('ownerPromo.gachaEntryActive')}
-                  </label>
-                  <button
-                    type="button"
-                    className="owner-btn-ghost"
-                    style={{ color: '#c92a2a', borderColor: '#ffc9c9' }}
-                    onClick={() =>
-                      void deleteGachaEntry(entry.id).then(() =>
-                        setEntries((prev) => prev.filter((en) => en.id !== entry.id)),
-                      )
-                    }
-                  >
-                    {t('ownerPromo.deleteEntry')}
-                  </button>
+                          );
+                        }}
+                      />
+                    </label>
+                    <span className="owner-gacha-entry__pct">{entryPct(entry)}</span>
+                    <label className="owner-gacha-entry__active">
+                      <input
+                        type="checkbox"
+                        checked={entry.is_active}
+                        onChange={(e) => {
+                          void updateGachaEntry(entry.id, { is_active: e.target.checked }).then(() =>
+                            setEntries((prev) =>
+                              prev.map((en) =>
+                                en.id === entry.id ? { ...en, is_active: e.target.checked } : en,
+                              ),
+                            ),
+                          );
+                        }}
+                      />
+                      {t('ownerPromo.gachaEntryActive')}
+                    </label>
+                    <button
+                      type="button"
+                      className="owner-btn-ghost"
+                      style={{ color: '#c92a2a', borderColor: '#ffc9c9' }}
+                      onClick={() =>
+                        void deleteGachaEntry(entry.id).then(() =>
+                          setEntries((prev) => prev.filter((en) => en.id !== entry.id)),
+                        )
+                      }
+                    >
+                      {t('ownerPromo.deleteEntry')}
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -589,7 +602,7 @@ export function OwnerPromotionPanel({ storeId }: OwnerPromotionPanelProps) {
         )}
 
         {poolActive && entries.length === 0 && (
-          <p className="owner-promo-card__lead">{t('ownerPromo.gachaEmptyHint')}</p>
+          <p className="owner-promo-card__lead owner-promo-card__lead--after-table">{t('ownerPromo.gachaEmptyHint')}</p>
         )}
       </article>
 

@@ -3,7 +3,8 @@
 .owner-promo-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  max-width: 920px;
 }
 
 .owner-promo-page__intro {
@@ -17,8 +18,35 @@
   background: #ffffff;
   border: 1px solid #e5e8eb;
   border-radius: 12px;
-  padding: 18px 16px;
+  padding: 14px 16px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.owner-promo-card__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 12px;
+}
+
+.owner-promo-card__top > .owner-promo-card__title {
+  margin: 0;
+  flex: 1 1 200px;
+}
+
+.owner-promo-card__top-main {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.owner-promo-card__top-main .owner-promo-card__title {
+  margin-bottom: 6px;
+}
+
+.owner-promo-card__top-main .owner-promo-card__lead {
+  margin-bottom: 0;
 }
 
 .owner-promo-card__title {
@@ -29,9 +57,9 @@
 }
 
 .owner-promo-card__lead {
-  margin: 0 0 18px;
-  font-size: 13px;
-  line-height: 1.5;
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.45;
   color: #8b95a1;
 }
 
@@ -42,26 +70,37 @@
 .owner-promo-toggle {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 0 0 18px;
-  font-size: 15px;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
   font-weight: 600;
   color: #191f28;
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.owner-promo-toggle--block {
+  margin-bottom: 12px;
 }
 
 .owner-promo-mode-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 8px;
-  margin-bottom: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+@media (min-width: 640px) {
+  .owner-promo-mode-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 .owner-promo-mode-option {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
   border: 1px solid #e5e8eb;
   border-radius: 10px;
   background: #f9fafb;
@@ -77,8 +116,24 @@
   box-shadow: 0 0 0 1px #3182f6;
 }
 
+.owner-promo-store-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+}
+
+.owner-promo-store-body__modes {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
 .owner-promo-field {
-  margin-bottom: 12px;
+  margin-bottom: 0;
+}
+
+.owner-promo-field--inline {
+  flex: 0 0 auto;
 }
 
 .owner-promo-field__label {
@@ -90,8 +145,8 @@
 }
 
 .owner-promo-input-short {
-  width: 80px;
-  padding: 8px 10px;
+  width: 72px;
+  padding: 6px 8px;
   border: 1px solid #d1d6db;
   border-radius: 8px;
   font-size: 14px;
@@ -111,7 +166,7 @@
 
 .owner-promo-table th {
   text-align: left;
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: #f9fafb;
   color: #4e5968;
   font-weight: 600;
@@ -119,7 +174,7 @@
 }
 
 .owner-promo-table td {
-  padding: 10px 12px;
+  padding: 7px 10px;
   border-bottom: 1px solid #eef0f2;
   vertical-align: middle;
   color: #191f28;
@@ -135,9 +190,9 @@
 }
 
 .owner-promo-select {
-  min-width: 140px;
+  min-width: 120px;
   max-width: 100%;
-  padding: 8px 10px;
+  padding: 6px 8px;
   border: 1px solid #d1d6db;
   border-radius: 8px;
   font-size: 13px;
@@ -163,59 +218,69 @@
 }
 
 .owner-gacha-stats {
-  margin: 0 0 12px;
-  font-size: 13px;
+  margin: 0;
+  font-size: 12px;
   font-weight: 600;
-  color: #4e5968;
+  color: #8b95a1;
+}
+
+.owner-promo-card__lead--after-table {
+  margin: 10px 0 0;
+  font-size: 12px;
 }
 
 .owner-gacha-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin: 0 0 16px;
+  gap: 6px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .owner-gacha-entry {
-  display: grid;
-  grid-template-columns: 1fr auto auto auto auto;
-  gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  padding: 12px 14px;
+  gap: 8px 12px;
+  padding: 8px 12px;
   border: 1px solid #e5e8eb;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fafbfc;
 }
 
-@media (max-width: 640px) {
-  .owner-gacha-entry {
-    grid-template-columns: 1fr;
-  }
+.owner-gacha-entry__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-left: auto;
 }
 
 .owner-gacha-entry__name {
-  font-size: 14px;
+  flex: 1 1 140px;
+  max-width: 100%;
+  font-size: 13px;
   font-weight: 600;
   color: #191f28;
   min-width: 0;
   word-break: break-word;
 }
 
-.owner-gacha-entry__weight {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: flex-start;
+.owner-gacha-weight-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8b95a1;
+  white-space: nowrap;
 }
 
 .owner-gacha-entry__weight-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   color: #8b95a1;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
 }
 
 .owner-gacha-entry__pct {
@@ -237,43 +302,57 @@
 }
 
 .owner-gacha-add-section {
-  margin-bottom: 20px;
-  padding-bottom: 4px;
+  margin-bottom: 14px;
 }
 
-.owner-gacha-add-section__title {
-  margin: 0 0 10px;
-  font-size: 15px;
-  font-weight: 700;
-  color: #191f28;
+.owner-gacha-add-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+@media (min-width: 720px) {
+  .owner-gacha-add-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.owner-gacha-list-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin: 4px 0 8px;
 }
 
 .owner-gacha-list-section__title {
-  margin: 0 0 10px;
-  font-size: 15px;
-  font-weight: 700;
-  color: #191f28;
-}
-
-.owner-gacha-add-block {
-  margin-top: 10px;
-  padding: 14px;
-  border: 1px dashed #d1d6db;
-  border-radius: 10px;
-  background: #fff;
-}
-
-.owner-gacha-add-block__title {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 14px;
   font-weight: 700;
   color: #191f28;
 }
 
+.owner-gacha-add-block {
+  padding: 10px 12px;
+  border: 1px dashed #d1d6db;
+  border-radius: 8px;
+  background: #fff;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.owner-gacha-add-block__title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #191f28;
+}
+
 .owner-gacha-add-block__lead {
-  margin: 0 0 12px;
-  font-size: 12px;
-  line-height: 1.45;
+  margin: 0 0 8px;
+  font-size: 11px;
+  line-height: 1.4;
   color: #8b95a1;
 }
 
@@ -285,9 +364,9 @@
 }
 
 .owner-gacha-add-row .owner-promo-input-flex {
-  flex: 1;
-  min-width: 160px;
-  padding: 10px 12px;
+  flex: 1 1 120px;
+  min-width: 0;
+  padding: 7px 10px;
   border: 1px solid #d1d6db;
   border-radius: 8px;
   font-size: 14px;
