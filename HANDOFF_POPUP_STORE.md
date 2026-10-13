@@ -111,6 +111,15 @@
 
 **HANDOFF·에이전트:** §25 i18n 갱신 시 위 규칙 준수. 불필요한 `helpText` 블록 추가 금지.
 
+**점주 PC 저장 버튼·섹션 (User 2026-10-13):**
+
+| | 규칙 |
+|---|---|
+| **Primary** | **`#3182f6`** · 클래스 **`owner-btn-primary`** / **`owner-sku-btn--primary`** — 검정 CTA **❌** |
+| **정렬** | 섹션별 저장 = **우측** (`owner-section-actions` · `owner-sku-footer`) |
+| **상품 수정** | **기본·재고** = 하단 **sticky 「상품 저장」** · **옵션** = 「옵션 저장」 · **함께 추천** = 「추천 저장」 (RPC 분리 유지) |
+| **레이아웃** | 수정 펼침 = **`owner-product-edit__section`** 박스 구분 · §7.108 |
+
 **AI 티 금지 (User 2026-10-02):** 「~할 일」「~해보세요」「한곳에서」「~이에요」 남발 · 친절한 챗봇/매뉴얼체 **❌** — **짧은 라벨·명사구** · 문구 추가 전 **소리 내어 읽기** · §25·`ko.ts`·HANDOFF 본문 동일.
 
 **User-facing TMI·타사 비교 금지 (User 2026-10-12 — §0 매 작업 재확인):**
@@ -2368,6 +2377,23 @@ npx supabase db pull
 | | |
 |---|---|
 | `apps/web` only | **❌ Expo** · **Vercel 1~2min** · 점주 PC **Ctrl+F5** |
+
+---
+
+### 7.108 **점주 상품 수정 — 가시성·저장 UX** (User 2026-10-13)
+
+| | |
+|---|---|
+| **옵션 칸** | 값 아래 **「이 옵션만 추가·할인(원)」** · placeholder `0` · `± (선택)` **❌** |
+| **상품코드** | placeholder **비움** · 「엑셀·셀메이트」 칸 placeholder **❌** (라벨만) |
+| **수정 펼침** | **기본 정보** · **판매 옵션** · **함께 추천** · **재고·자동수락** · **sticky 상품 저장** · 상세 블록 |
+| **저장** | primary **파랑·우측** · §0 표 |
+
+#### Expo 재시작
+
+| | |
+|---|---|
+| `apps/web` only | **❌ Expo** · **Vercel 1~2min** |
 
 ---
 
@@ -4922,6 +4948,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-13 — 점주 상품 수정 UX·옵션 칸 문구 (§7.108)
+- **Changed:** `OwnerProductPanel` · `OwnerProductSkusEditor` · `owner-product-edit.css` · linked recommend primary · `ko.ts` · §0 · §25
+- **Notes:** **`apps/web` only** · Vercel **1~2min** · sticky **상품 저장**
 
 ### 2026-10-13 — 함께 추천 카피·점주 카드 UI (§7.107)
 - **Changed:** `ko.ts` (`linkedRecommend*`) · `OwnerProductCoordiEditor` · `owner-product-linked-recommend.css` · `ProductDetailModal` · §23 · §25 · §7.106
@@ -8732,6 +8762,7 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 - **라벨 직관성:** §0 — 주어 있는 짧은 문장 (재고 vs **주문 자동 수락** quota 구분). 상품 목록: `ownerProducts.autoAcceptOnBadge` · `autoAcceptQuotaShort`.
 - **점주 PC 탭명 (AD-058, 2026-08-12):** `ownerEdit.tabOverview` = **「매장 개요」** · `tabPolicy` = **「운영·배송 안내」** (발주·배송 처리 탭과 구분) · `tabFulfillment` = **「발주·배송」** · 사이드바/상단바 「대시보드로 이동」(화살표 없음).
 - **함께 추천 (2026-10-13):** `ownerProducts.linkedRecommend*` · `productDetail.linkedRecommendTitle` — **「코디」 User-facing ❌** · §7.107
+- **점주 저장·수정 UI (2026-10-13):** §0 **저장 버튼·섹션** · `owner-product-edit.css` · §7.108
 
 ### 향후 다국어 확장 (post-launch / 글로벌)
 | 단계 | 방법 |

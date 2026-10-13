@@ -20,6 +20,7 @@ import {
   ownerFontSize as fs,
   ownerHelpText,
 } from '../styles/ownerAdminTheme';
+import '../styles/owner-product-edit.css';
 import { OwnerProductBlockEditor } from './OwnerProductBlockEditor';
 import { OwnerProductBulkUpload } from './OwnerProductBulkUpload';
 import { OwnerProductCoordiEditor } from './OwnerProductCoordiEditor';
@@ -347,7 +348,7 @@ export function OwnerProductPanel({
             style={styles.inputFull}
             value={productCode}
             onChange={(e) => setProductCode(e.target.value)}
-            placeholder={t('ownerProducts.productCodePlaceholder')}
+            placeholder={t('ownerProducts.productCodePlaceholder') || undefined}
             maxLength={40}
           />
           <label style={styles.fieldLabel}>{t('ownerProducts.priceLabel')}</label>
@@ -418,136 +419,153 @@ export function OwnerProductPanel({
             {products.map((product) => (
               <div key={product.id} style={styles.card}>
                 {editingId === product.id ? (
-                  <div style={styles.editArea}>
-                    <label style={styles.fieldLabelFirst}>{t('ownerProducts.nameLabel')}</label>
-                    <input
-                      style={styles.inputFull}
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      placeholder={t('ownerProducts.namePlaceholder')}
-                      maxLength={120}
-                    />
-                    <label style={styles.fieldLabel}>{t('ownerProducts.productCodeLabel')}</label>
-                    <input
-                      style={styles.inputFull}
-                      value={editProductCode}
-                      onChange={(e) => setEditProductCode(e.target.value)}
-                      placeholder={t('ownerProducts.productCodePlaceholder')}
-                      maxLength={40}
-                    />
-                    <label style={styles.fieldLabel}>{t('ownerProducts.priceLabel')}</label>
-                    <input
-                      style={styles.inputFull}
-                      value={editPrice}
-                      onChange={(e) => setEditPrice(formatIntegerInputRaw(e.target.value))}
-                      onBlur={() => blurFormatInteger(editPrice, setEditPrice)}
-                      inputMode="numeric"
-                      maxLength={16}
-                    />
-                    <label style={styles.fieldLabel}>{t('ownerProducts.descriptionLabel')}</label>
-                    <textarea
-                      style={styles.textarea}
-                      value={editDescription}
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      placeholder={t('ownerProducts.descriptionPlaceholder')}
-                      maxLength={300}
-                      rows={2}
-                    />
-                    <label style={styles.fieldLabel}>{t('ownerProducts.editImageLabel')}</label>
-                    <div style={styles.formRow}>
-                      <div style={styles.imagePreviewWrapLarge}>
-                        {editPreviewUrl ? (
-                          <img src={editPreviewUrl} alt="" style={styles.imagePreview} />
-                        ) : (
-                          <div style={styles.imagePlaceholder}>🖼️</div>
+                  <div className="owner-product-edit">
+                    <section className="owner-product-edit__section">
+                      <h3 className="owner-product-edit__section-title">{t('ownerProducts.editSectionBasics')}</h3>
+                      <div className="owner-field-gap">
+                        <label style={styles.fieldLabelFirst}>{t('ownerProducts.nameLabel')}</label>
+                        <input
+                          style={styles.inputFull}
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          placeholder={t('ownerProducts.namePlaceholder')}
+                          maxLength={120}
+                        />
+                        <label style={styles.fieldLabel}>{t('ownerProducts.productCodeLabel')}</label>
+                        <input
+                          style={styles.inputFull}
+                          value={editProductCode}
+                          onChange={(e) => setEditProductCode(e.target.value)}
+                          placeholder={t('ownerProducts.productCodePlaceholder') || undefined}
+                          maxLength={40}
+                        />
+                        <label style={styles.fieldLabel}>{t('ownerProducts.priceLabel')}</label>
+                        <input
+                          style={styles.inputFull}
+                          value={editPrice}
+                          onChange={(e) => setEditPrice(formatIntegerInputRaw(e.target.value))}
+                          onBlur={() => blurFormatInteger(editPrice, setEditPrice)}
+                          inputMode="numeric"
+                          maxLength={16}
+                        />
+                        <label style={styles.fieldLabel}>{t('ownerProducts.descriptionLabel')}</label>
+                        <textarea
+                          style={styles.textarea}
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          placeholder={t('ownerProducts.descriptionPlaceholder')}
+                          maxLength={300}
+                          rows={2}
+                        />
+                        <label style={styles.fieldLabel}>{t('ownerProducts.editImageLabel')}</label>
+                        <div style={styles.formRow}>
+                          <div style={styles.imagePreviewWrapLarge}>
+                            {editPreviewUrl ? (
+                              <img src={editPreviewUrl} alt="" style={styles.imagePreview} />
+                            ) : (
+                              <div style={styles.imagePlaceholder}>🖼️</div>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            style={styles.fileButton}
+                            onClick={() => editFileInputRef.current?.click()}
+                          >
+                            {t('ownerProducts.imageChange')}
+                          </button>
+                          <input
+                            ref={editFileInputRef}
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={handleEditFileChange}
+                          />
+                        </div>
+                      </div>
+                    </section>
+
+                    <section className="owner-product-edit__section owner-product-edit__section--flush">
+                      <OwnerProductSkusEditor
+                        productId={product.id}
+                        basePrice={parseIntegerInput(editPrice) || product.price}
+                        onSyncProductBasics={() => persistProductBasicsFromEdit(product.id)}
+                        onSkusSaved={() => void reload()}
+                      />
+                    </section>
+
+                    <section className="owner-product-edit__section owner-product-edit__section--flush">
+                      <OwnerProductCoordiEditor productId={product.id} products={products} />
+                    </section>
+
+                    <section className="owner-product-edit__section">
+                      <h3 className="owner-product-edit__section-title">{t('ownerProducts.editSectionFulfillment')}</h3>
+                      <div className="owner-field-gap">
+                        <label style={styles.fieldLabel}>{t('ownerProducts.stockLabel')}</label>
+                        <p style={styles.helpText}>{t('ownerProducts.stockWhenOptionsHelp')}</p>
+                        <input
+                          style={styles.inputFull}
+                          value={editStock}
+                          onChange={(e) => setEditStock(formatIntegerInputRaw(e.target.value))}
+                          onBlur={() => blurFormatInteger(editStock, setEditStock)}
+                          placeholder={t('ownerProducts.stockPlaceholder')}
+                          inputMode="numeric"
+                          maxLength={16}
+                        />
+                        <label style={styles.checkRow}>
+                          <input
+                            type="checkbox"
+                            checked={editAutoEnabled}
+                            onChange={(e) => setEditAutoEnabled(e.target.checked)}
+                          />
+                          <span>{t('ownerProducts.autoAcceptLabel')}</span>
+                        </label>
+                        {editAutoEnabled && (
+                          <p style={styles.helpText}>{t('ownerProducts.autoAcceptIntro')}</p>
+                        )}
+                        {editAutoEnabled && (
+                          <>
+                            <label style={styles.fieldLabel}>{t('ownerProducts.autoAcceptQuotaLabel')}</label>
+                            <input
+                              style={styles.input}
+                              value={editAutoLimit}
+                              onChange={(e) => setEditAutoLimit(formatIntegerInputRaw(e.target.value))}
+                              inputMode="numeric"
+                              maxLength={12}
+                              placeholder="400"
+                            />
+                            <p style={styles.helpText}>{t('ownerProducts.autoAcceptQuotaHelp')}</p>
+                            <p style={styles.helpText}>{t('ownerProducts.autoAcceptVsStockHelp')}</p>
+                          </>
                         )}
                       </div>
-                      <button
-                        type="button"
-                        style={styles.fileButton}
-                        onClick={() => editFileInputRef.current?.click()}
-                      >
-                        {editImageFile ? t('ownerProducts.imageChange') : t('ownerProducts.imageChange')}
-                      </button>
-                      <input
-                        ref={editFileInputRef}
-                        type="file"
-                        accept="image/*"
-                        style={{ display: 'none' }}
-                        onChange={handleEditFileChange}
-                      />
-                    </div>
+                    </section>
 
-                    <OwnerProductSkusEditor
-                      productId={product.id}
-                      basePrice={parseIntegerInput(editPrice) || product.price}
-                      onSyncProductBasics={() => persistProductBasicsFromEdit(product.id)}
-                      onSkusSaved={() => void reload()}
-                    />
-
-                    <OwnerProductCoordiEditor productId={product.id} products={products} />
-
-                    <label style={styles.fieldLabel}>{t('ownerProducts.stockLabel')}</label>
-                    <p style={styles.helpText}>{t('ownerProducts.stockWhenOptionsHelp')}</p>
-                    <input
-                      style={styles.inputFull}
-                      value={editStock}
-                      onChange={(e) => setEditStock(formatIntegerInputRaw(e.target.value))}
-                      onBlur={() => blurFormatInteger(editStock, setEditStock)}
-                      placeholder={t('ownerProducts.stockPlaceholder')}
-                      inputMode="numeric"
-                      maxLength={16}
-                    />
-                    <label style={styles.checkRow}>
-                      <input
-                        type="checkbox"
-                        checked={editAutoEnabled}
-                        onChange={(e) => setEditAutoEnabled(e.target.checked)}
-                      />
-                      <span>{t('ownerProducts.autoAcceptLabel')}</span>
-                    </label>
-                    {editAutoEnabled && (
-                      <p style={styles.helpText}>{t('ownerProducts.autoAcceptIntro')}</p>
-                    )}
-                    {editAutoEnabled && (
-                      <>
-                        <label style={styles.fieldLabel}>{t('ownerProducts.autoAcceptQuotaLabel')}</label>
-                        <input
-                          style={styles.input}
-                          value={editAutoLimit}
-                          onChange={(e) => setEditAutoLimit(formatIntegerInputRaw(e.target.value))}
-                          inputMode="numeric"
-                          maxLength={12}
-                          placeholder="400"
-                        />
-                        <p style={styles.helpText}>{t('ownerProducts.autoAcceptQuotaHelp')}</p>
-                        <p style={styles.helpText}>{t('ownerProducts.autoAcceptVsStockHelp')}</p>
-                      </>
-                    )}
-                    <div style={styles.editActions}>
-                      <button
-                        style={styles.smallButton}
-                        onClick={() => handleSaveEdit(product.id)}
-                        disabled={editSaving}
-                      >
-                        {editSaving ? t('ownerProducts.submitting') : t('ownerProducts.save')}
-                      </button>
+                    <div className="owner-product-edit__sticky">
                       <button style={styles.smallGhostButton} type="button" onClick={cancelEdit}>
                         {t('common.back')}
                       </button>
+                      <button
+                        type="button"
+                        className="owner-btn-primary"
+                        onClick={() => handleSaveEdit(product.id)}
+                        disabled={editSaving}
+                      >
+                        {editSaving ? t('ownerProducts.submitting') : t('ownerProducts.editStickySave')}
+                      </button>
                     </div>
 
-                    <div style={styles.detailDivider} />
-                    <h4 style={styles.detailSectionTitle}>{t('ownerProducts.detailSectionTitle')}</h4>
-                    <p style={styles.detailIntro}>{t('ownerProducts.detailIntro')}</p>
-                    <OwnerProductBlockEditor product={product} userId={userId} onSaved={reload} />
-                    <button
-                      type="button"
-                      style={styles.previewButton}
-                      onClick={() => setPreviewProductId(product.id)}
-                    >
-                      {t('ownerProducts.previewButton')}
-                    </button>
+                    <div className="owner-product-edit__detail">
+                      <h4 style={styles.detailSectionTitle}>{t('ownerProducts.detailSectionTitle')}</h4>
+                      <p style={styles.detailIntro}>{t('ownerProducts.detailIntro')}</p>
+                      <OwnerProductBlockEditor product={product} userId={userId} onSaved={reload} />
+                      <button
+                        type="button"
+                        style={styles.previewButton}
+                        onClick={() => setPreviewProductId(product.id)}
+                      >
+                        {t('ownerProducts.previewButton')}
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div style={styles.cardBody}>

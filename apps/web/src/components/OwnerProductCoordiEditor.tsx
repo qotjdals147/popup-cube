@@ -5,6 +5,7 @@ import {
   saveOwnerProductCoordiLinks,
 } from '../lib/productCoordi';
 import { t } from '../i18n';
+import '../styles/owner-product-edit.css';
 import '../styles/owner-product-linked-recommend.css';
 
 const MAX_LINKS = 12;
@@ -176,7 +177,12 @@ export function OwnerProductCoordiEditor({ productId, products }: OwnerProductCo
       </div>
 
       <div className="owner-linked-actions">
-        <button type="button" className="owner-linked-save-btn" disabled={saving} onClick={() => void handleSave()}>
+        <button
+          type="button"
+          className="owner-btn-primary owner-linked-save-btn"
+          disabled={saving}
+          onClick={() => void handleSave()}
+        >
           {saving ? t('ownerProducts.linkedRecommendSaving') : t('ownerProducts.linkedRecommendSave')}
         </button>
         {saved && <span className="owner-linked-saved">{t('ownerProducts.linkedRecommendSaved')}</span>}

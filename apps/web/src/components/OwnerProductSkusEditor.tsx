@@ -435,10 +435,12 @@ export function OwnerProductSkusEditor({
                           onChange={(e) => updateRowValue(idx, gi, e.target.value)}
                           maxLength={40}
                         />
+                        <span className="owner-sku-cell-adj-hint">{t('ownerProducts.skusCellAdjMicro')}</span>
                         <input
                           className="owner-sku-cell-input owner-sku-cell-adj"
-                          aria-label={`${name.trim() || t('ownerProducts.skusGroupFallback', { index: gi + 1 })} ${t('ownerProducts.skusCellAdjLabel')}`}
+                          aria-label={`${name.trim() || t('ownerProducts.skusGroupFallback', { index: gi + 1 })} ${t('ownerProducts.skusCellAdjMicro')}`}
                           placeholder={t('ownerProducts.skusCellAdjPh')}
+                          title={t('ownerProducts.skusCellAdjMicro')}
                           value={cellAdjInputValue(idx, gi, row)}
                           onChange={(e) =>
                             updateRowCellAdjustment(idx, gi, sanitizeSignedDeltaInput(e.target.value))
