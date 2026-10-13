@@ -33,6 +33,11 @@
   white-space: nowrap;
 }
 
+.owner-product-edit__toolbar-save {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .owner-product-edit__section {
   background: #ffffff;
   border: 1px solid #e5e8eb;

@@ -426,6 +426,14 @@ export function OwnerProductPanel({
                         ← {t('ownerProducts.editClose')}
                       </button>
                       <p className="owner-product-edit__toolbar-title">{editName.trim() || product.name}</p>
+                      <button
+                        type="button"
+                        className="owner-btn-primary owner-product-edit__toolbar-save"
+                        onClick={() => handleSaveEdit(product.id)}
+                        disabled={editSaving}
+                      >
+                        {editSaving ? t('ownerProducts.submitting') : t('ownerProducts.editStickySave')}
+                      </button>
                     </div>
 
                     <section className="owner-product-edit__section">

@@ -117,7 +117,7 @@
 |---|---|
 | **Primary** | **`#3182f6`** · 클래스 **`owner-btn-primary`** / **`owner-sku-btn--primary`** — 검정 CTA **❌** |
 | **정렬** | 섹션별 저장 = **우측** (`owner-section-actions` · `owner-sku-footer`) |
-| **상품 수정** | **닫기** = 상단 sticky **「수정 닫기」** · **기본·재고** = 하단 sticky **「상품 저장」만** · **옵션** / **추천** = 각 섹션 저장 · **상세 블록** = **저장 버튼 없음**(즉시 반영) |
+| **상품 수정** | **닫기** = 상단 **「수정 닫기」** · **기본·재고** = 상단 toolbar **+** 하단 sticky **「상품 저장」**(동일 동작 · 항상 보이게) · **옵션** / **추천** / **태그** = 각 섹션 저장 · **상세 블록** = **저장 버튼 없음**(즉시 반영) |
 | **레이아웃** | 수정 펼침 = **`owner-product-edit__section`** 박스 구분 · §7.108 |
 
 **점주 섹션 타이포 (User 2026-10-13):**
@@ -2424,8 +2424,8 @@ npx supabase db pull
 |---|---|
 | **옵션 칸** | 값 아래 **「이 옵션만 추가·할인(원)」** · placeholder `0` · `± (선택)` **❌** |
 | **상품코드** | placeholder **비움** · 「엑셀·셀메이트」 칸 placeholder **❌** (라벨만) |
-| **수정 펼침** | 상단 **수정 닫기** · 섹션 박스 · sticky **상품 저장**(닫기 ❌) · **상세** = 블록 즉시 저장 |
-| **저장** | primary **파랑·우측** · §0 표 |
+| **수정 펼침** | 상단 **수정 닫기** + **상품 저장**(toolbar) · 섹션 박스 · 하단 sticky **상품 저장** 유지 · **상세** = 블록 즉시 저장 |
+| **저장** | primary **파랑·우측** · §0 표 · **User 2026-10-13 pm** — 기본 정보만 볼 때 저장 안 보이던 문제 → toolbar 저장 추가 |
 
 #### Expo 재시작
 
@@ -5080,6 +5080,10 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-13 — 프로모·가챠 컴팩트 레이아웃 (§7.109c)
 - **Changed:** `owner-promo-gacha.css` · `OwnerPromotionPanel.tsx`
 - **Notes:** **`apps/web`** · Vercel **1~2min**
+
+### 2026-10-13 — 점주 상품 수정 toolbar 「상품 저장」 (§7.108)
+- **Changed:** `OwnerProductPanel` · `owner-product-edit.css` · §0 저장 버튼 표 · §7.108
+- **Notes:** **`apps/web` only** · Vercel **1~2min** · 점주 PC **Ctrl+F5**
 
 ### 2026-10-13 — AD-088 벤치 08 태그·매장 소식 (§7.113)
 - **Changed:** migration `20261013_ad088_product_tags_store_news` · `productTags.ts` · `storeNews.ts` · `OwnerProductTagsEditor` · `OwnerStoreNewsEditor` · `ProductDetailModal` · `OwnerProductPanel` · `OwnerStorePolicyPanel` · `product-detail-shop.css` · `ko.ts` · §7.94 · §7.0
