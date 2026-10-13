@@ -120,6 +120,13 @@
 | **상품 수정** | **닫기** = 상단 sticky **「수정 닫기」** · **기본·재고** = 하단 sticky **「상품 저장」만** · **옵션** / **추천** = 각 섹션 저장 · **상세 블록** = **저장 버튼 없음**(즉시 반영) |
 | **레이아웃** | 수정 펼침 = **`owner-product-edit__section`** 박스 구분 · §7.108 |
 
+**점주 섹션 타이포 (User 2026-10-13):**
+
+| | 규칙 |
+|---|---|
+| **제목 ↔ 안내** | 제목 `margin-bottom` **≥10px** · 안내(lead) 아래 **≥18px** 후 본문/입력 |
+| **공통 클래스** | `owner-promo-card__title` / `__lead` · `owner-section-lead` · `owner-gacha-add-block__lead` |
+
 **AI 티 금지 (User 2026-10-02):** 「~할 일」「~해보세요」「한곳에서」「~이에요」 남발 · 친절한 챗봇/매뉴얼체 **❌** — **짧은 라벨·명사구** · 문구 추가 전 **소리 내어 읽기** · §25·`ko.ts`·HANDOFF 본문 동일.
 
 **User-facing TMI·타사 비교 금지 (User 2026-10-12 — §0 매 작업 재확인):**
@@ -2402,7 +2409,7 @@ npx supabase db pull
 | | |
 |---|---|
 | **화면** | `OwnerPromotionPanel` — **매장 기본** · **상품별** · **가챠 풀** 카드 분리 |
-| **가챠** | 당첨 **카드 행** · **가중치** 라벨 · **비율 %** · 추가 폼 **점선 박스** |
+| **가챠** | **추가 → 목록** 순 · **등록 상품 넣기** = 상품 탭 상품 · 제목·lead 간격 · §7.109b |
 | **저장** | §0 primary **우측** (`owner-section-actions`) |
 
 #### Expo 재시작
@@ -4964,6 +4971,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-13 — 가챠 추가 순서·카피·제목 간격 (§7.109)
+- **Changed:** `OwnerPromotionPanel` · `owner-promo-gacha.css` · linked/edit spacing · `ko.ts` · §0 타이포
+- **Notes:** **`apps/web`** · Vercel **1~2min**
 
 ### 2026-10-13 — 점주 프로모션·가챠 탭 UI (§7.109)
 - **Changed:** `OwnerPromotionPanel` · `owner-promo-gacha.css` · `ko.ts` ownerPromo

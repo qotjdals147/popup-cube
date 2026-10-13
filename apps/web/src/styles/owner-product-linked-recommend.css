@@ -17,7 +17,7 @@
 }
 
 .owner-linked-panel__title {
-  margin: 0;
+  margin: 0 0 10px;
   font-size: 16px;
   font-weight: 700;
   color: #191f28;
@@ -33,10 +33,10 @@
 }
 
 .owner-linked-panel__hint {
-  margin: 0 0 12px;
+  margin: 0 0 18px;
   font-size: 13px;
   color: #8b95a1;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .owner-linked-selected {

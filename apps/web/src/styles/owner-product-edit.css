@@ -49,10 +49,18 @@
 }
 
 .owner-product-edit__section-title {
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   font-size: 16px;
   font-weight: 700;
   color: #191f28;
+}
+
+/* 점주 공통 — 섹션 제목 ↔ 안내 문구 간격 (User 2026-10-13) */
+.owner-section-lead {
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #8b95a1;
 }
 
 .owner-product-edit__section .owner-field-gap {

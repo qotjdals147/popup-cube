@@ -22,24 +22,28 @@
 }
 
 .owner-promo-card__title {
-  margin: 0 0 4px;
+  margin: 0 0 10px;
   font-size: 16px;
   font-weight: 700;
   color: #191f28;
 }
 
 .owner-promo-card__lead {
-  margin: 0 0 14px;
+  margin: 0 0 18px;
   font-size: 13px;
-  line-height: 1.45;
+  line-height: 1.5;
   color: #8b95a1;
+}
+
+.owner-promo-card__lead--tight-bottom {
+  margin-bottom: 12px;
 }
 
 .owner-promo-toggle {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 14px;
+  margin: 0 0 18px;
   font-size: 15px;
   font-weight: 600;
   color: #191f28;
@@ -232,8 +236,27 @@
   white-space: nowrap;
 }
 
+.owner-gacha-add-section {
+  margin-bottom: 20px;
+  padding-bottom: 4px;
+}
+
+.owner-gacha-add-section__title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #191f28;
+}
+
+.owner-gacha-list-section__title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #191f28;
+}
+
 .owner-gacha-add-block {
-  margin-top: 12px;
+  margin-top: 10px;
   padding: 14px;
   border: 1px dashed #d1d6db;
   border-radius: 10px;
@@ -241,10 +264,17 @@
 }
 
 .owner-gacha-add-block__title {
-  margin: 0 0 10px;
-  font-size: 13px;
+  margin: 0 0 6px;
+  font-size: 14px;
   font-weight: 700;
   color: #191f28;
+}
+
+.owner-gacha-add-block__lead {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #8b95a1;
 }
 
 .owner-gacha-add-row {
