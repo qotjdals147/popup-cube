@@ -13,14 +13,17 @@
 .cart-icon-btn--header {
   min-width: 44px;
   min-height: 44px;
-  font-size: 20px;
   color: var(--shop-text, #191f28);
+}
+
+.cart-icon-btn__glyph {
+  display: block;
+  flex-shrink: 0;
 }
 
 .cart-icon-btn--bar {
   width: 44px;
   height: 44px;
-  font-size: 20px;
   border-radius: 8px;
   border: 1.5px solid #3182f6;
   background: #ffffff;

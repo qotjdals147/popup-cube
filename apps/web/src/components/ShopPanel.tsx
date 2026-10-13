@@ -1,5 +1,6 @@
 import { useCart } from '../context/CartContext';
 import { StoreShopCatalog } from './StoreShopCatalog';
+import { ShopperLineIcon } from './ShopperLineIcon';
 import { t } from '../i18n';
 import '../styles/store-shop.css';
 
@@ -20,7 +21,10 @@ export function ShopPanel({ storeId, onClose, onOpenCart }: ShopPanelProps) {
           <h3 className="shop-panel__title">{t('shop.title')}</h3>
           <div className="shop-panel__header-actions">
             <button type="button" className="shop-panel__cart-btn" onClick={onOpenCart}>
-              🛒 {t('shop.cart')} {totalQuantity > 0 ? `(${totalQuantity})` : ''}
+              <ShopperLineIcon name="bag" size={18} />
+              <span>
+                {t('shop.cart')} {totalQuantity > 0 ? `(${totalQuantity})` : ''}
+              </span>
             </button>
             <button type="button" className="shop-panel__close-btn" onClick={onClose}>
               ✕

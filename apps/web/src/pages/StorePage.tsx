@@ -17,6 +17,7 @@ import { DisplayProductModal } from '../components/DisplayProductModal';
 import { OwnerProductPanel } from '../components/OwnerProductPanel';
 import { OwnerOrdersPanel } from '../components/OwnerOrdersPanel';
 import { DemoToast } from '../components/DemoToast';
+import { ShopperLineIcon } from '../components/ShopperLineIcon';
 import { VirtualDpad } from '../components/VirtualDpad';
 import { ViewModeToggle } from '../components/ViewModeToggle';
 import { getStoreSummary, userOwnsStore } from '../lib/stores';
@@ -387,8 +388,11 @@ export function StorePage() {
         }}
         title="담아 둔 상품 · 결제"
       >
-        🛒 {t('store.hud.cart')}
-        {totalQuantity > 0 ? ` (${totalQuantity})` : ''}
+        <ShopperLineIcon name="bag" size={18} />
+        <span style={{ marginLeft: 4 }}>
+          {t('store.hud.cart')}
+          {totalQuantity > 0 ? ` (${totalQuantity})` : ''}
+        </span>
       </button>
       <button
         style={isMobile ? undefined : styles.shopButton}
@@ -576,8 +580,9 @@ export function StorePage() {
           </span>
         </div>
         <div style={styles.headerRight}>
-          <button style={styles.cartHeaderButton} onClick={() => setCartOpen(true)}>
-            🛒 {totalQuantity > 0 ? totalQuantity : ''}
+          <button style={{ ...styles.cartHeaderButton, display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={() => setCartOpen(true)}>
+            <ShopperLineIcon name="bag" size={18} />
+            {totalQuantity > 0 ? totalQuantity : ''}
           </button>
           <button style={styles.cartHeaderButton} onClick={() => navigate('/mypage')}>
             {t('common.myPage')}

@@ -132,7 +132,7 @@
 | | 규칙 |
 |---|---|
 | **원칙** | 쇼핑몰 내비·버튼·메뉴 등 **아이콘이 필요하면 전부 얇은 선(아웃라인) 스타일** — 에이블리·일반 몰과 동일 톤 |
-| **구현** | **`apps/mobile`** → **`ShopperLineIcon`** (`Ionicons` outline) · 새 glyph **여기 name 추가** 후 재사용 |
+| **구현** | **`apps/mobile`** · **`apps/web`**(shop/WebView) → 각 **`ShopperLineIcon`** · 새 glyph **name 추가** 후 재사용 |
 | **선택 상태** | 탭 등 **활성**만 **채움(filled)** 허용 · 비활성 = outline |
 | **❌ 금지** | 🏠🛒🔔🔍📦 등 **이모지·3D·컬러 이모티콘을 UI 아이콘 자리**에 쓰기 · `Text`에 이모지만 박기 |
 | **i18n** | `ko.ts` **라벨·버튼**에 장식 이모지 **❌** (예: 「장바구니」·「알림」 — 아이콘은 컴포넌트) |
@@ -2422,7 +2422,7 @@ npx supabase db pull
 |---|---|
 | **Why** | 하단·알림 등 **3D/이모지** → 쇼핑몰 **이질감** · 에이블리 등 **라인 아이콘** 표준 |
 | **규칙 (고정)** | **앞으로 손님 UI에 아이콘 쓸 일 = 전부 라인** · §0 표 · **`ShopperLineIcon`** |
-| **1차 적용** | 홈·마이·장바구니 탭 · 알림 · 검색 · 설정 · 마이 퀵 |
+| **1차 적용** | 앱 탭·알림·검색 · **web `CartIconButton`**(매장 헤더) · 장바구니 탭 제목(텍스트만) |
 | **회의록** | `2026.10.02_회의_내용.txt` · 벤치 **01** 하단 탭 |
 
 #### Expo 재시작
@@ -5033,6 +5033,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-13 — web 장바구니 라인 아이콘 (§7.112)
+- **Changed:** `ShopperLineIcon.tsx`(web) · `CartIconButton` · `ShopPanel` · `StorePage` · cart CSS · §0
+- **Notes:** **`apps/web`** · Vercel **1~2min** · Expo **❌** (WebView)
 
 ### 2026-10-13 — 장바구니 탭 제목 이모지 제거
 - **Changed:** `apps/web/src/i18n/ko.ts` (`cart.title`)
