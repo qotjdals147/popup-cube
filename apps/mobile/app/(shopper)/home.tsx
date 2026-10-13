@@ -16,6 +16,7 @@ import { ShopperNotificationBell } from '../../src/components/ShopperNotificatio
 import { useAuth } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
 import { t } from '../../src/i18n/ko';
+import { listHomePromoBanners, type HomeBannerSlide } from '../../src/lib/homeBanners';
 import {
   listHomeProductFeed,
   sortHomeProductFeed,
@@ -35,6 +36,7 @@ export default function HomeScreen() {
   const [search, setSearch] = useState('');
   const [feedSort, setFeedSort] = useState<HomeFeedSort>('all');
   const [products, setProducts] = useState<HomeProductFeedItem[]>([]);
+  const [banners, setBanners] = useState<HomeBannerSlide[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -108,9 +110,18 @@ export default function HomeScreen() {
     setError(false);
 
     const timer = setTimeout(() => {
-      listHomeProductFeed(search)
-        .then((data) => {
-          if (active) setProducts(data);
+      Promise.all([
+        listHomeProductFeed(search),
+        listHomePromoBanners({
+          title: t.home.bannerTitle,
+          subtitle: t.home.bannerSub,
+        }),
+      ])
+        .then(([feed, bannerSlides]) => {
+          if (active) {
+            setProducts(feed);
+            setBanners(bannerSlides);
+          }
         })
         .catch(() => {
           if (active) setError(true);
@@ -133,9 +144,19 @@ export default function HomeScreen() {
     });
   }
 
+  function handleBannerPress(slide: HomeBannerSlide) {
+    if (!slide.storeId) return;
+    router.push({
+      pathname: '/store/[storeId]',
+      params: slide.productId
+        ? { storeId: slide.storeId, productId: slide.productId }
+        : { storeId: slide.storeId },
+    });
+  }
+
   const listHeader = (
     <View style={styles.listHeader}>
-      <HomePromoBanner />
+      <HomePromoBanner slides={banners} onPressSlide={handleBannerPress} />
       <HomeFeedChips sort={feedSort} onChange={setFeedSort} />
       <Text style={styles.feedTitle}>{t.home.feedTitle}</Text>
     </View>
