@@ -242,7 +242,8 @@ export const ko = {
   ownerStoreNews: {
     sectionTitle: '매장 새 소식',
     introMedia:
-      '사진·GIF를 올리면 손님 상품 상세에서 「이 매장의 다른 상품」과 같은 가로 슬라이드로 보입니다. 탭하면 매장으로 들어가거나, 아래에서 고른 상품 상세로 이동합니다. 순서는 위에서 아래입니다.',
+      '사진·GIF를 올리면 손님 상품 상세에서 「이 매장의 다른 상품」과 같은 가로 슬라이드로 보입니다. 사진은 대표 사진처럼 드래그·확대로 보이는 영역을 맞춥니다. GIF는 움직임 그대로 올라갑니다. 탭하면 매장 또는 연결 상품으로 이동합니다.',
+    cropNote: '사진 선택 후 영역을 맞춘 뒤 적용해 주세요.',
     addMedia: '+ 사진·GIF 추가',
     uploading: '올리는 중…',
     uploadImage: '사진·GIF 올리기',
@@ -469,6 +470,7 @@ export const ko = {
     addToCart: '담기',
     added: '담았어요 ✅',
     viewDetail: '상품 상세 보기',
+    returnToPreviousProduct: '← 이전 상품 상세로',
   },
   display: {
     title: '진열 상품',
@@ -558,6 +560,8 @@ export const ko = {
   imageCrop: {
     storeTitle: '대표 사진 영역 맞추기',
     storeHint: '손님 앱 홈 카드(4:3)에 보이는 구간이에요. 사진을 드래그하고 슬라이더로 확대·축소하세요.',
+    storeNewsTitle: '소식 사진 영역 맞추기',
+    storeNewsHint: '손님 상품 상세 카드(정사각형)에 보이는 구간이에요.',
     zoom: '확대·축소',
     frameNote: '테두리 안이 저장되는 영역이에요.',
     apply: '이대로 적용',

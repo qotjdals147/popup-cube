@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Product } from '@popup-cube/shared';
+import { STORE_NEWS_CARD_ASPECT } from '../lib/cropImage';
 import { useAuth } from '../context/AuthContext';
+import { ImageCropDialog } from './ImageCropDialog';
 import { listMyProducts } from '../lib/products';
 import type { StoreNewsPost } from '../lib/storeNews';
 import {
@@ -29,6 +31,13 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const replaceTargetRef = useRef<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (cropSrc) URL.revokeObjectURL(cropSrc);
+    };
+  }, [cropSrc]);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -53,16 +62,15 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
     fileInputRef.current?.click();
   }
 
-  async function handleFileSelected(file: File | undefined) {
-    if (!file || !userId) return;
-    if (file.size > MAX_STORE_NEWS_MEDIA_BYTES) {
-      setError(t('ownerStoreNews.mediaTooLarge'));
-      return;
-    }
+  function closeCrop() {
+    setCropSrc((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+  }
 
-    const replaceId = replaceTargetRef.current;
-    replaceTargetRef.current = null;
-    setError(null);
+  async function persistUploadedFile(file: File, replaceId: string | null) {
+    if (!userId) return;
 
     if (replaceId) {
       setBusyId(replaceId);
@@ -94,6 +102,36 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
     } finally {
       setBusyId(null);
     }
+  }
+
+  async function handleFileSelected(file: File | undefined) {
+    if (!file || !userId) return;
+    if (file.size > MAX_STORE_NEWS_MEDIA_BYTES) {
+      setError(t('ownerStoreNews.mediaTooLarge'));
+      return;
+    }
+
+    setError(null);
+
+    if (file.type === 'image/gif') {
+      const replaceId = replaceTargetRef.current;
+      replaceTargetRef.current = null;
+      await persistUploadedFile(file, replaceId);
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    setCropSrc((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return url;
+    });
+  }
+
+  async function handleCropped(file: File) {
+    const replaceId = replaceTargetRef.current;
+    replaceTargetRef.current = null;
+    closeCrop();
+    await persistUploadedFile(file, replaceId);
   }
 
   async function patchLink(postId: string, linkProductId: string | null) {
@@ -225,10 +263,25 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
           >
             {busyId === 'new' ? t('ownerStoreNews.uploading') : t('ownerStoreNews.addMedia')}
           </button>
+          <p style={styles.help}>{t('ownerStoreNews.cropNote')}</p>
           <p style={styles.help}>{t('ownerStoreNews.limitHint', { max: MAX_POSTS })}</p>
         </>
       )}
       {error && <p style={styles.error}>{error}</p>}
+
+      {cropSrc && (
+        <ImageCropDialog
+          imageSrc={cropSrc}
+          aspect={STORE_NEWS_CARD_ASPECT}
+          title={t('imageCrop.storeNewsTitle')}
+          previewHint={t('imageCrop.storeNewsHint')}
+          onCancel={() => {
+            replaceTargetRef.current = null;
+            closeCrop();
+          }}
+          onConfirm={handleCropped}
+        />
+      )}
     </div>
   );
 }

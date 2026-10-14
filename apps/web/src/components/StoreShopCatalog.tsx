@@ -46,7 +46,13 @@ export function StoreShopCatalog({
   const [error, setError] = useState<string | null>(null);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [addedId, setAddedId] = useState<string | null>(null);
-  const [detailProduct, setDetailProduct] = useState<Product | null>(null);
+  /** 상세 스택 — 연관·소식 탭 시 push · ← 뒤로가기 시 pop (§7.119) */
+  const [detailStack, setDetailStack] = useState<Product[]>([]);
+  /** 매장 홈으로 나갔을 때 복귀용 상세 스택 */
+  const [returnDetailStack, setReturnDetailStack] = useState<Product[] | null>(null);
+
+  const detailProduct = detailStack.length > 0 ? detailStack[detailStack.length - 1] : null;
+  const detailCanPop = detailStack.length > 1;
 
   useEffect(() => {
     let mounted = true;
@@ -70,13 +76,27 @@ export function StoreShopCatalog({
   useEffect(() => {
     if (!initialProductId || products.length === 0) return;
     const match = products.find((p) => p.id === initialProductId);
-    if (match) setDetailProduct(match);
+    if (match) setDetailStack([match]);
   }, [initialProductId, products]);
 
   const relatedForDetail = useMemo(() => {
     if (!detailProduct) return [];
     return products.filter((p) => p.id !== detailProduct.id).slice(0, 12);
   }, [products, detailProduct]);
+
+  function openDetailProduct(product: Product, mode: 'push' | 'reset') {
+    setReturnDetailStack(null);
+    setDetailStack((prev) => {
+      if (mode === 'push' && prev.length > 0) return [...prev, product];
+      return [product];
+    });
+  }
+
+  function navigateToProductId(productId: string) {
+    const p = products.find((x) => x.id === productId);
+    if (!p) return;
+    openDetailProduct(p, detailStack.length > 0 ? 'push' : 'reset');
+  }
 
   function getQty(productId: string): number {
     return quantities[productId] ?? 1;
@@ -91,7 +111,7 @@ export function StoreShopCatalog({
     try {
       const skuList = await getProductSkus(product.id);
       if (skuList.length > 0) {
-        setDetailProduct(product);
+        openDetailProduct(product, 'reset');
         return;
       }
     } catch {
@@ -118,20 +138,41 @@ export function StoreShopCatalog({
   const productOnlyEntry = Boolean(initialProductId) && !storeBrowseUnlocked;
 
   function handleCloseDetail() {
+    if (detailCanPop) {
+      setDetailStack((prev) => prev.slice(0, -1));
+      return;
+    }
     if (productOnlyEntry && onExitToFeed) {
       onExitToFeed();
       return;
     }
-    setDetailProduct(null);
+    setDetailStack([]);
   }
 
   function handleEnterStoreFromDetail() {
+    if (detailStack.length > 0) {
+      setReturnDetailStack(detailStack);
+    }
+    setDetailStack([]);
     onEnterStoreBrowse?.();
-    setDetailProduct(null);
+  }
+
+  function restoreReturnDetail() {
+    if (!returnDetailStack?.length) return;
+    setDetailStack(returnDetailStack);
+    setReturnDetailStack(null);
   }
 
   return (
     <>
+      {returnDetailStack && returnDetailStack.length > 0 && storeBrowseUnlocked && !detailProduct && (
+        <div className="store-shop-return-detail">
+          <button type="button" className="store-shop-return-detail__btn" onClick={restoreReturnDetail}>
+            {t('shop.returnToPreviousProduct')}
+          </button>
+        </div>
+      )}
+
       {storeBrowseUnlocked && (
       <div className={gridClass}>
         {products.map((product) => (
@@ -185,7 +226,7 @@ export function StoreShopCatalog({
                 <button
                   type="button"
                   className="store-shop-card__action-btn store-shop-card__action-btn--detail"
-                  onClick={() => setDetailProduct(product)}
+                  onClick={() => openDetailProduct(product, 'reset')}
                 >
                   {t('shop.viewDetail')}
                 </button>
@@ -203,13 +244,10 @@ export function StoreShopCatalog({
           appearance={variant === 'page' ? 'light' : 'dark'}
           shoppingBlocked={shoppingBlocked}
           relatedProducts={relatedForDetail}
-          onSelectRelated={(p) => setDetailProduct(p)}
-          onOpenProductId={(id) => {
-            const p = products.find((x) => x.id === id);
-            if (p) setDetailProduct(p);
-          }}
+          onSelectRelated={(p) => openDetailProduct(p, 'push')}
+          onOpenProductId={navigateToProductId}
           storeEntry={
-            variant === 'page' && productOnlyEntry && storeName
+            variant === 'page' && storeName
               ? {
                   name: storeName,
                   thumbnailUrl: storeThumbnailUrl,
@@ -219,7 +257,7 @@ export function StoreShopCatalog({
           }
           onClose={handleCloseDetail}
           onOpenCart={() => {
-            setDetailProduct(null);
+            setDetailStack([]);
             onOpenCart?.();
           }}
         />

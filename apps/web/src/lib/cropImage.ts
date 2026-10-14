@@ -57,3 +57,6 @@ export async function getCroppedImageBlob(
 
 /** 홈 카드·매장 개요 썸네일 (4:3) */
 export const STORE_THUMBNAIL_ASPECT = 4 / 3;
+
+/** 손님 상품 상세 — 매장 새 소식 카드 (1:1) */
+export const STORE_NEWS_CARD_ASPECT = 1;

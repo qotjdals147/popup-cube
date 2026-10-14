@@ -234,6 +234,23 @@ html:has(.store-shop-page) body {
   opacity: 0.35;
 }
 
+.store-shop-return-detail {
+  margin-bottom: 12px;
+}
+
+.store-shop-return-detail__btn {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--shop-border, #e5e8eb);
+  background: var(--shop-surface-muted, #f9fafb);
+  color: var(--shop-text, #191f28);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
 .store-shop-card__body {
   padding: 10px;
   display: flex;

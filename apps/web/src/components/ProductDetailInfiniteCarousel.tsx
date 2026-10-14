@@ -10,9 +10,14 @@ interface ProductDetailInfiniteCarouselProps {
   ariaLabel?: string;
 }
 
+/** 세로 스크롤과 구분 — 이 거리 이상 가로로 움직여야 캐러셀 조작 */
+const HORIZONTAL_DRAG_THRESHOLD_PX = 16;
+/** 가로 이동이 세로보다 이만큼 커야 가로 드래그로 인정 */
+const HORIZONTAL_INTENT_RATIO = 1.35;
+
 /**
- * 상품 상세 — 가로 무한 캐러셀 (자동 슬로우 + 손가락/드래그).
- * 아이템을 두 번 이어 붙여 끝→처음 전환을 끊김 없이 처리한다.
+ * 상품 상세 — 가로 무한 캐러셀 (자동 슬로우 + 의도적 가로 드래그).
+ * 세로로 상세를 내릴 때 살짝 닿는 것만으로는 멈추지 않는다.
  */
 export function ProductDetailInfiniteCarousel({
   children,
@@ -26,7 +31,13 @@ export function ProductDetailInfiniteCarousel({
   const offsetRef = useRef(0);
   const pausedRef = useRef(false);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const dragRef = useRef<{ pointerId: number; startX: number; startOffset: number } | null>(null);
+  const dragActiveRef = useRef(false);
+  const pendingRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    startOffset: number;
+  } | null>(null);
   const rafRef = useRef<number | null>(null);
   const lastTsRef = useRef<number | null>(null);
 
@@ -94,37 +105,59 @@ export function ProductDetailInfiniteCarousel({
           if (e.button !== 0 && e.pointerType === 'mouse') return;
           const target = e.target as HTMLElement;
           if (target.closest('button, a, input, textarea, select')) return;
-          dragRef.current = {
+
+          pendingRef.current = {
             pointerId: e.pointerId,
             startX: e.clientX,
+            startY: e.clientY,
             startOffset: offsetRef.current,
           };
-          pausedRef.current = true;
-          if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+          dragActiveRef.current = false;
         }}
         onPointerMove={(e) => {
-          const drag = dragRef.current;
-          if (!drag || drag.pointerId !== e.pointerId) return;
-          const dx = e.clientX - drag.startX;
-          offsetRef.current = drag.startOffset - dx;
+          const pending = pendingRef.current;
+          if (!pending || pending.pointerId !== e.pointerId) return;
+
+          const dx = e.clientX - pending.startX;
+          const dy = e.clientY - pending.startY;
+
+          if (!dragActiveRef.current) {
+            if (
+              Math.abs(dx) < HORIZONTAL_DRAG_THRESHOLD_PX ||
+              Math.abs(dx) < Math.abs(dy) * HORIZONTAL_INTENT_RATIO
+            ) {
+              return;
+            }
+            dragActiveRef.current = true;
+            pausedRef.current = true;
+            if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+          }
+
+          offsetRef.current = pending.startOffset - dx;
           wrapOffset();
           applyTransform();
         }}
         onPointerUp={(e) => {
-          const drag = dragRef.current;
-          if (!drag || drag.pointerId !== e.pointerId) return;
-          dragRef.current = null;
-          try {
-            (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-          } catch {
-            /* ignore */
+          const pending = pendingRef.current;
+          if (!pending || pending.pointerId !== e.pointerId) return;
+
+          if (dragActiveRef.current) {
+            try {
+              (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+            } catch {
+              /* ignore */
+            }
+            pauseAuto();
           }
-          pauseAuto();
+
+          pendingRef.current = null;
+          dragActiveRef.current = false;
         }}
-        onPointerCancel={(e) => {
-          dragRef.current = null;
-          pauseAuto();
+        onPointerCancel={() => {
+          if (dragActiveRef.current) pauseAuto();
+          pendingRef.current = null;
+          dragActiveRef.current = false;
         }}
       >
         <div

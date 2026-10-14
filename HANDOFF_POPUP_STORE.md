@@ -2461,6 +2461,23 @@ npx supabase db pull
 
 ---
 
+### 7.119 **손님 상세 — 캐러셀·뒤로가기·소식 크롭** (User 2026-10-14)
+
+| | |
+|---|---|
+| **캐러셀** | `ProductDetailInfiniteCarousel` — 자동 슬로우 · **가로 드래그만** 조작(세로 스크롤과 구분) |
+| **뒤로가기** | `StoreShopCatalog` **`detailStack`** · §62.4 |
+| **소식 업로드** | `ImageCropDialog` **1:1** · **GIF** = 크롭 없이 원본 |
+| **규칙** | 상세·피드 **탭 이동** = **스택 + pop** (앞으로 동일) |
+
+#### Expo 재시작
+
+| | |
+|---|---|
+| `apps/web` only | **❌ Expo** · Vercel **1~2min** · shop **새로고침** |
+
+---
+
 ### 7.107 **함께 추천 — 카피·점주 UI** (User 2026-10-13)
 
 | | |
@@ -5289,6 +5306,11 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-14 — 홈 배너 광고 소재·운영 정리 (§7.115 · §59)
 - **Changed:** §7.115 · §7.110 · §59.2 · §7.0 — User: 본사 제작 **or** 광고주 완성본
 - **Notes:** 문서만 · 구현 ⬜
+
+### 2026-10-14 — 상세 캐러셀·뒤로가기·소식 크롭 (§7.119 · §62.4)
+- **Author:** Cursor Agent
+- **Changed:** `ProductDetailInfiniteCarousel` · `StoreShopCatalog` · `OwnerStoreNewsEditor` · `cropImage.ts` · `store-shop.css` · `ko.ts` · HANDOFF §62.4 · §7.119
+- **Notes:** **`apps/web` only** · Vercel **1~2min** · shop **새로고침**
 
 ### 2026-10-14 — 매장 새 소식 미디어 캐러셀 (§7.113)
 - **Author:** Cursor Agent
@@ -8700,7 +8722,16 @@ Wave D (플랫폼)   →  기획전  +  타겟 메시지  (트래픽·Admin 후)
 | **숨김 규칙** | `rejected` 손님 숨김 등 — **`get_my_orders` / `get_store_orders` RPC** 와 UI **동일** |
 | **구매확정·7일** | 반품 신청 가능 시점 = **`canFileClaim(status)`** — 반품 UI도 **같은 함수 재사용** |
 
-### 62.4 재고·가챠·프로모 (Stock & gacha)
+### 62.4 손님 화면 이동·뒤로가기 (User 2026-10-14 · **고정 규칙**)
+
+| 연관 | 규칙 |
+|---|---|
+| **상세 안 링크** | 연관 상품 · 매장 새 소식 · 함께 추천 등 **탭해서 다른 상품/화면으로 가는 기능** = **스택(push)** |
+| **← 뒤로가기** | 상세 헤더 **「뒤로가기」** = 스택 **pop** → **직전에 보던 상품 상세** (전체 닫기 ❌) |
+| **매장 홈으로** | 소식·매장 진입으로 **그리드만** 보일 때 = **복귀 스택** 저장 · **「이전 상품 상세로」** (`StoreShopCatalog`) |
+| **앞으로 구현** | 같은 패턴의 **하이퍼링크·탭 이동** 추가 시 **§7.119** · **스택 없이 replace만** ❌ |
+
+### 62.5 재고·가챠·프로모 (Stock & gacha)
 
 | 연관 | 규칙 |
 |---|---|
