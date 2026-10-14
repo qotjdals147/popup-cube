@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import type { OwnerProductSectionSaveHandle } from '../lib/ownerProductSectionSave';
 import { MAX_PRODUCT_OPTION_GROUPS } from '@popup-cube/shared';
 import {
   DEFAULT_OPTION_GROUP_NAMES,
@@ -127,12 +128,8 @@ function resizeRow(row: OwnerSkuRow, groupCount: number): OwnerSkuRow {
   return { ...row, values, adjustments };
 }
 
-export function OwnerProductSkusEditor({
-  productId,
-  basePrice,
-  onSyncProductBasics,
-  onSkusSaved,
-}: OwnerProductSkusEditorProps) {
+export const OwnerProductSkusEditor = forwardRef<OwnerProductSectionSaveHandle, OwnerProductSkusEditorProps>(
+  function OwnerProductSkusEditor({ productId, basePrice, onSyncProductBasics, onSkusSaved }, ref) {
   const [groupNames, setGroupNames] = useState<string[]>(DEFAULT_OPTION_GROUP_NAMES);
   const [rows, setRows] = useState<OwnerSkuRow[]>([emptyRow(DEFAULT_OPTION_GROUP_NAMES.length)]);
   const [loading, setLoading] = useState(true);
@@ -193,31 +190,61 @@ export function OwnerProductSkusEditor({
     };
   }, [productId]);
 
-  async function handleSave() {
-    setSaving(true);
+  async function persistSkus(opts?: { skipBasicsSync?: boolean }): Promise<void> {
+    if (loading) return;
     setErr(null);
     setMsg(null);
     const negativeSale = activeRows.find((r) => basePrice + rowEffectiveDelta(r) < 0);
     if (negativeSale) {
-      setSaving(false);
       setErr(t('ownerProducts.skusSaveErrorNegativeSale'));
-      return;
+      throw new Error('skus_negative_sale');
     }
-    try {
-      if (onSyncProductBasics) {
-        await onSyncProductBasics();
+    if (onSyncProductBasics && !opts?.skipBasicsSync) {
+      await onSyncProductBasics();
+    }
+    await saveOwnerProductSkus(productId, groupNames, rows);
+    setDeltaDraft({});
+    onSkusSaved?.();
+    setMsg(t('ownerProducts.skusSaved'));
+  }
+
+  useImperativeHandle(ref, () => ({
+    save: async (opts) => {
+      setSaving(true);
+      try {
+        await persistSkus(opts);
+      } catch (e) {
+        const raw = e && typeof e === 'object' && 'message' in e ? String((e as { message: string }).message) : '';
+        if (raw === 'skus_negative_sale') {
+          throw e;
+        }
+        if (raw.includes('not_store_owner')) {
+          setErr(t('ownerProducts.skusSaveErrorOwner'));
+        } else if (raw.includes('too_many_option_groups')) {
+          setErr(t('ownerProducts.skusSaveErrorTooManyGroups'));
+        } else {
+          setErr(t('ownerProducts.skusSaveError'));
+        }
+        throw new Error('skus_save_failed');
+      } finally {
+        setSaving(false);
       }
-      await saveOwnerProductSkus(productId, groupNames, rows);
-      setDeltaDraft({});
-      onSkusSaved?.();
-      setMsg(t('ownerProducts.skusSaved'));
+    },
+  }));
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      await persistSkus();
     } catch (e) {
       const raw = e && typeof e === 'object' && 'message' in e ? String((e as { message: string }).message) : '';
-      if (raw.includes('not_store_owner')) {
+      if (raw === 'skus_negative_sale') {
+        /* err already set */
+      } else if (raw.includes('not_store_owner')) {
         setErr(t('ownerProducts.skusSaveErrorOwner'));
       } else if (raw.includes('too_many_option_groups')) {
         setErr(t('ownerProducts.skusSaveErrorTooManyGroups'));
-      } else {
+      } else if (raw !== 'skus_save_failed') {
         setErr(t('ownerProducts.skusSaveError'));
       }
     } finally {
@@ -541,11 +568,11 @@ export function OwnerProductSkusEditor({
         </div>
         <button
           type="button"
-          className="owner-sku-btn owner-sku-btn--primary"
+          className="owner-sku-btn owner-sku-btn--section"
           disabled={saving}
           onClick={() => void handleSave()}
         >
-          {saving ? t('ownerProducts.submitting') : t('ownerProducts.skusSave')}
+          {saving ? t('ownerProducts.submitting') : t('ownerProducts.skusSaveSection')}
         </button>
       </div>
 
@@ -558,4 +585,4 @@ export function OwnerProductSkusEditor({
       {err && <p className="owner-sku-msg-err">{err}</p>}
     </section>
   );
-}
+});

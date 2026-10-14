@@ -369,6 +369,13 @@
   cursor: not-allowed;
 }
 
+.owner-sku-btn--section {
+  border-color: #d1d6db;
+  background: #fff;
+  color: #4e5968;
+  font-weight: 600;
+}
+
 .owner-sku-msg-ok {
   margin: 10px 0 0;
   font-size: 13px;

@@ -117,7 +117,7 @@
 |---|---|
 | **Primary** | **`#3182f6`** · 클래스 **`owner-btn-primary`** / **`owner-sku-btn--primary`** — 검정 CTA **❌** |
 | **정렬** | 섹션별 저장 = **우측** (`owner-section-actions` · `owner-sku-footer`) |
-| **상품 수정** | **닫기** = 상단 **「수정 닫기」** · **기본·재고** = 상단 toolbar **+** 하단 sticky **「상품 저장」**(동일 동작 · 항상 보이게) · **옵션** / **추천** / **태그** = 각 섹션 저장 · **상세 블록** = **저장 버튼 없음**(즉시 반영) |
+| **상품 수정** | **닫기** = **「수정 닫기」** · **저장** = 상단·하단 **한 번에**(이름·가격·재고·옵션·추천·태그) · 구역 **「~만 저장」** = 보조(ghost) · **상세 블록** = 즉시 반영 · §7.114 |
 | **레이아웃** | 수정 펼침 = **`owner-product-edit__section`** 박스 구분 · §7.108 |
 
 **점주 섹션 타이포 (User 2026-10-13):**
@@ -2383,6 +2383,24 @@ npx supabase db pull
 
 ---
 
+### 7.114 **점주 상품 수정 — 저장 한 번에** (User 2026-10-14)
+
+| | |
+|---|---|
+| **문제** | 「상품 저장」·「옵션 저장」·「태그 저장」 등 **역할이 나뉘어** 점주 혼란 |
+| **동작** | toolbar **「저장」** = 기본·재고·옵션·추천·태그 **순서대로 일괄** · 수정 **닫지 않음** · 실패 시 구역 빨간 안내 |
+| **보조** | **옵션만 / 추천만 / 태그만 저장** — ghost 버튼 |
+| **상세** | 블록은 **추가·수정 즉시 DB** (lead 문구로 안내) |
+| **코드** | `handleSaveAll` · `ownerProductSectionSave.ts` · ref on SKU/coordi/tags editors |
+
+#### Expo 재시작
+
+| | |
+|---|---|
+| `apps/web` only | **❌ Expo** · Vercel **1~2min** · 점주 PC **Ctrl+F5** |
+
+---
+
 ### 7.113 **AD-088 벤치 08 — 상품 태그·매장 새 소식** (2026-10-13)
 
 | | |
@@ -2424,8 +2442,8 @@ npx supabase db pull
 |---|---|
 | **옵션 칸** | 값 아래 **「이 옵션만 추가·할인(원)」** · placeholder `0` · `± (선택)` **❌** |
 | **상품코드** | placeholder **비움** · 「엑셀·셀메이트」 칸 placeholder **❌** (라벨만) |
-| **수정 펼침** | 상단 **수정 닫기** + **상품 저장**(toolbar) · 섹션 박스 · 하단 sticky **상품 저장** 유지 · **상세** = 블록 즉시 저장 |
-| **저장** | primary **파랑·우측** · §0 표 · **User 2026-10-13 pm** — 기본 정보만 볼 때 저장 안 보이던 문제 → toolbar 저장 추가 |
+| **수정 펼침** | 상단 **저장** = 전 구역 일괄 · 한 줄 lead · **상세** = 블록 즉시 저장 |
+| **저장 UX** | **§7.114** — 「상품 저장」만 여러 개 → **저장 1개** + **~만 저장** 보조 |
 
 #### Expo 재시작
 
@@ -5080,6 +5098,10 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-13 — 프로모·가챠 컴팩트 레이아웃 (§7.109c)
 - **Changed:** `owner-promo-gacha.css` · `OwnerPromotionPanel.tsx`
 - **Notes:** **`apps/web`** · Vercel **1~2min**
+
+### 2026-10-14 — 점주 상품 수정 「저장」 일괄 (§7.114)
+- **Changed:** `OwnerProductPanel` · SKU/coordi/tags ref save · `ko.ts` · `owner-product-edit.css` · §0 · §7.108
+- **Notes:** **`apps/web` only** · Vercel **1~2min** · 점주 PC **Ctrl+F5**
 
 ### 2026-10-13 — 점주 상품 수정 toolbar 「상품 저장」 (§7.108)
 - **Changed:** `OwnerProductPanel` · `owner-product-edit.css` · §0 저장 버튼 표 · §7.108

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import type { OwnerProductSectionSaveHandle } from '../lib/ownerProductSectionSave';
 import type { Product } from '@popup-cube/shared';
 import {
   getOwnerProductCoordiLinkIds,
@@ -19,7 +20,8 @@ function formatPrice(price: number): string {
   return `${price.toLocaleString('ko-KR')}원`;
 }
 
-export function OwnerProductCoordiEditor({ productId, products }: OwnerProductCoordiEditorProps) {
+export const OwnerProductCoordiEditor = forwardRef<OwnerProductSectionSaveHandle, OwnerProductCoordiEditorProps>(
+  function OwnerProductCoordiEditor({ productId, products }, ref) {
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -71,14 +73,35 @@ export function OwnerProductCoordiEditor({ productId, products }: OwnerProductCo
     setSelected((prev) => prev.filter((x) => x !== id));
   }
 
+  async function persistLinks(): Promise<void> {
+    if (loading) return;
+    await saveOwnerProductCoordiLinks(productId, selected);
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 2000);
+  }
+
+  useImperativeHandle(ref, () => ({
+    save: async () => {
+      setSaving(true);
+      setError(null);
+      setSaved(false);
+      try {
+        await persistLinks();
+      } catch {
+        setError(t('ownerProducts.linkedRecommendSaveError'));
+        throw new Error('coordi_save_failed');
+      } finally {
+        setSaving(false);
+      }
+    },
+  }));
+
   async function handleSave() {
     setSaving(true);
     setError(null);
     setSaved(false);
     try {
-      await saveOwnerProductCoordiLinks(productId, selected);
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 2000);
+      await persistLinks();
     } catch {
       setError(t('ownerProducts.linkedRecommendSaveError'));
     } finally {
@@ -179,15 +202,15 @@ export function OwnerProductCoordiEditor({ productId, products }: OwnerProductCo
       <div className="owner-linked-actions">
         <button
           type="button"
-          className="owner-btn-primary owner-linked-save-btn"
+          className="owner-btn-ghost owner-linked-save-btn owner-linked-save-btn--section"
           disabled={saving}
           onClick={() => void handleSave()}
         >
-          {saving ? t('ownerProducts.linkedRecommendSaving') : t('ownerProducts.linkedRecommendSave')}
+          {saving ? t('ownerProducts.linkedRecommendSaving') : t('ownerProducts.linkedRecommendSaveSection')}
         </button>
         {saved && <span className="owner-linked-saved">{t('ownerProducts.linkedRecommendSaved')}</span>}
       </div>
       {error && <p className="owner-linked-error">{error}</p>}
     </div>
   );
-}
+});

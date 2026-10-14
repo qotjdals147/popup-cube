@@ -25,6 +25,7 @@ import { OwnerProductBlockEditor } from './OwnerProductBlockEditor';
 import { OwnerProductBulkUpload } from './OwnerProductBulkUpload';
 import { OwnerProductCoordiEditor } from './OwnerProductCoordiEditor';
 import { OwnerProductTagsEditor } from './OwnerProductTagsEditor';
+import type { OwnerProductSectionSaveHandle } from '../lib/ownerProductSectionSave';
 import { OwnerProductSkusEditor } from './OwnerProductSkusEditor';
 import { OwnerStatsShortcutBanner } from './OwnerStatsShortcutBanner';
 import { ProductDetailModal } from './ProductDetailModal';
@@ -52,6 +53,9 @@ export function OwnerProductPanel({
 }: OwnerProductPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFileInputRef = useRef<HTMLInputElement>(null);
+  const skusSaveRef = useRef<OwnerProductSectionSaveHandle>(null);
+  const coordiSaveRef = useRef<OwnerProductSectionSaveHandle>(null);
+  const tagsSaveRef = useRef<OwnerProductSectionSaveHandle>(null);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,6 +81,7 @@ export function OwnerProductPanel({
   const [editImageFile, setEditImageFile] = useState<File | null>(null);
   const [editPreviewUrl, setEditPreviewUrl] = useState<string | null>(null);
   const [editSaving, setEditSaving] = useState(false);
+  const [editSaveNotice, setEditSaveNotice] = useState<'success' | 'error' | null>(null);
   const [createFormOpen, setCreateFormOpen] = useState(false);
   const [createStock, setCreateStock] = useState('');
   const [previewProductId, setPreviewProductId] = useState<string | null>(null);
@@ -264,7 +269,7 @@ export function OwnerProductPanel({
     });
   }
 
-  async function handleSaveEdit(productId: string) {
+  async function handleSaveAll(productId: string) {
     const priceNumber = parseIntegerInput(editPrice);
     const stockNumber = parseIntegerInput(editStock);
     const autoLimitNumber = parseIntegerInput(editAutoLimit);
@@ -273,6 +278,8 @@ export function OwnerProductPanel({
     if (editAutoEnabled && (!Number.isFinite(autoLimitNumber) || autoLimitNumber <= 0)) return;
 
     setEditSaving(true);
+    setEditSaveNotice(null);
+    setLoadError(null);
     try {
       await persistProductBasicsFromEdit(productId);
       await updateProductFulfillment(productId, {
@@ -280,15 +287,20 @@ export function OwnerProductPanel({
         autoAcceptEnabled: editAutoEnabled,
         autoAcceptLimit: editAutoEnabled ? Math.round(autoLimitNumber) : 0,
       });
-      cancelEdit();
+      await skusSaveRef.current?.save({ skipBasicsSync: true });
+      await coordiSaveRef.current?.save();
+      await tagsSaveRef.current?.save();
+      setEditSaveNotice('success');
+      window.setTimeout(() => setEditSaveNotice(null), 3000);
       await reload();
     } catch (err) {
+      setEditSaveNotice('error');
       if (err instanceof ProductError && err.code === 'IMAGE_TOO_LARGE') {
         setLoadError(t('ownerProducts.errorImageTooLarge'));
       } else if (err instanceof ProductError && err.code === 'DUPLICATE_PRODUCT_CODE') {
         setLoadError(t('ownerProducts.errorDuplicateProductCode'));
       } else {
-        setLoadError(t('ownerProducts.errorGeneric'));
+        setLoadError(t('ownerProducts.editSaveAllError'));
       }
     } finally {
       setEditSaving(false);
@@ -421,19 +433,32 @@ export function OwnerProductPanel({
               <div key={product.id} style={styles.card}>
                 {editingId === product.id ? (
                   <div className="owner-product-edit">
-                    <div className="owner-product-edit__toolbar">
-                      <button type="button" className="owner-btn-ghost" onClick={cancelEdit}>
-                        ← {t('ownerProducts.editClose')}
-                      </button>
-                      <p className="owner-product-edit__toolbar-title">{editName.trim() || product.name}</p>
-                      <button
-                        type="button"
-                        className="owner-btn-primary owner-product-edit__toolbar-save"
-                        onClick={() => handleSaveEdit(product.id)}
-                        disabled={editSaving}
-                      >
-                        {editSaving ? t('ownerProducts.submitting') : t('ownerProducts.editStickySave')}
-                      </button>
+                    <div className="owner-product-edit__toolbar-wrap">
+                      <div className="owner-product-edit__toolbar">
+                        <button type="button" className="owner-btn-ghost" onClick={cancelEdit}>
+                          ← {t('ownerProducts.editClose')}
+                        </button>
+                        <p className="owner-product-edit__toolbar-title">{editName.trim() || product.name}</p>
+                        <button
+                          type="button"
+                          className="owner-btn-primary owner-product-edit__toolbar-save"
+                          onClick={() => void handleSaveAll(product.id)}
+                          disabled={editSaving}
+                        >
+                          {editSaving ? t('ownerProducts.submitting') : t('ownerProducts.editSaveAll')}
+                        </button>
+                      </div>
+                      <p className="owner-product-edit__toolbar-lead">{t('ownerProducts.editSaveAllHint')}</p>
+                      {editSaveNotice === 'success' && (
+                        <p className="owner-product-edit__toolbar-notice owner-product-edit__toolbar-notice--ok">
+                          {t('ownerProducts.editSaveAllDone')}
+                        </p>
+                      )}
+                      {editSaveNotice === 'error' && (
+                        <p className="owner-product-edit__toolbar-notice owner-product-edit__toolbar-notice--err">
+                          {loadError ?? t('ownerProducts.editSaveAllError')}
+                        </p>
+                      )}
                     </div>
 
                     <section className="owner-product-edit__section">
@@ -502,6 +527,7 @@ export function OwnerProductPanel({
 
                     <section className="owner-product-edit__section owner-product-edit__section--flush">
                       <OwnerProductSkusEditor
+                        ref={skusSaveRef}
                         productId={product.id}
                         basePrice={parseIntegerInput(editPrice) || product.price}
                         onSyncProductBasics={() => persistProductBasicsFromEdit(product.id)}
@@ -510,11 +536,11 @@ export function OwnerProductPanel({
                     </section>
 
                     <section className="owner-product-edit__section owner-product-edit__section--flush">
-                      <OwnerProductCoordiEditor productId={product.id} products={products} />
+                      <OwnerProductCoordiEditor ref={coordiSaveRef} productId={product.id} products={products} />
                     </section>
 
                     <section className="owner-product-edit__section owner-product-edit__section--flush">
-                      <OwnerProductTagsEditor productId={product.id} />
+                      <OwnerProductTagsEditor ref={tagsSaveRef} productId={product.id} />
                     </section>
 
                     <section className="owner-product-edit__section">
@@ -564,10 +590,10 @@ export function OwnerProductPanel({
                       <button
                         type="button"
                         className="owner-btn-primary"
-                        onClick={() => handleSaveEdit(product.id)}
+                        onClick={() => void handleSaveAll(product.id)}
                         disabled={editSaving}
                       >
-                        {editSaving ? t('ownerProducts.submitting') : t('ownerProducts.editStickySave')}
+                        {editSaving ? t('ownerProducts.submitting') : t('ownerProducts.editSaveAll')}
                       </button>
                     </div>
 

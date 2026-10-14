@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import type { OwnerProductSectionSaveHandle } from '../lib/ownerProductSectionSave';
 import { getOwnerProductTags, saveOwnerProductTags } from '../lib/productTags';
 import { t } from '../i18n';
 import '../styles/owner-product-edit.css';
@@ -22,7 +23,8 @@ interface OwnerProductTagsEditorProps {
   productId: string;
 }
 
-export function OwnerProductTagsEditor({ productId }: OwnerProductTagsEditorProps) {
+export const OwnerProductTagsEditor = forwardRef<OwnerProductSectionSaveHandle, OwnerProductTagsEditorProps>(
+  function OwnerProductTagsEditor({ productId }, ref) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -50,13 +52,34 @@ export function OwnerProductTagsEditor({ productId }: OwnerProductTagsEditorProp
     };
   }, [productId]);
 
+  async function persistTags(): Promise<void> {
+    if (loading) return;
+    await saveOwnerProductTags(productId, preview);
+    setSaved(true);
+  }
+
+  useImperativeHandle(ref, () => ({
+    save: async () => {
+      setSaving(true);
+      setError(null);
+      setSaved(false);
+      try {
+        await persistTags();
+      } catch {
+        setError(t('ownerProducts.productTagsSaveError'));
+        throw new Error('product_tags_save_failed');
+      } finally {
+        setSaving(false);
+      }
+    },
+  }));
+
   async function handleSave() {
     setSaving(true);
     setError(null);
     setSaved(false);
     try {
-      await saveOwnerProductTags(productId, preview);
-      setSaved(true);
+      await persistTags();
     } catch {
       setError(t('ownerProducts.productTagsSaveError'));
     } finally {
@@ -97,11 +120,11 @@ export function OwnerProductTagsEditor({ productId }: OwnerProductTagsEditorProp
           <div className="owner-linked-actions">
             <button
               type="button"
-              className="owner-btn-primary owner-linked-save-btn"
+              className="owner-btn-ghost owner-linked-save-btn owner-linked-save-btn--section"
               disabled={saving}
               onClick={() => void handleSave()}
             >
-              {saving ? t('ownerProducts.productTagsSaving') : t('ownerProducts.productTagsSave')}
+              {saving ? t('ownerProducts.productTagsSaving') : t('ownerProducts.productTagsSaveSection')}
             </button>
             {saved && <span className="owner-linked-saved">{t('ownerProducts.productTagsSaved')}</span>}
           </div>
@@ -110,4 +133,4 @@ export function OwnerProductTagsEditor({ productId }: OwnerProductTagsEditorProp
       )}
     </div>
   );
-}
+});

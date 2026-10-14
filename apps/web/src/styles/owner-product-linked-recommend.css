@@ -230,6 +230,10 @@
   border-top: 1px solid #eef0f2;
 }
 
+.owner-linked-save-btn--section {
+  font-weight: 600;
+}
+
 .owner-linked-save-btn {
   padding: 9px 16px;
   border-radius: 8px;
