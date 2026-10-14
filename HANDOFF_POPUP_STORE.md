@@ -943,6 +943,7 @@ popup_store/                          # Turborepo root
 | ISS-062 | ~~AD-087 옵션 ±가격이 **원격 DB 미적용**~~ — `product_skus.price_delta` **칼럼 없음** | **Fixed (DB · 2026-10-07)** | HANDOFF엔 적용된 것처럼 기재돼 있었으나 `schema_migrations`는 **`20261002015906`에서 멈춤**. 옵션별 추가금액이 **결제에 전혀 반영되지 않던 상태**. **조치** = `20261003_ad087_product_sku_price_delta.sql`(+`DROP FUNCTION` 2건·GRANT 보강) · `20261003b_place_order_sku_price_delta.sql` **원격 적용 ✅** · 이력 2건 기록 |
 | ISS-057 | ~~반품·교환 모달이 주문 상세 뒤~~ | **Fixed (web · ISS-057)** | `OrderReturnRequestDialog` → **`oh-stacked-dialog-portal`** (z-index 12050 · 상세 시트 11000 위) |
 | ISS-058 | ~~모달·상세·장바구니 뒤 배경 스크롤~~ | **Fixed (web+mobile · ISS-058)** | **`overlayScrollLock.ts`** + **`useOverlayScrollLock`** (상품상세·장바구니 drawer·confirm·반품·리뷰·우편번호) · 앱 **`webview_scroll_lock`** → WebView **`scrollEnabled`** |
+| ISS-066 | ~~매장 새 소식 — 점주 입력이 DB에 안 남고 손님 상세에 「새 소식」만~~ | **Fixed (web+DB · 2026-10-14)** | **원인** = `OwnerStoreNewsEditor` `onBlur`가 `onChange`와 같은 React state와 비교해 **항상 “변경 없음”** · DB `body` **null** · **조치** = 서버에 마지막으로 저장된 값(`persistedRef`)과 비교 · 카드 **「소식 저장」** · migration `20261014_store_news_posts_grants` (**INSERT GRANT** · 별건 ISS-012 계열) **원격 ✅** |
 
 ---
 
@@ -2447,8 +2448,8 @@ npx supabase db pull
 |---|---|
 | **회의** | 벤치 **8** — **마켓 새 소식** · **관련 태그** · **태그 전체보기** (`2026.10.02_회의_내용.txt`) |
 | **DB** | `product_tags` · `store_news_posts` · RPC `get_product_tags` · `get_store_news_for_shop` · owner `save_owner_product_tags` · migration `20261013_ad088_product_tags_store_news` **원격 ✅** |
-| **점주** | 상품 수정 — **상품 태그**(쉼표 구분 · 최대 12) · **운영·배송** 탭 — **매장 새 소식**(최대 12 · 노출 on/off) |
-| **손님** | `ProductDetailModal` — 상세 펼치기 아래 **태그 칩** · **태그 전체보기**(6개 초과) · **매장 새 소식** 목록 |
+| **점주** | 상품 수정 — **상품 태그**(쉼표 구분 · 최대 12) · **운영·배송** 탭 — **매장 새 소식**(최대 12 · 노출 on/off · **「소식 저장」** · ISS-066) |
+| **손님** | `ProductDetailModal` — 상세 펼치기 아래 **태그 칩** · **태그 전체보기**(6개 초과) · **매장 새 소식** 제목+본문 **읽기 전용**(탭 동작 **❌**) |
 | **2차** | 태그 **검색·필터** · 홈 피드 연동 ⏸ |
 
 #### Expo 재시작
@@ -5287,6 +5288,11 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-14 — 홈 배너 광고 소재·운영 정리 (§7.115 · §59)
 - **Changed:** §7.115 · §7.110 · §59.2 · §7.0 — User: 본사 제작 **or** 광고주 완성본
 - **Notes:** 문서만 · 구현 ⬜
+
+### 2026-10-14 — 매장 새 소식 저장 버그·GRANT (ISS-066 · §7.113)
+- **Author:** Cursor Agent
+- **Changed:** `OwnerStoreNewsEditor.tsx` · `ko.ts` · migration `20261014_store_news_posts_grants.sql` · §6 ISS-066 · §7.113
+- **Notes:** **POPUP DB grants ✅** · **`apps/web` only** · Vercel **1~2min** · 점주 PC **Ctrl+F5** 후 제목·내용 **「소식 저장」** · 손님 앱 = shop WebView **새로고침**(매장 재진입)
 
 ### 2026-10-14 — 상품 수정 상단 sticky 제거 (§7.114)
 - **Changed:** `owner-product-edit.css` — **수정 닫기** 헤더 겹침 fix

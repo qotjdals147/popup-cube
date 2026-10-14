@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { StoreNewsPost } from '../lib/storeNews';
 import {
   deleteOwnerStoreNewsPost,
@@ -11,6 +11,8 @@ import { t } from '../i18n';
 
 const MAX_POSTS = 12;
 
+type PersistedFields = { title: string; body: string | null };
+
 interface OwnerStoreNewsEditorProps {
   storeId: string;
 }
@@ -20,23 +22,83 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const persistedRef = useRef<Map<string, PersistedFields>>(new Map());
+
+  const syncPersisted = useCallback((list: StoreNewsPost[]) => {
+    const next = new Map<string, PersistedFields>();
+    for (const p of list) {
+      next.set(p.id, { title: p.title, body: p.body ?? null });
+    }
+    persistedRef.current = next;
+  }, []);
 
   const reload = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const list = await listOwnerStoreNewsPosts(storeId);
+      syncPersisted(list);
       setPosts(list);
     } catch {
       setError(t('ownerStoreNews.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [storeId]);
+  }, [storeId, syncPersisted]);
 
   useEffect(() => {
     void reload();
   }, [reload]);
+
+  async function persistTextFields(
+    id: string,
+    fields: { title: string; body: string },
+  ): Promise<boolean> {
+    const prev = persistedRef.current.get(id);
+    if (!prev) return false;
+
+    const title = fields.title.trim();
+    if (!title) {
+      setError(t('ownerStoreNews.titleRequired'));
+      return false;
+    }
+
+    const body = fields.body.trim() ? fields.body.trim() : null;
+    const prevBody = prev.body?.trim() || null;
+
+    const patch: Partial<{ title: string; body: string | null }> = {};
+    if (title !== prev.title) patch.title = title;
+    if (body !== prevBody) patch.body = body;
+    if (Object.keys(patch).length === 0) return true;
+
+    setBusyId(id);
+    setError(null);
+    try {
+      await updateOwnerStoreNewsPost(id, patch);
+      const saved: PersistedFields = {
+        title: patch.title ?? prev.title,
+        body: patch.body !== undefined ? patch.body : prev.body,
+      };
+      persistedRef.current.set(id, saved);
+      setPosts((list) =>
+        list.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                title: saved.title,
+                body: saved.body,
+              }
+            : p,
+        ),
+      );
+      return true;
+    } catch {
+      setError(t('ownerStoreNews.saveError'));
+      return false;
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   async function handleAdd() {
     if (posts.length >= MAX_POSTS) return;
@@ -76,12 +138,22 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
     setError(null);
     try {
       await deleteOwnerStoreNewsPost(id);
+      persistedRef.current.delete(id);
       setPosts((prev) => prev.filter((p) => p.id !== id));
     } catch {
       setError(t('ownerStoreNews.saveError'));
     } finally {
       setBusyId(null);
     }
+  }
+
+  function isDirty(post: StoreNewsPost): boolean {
+    const prev = persistedRef.current.get(post.id);
+    if (!prev) return false;
+    const title = post.title.trim();
+    const body = post.body?.trim() ? post.body.trim() : null;
+    const prevBody = prev.body?.trim() || null;
+    return title !== prev.title || body !== prevBody;
   }
 
   return (
@@ -94,55 +166,82 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
         <>
           <div style={styles.list}>
             {posts.length === 0 && <p style={styles.hint}>{t('ownerStoreNews.empty')}</p>}
-            {posts.map((post, index) => (
-              <article key={post.id} style={styles.card}>
-                <div style={styles.cardHead}>
-                  <span style={styles.orderBadge}>{index + 1}</span>
-                  <label style={styles.checkRow}>
-                    <input
-                      type="checkbox"
-                      checked={post.is_active !== false}
+            {posts.map((post, index) => {
+              const dirty = isDirty(post);
+              return (
+                <article key={post.id} style={styles.card}>
+                  <div style={styles.cardHead}>
+                    <span style={styles.orderBadge}>{index + 1}</span>
+                    <label style={styles.checkRow}>
+                      <input
+                        type="checkbox"
+                        checked={post.is_active !== false}
+                        disabled={busyId === post.id}
+                        onChange={(e) => void patchPost(post.id, { is_active: e.target.checked })}
+                      />
+                      <span>{t('ownerStoreNews.activeLabel')}</span>
+                    </label>
+                    <button
+                      type="button"
+                      style={styles.removeBtn}
                       disabled={busyId === post.id}
-                      onChange={(e) => void patchPost(post.id, { is_active: e.target.checked })}
-                    />
-                    <span>{t('ownerStoreNews.activeLabel')}</span>
-                  </label>
+                      onClick={() => void handleRemove(post.id)}
+                    >
+                      {t('ownerStoreNews.delete')}
+                    </button>
+                  </div>
+                  <label style={styles.label}>{t('ownerStoreNews.titleLabel')}</label>
+                  <input
+                    style={styles.input}
+                    value={post.title}
+                    maxLength={80}
+                    disabled={busyId === post.id}
+                    onChange={(e) =>
+                      setPosts((prev) => prev.map((p) => (p.id === post.id ? { ...p, title: e.target.value } : p)))
+                    }
+                    onBlur={(e) => {
+                      void persistTextFields(post.id, {
+                        title: e.target.value,
+                        body: post.body ?? '',
+                      });
+                    }}
+                  />
+                  <label style={styles.label}>{t('ownerStoreNews.bodyLabel')}</label>
+                  <textarea
+                    style={styles.textarea}
+                    rows={2}
+                    value={post.body ?? ''}
+                    disabled={busyId === post.id}
+                    onChange={(e) =>
+                      setPosts((prev) => prev.map((p) => (p.id === post.id ? { ...p, body: e.target.value } : p)))
+                    }
+                    onBlur={() => {
+                      void persistTextFields(post.id, {
+                        title: post.title,
+                        body: post.body ?? '',
+                      });
+                    }}
+                    placeholder={t('ownerStoreNews.bodyPlaceholder')}
+                  />
                   <button
                     type="button"
-                    style={styles.removeBtn}
-                    disabled={busyId === post.id}
-                    onClick={() => void handleRemove(post.id)}
+                    style={{
+                      ...styles.saveBtn,
+                      ...(dirty ? styles.saveBtnDirty : {}),
+                    }}
+                    disabled={busyId === post.id || !dirty}
+                    onClick={() =>
+                      void persistTextFields(post.id, {
+                        title: post.title,
+                        body: post.body ?? '',
+                      })
+                    }
                   >
-                    {t('ownerStoreNews.delete')}
+                    {busyId === post.id ? t('ownerStoreNews.saving') : t('ownerStoreNews.save')}
                   </button>
-                </div>
-                <label style={styles.label}>{t('ownerStoreNews.titleLabel')}</label>
-                <input
-                  style={styles.input}
-                  value={post.title}
-                  maxLength={80}
-                  disabled={busyId === post.id}
-                  onChange={(e) => setPosts((prev) => prev.map((p) => (p.id === post.id ? { ...p, title: e.target.value } : p)))}
-                  onBlur={(e) => {
-                    const title = e.target.value.trim();
-                    if (title && title !== post.title) void patchPost(post.id, { title });
-                  }}
-                />
-                <label style={styles.label}>{t('ownerStoreNews.bodyLabel')}</label>
-                <textarea
-                  style={styles.textarea}
-                  rows={2}
-                  value={post.body ?? ''}
-                  disabled={busyId === post.id}
-                  onChange={(e) => setPosts((prev) => prev.map((p) => (p.id === post.id ? { ...p, body: e.target.value } : p)))}
-                  onBlur={(e) => {
-                    const body = e.target.value;
-                    if (body !== (post.body ?? '')) void patchPost(post.id, { body });
-                  }}
-                  placeholder={t('ownerStoreNews.bodyPlaceholder')}
-                />
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
           <button
             type="button"
@@ -226,6 +325,22 @@ const styles: Record<string, React.CSSProperties> = {
     resize: 'vertical',
     fontFamily: 'inherit',
     lineHeight: 1.5,
+    marginBottom: 10,
+  },
+  saveBtn: {
+    padding: '8px 14px',
+    borderRadius: 8,
+    border: `1px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.textSecondary,
+    fontSize: fs.sm,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  saveBtnDirty: {
+    borderColor: oc.primary,
+    color: oc.primary,
+    background: oc.surface,
   },
   addBtn: {
     marginTop: 12,
