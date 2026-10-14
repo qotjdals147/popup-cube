@@ -2469,6 +2469,7 @@ npx supabase db pull
 | **뒤로가기** | `StoreShopCatalog` **`detailStack`** · §62.4 |
 | **소식 업로드** | `ImageCropDialog` **1:1** · **JPEG** = 잘라 저장 · **GIF** = 원본 + `image_crop` JSON(보이는 %) |
 | **규칙** | 상세·피드 **탭 이동** = **스택 + pop** (앞으로 동일) |
+| **권장 px** | 대표 **960×720** · 소식 **720×720** · 상품 카드 **1080×1080** · `imageSizeGuide.ts` |
 
 #### Expo 재시작
 
@@ -5306,6 +5307,10 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-14 — 홈 배너 광고 소재·운영 정리 (§7.115 · §59)
 - **Changed:** §7.115 · §7.110 · §59.2 · §7.0 — User: 본사 제작 **or** 광고주 완성본
 - **Notes:** 문서만 · 구현 ⬜
+
+### 2026-10-14 — 캐러셀 드래그·이미지 권장 크기 (§7.119)
+- **Changed:** `ProductDetailInfiniteCarousel` capture 드래그 · `carouselClickGuard` · `imageSizeGuide.ts` · i18n · §7.119
+- **Notes:** **`apps/web` only** · Vercel **1~2min**
 
 ### 2026-10-14 — GIF 소식 영역 맞추기 image_crop (§7.119)
 - **Author:** Cursor Agent

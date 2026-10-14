@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Product } from '@popup-cube/shared';
 import type { Area } from 'react-easy-crop';
 import { STORE_NEWS_CARD_ASPECT } from '../lib/cropImage';
+import { formatPxSize, STORE_NEWS_CARD_PX } from '../lib/imageSizeGuide';
 import { parseImageCropPercent } from '../lib/mediaCropDisplay';
 import { useAuth } from '../context/AuthContext';
 import { CroppedSquareMedia } from './CroppedSquareMedia';
@@ -317,6 +318,9 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
           >
             {busyId === 'new' ? t('ownerStoreNews.uploading') : t('ownerStoreNews.addMedia')}
           </button>
+          <p style={styles.help}>
+            {t('ownerStoreNews.sizeHint', { size: formatPxSize(STORE_NEWS_CARD_PX.width, STORE_NEWS_CARD_PX.height) })}
+          </p>
           <p style={styles.help}>{t('ownerStoreNews.cropNote')}</p>
           <p style={styles.help}>{t('ownerStoreNews.limitHint', { max: MAX_POSTS })}</p>
         </>
@@ -327,6 +331,7 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
         <ImageCropDialog
           imageSrc={cropSrc}
           aspect={STORE_NEWS_CARD_ASPECT}
+          cropOutputWidth={STORE_NEWS_CARD_PX.width}
           title={t('imageCrop.storeNewsTitle')}
           previewHint={t('imageCrop.storeNewsHint')}
           exportMode={cropExportMode}

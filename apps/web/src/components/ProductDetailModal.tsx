@@ -17,6 +17,7 @@ import { getMyReviewKeys, getProductReviews, reviewKey } from '../lib/reviews';
 import { canFileClaim, confirmPurchase, listMyOrders } from '../lib/orders';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { guardCarouselClick } from '../lib/carouselClickGuard';
 import { CroppedSquareMedia } from './CroppedSquareMedia';
 import { ProductDetailInfiniteCarousel } from './ProductDetailInfiniteCarousel';
 import { ReviewFormModal } from './ReviewFormModal';
@@ -249,7 +250,7 @@ export function ProductDetailModal({
         type="button"
         className="product-detail-related-card"
         style={styleFor(light, S.relatedCardLayout, S.relatedCardDark)}
-        onClick={() => openLinkedProduct(rp.id)}
+        onClick={() => guardCarouselClick(() => openLinkedProduct(rp.id))}
       >
         <div
           className="product-detail-related-thumb-wrap"
@@ -303,7 +304,7 @@ export function ProductDetailModal({
             type="button"
             className="product-detail-related-card product-detail-news-card"
             style={styleFor(light, S.relatedCardLayout, S.relatedCardDark)}
-            onClick={() => openStoreNewsPost(post)}
+            onClick={() => guardCarouselClick(() => openStoreNewsPost(post))}
           >
             <div
               className="product-detail-related-thumb-wrap"

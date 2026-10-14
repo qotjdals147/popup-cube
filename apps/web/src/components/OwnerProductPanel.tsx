@@ -393,6 +393,7 @@ export function OwnerProductPanel({
             maxLength={16}
           />
           <label style={styles.fieldLabel}>{t('ownerProducts.editImageLabel')}</label>
+          <p style={styles.imageSizeHint}>{t('ownerProducts.editImageSizeHint')}</p>
           <div style={styles.formRow}>
             <div style={styles.imagePreviewWrap}>
               {previewUrl ? (
@@ -496,6 +497,7 @@ export function OwnerProductPanel({
                           rows={2}
                         />
                         <label style={styles.fieldLabel}>{t('ownerProducts.editImageLabel')}</label>
+                        <p style={styles.imageSizeHint}>{t('ownerProducts.editImageSizeHint')}</p>
                         <div style={styles.formRow}>
                           <div style={styles.imagePreviewWrapLarge}>
                             {editPreviewUrl ? (
@@ -969,6 +971,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   fieldLabel: ownerFieldLabel,
   fieldLabelFirst: { ...ownerFieldLabel, marginTop: 0 },
+  imageSizeHint: { ...ownerHelpText, margin: '0 0 8px' },
   checkRow: { display: 'flex', alignItems: 'center', gap: 8, color: oc.text, fontSize: fs.base, fontWeight: 600 },
   helpText: { ...ownerHelpText, fontSize: fs.xs, margin: '4px 0 0' },
   productDesc: { color: oc.textSecondary, fontSize: fs.base, lineHeight: 1.55, margin: 0 },

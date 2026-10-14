@@ -1,23 +1,19 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { CAROUSEL_DRAG_BODY_FLAG } from '../lib/carouselClickGuard';
 
 interface ProductDetailInfiniteCarouselProps {
   children: ReactNode[];
   itemWidth: number;
   gap?: number;
-  /** 가로 자동 스크롤 속도 (px/s). 0이면 자동만 끔 */
   speedPxPerSec?: number;
   className?: string;
   ariaLabel?: string;
 }
 
-/** 세로 스크롤과 구분 — 이 거리 이상 가로로 움직여야 캐러셀 조작 */
-const HORIZONTAL_DRAG_THRESHOLD_PX = 16;
-/** 가로 이동이 세로보다 이만큼 커야 가로 드래그로 인정 */
-const HORIZONTAL_INTENT_RATIO = 1.35;
-
+const HORIZONTAL_DRAG_THRESHOLD_PX = 10;
+const HORIZONTAL_INTENT_RATIO = 1.15;
 /**
- * 상품 상세 — 가로 무한 캐러셀 (자동 슬로우 + 의도적 가로 드래그).
- * 세로로 상세를 내릴 때 살짝 닿는 것만으로는 멈추지 않는다.
+ * 상품 상세 — 가로 무한 캐러셀 (자동 슬로우 + 카드 위에서도 가로 드래그).
  */
 export function ProductDetailInfiniteCarousel({
   children,
@@ -27,6 +23,7 @@ export function ProductDetailInfiniteCarousel({
   className = '',
   ariaLabel,
 }: ProductDetailInfiniteCarouselProps) {
+  const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
   const pausedRef = useRef(false);
@@ -58,6 +55,11 @@ export function ProductDetailInfiniteCarousel({
     while (offsetRef.current < 0) offsetRef.current += setWidth;
   };
 
+  const setDraggingFlag = (on: boolean) => {
+    if (on) document.body.setAttribute(CAROUSEL_DRAG_BODY_FLAG, '1');
+    else document.body.removeAttribute(CAROUSEL_DRAG_BODY_FLAG);
+  };
+
   const pauseAuto = (ms = 2800) => {
     pausedRef.current = true;
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
@@ -74,7 +76,7 @@ export function ProductDetailInfiniteCarousel({
       const dt = Math.min(0.05, (ts - lastTsRef.current) / 1000);
       lastTsRef.current = ts;
 
-      if (!pausedRef.current && speedPxPerSec > 0 && setWidth > 0 && count > 1) {
+      if (!pausedRef.current && !dragActiveRef.current && speedPxPerSec > 0 && setWidth > 0 && count > 1) {
         offsetRef.current += speedPxPerSec * dt;
         wrapOffset();
       }
@@ -95,71 +97,86 @@ export function ProductDetailInfiniteCarousel({
     applyTransform();
   }, [count, itemWidth, gap]);
 
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+
+      pendingRef.current = {
+        pointerId: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        startOffset: offsetRef.current,
+      };
+      dragActiveRef.current = false;
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      const pending = pendingRef.current;
+      if (!pending || pending.pointerId !== e.pointerId) return;
+
+      const dx = e.clientX - pending.startX;
+      const dy = e.clientY - pending.startY;
+
+      if (!dragActiveRef.current) {
+        if (
+          Math.abs(dx) < HORIZONTAL_DRAG_THRESHOLD_PX ||
+          Math.abs(dx) < Math.abs(dy) * HORIZONTAL_INTENT_RATIO
+        ) {
+          return;
+        }
+        dragActiveRef.current = true;
+        pausedRef.current = true;
+        setDraggingFlag(true);
+        if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+        viewport.setPointerCapture(e.pointerId);
+      }
+
+      e.preventDefault();
+      offsetRef.current = pending.startOffset - dx;
+      wrapOffset();
+      applyTransform();
+    };
+
+    const finishPointer = (e: PointerEvent) => {
+      const pending = pendingRef.current;
+      if (!pending || pending.pointerId !== e.pointerId) return;
+
+      if (dragActiveRef.current) {
+        try {
+          viewport.releasePointerCapture(e.pointerId);
+        } catch {
+          /* ignore */
+        }
+        pauseAuto();
+        window.setTimeout(() => setDraggingFlag(false), 320);
+      }
+
+      pendingRef.current = null;
+      dragActiveRef.current = false;
+    };
+
+    viewport.addEventListener('pointerdown', onPointerDown, { capture: true });
+    viewport.addEventListener('pointermove', onPointerMove, { capture: true, passive: false });
+    viewport.addEventListener('pointerup', finishPointer, { capture: true });
+    viewport.addEventListener('pointercancel', finishPointer, { capture: true });
+
+    return () => {
+      viewport.removeEventListener('pointerdown', onPointerDown, { capture: true });
+      viewport.removeEventListener('pointermove', onPointerMove, { capture: true });
+      viewport.removeEventListener('pointerup', finishPointer, { capture: true });
+      viewport.removeEventListener('pointercancel', finishPointer, { capture: true });
+      setDraggingFlag(false);
+    };
+  }, [count, setWidth]);
+
   if (count === 0) return null;
 
   return (
     <div className={`product-detail-infinite-carousel ${className}`.trim()} aria-label={ariaLabel}>
-      <div
-        className="product-detail-infinite-carousel__viewport"
-        onPointerDown={(e) => {
-          if (e.button !== 0 && e.pointerType === 'mouse') return;
-          const target = e.target as HTMLElement;
-          if (target.closest('button, a, input, textarea, select')) return;
-
-          pendingRef.current = {
-            pointerId: e.pointerId,
-            startX: e.clientX,
-            startY: e.clientY,
-            startOffset: offsetRef.current,
-          };
-          dragActiveRef.current = false;
-        }}
-        onPointerMove={(e) => {
-          const pending = pendingRef.current;
-          if (!pending || pending.pointerId !== e.pointerId) return;
-
-          const dx = e.clientX - pending.startX;
-          const dy = e.clientY - pending.startY;
-
-          if (!dragActiveRef.current) {
-            if (
-              Math.abs(dx) < HORIZONTAL_DRAG_THRESHOLD_PX ||
-              Math.abs(dx) < Math.abs(dy) * HORIZONTAL_INTENT_RATIO
-            ) {
-              return;
-            }
-            dragActiveRef.current = true;
-            pausedRef.current = true;
-            if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-          }
-
-          offsetRef.current = pending.startOffset - dx;
-          wrapOffset();
-          applyTransform();
-        }}
-        onPointerUp={(e) => {
-          const pending = pendingRef.current;
-          if (!pending || pending.pointerId !== e.pointerId) return;
-
-          if (dragActiveRef.current) {
-            try {
-              (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-            } catch {
-              /* ignore */
-            }
-            pauseAuto();
-          }
-
-          pendingRef.current = null;
-          dragActiveRef.current = false;
-        }}
-        onPointerCancel={() => {
-          if (dragActiveRef.current) pauseAuto();
-          pendingRef.current = null;
-          dragActiveRef.current = false;
-        }}
-      >
+      <div ref={viewportRef} className="product-detail-infinite-carousel__viewport">
         <div
           ref={trackRef}
           className="product-detail-infinite-carousel__track"

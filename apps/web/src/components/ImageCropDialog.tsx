@@ -16,6 +16,8 @@ interface ImageCropDialogProps {
   previewHint?: string;
   /** file = JPEG로 잘라 저장 · framing = 원본 유지 + crop % (GIF) */
   exportMode?: 'file' | 'framing';
+  /** JPEG 잘라 저장 시 가로 픽셀 (기본 960 · 매장 소식 720) */
+  cropOutputWidth?: number;
   initialCroppedAreaPercentages?: Area;
   onCancel: () => void;
   onConfirm: (result: ImageCropDialogResult) => void | Promise<void>;
@@ -27,6 +29,7 @@ export function ImageCropDialog({
   aspect = STORE_THUMBNAIL_ASPECT,
   previewHint,
   exportMode = 'file',
+  cropOutputWidth = 960,
   initialCroppedAreaPercentages,
   onCancel,
   onConfirm,
@@ -64,7 +67,7 @@ export function ImageCropDialog({
     setBusy(true);
     setErr(null);
     try {
-      const blob = await getCroppedImageBlob(imageSrc, croppedAreaPixels);
+      const blob = await getCroppedImageBlob(imageSrc, croppedAreaPixels, cropOutputWidth);
       const file = new File([blob], 'store-thumbnail.jpg', { type: 'image/jpeg' });
       await onConfirm({ kind: 'file', file });
     } catch {
