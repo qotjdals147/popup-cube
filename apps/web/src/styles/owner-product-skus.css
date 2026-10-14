@@ -347,6 +347,11 @@
   gap: 8px;
 }
 
+.owner-sku-footer--actions-only {
+  justify-content: flex-start;
+  gap: 8px;
+}
+
 .owner-sku-btn {
   padding: 9px 14px;
   font-size: 14px;

@@ -24,9 +24,7 @@ export const OwnerProductCoordiEditor = forwardRef<OwnerProductSectionSaveHandle
   function OwnerProductCoordiEditor({ productId, products }, ref) {
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
 
   const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
 
@@ -60,7 +58,6 @@ export const OwnerProductCoordiEditor = forwardRef<OwnerProductSectionSaveHandle
   }, [productId]);
 
   function toggle(id: string) {
-    setSaved(false);
     setSelected((prev) => {
       if (prev.includes(id)) return prev.filter((x) => x !== id);
       if (prev.length >= MAX_LINKS) return prev;
@@ -69,45 +66,25 @@ export const OwnerProductCoordiEditor = forwardRef<OwnerProductSectionSaveHandle
   }
 
   function remove(id: string) {
-    setSaved(false);
     setSelected((prev) => prev.filter((x) => x !== id));
   }
 
   async function persistLinks(): Promise<void> {
     if (loading) return;
     await saveOwnerProductCoordiLinks(productId, selected);
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 2000);
   }
 
   useImperativeHandle(ref, () => ({
     save: async () => {
-      setSaving(true);
       setError(null);
-      setSaved(false);
       try {
         await persistLinks();
       } catch {
         setError(t('ownerProducts.linkedRecommendSaveError'));
         throw new Error('coordi_save_failed');
-      } finally {
-        setSaving(false);
       }
     },
   }));
-
-  async function handleSave() {
-    setSaving(true);
-    setError(null);
-    setSaved(false);
-    try {
-      await persistLinks();
-    } catch {
-      setError(t('ownerProducts.linkedRecommendSaveError'));
-    } finally {
-      setSaving(false);
-    }
-  }
 
   if (loading) {
     return (
@@ -199,17 +176,6 @@ export const OwnerProductCoordiEditor = forwardRef<OwnerProductSectionSaveHandle
         })}
       </div>
 
-      <div className="owner-linked-actions">
-        <button
-          type="button"
-          className="owner-btn-ghost owner-linked-save-btn owner-linked-save-btn--section"
-          disabled={saving}
-          onClick={() => void handleSave()}
-        >
-          {saving ? t('ownerProducts.linkedRecommendSaving') : t('ownerProducts.linkedRecommendSaveSection')}
-        </button>
-        {saved && <span className="owner-linked-saved">{t('ownerProducts.linkedRecommendSaved')}</span>}
-      </div>
       {error && <p className="owner-linked-error">{error}</p>}
     </div>
   );

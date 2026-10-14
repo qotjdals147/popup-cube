@@ -769,13 +769,9 @@ export const ko = {
     editSectionDetail: '상세 페이지',
     editStickySave: '상품 저장',
     editSaveAll: '저장',
-    editSaveAllHint:
-      '이름·가격·재고·옵션·추천·태그를 한 번에 저장해요. 상세 사진·글은 추가할 때마다 자동 저장.',
+    editSaveAllHint: '아래 「저장」으로 이름·가격·재고·옵션·추천·태그를 한 번에 반영해요. 상세는 추가할 때마다 자동 저장.',
     editSaveAllDone: '저장했어요.',
     editSaveAllError: '저장하지 못했어요. 빨간 안내를 확인해 주세요.',
-    skusSaveSection: '옵션만 저장',
-    linkedRecommendSaveSection: '추천만 저장',
-    productTagsSaveSection: '태그만 저장',
     editClose: '수정 닫기',
     skusCellAdjLabel: '칸별 ±',
     skusCellAdjMicro: '이 옵션만 추가·할인(원)',
@@ -789,7 +785,7 @@ export const ko = {
     skusGenHint: '쉼표로 구분해 넣으면 조합 행이 생겨요. 이미 있는 조합은 재고·±금액을 유지해요.',
     skusGenButton: '조합 표에 반영',
     skusGenEmpty: '옵션값을 하나 이상 넣어 주세요.',
-    skusGenDone: '조합 {count}개를 표에 넣었어요. 재고·±금액 확인 후 「옵션 저장」 눌러 주세요.',
+    skusGenDone: '조합 {count}개를 표에 넣었어요. 재고·±금액 확인 후 아래 「저장」을 눌러 주세요.',
     skusGenTooMany:
       '이대로 만들면 조합이 {count}개가 돼요. 손님이 고르기 어려우니 옵션값을 줄이는 걸 권해요.',
     skusColStock: '재고(개)',

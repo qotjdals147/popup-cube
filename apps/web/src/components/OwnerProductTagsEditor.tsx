@@ -27,9 +27,7 @@ export const OwnerProductTagsEditor = forwardRef<OwnerProductSectionSaveHandle, 
   function OwnerProductTagsEditor({ productId }, ref) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
 
   const preview = useMemo(() => parseTagsInput(input), [input]);
 
@@ -55,37 +53,19 @@ export const OwnerProductTagsEditor = forwardRef<OwnerProductSectionSaveHandle, 
   async function persistTags(): Promise<void> {
     if (loading) return;
     await saveOwnerProductTags(productId, preview);
-    setSaved(true);
   }
 
   useImperativeHandle(ref, () => ({
     save: async () => {
-      setSaving(true);
       setError(null);
-      setSaved(false);
       try {
         await persistTags();
       } catch {
         setError(t('ownerProducts.productTagsSaveError'));
         throw new Error('product_tags_save_failed');
-      } finally {
-        setSaving(false);
       }
     },
   }));
-
-  async function handleSave() {
-    setSaving(true);
-    setError(null);
-    setSaved(false);
-    try {
-      await persistTags();
-    } catch {
-      setError(t('ownerProducts.productTagsSaveError'));
-    } finally {
-      setSaving(false);
-    }
-  }
 
   return (
     <div className="owner-linked-panel">
@@ -99,10 +79,7 @@ export const OwnerProductTagsEditor = forwardRef<OwnerProductSectionSaveHandle, 
             className="owner-product-tags__input"
             rows={2}
             value={input}
-            onChange={(e) => {
-              setSaved(false);
-              setInput(e.target.value);
-            }}
+            onChange={(e) => setInput(e.target.value)}
             placeholder={t('ownerProducts.productTagsPlaceholder')}
           />
           {preview.length > 0 && (
@@ -117,17 +94,6 @@ export const OwnerProductTagsEditor = forwardRef<OwnerProductSectionSaveHandle, 
           <p className="owner-linked-panel__hint">
             {t('ownerProducts.productTagsCount', { n: String(preview.length), max: String(MAX_TAGS) })}
           </p>
-          <div className="owner-linked-actions">
-            <button
-              type="button"
-              className="owner-btn-ghost owner-linked-save-btn owner-linked-save-btn--section"
-              disabled={saving}
-              onClick={() => void handleSave()}
-            >
-              {saving ? t('ownerProducts.productTagsSaving') : t('ownerProducts.productTagsSaveSection')}
-            </button>
-            {saved && <span className="owner-linked-saved">{t('ownerProducts.productTagsSaved')}</span>}
-          </div>
           {error && <p className="owner-linked-error">{error}</p>}
         </>
       )}

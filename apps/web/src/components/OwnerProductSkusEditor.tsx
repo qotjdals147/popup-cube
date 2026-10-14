@@ -205,7 +205,7 @@ export const OwnerProductSkusEditor = forwardRef<OwnerProductSectionSaveHandle, 
     await saveOwnerProductSkus(productId, groupNames, rows);
     setDeltaDraft({});
     onSkusSaved?.();
-    setMsg(t('ownerProducts.skusSaved'));
+    setMsg(null);
   }
 
   useImperativeHandle(ref, () => ({
@@ -231,26 +231,6 @@ export const OwnerProductSkusEditor = forwardRef<OwnerProductSectionSaveHandle, 
       }
     },
   }));
-
-  async function handleSave() {
-    setSaving(true);
-    try {
-      await persistSkus();
-    } catch (e) {
-      const raw = e && typeof e === 'object' && 'message' in e ? String((e as { message: string }).message) : '';
-      if (raw === 'skus_negative_sale') {
-        /* err already set */
-      } else if (raw.includes('not_store_owner')) {
-        setErr(t('ownerProducts.skusSaveErrorOwner'));
-      } else if (raw.includes('too_many_option_groups')) {
-        setErr(t('ownerProducts.skusSaveErrorTooManyGroups'));
-      } else if (raw !== 'skus_save_failed') {
-        setErr(t('ownerProducts.skusSaveError'));
-      }
-    } finally {
-      setSaving(false);
-    }
-  }
 
   function addGroup() {
     if (groupNames.length >= MAX_PRODUCT_OPTION_GROUPS) return;
@@ -543,36 +523,26 @@ export const OwnerProductSkusEditor = forwardRef<OwnerProductSectionSaveHandle, 
         </table>
       </div>
 
-      <div className="owner-sku-footer">
-        <div className="owner-sku-footer__left">
-          <button
-            type="button"
-            className="owner-sku-btn"
-            onClick={() => setRows((p) => [...p, emptyRow(groupNames.length)])}
-          >
-            {t('ownerProducts.skusAddRow')}
-          </button>
-          <button
-            type="button"
-            className="owner-sku-btn"
-            disabled={groupNames.length >= MAX_PRODUCT_OPTION_GROUPS}
-            onClick={addGroup}
-            title={
-              groupNames.length >= MAX_PRODUCT_OPTION_GROUPS
-                ? t('ownerProducts.skusGroupMax', { max: MAX_PRODUCT_OPTION_GROUPS })
-                : undefined
-            }
-          >
-            {t('ownerProducts.skusAddGroup')}
-          </button>
-        </div>
+      <div className="owner-sku-footer owner-sku-footer--actions-only">
         <button
           type="button"
-          className="owner-sku-btn owner-sku-btn--section"
-          disabled={saving}
-          onClick={() => void handleSave()}
+          className="owner-sku-btn"
+          onClick={() => setRows((p) => [...p, emptyRow(groupNames.length)])}
         >
-          {saving ? t('ownerProducts.submitting') : t('ownerProducts.skusSaveSection')}
+          {t('ownerProducts.skusAddRow')}
+        </button>
+        <button
+          type="button"
+          className="owner-sku-btn"
+          disabled={groupNames.length >= MAX_PRODUCT_OPTION_GROUPS}
+          onClick={addGroup}
+          title={
+            groupNames.length >= MAX_PRODUCT_OPTION_GROUPS
+              ? t('ownerProducts.skusGroupMax', { max: MAX_PRODUCT_OPTION_GROUPS })
+              : undefined
+          }
+        >
+          {t('ownerProducts.skusAddGroup')}
         </button>
       </div>
 
