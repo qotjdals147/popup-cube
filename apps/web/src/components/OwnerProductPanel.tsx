@@ -430,7 +430,11 @@ export function OwnerProductPanel({
           ) : (
             <div style={styles.list}>
             {products.map((product) => (
-              <div key={product.id} style={styles.card}>
+              <div
+                key={product.id}
+                className={editingId === product.id ? 'owner-product-list-card--editing' : undefined}
+                style={editingId === product.id ? styles.cardEditing : styles.card}
+              >
                 {editingId === product.id ? (
                   <div className="owner-product-edit">
                     <div className="owner-product-edit__toolbar-wrap">
@@ -453,7 +457,7 @@ export function OwnerProductPanel({
                       )}
                     </div>
 
-                    <div className="owner-product-edit__scroll">
+                    <div className="owner-product-edit__body">
                     <section className="owner-product-edit__section">
                       <h3 className="owner-product-edit__section-title">{t('ownerProducts.editSectionBasics')}</h3>
                       <div className="owner-field-gap">
@@ -689,7 +693,7 @@ export function OwnerProductPanel({
 
   if (embedded) {
     return (
-      <section style={styles.embeddedPanel}>
+      <section className="owner-products-embedded" style={styles.embeddedPanel}>
         {panelBody}
         {previewModal}
       </section>
@@ -716,7 +720,14 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 12,
     border: `1px solid ${oc.border}`,
     boxShadow: oc.shadow,
-    overflow: 'hidden',
+  },
+  cardEditing: {
+    background: oc.surface,
+    borderRadius: 12,
+    padding: 0,
+    border: `2px solid ${oc.borderStrong}`,
+    boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+    overflow: 'visible',
   },
   overlay: {
     position: 'fixed',

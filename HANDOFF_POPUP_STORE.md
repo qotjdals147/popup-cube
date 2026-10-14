@@ -2388,7 +2388,7 @@ npx supabase db pull
 | | |
 |---|---|
 | **문제** | 「상품 저장」·「옵션 저장」·「태그 저장」 등 **역할이 나뉘어** 점주 혼란 |
-| **동작** | 하단 **고정 dock 「저장」** = 기본·재고·옵션·추천·태그 **일괄** · 본문만 스크롤 · 수정 **닫지 않음** |
+| **동작** | 하단 **sticky 「저장」** = 기본·재고·옵션·추천·태그 **일괄** · **스크롤 = `StoreEditPage` main 1개** (카드 내부 스크롤 ❌) |
 | **보조 저장** | ~~구역별 버튼~~ **❌** (User 2026-10-14 — dock 하나만) |
 | **상세** | 블록은 **추가·수정 즉시 DB** (lead 문구로 안내) |
 | **코드** | `handleSaveAll` · `ownerProductSectionSave.ts` · ref on SKU/coordi/tags editors |
@@ -5098,6 +5098,10 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-13 — 프로모·가챠 컴팩트 레이아웃 (§7.109c)
 - **Changed:** `owner-promo-gacha.css` · `OwnerPromotionPanel.tsx`
 - **Notes:** **`apps/web`** · Vercel **1~2min**
+
+### 2026-10-14 — 점주 상품 수정 스크롤 1개화 (§7.114)
+- **Changed:** `owner-product-edit.css` · `OwnerProductPanel` — 카드 `max-height`/내부 스크롤 제거 · dock/toolbar **sticky**
+- **Notes:** **`apps/web` only** · Vercel **1~2min** · 점주 PC **Ctrl+F5**
 
 ### 2026-10-14 — 점주 상품 수정 구역별 저장 버튼 제거 (§7.114)
 - **Changed:** `OwnerProductSkusEditor` · `OwnerProductCoordiEditor` · `OwnerProductTagsEditor` · `ko.ts` · §0
