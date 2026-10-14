@@ -14,6 +14,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { ShopperAccountPage } from './pages/ShopperAccountPage';
 import { ShopperCartPage } from './pages/ShopperCartPage';
 import { AppOnlyPage } from './pages/AppOnlyPage';
+import { PlatformHomeBannersPage } from './pages/PlatformHomeBannersPage';
 
 function AppRoutes() {
   return (
@@ -21,6 +22,7 @@ function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/home" element={<HomePage />} />
+      <Route path="/platform/home-banners" element={<PlatformHomeBannersPage />} />
       <Route path="/app-only" element={<AppOnlyPage />} />
       <Route path="/store/create" element={<CreateStorePage />} />
       <Route path="/store/:storeId/edit" element={<StoreEditPage />} />

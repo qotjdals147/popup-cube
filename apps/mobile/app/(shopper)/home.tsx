@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Linking,
   StyleSheet,
   Text,
   TextInput,
@@ -146,6 +147,10 @@ export default function HomeScreen() {
   }
 
   function handleBannerPress(slide: HomeBannerSlide) {
+    if (slide.linkUrl) {
+      void Linking.openURL(slide.linkUrl);
+      return;
+    }
     if (!slide.storeId) return;
     router.push({
       pathname: '/store/[storeId]',

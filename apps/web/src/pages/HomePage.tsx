@@ -98,6 +98,20 @@ export function HomePage() {
       </header>
 
       <main style={styles.main}>
+        {role === 'admin' && (
+          <section style={styles.panel}>
+            <h2 style={styles.panelTitle}>{t('platformHomeBanners.hubTitle')}</h2>
+            <p style={styles.body}>{t('platformHomeBanners.hubBody')}</p>
+            <button
+              style={styles.primaryButton}
+              type="button"
+              onClick={() => navigate('/platform/home-banners')}
+            >
+              {t('platformHomeBanners.hubButton')}
+            </button>
+          </section>
+        )}
+
         {role === 'shopper' && (
           <section style={styles.panel}>
             <h2 style={styles.panelTitle}>{t('ownerDashboard.noStoreTitle')}</h2>

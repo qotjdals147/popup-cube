@@ -7,6 +7,8 @@ export type HomeBannerSlide = {
   imageUrl: string | null;
   storeId: string | null;
   productId: string | null;
+  /** 외부 URL — store/product보다 우선 (§7.115 L1) */
+  linkUrl: string | null;
   accentColor: string;
 };
 
@@ -31,10 +33,48 @@ function storeFromRow(row: ProductRow) {
   return Array.isArray(row.stores) ? row.stores[0] : row.stores;
 }
 
+type SponsoredBannerRow = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  image_url: string;
+  store_id: string | null;
+  product_id: string | null;
+  link_url: string | null;
+  sort_order: number;
+};
+
+function mapSponsoredToSlide(row: SponsoredBannerRow, index: number): HomeBannerSlide {
+  return {
+    id: `sponsored-${row.id}`,
+    title: row.title,
+    subtitle: row.subtitle?.trim() || '',
+    imageUrl: row.image_url,
+    storeId: row.store_id,
+    productId: row.product_id,
+    linkUrl: row.link_url?.trim() || null,
+    accentColor: BANNER_ACCENTS[index % BANNER_ACCENTS.length],
+  };
+}
+
+async function listSponsoredHomeBanners(): Promise<HomeBannerSlide[]> {
+  const { data, error } = await getSupabase().rpc('list_home_sponsored_banners', { p_limit: 10 });
+  if (error) throw error;
+  const rows = (data ?? []) as SponsoredBannerRow[];
+  return rows.map(mapSponsoredToSlide);
+}
+
 export async function listHomePromoBanners(fallback: {
   title: string;
   subtitle: string;
 }): Promise<HomeBannerSlide[]> {
+  try {
+    const sponsored = await listSponsoredHomeBanners();
+    if (sponsored.length >= 1) return sponsored.slice(0, 10);
+  } catch {
+    /* RPC 미적용·오류 시 자동 썸네일 fallback */
+  }
+
   const { data: productData, error: productError } = await getSupabase()
     .from('products')
     .select(
@@ -67,6 +107,7 @@ export async function listHomePromoBanners(fallback: {
       imageUrl: row.image_url,
       storeId: row.store_id,
       productId: row.id,
+      linkUrl: null,
       accentColor: BANNER_ACCENTS[productSlides.length % BANNER_ACCENTS.length],
     });
     if (productSlides.length >= 5) break;
@@ -92,6 +133,7 @@ export async function listHomePromoBanners(fallback: {
     imageUrl: store.thumbnail_url,
     storeId: store.id,
     productId: null,
+    linkUrl: null,
     accentColor: BANNER_ACCENTS[index % BANNER_ACCENTS.length],
   }));
 
@@ -106,6 +148,7 @@ export async function listHomePromoBanners(fallback: {
       imageUrl: null,
       storeId: null,
       productId: null,
+      linkUrl: null,
       accentColor: BANNER_ACCENTS[0],
     },
   ];

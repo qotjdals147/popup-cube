@@ -913,7 +913,7 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-13)** | **벤치 08 태그·소식 ✅** · CEO **카테고리** ⏸ · HQ **배ner DB** (v1.5) |
+| **한 줄 요약 (2026-10-14)** | **L1 `sponsored_banners` ✅** (§7.116) · CEO **카테고리** ⏸ · **admin** 계정으로 배ner 등록 |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
 | **User实기** | **§7.100 ISS-053 ✅** · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
@@ -2514,7 +2514,7 @@ npx supabase db pull
 | **소재 (User 확정)** | ① **본사(POP-UP)가 배ner 제작** · ② **광고주가 넘긴 완성 이미지**를 본사가 **검수·등록** — 둘 중 하나 (누가 PSD까지 했는지는 **운영·계약** 문제) |
 | **점주 입점** | 홈 큰 배ner = **광고/기획 상품**(MD·패키지·유상 지면) 쪽 — **셀러어드민 “상품만 고르는 캠페인”**과 **별개** (에이블리도 [ablyads](https://www.ablyads.com/) = 상품·예산 vs 메인 **34장** 큐레이션) |
 | **POP-UP 지금** | `listHomePromoBanners` — **자동 썸네일** · **광고 슬롯 아님** |
-| **POP-UP v1.5 (코드)** | DB에 **완성 배ner URL** + **링크** + **노출 기간** · **본사/운영 등록 UI** (Supabase·간단 Admin) — **제작 툴·자동 합성**은 2차 |
+| **POP-UP v1.5 (코드)** | ✅ **`sponsored_banners`** · RPC `list_home_sponsored_banners` · PC **`/platform/home-banners`** (`profiles.role=admin`) — §7.116 |
 | **월드 L3** | §59 — 스폰서존은 **플랫폼 제작** (점주 월드 에디터 ❌) |
 
 #### Expo 재시작
@@ -2522,6 +2522,25 @@ npx supabase db pull
 | | |
 |---|---|
 | 미구현 | — |
+
+---
+
+### 7.116 **L1 홈 배ner DB + 본사 등록 UI** (2026-10-14 · §7.115)
+
+| | |
+|---|---|
+| **DB** | `sponsored_banners` · `is_platform_admin()` = `profiles.role = admin` |
+| **손님** | `list_home_sponsored_banners` → `homeBanners.ts` **1건 이상이면 슬롯 우선** · 없으면 §7.110 자동 썸네일 |
+| **링크** | `link_url` > `store_id`+`product_id` · 앱 `Linking.openURL` |
+| **본사 PC** | `/platform/home-banners` · `/home`에 admin일 때 진입 카드 |
+| **ops** | Supabase **Authentication** 계정의 `profiles.role` → **`admin`** (데모 owner는 owner 유지) |
+
+#### Expo 재시작
+
+| | |
+|---|---|
+| **`apps/mobile`** | **✅ `--clear`** (홈 배ner 데이터 경로 변경) |
+| **`apps/web`** | **❌** · Vercel 1~2min |
 
 ---
 
@@ -5120,6 +5139,14 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-13 — 프로모·가챠 컴팩트 레이아웃 (§7.109c)
 - **Changed:** `owner-promo-gacha.css` · `OwnerPromotionPanel.tsx`
 - **Notes:** **`apps/web`** · Vercel **1~2min**
+
+### 2026-10-14 — L1 sponsored_banners + 본사 등록 UI (§7.116)
+- **Changed:** migration `20261014_sponsored_banners_l1` · `sponsoredBanners.ts` · `PlatformHomeBannersPage` · `homeBanners.ts` · `HomePromoBanner` · `home.tsx` · `HomePage` · `ko.ts` · §7.116 · §59.5
+- **Notes:** **Expo ✅ `--clear`** · Vercel 1~2min · admin = `profiles.role`
+
+### 2026-10-14 — 홈 배ner 광고 소재·운영 정리 (§7.115 · §59)
+- **Changed:** §7.115 · §7.110 · §59.2 · §7.0 — User: 본사 제작 **or** 광고주 완성본
+- **Notes:** 문서만 · 구현 ⬜
 
 ### 2026-10-14 — 상품 수정 상단 sticky 제거 (§7.114)
 - **Changed:** `owner-product-edit.css` — **수정 닫기** 헤더 겹침 fix
@@ -8316,7 +8343,7 @@ Wave D (플랫폼)   →  기획전  +  타겟 메시지  (트래픽·Admin 후)
 
 | 티어 | 노출 | 가격 모델 | 구현 시기 |
 |---|---|---|---|
-| **L1 홈 배너** | 몰 상단·매장 카드 **스폰서** | 주/월 고정 · CPM | v1.5 (DB+Admin 간단) |
+| **L1 홈 배너** | 몰 상단 **슬라이드** · 완성 소재 (§7.115) | 주/월 고정 · CPM | v1.5 (DB+본사 등록) |
 | **L2 스폰서 매장 강조** | 홈 **핀·뱃지** · 검색 상단 | 입점+광고 패키지 | v1 P1 |
 | **L3 스폰서 팝업존 (월드)** | `/play` 또는 **브랜드존** · CTA→`/shop` | 캠페인 단위(기간) | v2 · legacy 월드 |
 | **L4 (미래)** | 영상·360·고급 2D | L3 업셀 | 그래픽 업그레이드 후 |
@@ -8331,8 +8358,8 @@ Wave D (플랫폼)   →  기획전  +  타겟 메시지  (트래픽·Admin 후)
 
 ### 59.5 v2 전 코드·ops (참고)
 
-- [ ] `sponsored_banners` 또는 `stores.is_sponsored` + 기간
-- [ ] 홈 carousel · **광고 슬롯** (플랫폼 ops)
+- [x] `sponsored_banners` + 기간 · §7.116
+- [x] 홈 carousel · **광고 슬롯** (RPC + admin UI)
 - [ ] 스폰서존 → shop deep link · 노출/클릭 집계
 - [ ] legacy `/play` = **스폰서 store만** (flag)
 

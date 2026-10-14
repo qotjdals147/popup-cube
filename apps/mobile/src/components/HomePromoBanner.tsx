@@ -120,7 +120,8 @@ export function HomePromoBanner({ slides, onPressSlide }: HomePromoBannerProps) 
   }
 
   function handlePress(slide: HomeBannerSlide) {
-    if (slide.storeId && onPressSlide) onPressSlide(slide);
+    if (!onPressSlide) return;
+    if (slide.linkUrl || slide.storeId) onPressSlide(slide);
   }
 
   if (slides.length === 0) return null;
@@ -143,7 +144,7 @@ export function HomePromoBanner({ slides, onPressSlide }: HomePromoBannerProps) 
         viewabilityConfig={viewabilityConfig}
         contentContainerStyle={{ paddingHorizontal: 0 }}
         renderItem={({ item }) => {
-          const pressable = Boolean(item.storeId && onPressSlide);
+          const pressable = Boolean(onPressSlide && (item.linkUrl || item.storeId));
           const body = (
             <>
               {item.imageUrl ? (
