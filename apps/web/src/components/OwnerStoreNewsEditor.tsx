@@ -1,113 +1,90 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Product } from '@popup-cube/shared';
+import { useAuth } from '../context/AuthContext';
+import { listMyProducts } from '../lib/products';
 import type { StoreNewsPost } from '../lib/storeNews';
 import {
   deleteOwnerStoreNewsPost,
   insertOwnerStoreNewsPost,
   listOwnerStoreNewsPosts,
+  MAX_STORE_NEWS_MEDIA_BYTES,
   updateOwnerStoreNewsPost,
+  uploadStoreNewsMedia,
 } from '../lib/storeNews';
 import { ownerColors as oc, ownerFieldLabel, ownerFontSize as fs, ownerHelpText } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 
 const MAX_POSTS = 12;
 
-type PersistedFields = { title: string; body: string | null };
-
 interface OwnerStoreNewsEditorProps {
   storeId: string;
 }
 
 export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
+  const { userId } = useAuth();
   const [posts, setPosts] = useState<StoreNewsPost[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const persistedRef = useRef<Map<string, PersistedFields>>(new Map());
-
-  const syncPersisted = useCallback((list: StoreNewsPost[]) => {
-    const next = new Map<string, PersistedFields>();
-    for (const p of list) {
-      next.set(p.id, { title: p.title, body: p.body ?? null });
-    }
-    persistedRef.current = next;
-  }, []);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const replaceTargetRef = useRef<string | null>(null);
 
   const reload = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const list = await listOwnerStoreNewsPosts(storeId);
-      syncPersisted(list);
+      const [list, prods] = await Promise.all([listOwnerStoreNewsPosts(storeId), listMyProducts(storeId)]);
       setPosts(list);
+      setProducts(prods.filter((p) => p.is_active));
     } catch {
       setError(t('ownerStoreNews.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [storeId, syncPersisted]);
+  }, [storeId]);
 
   useEffect(() => {
     void reload();
   }, [reload]);
 
-  async function persistTextFields(
-    id: string,
-    fields: { title: string; body: string },
-  ): Promise<boolean> {
-    const prev = persistedRef.current.get(id);
-    if (!prev) return false;
-
-    const title = fields.title.trim();
-    if (!title) {
-      setError(t('ownerStoreNews.titleRequired'));
-      return false;
-    }
-
-    const body = fields.body.trim() ? fields.body.trim() : null;
-    const prevBody = prev.body?.trim() || null;
-
-    const patch: Partial<{ title: string; body: string | null }> = {};
-    if (title !== prev.title) patch.title = title;
-    if (body !== prevBody) patch.body = body;
-    if (Object.keys(patch).length === 0) return true;
-
-    setBusyId(id);
-    setError(null);
-    try {
-      await updateOwnerStoreNewsPost(id, patch);
-      const saved: PersistedFields = {
-        title: patch.title ?? prev.title,
-        body: patch.body !== undefined ? patch.body : prev.body,
-      };
-      persistedRef.current.set(id, saved);
-      setPosts((list) =>
-        list.map((p) =>
-          p.id === id
-            ? {
-                ...p,
-                title: saved.title,
-                body: saved.body,
-              }
-            : p,
-        ),
-      );
-      return true;
-    } catch {
-      setError(t('ownerStoreNews.saveError'));
-      return false;
-    } finally {
-      setBusyId(null);
-    }
+  function openFilePicker(replacePostId: string | null) {
+    replaceTargetRef.current = replacePostId;
+    fileInputRef.current?.click();
   }
 
-  async function handleAdd() {
+  async function handleFileSelected(file: File | undefined) {
+    if (!file || !userId) return;
+    if (file.size > MAX_STORE_NEWS_MEDIA_BYTES) {
+      setError(t('ownerStoreNews.mediaTooLarge'));
+      return;
+    }
+
+    const replaceId = replaceTargetRef.current;
+    replaceTargetRef.current = null;
+    setError(null);
+
+    if (replaceId) {
+      setBusyId(replaceId);
+      try {
+        const url = await uploadStoreNewsMedia(userId, storeId, file);
+        await updateOwnerStoreNewsPost(replaceId, { image_url: url });
+        await reload();
+      } catch {
+        setError(t('ownerStoreNews.saveError'));
+      } finally {
+        setBusyId(null);
+      }
+      return;
+    }
+
     if (posts.length >= MAX_POSTS) return;
     setBusyId('new');
-    setError(null);
     try {
+      const url = await uploadStoreNewsMedia(userId, storeId, file);
       await insertOwnerStoreNewsPost(storeId, {
-        title: t('ownerStoreNews.defaultTitle'),
-        body: null,
+        image_url: url,
+        link_product_id: null,
         is_active: true,
         sort_order: posts.length,
       });
@@ -119,12 +96,27 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
     }
   }
 
-  async function patchPost(id: string, partial: Partial<StoreNewsPost>) {
-    setBusyId(id);
+  async function patchLink(postId: string, linkProductId: string | null) {
+    setBusyId(postId);
     setError(null);
     try {
-      await updateOwnerStoreNewsPost(id, partial);
-      setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, ...partial } : p)));
+      await updateOwnerStoreNewsPost(postId, { link_product_id: linkProductId });
+      setPosts((prev) =>
+        prev.map((p) => (p.id === postId ? { ...p, link_product_id: linkProductId } : p)),
+      );
+    } catch {
+      setError(t('ownerStoreNews.saveError'));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function patchActive(postId: string, is_active: boolean) {
+    setBusyId(postId);
+    setError(null);
+    try {
+      await updateOwnerStoreNewsPost(postId, { is_active });
+      setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, is_active } : p)));
     } catch {
       setError(t('ownerStoreNews.saveError'));
     } finally {
@@ -138,7 +130,6 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
     setError(null);
     try {
       await deleteOwnerStoreNewsPost(id);
-      persistedRef.current.delete(id);
       setPosts((prev) => prev.filter((p) => p.id !== id));
     } catch {
       setError(t('ownerStoreNews.saveError'));
@@ -147,109 +138,92 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
     }
   }
 
-  function isDirty(post: StoreNewsPost): boolean {
-    const prev = persistedRef.current.get(post.id);
-    if (!prev) return false;
-    const title = post.title.trim();
-    const body = post.body?.trim() ? post.body.trim() : null;
-    const prevBody = prev.body?.trim() || null;
-    return title !== prev.title || body !== prevBody;
-  }
-
   return (
     <div style={styles.section}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          e.target.value = '';
+          void handleFileSelected(f);
+        }}
+      />
       <h3 style={styles.sectionTitle}>{t('ownerStoreNews.sectionTitle')}</h3>
-      <p style={styles.intro}>{t('ownerStoreNews.intro')}</p>
+      <p style={styles.intro}>{t('ownerStoreNews.introMedia')}</p>
       {loading ? (
         <p style={styles.hint}>{t('ownerStoreNews.loading')}</p>
       ) : (
         <>
           <div style={styles.list}>
             {posts.length === 0 && <p style={styles.hint}>{t('ownerStoreNews.empty')}</p>}
-            {posts.map((post, index) => {
-              const dirty = isDirty(post);
-              return (
-                <article key={post.id} style={styles.card}>
-                  <div style={styles.cardHead}>
-                    <span style={styles.orderBadge}>{index + 1}</span>
-                    <label style={styles.checkRow}>
-                      <input
-                        type="checkbox"
-                        checked={post.is_active !== false}
-                        disabled={busyId === post.id}
-                        onChange={(e) => void patchPost(post.id, { is_active: e.target.checked })}
-                      />
-                      <span>{t('ownerStoreNews.activeLabel')}</span>
-                    </label>
-                    <button
-                      type="button"
-                      style={styles.removeBtn}
+            {posts.map((post, index) => (
+              <article key={post.id} style={styles.card}>
+                <div style={styles.cardHead}>
+                  <span style={styles.orderBadge}>{index + 1}</span>
+                  <label style={styles.checkRow}>
+                    <input
+                      type="checkbox"
+                      checked={post.is_active !== false}
                       disabled={busyId === post.id}
-                      onClick={() => void handleRemove(post.id)}
-                    >
-                      {t('ownerStoreNews.delete')}
-                    </button>
-                  </div>
-                  <label style={styles.label}>{t('ownerStoreNews.titleLabel')}</label>
-                  <input
-                    style={styles.input}
-                    value={post.title}
-                    maxLength={80}
-                    disabled={busyId === post.id}
-                    onChange={(e) =>
-                      setPosts((prev) => prev.map((p) => (p.id === post.id ? { ...p, title: e.target.value } : p)))
-                    }
-                    onBlur={(e) => {
-                      void persistTextFields(post.id, {
-                        title: e.target.value,
-                        body: post.body ?? '',
-                      });
-                    }}
-                  />
-                  <label style={styles.label}>{t('ownerStoreNews.bodyLabel')}</label>
-                  <textarea
-                    style={styles.textarea}
-                    rows={2}
-                    value={post.body ?? ''}
-                    disabled={busyId === post.id}
-                    onChange={(e) =>
-                      setPosts((prev) => prev.map((p) => (p.id === post.id ? { ...p, body: e.target.value } : p)))
-                    }
-                    onBlur={() => {
-                      void persistTextFields(post.id, {
-                        title: post.title,
-                        body: post.body ?? '',
-                      });
-                    }}
-                    placeholder={t('ownerStoreNews.bodyPlaceholder')}
-                  />
+                      onChange={(e) => void patchActive(post.id, e.target.checked)}
+                    />
+                    <span>{t('ownerStoreNews.activeLabel')}</span>
+                  </label>
                   <button
                     type="button"
-                    style={{
-                      ...styles.saveBtn,
-                      ...(dirty ? styles.saveBtnDirty : {}),
-                    }}
-                    disabled={busyId === post.id || !dirty}
-                    onClick={() =>
-                      void persistTextFields(post.id, {
-                        title: post.title,
-                        body: post.body ?? '',
-                      })
-                    }
+                    style={styles.removeBtn}
+                    disabled={busyId === post.id}
+                    onClick={() => void handleRemove(post.id)}
                   >
-                    {busyId === post.id ? t('ownerStoreNews.saving') : t('ownerStoreNews.save')}
+                    {t('ownerStoreNews.delete')}
                   </button>
-                </article>
-              );
-            })}
+                </div>
+                <div style={styles.previewWrap}>
+                  {post.image_url ? (
+                    <img src={post.image_url} alt="" style={styles.previewImg} />
+                  ) : (
+                    <div style={styles.previewPlaceholder}>{t('ownerStoreNews.noImageYet')}</div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  style={styles.secondaryBtn}
+                  disabled={busyId === post.id || !userId}
+                  onClick={() => openFilePicker(post.id)}
+                >
+                  {post.image_url ? t('ownerStoreNews.changeImage') : t('ownerStoreNews.uploadImage')}
+                </button>
+                <label style={styles.label}>{t('ownerStoreNews.linkLabel')}</label>
+                <select
+                  style={styles.select}
+                  disabled={busyId === post.id}
+                  value={post.link_product_id ?? ''}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    void patchLink(post.id, v ? v : null);
+                  }}
+                >
+                  <option value="">{t('ownerStoreNews.linkStore')}</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+                <p style={styles.cardHelp}>{t('ownerStoreNews.linkHelp')}</p>
+              </article>
+            ))}
           </div>
           <button
             type="button"
             style={styles.addBtn}
-            disabled={posts.length >= MAX_POSTS || busyId === 'new'}
-            onClick={() => void handleAdd()}
+            disabled={posts.length >= MAX_POSTS || busyId === 'new' || !userId}
+            onClick={() => openFilePicker(null)}
           >
-            {t('ownerStoreNews.add')}
+            {busyId === 'new' ? t('ownerStoreNews.uploading') : t('ownerStoreNews.addMedia')}
           </button>
           <p style={styles.help}>{t('ownerStoreNews.limitHint', { max: MAX_POSTS })}</p>
         </>
@@ -301,47 +275,51 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: fs.sm,
     cursor: 'pointer',
   },
-  label: ownerFieldLabel,
-  input: {
+  previewWrap: {
     width: '100%',
-    padding: '8px 10px',
-    borderRadius: 8,
+    maxWidth: 200,
+    aspectRatio: '1',
+    borderRadius: 10,
+    overflow: 'hidden',
     border: `1px solid ${oc.borderStrong}`,
     background: oc.surface,
-    color: oc.text,
-    fontSize: fs.base,
-    boxSizing: 'border-box',
-    marginBottom: 8,
-  },
-  textarea: {
-    width: '100%',
-    padding: '8px 10px',
-    borderRadius: 8,
-    border: `1px solid ${oc.borderStrong}`,
-    background: oc.surface,
-    color: oc.text,
-    fontSize: fs.base,
-    boxSizing: 'border-box',
-    resize: 'vertical',
-    fontFamily: 'inherit',
-    lineHeight: 1.5,
     marginBottom: 10,
   },
-  saveBtn: {
-    padding: '8px 14px',
+  previewImg: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' },
+  previewPlaceholder: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: oc.textMuted,
+    fontSize: fs.sm,
+    padding: 8,
+    textAlign: 'center',
+  },
+  secondaryBtn: {
+    marginBottom: 12,
+    padding: '8px 12px',
     borderRadius: 8,
     border: `1px solid ${oc.borderStrong}`,
     background: oc.surface,
-    color: oc.textSecondary,
+    color: oc.primary,
     fontSize: fs.sm,
     fontWeight: 600,
     cursor: 'pointer',
   },
-  saveBtnDirty: {
-    borderColor: oc.primary,
-    color: oc.primary,
+  label: ownerFieldLabel,
+  select: {
+    width: '100%',
+    padding: '8px 10px',
+    borderRadius: 8,
+    border: `1px solid ${oc.borderStrong}`,
     background: oc.surface,
+    color: oc.text,
+    fontSize: fs.base,
+    boxSizing: 'border-box',
   },
+  cardHelp: { ...ownerHelpText, margin: '8px 0 0' },
   addBtn: {
     marginTop: 12,
     padding: '10px 16px',

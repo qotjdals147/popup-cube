@@ -17,6 +17,7 @@ import { getMyReviewKeys, getProductReviews, reviewKey } from '../lib/reviews';
 import { canFileClaim, confirmPurchase, listMyOrders } from '../lib/orders';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { ProductDetailInfiniteCarousel } from './ProductDetailInfiniteCarousel';
 import { ReviewFormModal } from './ReviewFormModal';
 import { ShopperConfirmDialog } from './ShopperConfirmDialog';
 import { t } from '../i18n';
@@ -52,6 +53,9 @@ interface ReviewableOrder {
   orderId: string;
   status: OrderStatus;
 }
+
+const DETAIL_CAROUSEL_CARD_WIDTH = 108;
+const DETAIL_CAROUSEL_GAP = 10;
 
 function formatPrice(price: number): string {
   return `${price.toLocaleString('ko-KR')}원`;
@@ -226,36 +230,93 @@ export function ProductDetailModal({
     }
   }
 
-  function renderRelatedRow(
-    items: { id: string; name: string; price: number; image_url: string | null }[],
-    keyPrefix: string
+  function openStoreNewsPost(post: StoreNewsPost) {
+    if (post.link_product_id) {
+      openLinkedProduct(post.link_product_id);
+      return;
+    }
+    storeEntry?.onEnter();
+  }
+
+  function renderProductCarouselCard(
+    rp: { id: string; name: string; price: number; image_url: string | null },
+    keyPrefix: string,
   ) {
     return (
-      <div className="product-detail-related-row">
-        {items.map((rp) => (
+      <button
+        key={`${keyPrefix}-${rp.id}`}
+        type="button"
+        className="product-detail-related-card"
+        style={styleFor(light, S.relatedCardLayout, S.relatedCardDark)}
+        onClick={() => openLinkedProduct(rp.id)}
+      >
+        <div
+          className="product-detail-related-thumb-wrap"
+          style={styleFor(light, S.relatedThumbWrapLayout, S.relatedThumbWrapDark)}
+        >
+          {rp.image_url ? (
+            <img src={rp.image_url} alt="" className="product-detail-related-thumb" />
+          ) : (
+            <span className="product-detail-related-placeholder">🛍️</span>
+          )}
+        </div>
+        <span className="product-detail-related-name" style={styleFor(light, S.relatedNameLayout, S.relatedNameDark)}>
+          {rp.name}
+        </span>
+        <span className="product-detail-related-price" style={styleFor(light, S.relatedPriceLayout, S.relatedPriceDark)}>
+          {formatPrice(rp.price)}
+        </span>
+      </button>
+    );
+  }
+
+  function renderRelatedCarousel(
+    items: { id: string; name: string; price: number; image_url: string | null }[],
+    keyPrefix: string,
+  ) {
+    if (items.length === 0) return null;
+    return (
+      <ProductDetailInfiniteCarousel
+        itemWidth={DETAIL_CAROUSEL_CARD_WIDTH}
+        gap={DETAIL_CAROUSEL_GAP}
+        speedPxPerSec={18}
+        ariaLabel={t('productDetail.relatedTitle')}
+      >
+        {items.map((rp) => renderProductCarouselCard(rp, keyPrefix))}
+      </ProductDetailInfiniteCarousel>
+    );
+  }
+
+  function renderStoreNewsCarousel() {
+    if (storeNews.length === 0) return null;
+    return (
+      <ProductDetailInfiniteCarousel
+        itemWidth={DETAIL_CAROUSEL_CARD_WIDTH}
+        gap={DETAIL_CAROUSEL_GAP}
+        speedPxPerSec={16}
+        ariaLabel={t('productDetail.storeNewsTitle')}
+      >
+        {storeNews.map((post) => (
           <button
-            key={`${keyPrefix}-${rp.id}`}
+            key={post.id}
             type="button"
-            className="product-detail-related-card"
+            className="product-detail-related-card product-detail-news-card"
             style={styleFor(light, S.relatedCardLayout, S.relatedCardDark)}
-            onClick={() => openLinkedProduct(rp.id)}
+            onClick={() => openStoreNewsPost(post)}
           >
-            <div className="product-detail-related-thumb-wrap" style={styleFor(light, S.relatedThumbWrapLayout, S.relatedThumbWrapDark)}>
-              {rp.image_url ? (
-                <img src={rp.image_url} alt="" className="product-detail-related-thumb" />
+            <div
+              className="product-detail-related-thumb-wrap"
+              style={styleFor(light, S.relatedThumbWrapLayout, S.relatedThumbWrapDark)}
+            >
+              {post.image_url ? (
+                <img src={post.image_url} alt="" className="product-detail-related-thumb" />
               ) : (
-                <span className="product-detail-related-placeholder">🛍️</span>
+                <span className="product-detail-news-fallback">{post.title?.trim() || t('productDetail.storeNewsTitle')}</span>
               )}
             </div>
-            <span className="product-detail-related-name" style={styleFor(light, S.relatedNameLayout, S.relatedNameDark)}>
-              {rp.name}
-            </span>
-            <span className="product-detail-related-price" style={styleFor(light, S.relatedPriceLayout, S.relatedPriceDark)}>
-              {formatPrice(rp.price)}
-            </span>
           </button>
         ))}
-      </div>
+      </ProductDetailInfiniteCarousel>
     );
   }
 
@@ -482,14 +543,7 @@ export function ProductDetailModal({
                   <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>
                     {t('productDetail.storeNewsTitle')}
                   </h4>
-                  <ul className="product-detail-news-list">
-                    {storeNews.map((post) => (
-                      <li key={post.id} className="product-detail-news-item">
-                        <p className="product-detail-news-item__title">{post.title}</p>
-                        {post.body?.trim() && <p className="product-detail-news-item__body">{post.body}</p>}
-                      </li>
-                    ))}
-                  </ul>
+                  {renderStoreNewsCarousel()}
                 </section>
               )}
 
@@ -498,7 +552,7 @@ export function ProductDetailModal({
                   <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>
                     {t('productDetail.linkedRecommendTitle')}
                   </h4>
-                  {renderRelatedRow(coordiProducts, 'coordi')}
+                  {renderRelatedCarousel(coordiProducts, 'coordi')}
                 </section>
               )}
 
@@ -507,7 +561,7 @@ export function ProductDetailModal({
                   <h4 className="product-detail-section-title" style={styleFor(light, S.sectionTitleLayout, S.sectionTitleDark)}>
                     {t('productDetail.relatedTitle')}
                   </h4>
-                  {renderRelatedRow(relatedProducts, 'related')}
+                  {renderRelatedCarousel(relatedProducts, 'related')}
                 </section>
               )}
 

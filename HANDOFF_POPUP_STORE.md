@@ -2448,8 +2448,9 @@ npx supabase db pull
 |---|---|
 | **회의** | 벤치 **8** — **마켓 새 소식** · **관련 태그** · **태그 전체보기** (`2026.10.02_회의_내용.txt`) |
 | **DB** | `product_tags` · `store_news_posts` · RPC `get_product_tags` · `get_store_news_for_shop` · owner `save_owner_product_tags` · migration `20261013_ad088_product_tags_store_news` **원격 ✅** |
-| **점주** | 상품 수정 — **상품 태그**(쉼표 구분 · 최대 12) · **운영·배송** 탭 — **매장 새 소식**(최대 12 · 노출 on/off · **「소식 저장」** · ISS-066) |
-| **손님** | `ProductDetailModal` — 상세 펼치기 아래 **태그 칩** · **태그 전체보기**(6개 초과) · **매장 새 소식** 제목+본문 **읽기 전용**(탭 동작 **❌**) |
+| **점주** | 상품 수정 — **상품 태그** · **운영·배송** — **매장 새 소식** = **사진·GIF**(5MB · jpg/png/webp/gif) · **탭 이동** = 매장 홈 **or** 연결 상품 · 최대 12 |
+| **손님** | `ProductDetailInfiniteCarousel` — **매장 새 소식** · **이 매장의 다른 상품**(· **함께 추천**) 동일 UI · **자동 슬로우 + 드래그** · 소식 탭 → 상품 or 매장 |
+| **DB** | `store_news_posts.image_url` · `link_product_id` · RPC `get_store_news_for_shop` 갱신 · migration `20261014_store_news_media_carousel` **원격 ✅** |
 | **2차** | 태그 **검색·필터** · 홈 피드 연동 ⏸ |
 
 #### Expo 재시작
@@ -5288,6 +5289,11 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-14 — 홈 배너 광고 소재·운영 정리 (§7.115 · §59)
 - **Changed:** §7.115 · §7.110 · §59.2 · §7.0 — User: 본사 제작 **or** 광고주 완성본
 - **Notes:** 문서만 · 구현 ⬜
+
+### 2026-10-14 — 매장 새 소식 미디어 캐러셀 (§7.113)
+- **Author:** Cursor Agent
+- **Changed:** `ProductDetailInfiniteCarousel` · `ProductDetailModal` · `OwnerStoreNewsEditor` · `storeNews.ts` · `product-detail-shop.css` · `ko.ts` · migration `20261014_store_news_media_carousel.sql` · §7.113
+- **Notes:** **POPUP DB ✅** · **`apps/web` only** · Vercel **1~2min** · 점주 **사진·GIF 재등록** 권장 · 손님 shop **새로고침**
 
 ### 2026-10-14 — 매장 새 소식 저장 버그·GRANT (ISS-066 · §7.113)
 - **Author:** Cursor Agent

@@ -241,11 +241,17 @@ export const ko = {
   },
   ownerStoreNews: {
     sectionTitle: '매장 새 소식',
-    intro:
-      '신상·공지 등을 적으면 손님 상품 상세에 노출됩니다. 제목·내용을 바꾼 뒤 카드 아래 「소식 저장」을 누르거나 다른 칸으로 이동하면 저장됩니다. 노출 순서는 위에서 아래 순입니다.',
-    save: '소식 저장',
-    saving: '저장 중…',
-    titleRequired: '제목을 입력해 주세요.',
+    introMedia:
+      '사진·GIF를 올리면 손님 상품 상세에서 「이 매장의 다른 상품」과 같은 가로 슬라이드로 보입니다. 탭하면 매장으로 들어가거나, 아래에서 고른 상품 상세로 이동합니다. 순서는 위에서 아래입니다.',
+    addMedia: '+ 사진·GIF 추가',
+    uploading: '올리는 중…',
+    uploadImage: '사진·GIF 올리기',
+    changeImage: '이미지 바꾸기',
+    noImageYet: '이미지 없음',
+    mediaTooLarge: '파일은 5MB 이하만 올릴 수 있어요.',
+    linkLabel: '탭했을 때 이동',
+    linkStore: '매장 홈(기본)',
+    linkHelp: '상품을 고르면 그 상품 상세로, 기본이면 매장으로 이동합니다.',
     loading: '불러오는 중…',
     loadError: '소식 목록을 불러오지 못했어요.',
     saveError: '저장에 실패했어요. 다시 시도해 주세요.',
