@@ -439,14 +439,6 @@ export function OwnerProductPanel({
                           ← {t('ownerProducts.editClose')}
                         </button>
                         <p className="owner-product-edit__toolbar-title">{editName.trim() || product.name}</p>
-                        <button
-                          type="button"
-                          className="owner-btn-primary owner-product-edit__toolbar-save"
-                          onClick={() => void handleSaveAll(product.id)}
-                          disabled={editSaving}
-                        >
-                          {editSaving ? t('ownerProducts.submitting') : t('ownerProducts.editSaveAll')}
-                        </button>
                       </div>
                       <p className="owner-product-edit__toolbar-lead">{t('ownerProducts.editSaveAllHint')}</p>
                       {editSaveNotice === 'success' && (
@@ -461,6 +453,7 @@ export function OwnerProductPanel({
                       )}
                     </div>
 
+                    <div className="owner-product-edit__scroll">
                     <section className="owner-product-edit__section">
                       <h3 className="owner-product-edit__section-title">{t('ownerProducts.editSectionBasics')}</h3>
                       <div className="owner-field-gap">
@@ -586,17 +579,6 @@ export function OwnerProductPanel({
                       </div>
                     </section>
 
-                    <div className="owner-product-edit__sticky">
-                      <button
-                        type="button"
-                        className="owner-btn-primary"
-                        onClick={() => void handleSaveAll(product.id)}
-                        disabled={editSaving}
-                      >
-                        {editSaving ? t('ownerProducts.submitting') : t('ownerProducts.editSaveAll')}
-                      </button>
-                    </div>
-
                     <section className="owner-product-edit__section owner-product-edit__detail">
                       <h3 className="owner-product-edit__section-title">{t('ownerProducts.editSectionDetail')}</h3>
                       <p style={styles.detailIntro}>{t('ownerProducts.detailIntro')}</p>
@@ -609,6 +591,18 @@ export function OwnerProductPanel({
                         {t('ownerProducts.previewButton')}
                       </button>
                     </section>
+                    </div>
+
+                    <div className="owner-product-edit__dock">
+                      <button
+                        type="button"
+                        className="owner-btn-primary owner-product-edit__dock-save"
+                        onClick={() => void handleSaveAll(product.id)}
+                        disabled={editSaving}
+                      >
+                        {editSaving ? t('ownerProducts.submitting') : t('ownerProducts.editSaveAll')}
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div style={styles.cardBody}>

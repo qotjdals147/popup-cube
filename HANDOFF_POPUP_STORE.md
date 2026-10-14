@@ -117,7 +117,7 @@
 |---|---|
 | **Primary** | **`#3182f6`** · 클래스 **`owner-btn-primary`** / **`owner-sku-btn--primary`** — 검정 CTA **❌** |
 | **정렬** | 섹션별 저장 = **우측** (`owner-section-actions` · `owner-sku-footer`) |
-| **상품 수정** | **닫기** = **「수정 닫기」** · **저장** = 상단·하단 **한 번에**(이름·가격·재고·옵션·추천·태그) · 구역 **「~만 저장」** = 보조(ghost) · **상세 블록** = 즉시 반영 · §7.114 |
+| **상품 수정** | **닫기** = **「수정 닫기」** · **저장** = 하단 **고정 dock**(일괄) · 구역 **「~만 저장」** = 보조(ghost) · **상세 블록** = 즉시 반영 · §7.114 |
 | **레이아웃** | 수정 펼침 = **`owner-product-edit__section`** 박스 구분 · §7.108 |
 
 **점주 섹션 타이포 (User 2026-10-13):**
@@ -2388,7 +2388,7 @@ npx supabase db pull
 | | |
 |---|---|
 | **문제** | 「상품 저장」·「옵션 저장」·「태그 저장」 등 **역할이 나뉘어** 점주 혼란 |
-| **동작** | toolbar **「저장」** = 기본·재고·옵션·추천·태그 **순서대로 일괄** · 수정 **닫지 않음** · 실패 시 구역 빨간 안내 |
+| **동작** | 하단 **고정 dock 「저장」** = 기본·재고·옵션·추천·태그 **일괄** · 본문만 스크롤 · 수정 **닫지 않음** |
 | **보조** | **옵션만 / 추천만 / 태그만 저장** — ghost 버튼 |
 | **상세** | 블록은 **추가·수정 즉시 DB** (lead 문구로 안내) |
 | **코드** | `handleSaveAll` · `ownerProductSectionSave.ts` · ref on SKU/coordi/tags editors |
@@ -5098,6 +5098,10 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-13 — 프로모·가챠 컴팩트 레이아웃 (§7.109c)
 - **Changed:** `owner-promo-gacha.css` · `OwnerPromotionPanel.tsx`
 - **Notes:** **`apps/web`** · Vercel **1~2min**
+
+### 2026-10-14 — 점주 상품 수정 하단 고정 「저장」 dock (§7.114)
+- **Changed:** `owner-product-edit.css` · `OwnerProductPanel` scroll+dock
+- **Notes:** **`apps/web` only** · Vercel **1~2min** · 점주 PC **Ctrl+F5**
 
 ### 2026-10-14 — 점주 상품 수정 「저장」 일괄 (§7.114)
 - **Changed:** `OwnerProductPanel` · SKU/coordi/tags ref save · `ko.ts` · `owner-product-edit.css` · §0 · §7.108
