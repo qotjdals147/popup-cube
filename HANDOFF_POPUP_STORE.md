@@ -5100,7 +5100,7 @@ npx expo start --tunnel --port 8082 --clear
 - **Notes:** **`apps/web`** · Vercel **1~2min**
 
 ### 2026-10-14 — 점주 상품 수정 스크롤 1개화 (§7.114)
-- **Changed:** `owner-product-edit.css` · `OwnerProductPanel` — 카드 `max-height`/내부 스크롤 제거 · dock/toolbar **sticky**
+- **Changed:** `owner-product-edit.css` · `OwnerProductPanel` — 카드 `max-height`/내부 스크롤 제거 · **저장 dock만 sticky** (닫기 헤더는 스크롤)
 - **Notes:** **`apps/web` only** · Vercel **1~2min** · 점주 PC **Ctrl+F5**
 
 ### 2026-10-14 — 점주 상품 수정 구역별 저장 버튼 제거 (§7.114)
