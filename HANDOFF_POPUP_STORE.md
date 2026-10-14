@@ -16,7 +16,7 @@
 
 - **사용자가 지시했든, 에이전트가 스스로 다음 작업을 이어가든 — 새 작업(요청/할 일)을 시작할 때마다** 이 `## 0. Handoff Protocol`을 다시 읽고 따른다.
 - 같은 세션 안에서 이미 한 번 읽었어도, 다음 작업으로 넘어갈 때 **다시** §0을 확인한다 `(대화가 길어지며 규칙을 놓치는 것을 방지)`.
-- 특히 아래는 매번 재확인: **작업 큐·우선순위(§0 · User 2026-10-12)**, **브리핑 형식(§0 하단)**, **User-facing TMI·타사 비교 금지(§0 · User 2026-10-12)**, **손님 UI 아이콘 = 라인만(§0 · §7.112 · User 2026-10-13)**, **모델 추천(§24)**, **출시 전 감사·QA(§63 · User 2026-10-02)**, **HANDOFF 실시간 갱신**, **Git commit+push 즉시(§0 · HANDOFF만 바꿔도 push)**, **한국어 대화 규칙**, **UI/UX · 쇼핑몰 퀄리티(§0)**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · **축약·「--clear 후 매장→」식 금지**), **Expo 재시작 여부 표(§0 · commit/push·테스트 안내 시 필수 동반)**, **기능 구현 연관점(§62 · 주문번호·알림·재고·RPC·양쪽 UI)**, **채팅 분리 인수인계(§0 · 감사 채팅↔작업 채팅 · 착수 전 `## 6` Open P0 확인 · User 2026-10-02)**.
+- 특히 아래는 매번 재확인: **작업 큐·우선순위(§0 · User 2026-10-12)**, **브리핑 형식(§0 하단)**, **User-facing TMI·타사 비교 금지(§0 · User 2026-10-12)**, **손님 UI 아이콘 = 라인만(§0 · §7.112 · User 2026-10-13)**, **모델 추천(§24)**, **출시 전 감사·QA(§63 · User 2026-10-02)**, **HANDOFF 실시간 갱신**, **Git commit+push 즉시(§0 · HANDOFF만 바꿔도 push)**, **한국어 말하기·쓰기(§0 · User 2026-10-14)**, **한국어 대화 규칙**, **UI/UX · 쇼핑몰 퀄리티(§0)**, **실기 확인 = §0 cmd「한 줄씩 복붙」**(Win→cmd→Expo 4줄·PC 3줄 · **축약·「--clear 후 매장→」식 금지**), **Expo 재시작 여부 표(§0 · commit/push·테스트 안내 시 필수 동반)**, **기능 구현 연관점(§62 · 주문번호·알림·재고·RPC·양쪽 UI)**, **채팅 분리 인수인계(§0 · 감사 채팅↔작업 채팅 · 착수 전 `## 6` Open P0 확인 · User 2026-10-02)**.
 - 규칙을 지키지 못했다고 사용자가 지적하면, 즉시 인정하고 그 지점부터 규칙대로 다시 수행한다.
 
 ### 세션 시작 시
@@ -90,6 +90,45 @@
 > Turborepo monorepo `(웹·서버·공통 코드를 한 프로젝트 폴더 안에 모아두는 방식)` 로 시작할게요.
 
 **금지:** jargon만 나열, 영어 약어만 던지고 끝, "당연히 아시겠지만"
+
+### 한국어 말하기·쓰기 (User 2026-10-14 — **채팅·HANDOFF·브리핑 필수**)
+
+**대상:** User에게 보이는 **모든 한국어** — Cursor 채팅, 작업 요약, §7 브리핑, HANDOFF 표·「쉬운 말」 인용문. (코드 식별자·AD 번호·파일 경로는 예외.)
+
+**원칙 — “번역투·영어 섞임·깨진 글자” 금지**
+
+| | 하지 말 것 | 대신 |
+|---|---|---|
+| **글자** | 한글「배」+영문「ner」붙임 · 한자「实」(실기 대신 쓰던 표기) | **배너** · **실기**(폰·PC에서 직접 확인) |
+| **영어 남발** | 문장 안에 `admin`, `push`, `slot`, `fallback`만 던짐 | **관리자**, **올리기/배포**, **칸/슬롯**, **대체** — 꼭 필요할 때만 영어 뒤에 `(한글)` 한 번 |
+| **어순** | 「RPC 적용 완료 mobile 홈 carousel 우선」 | **「손님 앱 홈 슬라이드는 DB 배너를 먼저 씁니다.»** — **주어·동사·목적** 순 |
+| **한 문장** | 쉼표·`·`로 **다섯 가지** 엮기 | **한 줄에 한 가지** · 목록은 표나 번호 |
+| **말투** | 「착수」「인수인계」「Mitigated」「scope」만 | **「시작한다」「넘겨 받을 내용」「완화됨」「범위」** |
+
+**채팅 답변 구조 (에이전트 — User 2026-10-14)**
+
+1. **첫 문장:** 지금 **무슨 일이 끝났는지 / 뭘 할지** (한국어만, 25자~한 줄).
+2. **본문:** 표·짧은 목록 · **굵은 글씨·백틱 남용 ❌**.
+3. **마지막:** 실기(테스트)할 때만 §0 cmd — **「Expo `--clear`」같은 줄은 표로**.
+
+**보내기 전 자가 검수 (소리 내어 읽기)**
+
+- [ ] **한글+영문 섞인 배ner·한자 实** grep — **0** (HANDOFF·방금 쓴 채팅)
+- [ ] 문장마다 **「~습니다/~입니다」** 로 끝나는지 · **주어 생략** 과다 ❌
+- [ ] User가 **개발자가 아님** — **Supabase RPC**처럼 쓸 때는 바로 뒤에 `(손님 앱이 DB에서 배너 목록을 부르는 함수)` 수준 **한 번**
+
+**HANDOFF 전용**
+
+- §7 **「쉬운 말」** 블록 = **User가 그대로 읽어도 이해되는** 문장만 · `sponsored_banners`는 **「홈 배너 DB 테이블」**처럼 **한글 이름 병기**.
+- Changelog **Notes** = **「Vercel 1~2분」** OK · **「push ✅ `--clear`」** ❌ → **「웹 배포 후 1~2분 · 앱은 Expo 재시작 필요」**.
+
+**예시 (채팅 — ✅)**
+
+> 홈 배너 등록 기능을 넣었습니다. 본사 **관리자** 계정으로 PC에서 이미지를 올리면, 손님 앱 홈 맨 위 슬라이드에 나옵니다. 등록된 배너가 없으면 예전처럼 상품 사진으로 채웁니다.
+
+**예시 (채팅 — ❌)**
+
+> L1 sponsored_banners ✅ · admin UI push · mobile carousel fallback 유지.
 
 ### UI·i18n 문구 규칙 (User 2026-08-03 — 필수)
 
@@ -645,15 +684,15 @@ npm run dev
 | AD-074 | **(확정 · User 2026-08-27) 반품 정책·가챠 반납·판매자센터 확장** — **단순변심 = 점주 설정(ON/OFF·기간)** · **교환+반품 둘 다** · **가챠 반납 3상태**(반납 완료/예정/불가) · §7.49 · §53.9 | User 2026-08-27 | 2026-08-27 |
 | AD-075 | **(확정 · User 2026-08-27) 기능 구현 연관점 필수** — 주문번호·알림·재고·RPC·양쪽 UI·뱃지 등 **한 기능 = 연쇄 갱신** · 에이전트 **§62 체크리스트** 매번 · §0 | User 2026-08-27 | 2026-08-27 |
 | AD-076 | **(✅ · User 2026-08-28) 손님 알림 탭 + 반품지** — **반품지 ✅** · **알림 탭 UI ✅** §7.69 | User 2026-08-27 | 2026-09-01 |
-| AD-077 | **(구현 ✅ · User实기 ✅ 2026-08-27) 문의 유지 + 이력·타임스탬프** — **「문의하기」유지** · **2회차+「문의 전체 기록」** · **접수·답변 시각 필수** · R2 **반품 신청 별도** · §7.52~§7.54 | User 2026-08-27 | 2026-08-27 |
-| AD-078 | **(진행 · User 2026-08-27) 소셜 로그인** — **Google ✅ Dev Client实机(§7.84)** · 버튼 UX **AD-080** · **카카오 · 네이버 ⏸️** (+ iOS **Apple** if other social) · **Supabase Auth** · **AD-034** 후속 · §33.1 | User 2026-08-27 | 2026-08-27 |
-| AD-079 | **(구현 ✅ · User实机 ✅ 2026-09-09) Google 네이티브 로그인 + EAS Dev Client** — `@react-native-google-signin/google-signin` + `signInWithIdToken` · Expo Go 브라우저 OAuth **fallback 유지**(ISS-040 Gmail 잔존) · **Dev Client = 표준 Google 테스트 경로** · §7.84 | User 2026-09-09 | 2026-09-09 |
+| AD-077 | **(구현 ✅ · User 실기 ✅ 2026-08-27) 문의 유지 + 이력·타임스탬프** — **「문의하기」유지** · **2회차+「문의 전체 기록」** · **접수·답변 시각 필수** · R2 **반품 신청 별도** · §7.52~§7.54 | User 2026-08-27 | 2026-08-27 |
+| AD-078 | **(진행 · User 2026-08-27) 소셜 로그인** — **Google ✅ Dev Client실기(§7.84)** · 버튼 UX **AD-080** · **카카오 · 네이버 ⏸️** (+ iOS **Apple** if other social) · **Supabase Auth** · **AD-034** 후속 · §33.1 | User 2026-08-27 | 2026-08-27 |
+| AD-079 | **(구현 ✅ · User 실기 ✅ 2026-09-09) Google 네이티브 로그인 + EAS Dev Client** — `@react-native-google-signin/google-signin` + `signInWithIdToken` · Expo Go 브라우저 OAuth **fallback 유지**(ISS-040 Gmail 잔존) · **Dev Client = 표준 Google 테스트 경로** · §7.84 | User 2026-09-09 | 2026-09-09 |
 | AD-080 | **(확정 · User 2026-09-16) 손님 SNS 로그인 버튼 카피·레이아웃** — 이메일 로그인 **아래** · 버튼 = **로고 + 「로그인」** (제공자명 **버튼 글자에 중복 ❌**) · `SocialLoginRow` · `assets/google-wordmark.png` · §0 · §25 · §7.86 | User 2026-09-16 | 2026-09-16 |
 | AD-082 | **(구현 ✅ · 2026-09-22) 점주 리뷰 관리 P1** — `OwnerReviewsPanel` · **리뷰** 탭 · `get_store_reviews` · `set_owner_review_reply` · 손님 상세 **판매자 답글** · §7.88 · §58 #8 P1 | User 2026-09-22 | 2026-09-22 |
 | AD-083 | **(구현 ✅ · 2026-09-29) 마이 › 닉네임 변경** — `update_my_nickname` RPC · **중복확인 필수** · `settings.tsx` · AD-023 연장 · §7.89 | User 2026-09-29 | 2026-09-29 |
 | AD-085 | **(착수 · 2026-10-02) 상품 옵션 v1** — `product_skus`(색·사이즈·재고) · 점주·손님·`place_order` · §7.91 · §58 #8 P1 · **⚠ 「색·사이즈 2개 고정」은 User 지시가 아니라 에이전트가 임의로 좁힌 것** → **AD-090으로 폐기** (User 2026-10-07 지적) | User 2026-10-02 | 2026-10-02 |
 | AD-087 | **(구현 · 2026-10-02) 옵션 v2** — 옵션별 **±판매가**(`price_delta`) · 점주 표 UI · 재고/자동수락 **관계 안내** · `place_order` 반영 · §7.92 | User 2026-10-02 | 2026-10-02 |
-| AD-088 | **(확정 · CEO 회의 2026-10-02 · User 2026-10-06) UX·운영 로드맵** — 홈(배ner·카테고리·상품 피드) · 상세(연관·펼쳐보기·태그·소식) · 코디·상품코드·엑셀 · CRM·푸시 · HQ · 주문 배치 · 베타 건의 · **도착보장류 = 구조 참고만** · `2026.10.02_회의_내용.txt` · §7.94 | CEO·User | 2026-10-06 |
+| AD-088 | **(확정 · CEO 회의 2026-10-02 · User 2026-10-06) UX·운영 로드맵** — 홈(배너·카테고리·상품 피드) · 상세(연관·펼쳐보기·태그·소식) · 코디·상품코드·엑셀 · CRM·푸시 · HQ · 주문 배치 · 베타 건의 · **도착보장류 = 구조 참고만** · `2026.10.02_회의_내용.txt` · §7.94 | CEO·User | 2026-10-06 |
 | AD-089 | **(확정 · CEO 심현우 · User 2026-10-07) 발주·배송 = 셀메이트(외부 솔루션) 전제 · 자체 딥 개발 ❌** — **셀메이트** `(쇼핑몰 주문·재고·송장을 모아 처리하는 외부 서비스)` 를 쓸 것이므로, 우리는 **「셀메이트로 넘길 수 있는 수준」까지만** 만든다. **우리 범위** = 주문 데이터 **정규화**(상품코드·옵션명) · **주문 내보내기** · **송장 받아오기** · 상태 반영. **자체 개발 ❌** = 택배사 API 직접 연동 · 물류 자동화 · 복잡한 발주 워크플로. **에이전트 필수:** 발주·배송 관련 기능 추가 전 **§7.95 체크리스트** 확인 — 「셀메이트 쓰면 이 기능이 **중복/무용**이 되는지」 먼저 판단. **연계** = AD-088 상품코드·엑셀 일괄등록(= 셀메이트 매칭 키) · 주문 배치 생성. **연동 수단 (User 2026-10-07)** = **계정 ❌ · API ❌ → 엑셀 업로드/내보내기** (§7.96) | CEO 심현우 · User 2026-10-07 | 2026-10-07 |
 | AD-091 | **(확정 · User 2026-10-12) 결제·주문 멱등키 — mock 단계에서 `place_order` + 웹 클라이언트 적용 · PG(AD-061) 착수 시 **동일 정책 재검수**(PG 승인키·웹훅·통합 결제 오케스트레이션과 **이중 방어**) · 상세 = **§7.99** · ISS-047 | User 2026-10-12 | 2026-10-12 |
 | AD-090 | **(확정 · User 2026-10-07) 상품 옵션 = 자유 N개 — AD-085 「색·사이즈 2개 고정」 폐기** · **User 원래 의도는 「옵션을 자유롭게 추가」였고, 2개로 좁힌 것은 에이전트의 임의 결정이었음** · 점주가 **옵션명 자체를 직접 만든다**(컬러·사이즈·소재·길이·각인…) · **방식** = `product_skus.option_values jsonb` `[{"name":"컬러","value":"빨강"},…]` · 라벨 = 값들을 ` / ` 로 이어 생성 · **스마트스토어 조합형과 동일 모델** → 엑셀 일괄등록 매핑 **1:1** · **AD-088 엑셀 업로드의 선행 작업** · 상세 = §7.97 | User 2026-10-07 | 2026-10-07 |
@@ -733,16 +772,16 @@ npm run dev
 - [x] **상품 상세 UX 1차 (2026-08-12d, §55 AD-059)** — **⬜ commit/push · ⬜ 실기**
 - [x] **상품 상세 블록 에디터 (2026-08-12f, §56 AD-060)** — migration `20260812c` **원격 ✅** · **⬜ commit/push · ⬜ 실기**
 - [x] **블록 추가 시 스크롤 튐 (2026-08-12g, ISS-035)** — `OwnerProductPanel.reload()` fix · **⬜ commit/push**
-- [x] **§7.66 R2 UX polish (2026-09-01)** — 신규 상품 **재고** · 구매확정 **배송완료 후** · 날짜 **오픈일~오늘** · 반품 **카드 UI** · 사진 첨부 · `useShopperOrderRealtime` · migration `20260901_return_evidence_urls.sql` · User实기 **✅** · git **`ffa614f`**
-- [x] **§7.67 손님 주문내역 쿠팡형 (2026-09-01)** — `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · 날짜 묶음 · User实기 **⬜**
-- [x] **§7.68 손님 주문내역 에이블리형 + 반품 거절 찾기 (2026-09-01)** — 행 탭 · 필터 · 아코디언 · User实기 **⬜**
-- [x] **§7.69 점주 반품 이력 + 손님 알림 탭 AD-076 (2026-09-01)** — `OwnerReturnsPanel` 이력 · `NotificationsPanel` · RPC · User实기 **⬜**
-- [x] **§7.70 홈 알림 종 + 마이 탭 뱃지 (2026-09-01)** — 쿠팡형 접근성 · User实기 **⬜**
-- [x] **§7.71 알림 삭제 + Realtime 중복 구독 fix (2026-09-01)** — × · 읽은/전체 삭제 · User实기 **✅**
+- [x] **§7.66 R2 UX polish (2026-09-01)** — 신규 상품 **재고** · 구매확정 **배송완료 후** · 날짜 **오픈일~오늘** · 반품 **카드 UI** · 사진 첨부 · `useShopperOrderRealtime` · migration `20260901_return_evidence_urls.sql` · User 실기 **✅** · git **`ffa614f`**
+- [x] **§7.67 손님 주문내역 쿠팡형 (2026-09-01)** — `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · 날짜 묶음 · User 실기 **⬜**
+- [x] **§7.68 손님 주문내역 에이블리형 + 반품 거절 찾기 (2026-09-01)** — 행 탭 · 필터 · 아코디언 · User 실기 **⬜**
+- [x] **§7.69 점주 반품 이력 + 손님 알림 탭 AD-076 (2026-09-01)** — `OwnerReturnsPanel` 이력 · `NotificationsPanel` · RPC · User 실기 **⬜**
+- [x] **§7.70 홈 알림 종 + 마이 탭 뱃지 (2026-09-01)** — 쿠팡형 접근성 · User 실기 **⬜**
+- [x] **§7.71 알림 삭제 + Realtime 중복 구독 fix (2026-09-01)** — × · 읽은/전체 삭제 · User 실기 **✅**
 - [ ] **§7.72 AD-078 OAuth 개발자 콘솔 (2026-09-01)** — Google ✅ · Kakao/Naver ⏸️ 사업자 |
-- [x] **§7.73 Google 로그인 버튼 + OAuth (2026-09-01)** — `login.tsx` · `googleSignIn.ts` · User实기 **✅ §7.78**
+- [x] **§7.73 Google 로그인 버튼 + OAuth (2026-09-01)** — `login.tsx` · `googleSignIn.ts` · User 실기 **✅ §7.78**
 - [x] **§7.78 Google OAuth openBrowserAsync (2026-09-08)** — Expo Go **1회 ✅** · 반복 시 ISS-040 재발
-- [x] **§7.84 Google 네이티브 + Dev Client (2026-09-09 · AD-079)** — User实기 **✅** · git **`15dbb4a`**
+- [x] **§7.84 Google 네이티브 + Dev Client (2026-09-09 · AD-079)** — User 실기 **✅** · git **`15dbb4a`**
 
 ### ⬜ Not Done / Next (Phase 4 정식 런칭 — AD-037)
 - [x] **Sprint 3 — OwnerDisplayPanel** — 조형물 배치 + 슬롯 상품 연결 UI + draft/출시
@@ -869,7 +908,7 @@ popup_store/                          # Turborepo root
 | ISS-038 | ~~장바구니 탭 sync · 행 정렬 · 쿠팡형 · 줄금액 · 통합 결제 UX~~ | **Resolved** | User **`1413647`** UI OK · **`ebd3648`** 서랍 뱃지·할인가 **✅ User 2026-08-25** · **`choice` 뱃지 카피** → §7.41 |
 | ISS-039 | Expo `--tunnel` ngrok **`body` 일시 오류** (2026-08~) | Open (외부·간헐) | **§0 4줄 `--tunnel` 유지** · User **2026-08-24 정상** · 에이전트 **`--lan` 선제안 ❌** · 지속 실패만 `start-remote-cloudflare.cmd` |
 | ISS-040 | **Google OAuth (Expo Go 브라우저)** — 무한로딩 / Gmail redirect / 빨간 오류 flash | **Open (Expo Go만)** | **Dev Client 네이티브(§7.84) = ✅ 해결** · Expo Go fallback = 브라우저 경로 **잔존** |
-| ISS-041 | **Google OAuth 후** — 프로필 timeout · JWT clock skew · OAuth code **이중 교환** | **Mitigated** | Dev Client实机: **JWT clock skew** → 폰 **날짜·시간 자동** 후 OK · `loadProfile` retry · **미커밋** |
+| ISS-041 | **Google OAuth 후** — 프로필 timeout · JWT clock skew · OAuth code **이중 교환** | **Mitigated** | Dev Client실기: **JWT clock skew** → 폰 **날짜·시간 자동** 후 OK · `loadProfile` retry · **미커밋** |
 | ISS-042 | **Dev Client** — `Cannot find native module 'ExpoCrypto'` | **Resolved** | `expo-auth-session` import 제거 → `oauthQueryParams.ts` · `Linking.createURL` · APK 재빌드 **`a7ade9ee`** (JS만으로도 해결 가능) |
 | ISS-043 | ~~점주 KPI 숫자만 노출 — 「통계」가 뭔지·어디서 보는지 불명~~ | **Resolved** | **§0 UX** — `/home` **「매출·주문 통계」** 제목·안내 · 매장 관리 **「통계」** 탭 · 상품 탭 **통계 탭 열기** 배너 (2026-10-02) |
 
@@ -913,15 +952,15 @@ popup_store/                          # Turborepo root
 
 | | |
 |---|---|
-| **한 줄 요약 (2026-10-14)** | **L1 `sponsored_banners` ✅** (§7.116) · CEO **카테고리** ⏸ · **admin** 계정으로 배ner 등록 |
+| **한 줄 요약 (2026-10-14)** | **홈 배너 DB·등록 화면 ✅** (§7.116) · CEO **카테고리** ⏸ · **관리자** 계정으로 배너 등록 |
 | **한 줄 요약 (구)** | ISS-056~058 · AD-088 ✅ |
-| **User实기** | **§7.100 ISS-053 ✅** · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
+| **User 실기** | **§7.100 ISS-053 ✅** · §7.84 Google **✅** · §7.88 리뷰 **✅** · §7.89 닉네임 **✅** · §7.90 KPI **✅** |
 | **CEO·사업 Q** | **쿠폰·할인** → **§7.87** · **회의 UX·운영** → **§7.94 · AD-088** · 원문 `2026.10.02_회의_내용.txt` |
 | **출시 불안·건강검진** | **§63 (AD-086)** — **1차 감사 (2026-10-02) ✅** · **2차 최종 = 기능·CEO 항목 완료 후 동일 §63 재실시** (§63.8 · User 2026-10-06) |
 | **🚨 즉시 (User 2026-10-06~07)** | **ISS-056~062** ✅ push 후 Vercel 1~2분 · **앱 `apps/mobile` 변경 → Expo `--clear`** · **옵션 주문 「안 들어옴」 = 자동수락 → 발주·배송 탭** (ISS-061 · 주문 탭에 안내 추가) |
 | **📦 발주·배송 방향 (CEO 2026-10-07)** | **셀메이트 전제 · 자체 딥 개발 ❌** — 발주·배송 기능 착수 전 **§7.95 체크리스트** · **AD-089** |
 | **🚨 감사 잔여 (2026-10-02)** | **044~051·053~055** ✅ · **044 과거 오염** = SKU 취소/거절 **0건** (§7.102 · 보정 불필요) · **052** = §7.101 **`db pull` ⬜** |
-| **§7.96 엑셀** | v1 **코드 ✅** · **User实机 ✅** (2026-10-13 · 문제 없음) · **카테고리 열·양식 대개편**만 CEO 합의 후 |
+| **§7.96 엑셀** | v1 **코드 ✅** · **User 실기 ✅** (2026-10-13 · 문제 없음) · **카테고리 열·양식 대개편**만 CEO 합의 후 |
 | **⏸ 예약 (User 2026-10-12)** | **「TMI 작업」** — **§7.98** · User 말할 때까지 **본격 착수 ❌** |
 | **채팅 분리 (User 2026-10-02)** | 점검은 **별도 채팅** → 착수 전 **`## 6` Open ISS + §63.14** · 수정 시 ISS **Fixed(hash)** 갱신 |
 
@@ -1048,7 +1087,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **다음 우선 (에이전트)** | ① Google 로그아웃×3 · ② Kakao/Naver · PG는 **사업자+가맹 후** |
-| **User实기** | §7.84 Google **✅** · Dev Client = **§7.84 Dev Client 4줄** |
+| **User 실기** | §7.84 Google **✅** · Dev Client = **§7.84 Dev Client 4줄** |
 | **상세** | **§7.85** (최신) · §7.84 · §7.0 「PG·정산 FAQ」표 |
 
 #### Expo 재시작 여부 (최신 §7.78)
@@ -1133,7 +1172,7 @@ npx expo start --tunnel --port 8082 --clear
 | Phase | 이름 | 범위 | 산출물 |
 |---|---|---|---|
 | **R1** | **탭·큐** | `StoreEditPage` **「반품·교환」** 탭 · `claim_status=open` 필터 · 사이드바 **뱃지** · Realtime | ✅ **2026-08-27** · §7.51 |
-| **R1.5** | **문의 이력·시각** | **「문의하기」유지** · 카드=최근 1세트 · **2회차+「이전 문의 보기」** · **접수·답변 타임스탬프 필수** (손님·점주) | ✅ **§7.53** · **User实기 §7.54** |
+| **R1.5** | **문의 이력·시각** | **「문의하기」유지** · 카드=최근 1세트 · **2회차+「이전 문의 보기」** · **접수·답변 타임스탬프 필수** (손님·점주) | ✅ **§7.53** · **User 실기 §7.54** |
 | **R2** | **구조화 신청** | **`order_returns`** · **「반품·교환 신청」별도 버튼** · 사유·품목/수량 · 반품지 안내 | `request_return` … |
 | **R3** | **물류·재고** | 손님 **반품 송장**(선택) · 점주 **입고 확인** → **재고 +** · 가챠/할인 **롤백 정책** | §52.2 구현 |
 | **R4** | **환불** | PG webhook **환불** · mock = **「환불 처리됨」** 상태만 | AD-061 **후** |
@@ -1380,14 +1419,14 @@ stores.default_return_address_id  -- FK, nullable
 
 ---
 
-### 7.54 세션 인수인계 — **2026-08-27** (AD-077 User实기 ✅ · **AddressSearch 착수 준비**)
+### 7.54 세션 인수인계 — **2026-08-27** (AD-077 User 실기 ✅ · **AddressSearch 착수 준비**)
 
 | | |
 |---|---|
 | **User** | ① **문의 기록·타임스탬프** 실기 **OK** ② 작업 순서 = **에이전트 권장 순서 유지** (알림 탭만 앞당기기 ❌) |
 | **다음 착수** | **`AddressSearch`** — AD-076 · §7.50 §3 |
 
-#### AD-077 User实기 합격
+#### AD-077 User 실기 합격
 
 | | |
 |---|---|
@@ -1440,7 +1479,7 @@ stores.default_return_address_id  -- FK, nullable
 
 ---
 
-### 7.56 세션 인수인계 — **2026-08-27** (AD-076 · **AddressSearch User实기 ✅**)
+### 7.56 세션 인수인계 — **2026-08-27** (AD-076 · **AddressSearch User 실기 ✅**)
 
 | | |
 |---|---|
@@ -1448,7 +1487,7 @@ stores.default_return_address_id  -- FK, nullable
 | **Git** | **`cfd86d0`** push ✅ |
 | **다음** | **`store_return_addresses`** + `OwnerReturnAddressPanel` |
 
-#### User实기 합격
+#### User 실기 합격
 
 | | |
 |---|---|
@@ -1491,7 +1530,7 @@ stores.default_return_address_id  -- FK, nullable
 | **Expo(Metro) 재시작** | ❌ **불필요** |
 | **User** | Vercel **1~2min** · 점주 PC **Ctrl+F5** |
 
-#### User实기 (§0 — **cmd 블록 생략 금지**)
+#### User 실기 (§0 — **cmd 블록 생략 금지**)
 
 0) 폰 **Expo Go SDK 52** (Play 54+ ❌) — **PC 웹만**이면 2)부터
 
@@ -1521,7 +1560,7 @@ npx expo start --tunnel --port 8082 --clear
    - ✅ 2개+ → **기본 반품지** 지정
    - ✅ **저장하기** = CS·배송비만 (반품지는 폼에서 즉시 저장)
 
-6) ⬜ User实기 **미확인** — 확인 후 §7.59·Changelog 갱신
+6) ⬜ User 실기 **미확인** — 확인 후 §7.59·Changelog 갱신
 
 #### 다음
 
@@ -1536,12 +1575,12 @@ npx expo start --tunnel --port 8082 --clear
 | | |
 |---|---|
 | **Scope** | Google OAuth End-to-End · 콘솔 마무리 · 코드 race fix |
-| **User实기** | **⬜ 간헐만** (2026-09-04 User 재확인) — **완전 해결 ❌** |
+| **User 실기** | **⬜ 간헐만** (2026-09-04 User 재확인) — **완전 해결 ❌** |
 | **ISS** | ISS-040 Open (UX) · ISS-041 Open (Low) |
 | **Git** | **`930161c`** pushed · 로컬 **미커밋** |
 | **AD** | AD-078 |
 
-#### User实기 결과
+#### User 실기 결과
 
 | | |
 |---|---|
@@ -1578,7 +1617,7 @@ npx expo start --tunnel --port 8082 --clear
 | **User 이번 실기** | **`--clear`** 후 QR · **8082** |
 | **다음 코드 commit 후** | ✅ **`--clear`** 재필수 |
 
-#### User实기 (§0 — **cmd 블록 생략 금지**)
+#### User 실기 (§0 — **cmd 블록 생략 금지**)
 
 1) **Win → `cmd` → Enter**
 
@@ -1612,7 +1651,7 @@ npx expo start --tunnel --port 8082 --clear
 | | |
 |---|---|
 | **Scope** | WebBrowser ↔ deep link race 통합 · 이중 교환 방지 · Android warmUp |
-| **User实기** | **⬜** — §0 Expo 4줄 **`--clear`** 후 재확인 |
+| **User 실기** | **⬜** — §0 Expo 4줄 **`--clear`** 후 재확인 |
 | **User 실기 (2026-09-08)** | **❌** — §7.77 적용 후에도 `accounts.google.com` **무한로딩 동일** |
 | **ISS** | ISS-040 Open (UX) · ISS-041 mitigated (mutex + flow guard) |
 | **Git** | **`930161c`** pushed · 로컬 **미커밋** |
@@ -1627,7 +1666,7 @@ npx expo start --tunnel --port 8082 --clear
 | **`login-callback.tsx`** | flow active 시 교환 스kip · 기존 세션 있으면 바로 `/home` |
 | **`login.tsx`** | owner hint 중복 제거 |
 
-#### User实기 (§0)
+#### User 실기 (§0)
 
 1) Win → `cmd` → Metro **Ctrl+C**
 
@@ -1649,7 +1688,7 @@ npx expo start --tunnel --port 8082 --clear
 
 #### 다음
 
-- User实기 **⬜** → 합격 시 **commit & push**
+- User 실기 **⬜** → 합격 시 **commit & push**
 - ISS-040 잔존 시: consent 로고 · EAS Dev Client 검토
 
 ---
@@ -1896,10 +1935,10 @@ npm run dev
 
 #### 다음
 
-- [x] **ISS-056** web (KST 필터 · `/home` pulse · 폴링) — **User实机** ⬜  
+- [x] **ISS-056** web (KST 필터 · `/home` pulse · 폴링) — **User 실기** ⬜  
 - [x] **ISS-057** · **ISS-058** · **ISS-060** · **ISS-061** ✅  
 - [ ] CEO **홈 카테고리** 확정 ⬜ (칩 = 전체/신규/마감임박 · **의류/뷰티 등 = CEO 후**)  
-- [x] AD-088 **Phase 1 홈** — 앱 `home.tsx` **상품 피드** · 배ner · 칩 (벤치 **01~02**) · 2026-10-12  
+- [x] AD-088 **Phase 1 홈** — 앱 `home.tsx` **상품 피드** · 배너 · 칩 (벤치 **01~02**) · 2026-10-12  
 - [x] AD-088 **Phase 1b** — 홈 상품 탭 → `/shop?product=` · **ProductDetailModal** 자동 (§7.104) · 2026-10-12  
 - [x] AD-088 **Phase 2** 상세 **펼치기·연관상품** (벤치 **05~07** v1) · 2026-10-12  
 - [x] AD-088 **Phase 3 함께 추천** — `product_coordi_links` · 점주 카드 UI · 손님 **함께 추천** · §7.106 · §7.107 · 2026-10-13  
@@ -1964,7 +2003,7 @@ npm run dev
 | | |
 |---|---|
 | **User 의도** | `2026.10.02_회의_내용.txt` = **계속 구현** (「다 기다리기」❌) |
-| **v1 상태** | 양식·업로드·상품코드 **코드 main ✅** · **实机·P0 버그** = **진행** |
+| **v1 상태** | 양식·업로드·상품코드 **코드 main ✅** · **실기·P0 버그** = **진행** |
 | **CEO만 맡김** | **카테고리 체계** · 엑셀 **양식 대개편**(13열→구조 변경) — 합의 후 반영 |
 | **에이전트** | AD-088 **오류→홈 UX→엑셀→코디→HQ** 순 (§7.94) · 「전부 ⏸」 **❌** |
 
@@ -2042,7 +2081,7 @@ npm run dev
 - [x] `products.product_code` + 점주 상품 폼 (AD-088) ✅ (2026-10-12)  
 - [x] 업로드 파서 + **행별 오류 리포트** ✅ (2026-10-12)  
 - [x] 양식 **다운로드** (13열 + 샘플 1행) ✅ (2026-10-12)  
-- [ ] **User实机** — v1 업로드·다운로드 (회의록 · **진행**)  
+- [ ] **User 실기** — v1 업로드·다운로드 (회의록 · **진행**)  
 - [ ] v2 — **CEO/User 합의 후** (카테고리 열 · `promo_mode` 등)  
 
 ---
@@ -2163,7 +2202,7 @@ npx expo start --tunnel --port 8082 --clear
 
 - [x] **User 실기 확인** — 위 5)~8) **ISS-064 v2 포함** ✅ (User 2026-10-12 · `622d8d6`/`9bd25a5`)
 - [x] `products.product_code` + 상품 폼 입력칸 (AD-088) ✅ (2026-10-12)  
-- [x] **엑셀 일괄등록 v1** (§7.96 · 다운로드·업로드) ✅ (2026-10-12) · **User实机 ✅** (2026-10-13)  
+- [x] **엑셀 일괄등록 v1** (§7.96 · 다운로드·업로드) ✅ (2026-10-12) · **User 실기 ✅** (2026-10-13)  
 - [x] **ISS-047** 통합 결제 부분 실패·멱등키 (mock) ✅ (2026-10-12 · §7.99)  
 - [x] **ISS-054** 반품·판매통계 RPC 3개 + UI `option_label` ✅ (2026-10-12)  
 - [x] `product_skus.color`·`size` **DROP COLUMN** · `format_product_sku_label` 제거 ✅ (2026-10-12 · `20261012_ad090_drop_product_skus_color_size`)  
@@ -2208,9 +2247,9 @@ PG 코드를 **새로 짜기 전** · **스테이징 승인 전** 아래를 **§
 
 ---
 
-### 7.100 **ISS-053 장바구니 가격 갱신** (AD-068 · User实机 · 2026-10-12)
+### 7.100 **ISS-053 장바구니 가격 갱신** (AD-068 · User 실기 · 2026-10-12)
 
-> **User实机 ✅ (2026-10-12 pm)** — 점주 **판매가 변경** → 손님 **앱** 장바구니 **합계·안내 문구** 확인 · **옵션 저장** 시 판매가 동시 반영 = `af20335`
+> **User 실기 ✅ (2026-10-12 pm)** — 점주 **판매가 변경** → 손님 **앱** 장바구니 **합계·안내 문구** 확인 · **옵션 저장** 시 판매가 동시 반영 = `af20335`
 
 > **쉬운 말:** 장바구니에 담아 둔 **옛날 가격**을, 장바구니를 **열 때** 서버 최신 가격으로 맞춘다. 바뀌었으면 **한 줄 안내**가 뜬다.
 
@@ -2222,7 +2261,7 @@ PG 코드를 **새로 짜기 전** · **스테이징 승인 전** 아래를 **§
 | **Expo(Metro) 재시작** | ❌ **불필요** · Metro **Ctrl+C 불필요** |
 | **User가 할 일** | `main` push ✅ (`0f2d689`) → **Vercel 1~2min** → 손님 **장바구니 탭 나갔다 다시** · PC는 **`Ctrl+F5`** |
 
-#### User实机 (§0 전체 — **cmd 블록 생략 금지**)
+#### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
 
 0) 폰 **Expo Go SDK 52** (Play 스토어 54+ ❌) — **PC 점주만** 볼 거면 2)부터
 
@@ -2379,7 +2418,7 @@ npx supabase db pull
 | **DB** | `product_coordi_links` *(내부명 · 패션 「코디」 UI ❌)* · RPC `get_product_coordi_products` 등 · migration `20261013_*` **원격 ✅** |
 | **User-facing** | **「함께 추천」** · §7.107 카피·점주 카드 UI |
 | **손님** | 점주 추천 있으면 **「함께 추천」** · 없으면 **「이 매장의 다른 상품」** · **상품정보 / 리뷰** 탭 |
-| **다음** | ~~벤치 **08**~~ → **§7.113** ✅ · HQ **배ner DB** (v1.5) |
+| **다음** | ~~벤치 **08**~~ → **§7.113** ✅ · HQ **배너 DB** (v1.5) |
 
 ---
 
@@ -2486,14 +2525,14 @@ npx supabase db pull
 
 ---
 
-### 7.110 **AD-088 홈 배ner 슬라이드** (User 2026-10-13 · 벤치 01)
+### 7.110 **AD-088 홈 배너 슬라이드** (User 2026-10-13 · 벤치 01)
 
 | | |
 |---|---|
 | **동작** | 검색 아래 **가로 스와이프** · **페이지 점** · **4.5s 자동 넘김**(손 스와이프 중 멈춤) |
 | **데이터** | `listHomePromoBanners` — **이미지 있는 상품** 최대 5 · 부족 시 **매장 썸네일** · 탭 → **`/store` + `productId` 딥링크** |
 | **코드** | `homeBanners.ts` · `HomePromoBanner.tsx` · `home.tsx` |
-| **지금(v1)** | §7.110 — **상품·매장 썸네일 자동** (에이블리 메인 배ner **대체용**) |
+| **지금(v1)** | §7.110 — **상품·매장 썸네일 자동** (에이블리 메인 배너 **대체용**) |
 | **다음(v1.5)** | §7.115 · §59 **L1** — `sponsored_banners` 슬롯 |
 
 #### Expo 재시작
@@ -2504,15 +2543,15 @@ npx supabase db pull
 
 ---
 
-### 7.115 **홈 배ner 광고 — 소재·운영 정리** (User 2026-10-14 · AD-088/§59)
+### 7.115 **홈 배너 광고 — 소재·운영 정리** (User 2026-10-14 · AD-088/§59)
 
-> **쉬운 말:** 손님 홈 **검색 아래 큰 슬라이드**는 “광고 칸”이고, **이미지는 보통 완성된 배ner**다. 점주가 상품탭에서 JPG 올리는 구조 **❌**.
+> **쉬운 말:** 손님 홈 **검색 아래 큰 슬라이드**는 “광고 칸”이고, **이미지는 보통 완성된 배너**다. 점주가 상품탭에서 JPG 올리는 구조 **❌**.
 
 | | |
 |---|---|
-| **벤치** | 회의 `2026.10.02` · **1번** 검색+배ner · 에이블리 스크린 참고 (`docs/benchmark/ably-2026-10-02/`) |
-| **소재 (User 확정)** | ① **본사(POP-UP)가 배ner 제작** · ② **광고주가 넘긴 완성 이미지**를 본사가 **검수·등록** — 둘 중 하나 (누가 PSD까지 했는지는 **운영·계약** 문제) |
-| **점주 입점** | 홈 큰 배ner = **광고/기획 상품**(MD·패키지·유상 지면) 쪽 — **셀러어드민 “상품만 고르는 캠페인”**과 **별개** (에이블리도 [ablyads](https://www.ablyads.com/) = 상품·예산 vs 메인 **34장** 큐레이션) |
+| **벤치** | 회의 `2026.10.02` · **1번** 검색+배너 · 에이블리 스크린 참고 (`docs/benchmark/ably-2026-10-02/`) |
+| **소재 (User 확정)** | ① **본사(POP-UP)가 배너 제작** · ② **광고주가 넘긴 완성 이미지**를 본사가 **검수·등록** — 둘 중 하나 (누가 PSD까지 했는지는 **운영·계약** 문제) |
+| **점주 입점** | 홈 큰 배너 = **광고/기획 상품**(MD·패키지·유상 지면) 쪽 — **셀러어드민 “상품만 고르는 캠페인”**과 **별개** (에이블리도 [ablyads](https://www.ablyads.com/) = 상품·예산 vs 메인 **34장** 큐레이션) |
 | **POP-UP 지금** | `listHomePromoBanners` — **자동 썸네일** · **광고 슬롯 아님** |
 | **POP-UP v1.5 (코드)** | ✅ **`sponsored_banners`** · RPC `list_home_sponsored_banners` · PC **`/platform/home-banners`** (`profiles.role=admin`) — §7.116 |
 | **월드 L3** | §59 — 스폰서존은 **플랫폼 제작** (점주 월드 에디터 ❌) |
@@ -2525,7 +2564,7 @@ npx supabase db pull
 
 ---
 
-### 7.116 **L1 홈 배ner DB + 본사 등록 UI** (2026-10-14 · §7.115)
+### 7.116 **L1 홈 배너 DB + 본사 등록 UI** (2026-10-14 · §7.115)
 
 | | |
 |---|---|
@@ -2539,7 +2578,7 @@ npx supabase db pull
 
 | | |
 |---|---|
-| **`apps/mobile`** | **✅ `--clear`** (홈 배ner 데이터 경로 변경) |
+| **`apps/mobile`** | **✅ `--clear`** (홈 배너 데이터 경로 변경) |
 | **`apps/web`** | **❌** · Vercel 1~2min |
 
 ---
@@ -2607,7 +2646,7 @@ npx supabase db pull
 5. **제외** — HANDOFF·코드 **주석**의 「쿠팡형」 등 벤치마크 (User-facing 아님)
 6. **끝** — §7.98 **완료 ✅** · §8 Changelog · commit+push
 
-#### 완료 체크 (User实机 전)
+#### 완료 체크 (User 실기 전)
 
 - [ ] web `ko.ts` — 타사명 **0** · help/intro **과장·튜토리얼체** 축소  
 - [ ] mobile `ko.ts` — 동일  
@@ -2806,7 +2845,7 @@ PG 승인 = 그 금액
 
 | | |
 |---|---|
-| **결과** | User实기 **✅** — POP-UP CUBE Dev Client · **Google로 시작하기 → 홈** |
+| **결과** | User 실기 **✅** — POP-UP CUBE Dev Client · **Google로 시작하기 → 홈** |
 | **Scope** | `@react-native-google-signin/google-signin` + `signInWithIdToken` · EAS Dev Client · Google Cloud Android OAuth client |
 | **Git** | **`15dbb4a`** pushed `main` |
 | **AD** | AD-079 · AD-078 (Google Phase 1 완료) |
@@ -2915,7 +2954,7 @@ npx expo start --dev-client --tunnel --port 8082 --clear
 |---|---|
 | **Scope** | `openAuthSessionAsync`(redirect URL 감시) → **`openBrowserAsync` + deep link만** |
 | **원인 가설** | Custom Tab이 Google OAuth 중간 페이지를 redirect로 오인 → `accounts.google.com` **무한로딩** (§7.77 User **❌**) |
-| **User实기** | **✅** (2026-09-08 User) — Google 계정 선택 → **홈** 정상 |
+| **User 실기** | **✅** (2026-09-08 User) — Google 계정 선택 → **홈** 정상 |
 | **Git** | **`930161c`** pushed · 로컬 **미커밋** → **commit 대기** |
 | **AD** | AD-078 · ISS-040 |
 
@@ -2935,7 +2974,7 @@ npx expo start --dev-client --tunnel --port 8082 --clear
 | **필요** | **EAS Dev Client** (Expo Go ❌) · Google Cloud **Android/iOS OAuth client** |
 | **콘솔** | consent **로고 업로드** · Testing → Production 검토 |
 
-#### User实기 (§0)
+#### User 실기 (§0)
 
 ```
 cd C:\Users\qotjd\Downloads\Cursor\popup_store
@@ -2948,7 +2987,7 @@ QR → Google로 시작하기 → 계정 선택 → **Expo Go 자동 복귀** �
 
 4) **합격** — **✅** (2026-09-08 User) — 무한로딩 ❌ · 홈 진입 ✅
 
-#### User实기 추가 (2026-09-09)
+#### User 실기 추가 (2026-09-09)
 
 | | |
 |---|---|
@@ -2961,7 +3000,7 @@ QR → Google로 시작하기 → 계정 선택 → **Expo Go 자동 복귀** �
 - `prompt: consent` · OAuth callback wait **cancel** on signOut
 - 로그인 후 **Expo Go 수동 복귀** 안내
 
-#### User实기 추가 (2026-09-09 재발) — **여전히 메일 작성 화면**
+#### User 실기 추가 (2026-09-09 재발) — **여전히 메일 작성 화면**
 
 - `Linking.openURL`로 바꿔도 **동일** → **브라우저 API(Custom Tab vs 외부 Chrome) 문제가 아님**
 - 결론: **Google/Android 쪽 화면 전환** 문제일 가능성 큼 (우리 JS 코드가 브라우저를 어떻게 여는지와 무관)
@@ -2997,7 +3036,7 @@ QR → Google로 시작하기 → 계정 선택 → **Expo Go 자동 복귀** �
 |---|---|
 | **결정** | User 위임 → 에이전트 판단: **§7.78~81 브라우저 패치 반복 실패** → **네이티브 전환**으로 근본 해결 시도 |
 | **Scope** | `@react-native-google-signin/google-signin` + `signInWithIdToken` · EAS Dev Client |
-| **상태** | **§7.84로 완료** — User实기 ✅ · 빌드 `a7ade9ee` |
+| **상태** | **§7.84로 완료** — User 실기 ✅ · 빌드 `a7ade9ee` |
 
 #### 코드 변경 (로컬 · 미커밋)
 
@@ -3131,7 +3170,7 @@ Gemini(x2) · Perplexity · ChatGPT 4개 답변 모두 동일 결론:
 | **Expo** | ✅ **Ctrl+C** → §0 **4줄 `--clear`** · QR 재연결 |
 | **User** | 일반 회원 로그인 → **Google로 시작하기** |
 
-#### User实기 (§0 — **cmd 블록 생략 금지**)
+#### User 실기 (§0 — **cmd 블록 생략 금지**)
 
 0) Metro **꺼져 있거나** QR 끊김 → §0 Expo 4줄
 
@@ -3151,7 +3190,7 @@ npx expo start --tunnel --port 8082 --clear
 4) **합격**
    - ✅ Google 계정 선택 → **홈** 진입
    - ✅ 프로필/주문 등 기존 플로우
-   - ⬜ User实기
+   - ⬜ User 실기
 
 #### 다음
 
@@ -3298,7 +3337,7 @@ https://cvrtobxkvpcpcxrcspdp.supabase.co/auth/v1/callback
 | **web** | ❌ Expo 재시작 불필요 · **Vercel 1~2min** · 알림 탭 재진입 |
 | **User** | × · 읽은/전체 삭제 · 홈 🔔 크래시 없음 |
 
-#### User实기 (§0 — **cmd 블록 생략 금지**)
+#### User 실기 (§0 — **cmd 블록 생략 금지**)
 
 0) Metro **꺼져 있거나** QR 연결 끊김 → §0 **Expo 4줄 `--clear`**
 
@@ -3319,7 +3358,7 @@ npx expo start --tunnel --port 8082 --clear
    - ✅ 홈 🔔 **Render Error 없음**
    - ✅ 알림 탭 — **×** 로 1건 삭제
    - ✅ **읽은 알림 삭제** / **전체 삭제**
-   - ⬜ User实기
+   - ⬜ User 실기
 
 #### 다음
 
@@ -3346,7 +3385,7 @@ npx expo start --tunnel --port 8082 --clear
 | **Expo** | ❌ **`r` 리로드**면 충분 |
 | **User** | 홈 🔔 · 마이 탭 뱃지 |
 
-#### User实기 (§0 — **cmd 블록 생략 금지**)
+#### User 실기 (§0 — **cmd 블록 생략 금지**)
 
 0) **앱 실기** — Metro **켜져 있으면 2) 생략** · **꺼져 있을 때만** §0 Expo 4줄
 
@@ -3365,7 +3404,7 @@ npx expo start --tunnel --port 8082 --clear
 
 4) **합격**
    - ✅ 홈에서 **1탭**으로 알림 목록
-   - ⬜ User实기
+   - ⬜ User 실기
 
 #### 다음
 
@@ -3394,7 +3433,7 @@ npx expo start --tunnel --port 8082 --clear
 | **Expo** | ⚠️ **신규 라우트** — Metro 켜져 있으면 **`r` 리로드** 또는 마이 재진입 · **꺼져 있을 때만** §0 4줄 |
 | **User** | Vercel **1~2min** · WebView 새로고침 |
 
-#### User实기 (§0 — **cmd 블록 생략 금지**)
+#### User 실기 (§0 — **cmd 블록 생략 금지**)
 
 0) **PC 웹만**이면 2)부터 · 앱 실기면 4)까지
 
@@ -3422,7 +3461,7 @@ npx expo start --tunnel --port 8082 --clear
 5) **합격**
    - ✅ 점주 거절·완료 반품 **이력**에서 카드 보임
    - ✅ 손님 알림 목록 · 탭 → 주문 상세
-   - ⬜ User实기
+   - ⬜ User 실기
 
 #### 다음
 
@@ -3453,7 +3492,7 @@ npx expo start --tunnel --port 8082 --clear
 | **Expo(Metro) 재시작** | ❌ **불필요** |
 | **User** | Vercel **1~2min** · WebView **Ctrl+F5** (앱 `/app/me` 구매 내역) |
 
-#### User实기 (§0 — **cmd 블록 생략 금지**)
+#### User 실기 (§0 — **cmd 블록 생략 금지**)
 
 0) **PC 웹만**이면 2)부터 · 앱 실기면 4)까지
 
@@ -3482,7 +3521,7 @@ npx expo start --tunnel --port 8082 --clear
    - ✅ **반품·교환 거절** 뱃지 + 빨간 줄 — 상세 안 열어도 보임
    - ✅ **반품·교환** 필터만 해당 주문
    - ✅ 행 탭 → 아코디언 상세 · 거절 건 **문의·반품·교환** 펼침
-   - ⬜ User实기
+   - ⬜ User 실기
 
 #### 다음
 
@@ -3510,7 +3549,7 @@ npx expo start --tunnel --port 8082 --clear
 | **Expo(Metro) 재시작** | ❌ **불필요** |
 | **User** | Vercel **1~2min** · WebView **Ctrl+F5** (앱 `/app/me` 구매 내역) |
 
-#### User实기 (§0 — **cmd 블록 생략 금지**)
+#### User 실기 (§0 — **cmd 블록 생략 금지**)
 
 0) **PC 웹만**이면 2)부터 · 앱 실기면 4)까지
 
@@ -3537,7 +3576,7 @@ npx expo start --tunnel --port 8082 --clear
 
 5) **합격**
    - ✅ 목록 **짧음** · **주문 상세**에 배송·결제·문의·반품·버튼
-   - ⬜ User实기
+   - ⬜ User 실기
 
 #### 다음
 
@@ -3545,11 +3584,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ---
 
-### 7.66 세션 인수인계 — **2026-09-01** (UX·필터·반품 카드 · User实기 ✅)
+### 7.66 세션 인수인계 — **2026-09-01** (UX·필터·반품 카드 · User 실기 ✅)
 
 | | |
 |---|---|
-| **Scope** | User 피드백 6건 + 손님 Realtime · §7.60~§7.65实기 **✅** |
+| **Scope** | User 피드백 6건 + 손님 Realtime · §7.60~§7.65실기 **✅** |
 | **1 재고** | 신규 상품 등록 폼에 **재고** 칸 추가 (`OwnerProductPanel`) |
 | **2 구매확정** | **배송 완료 후에만** 구매확정 버튼 · 배송 중=안내 배너 |
 | **3 날짜** | 전 탭·연결 이동 **A=매장 오픈일(`stores.created_at`) · B=오늘** |
@@ -3706,13 +3745,13 @@ npx expo start --tunnel --port 8082 --clear
 
 #### Expo 재시작 — **web-only** ❌
 
-#### User实기
+#### User 실기
 
 4) **점주** 발주·배송 → GUCCI-3 **문의 기록** → 문의 탭 이동 → **카드 반짝임** + **이력 모달**
 
 5) **점주** 주문 탭 들어가면 날짜 **2026-08-01 ~ 2026-08-31** 기본
 
-6) ⬜ User实기 **미확인**
+6) ⬜ User 실기 **미확인**
 
 ---
 
@@ -3748,7 +3787,7 @@ npx expo start --tunnel --port 8082 --clear
 | **Expo(Metro) 재시작** | ❌ **불필요** |
 | **User** | Vercel **1~2min** · PC **Ctrl+F5** |
 
-#### User实기
+#### User 실기
 
 4) **손님** 승인된 반품 건 → 구매 내역 카드 **주소 복사**
 
@@ -3756,7 +3795,7 @@ npx expo start --tunnel --port 8082 --clear
 
 6) **점주** 발주·배송 카드에 반품/문의 있으면 **「연결된 처리」** → 반품·교환·문의 탭 이동
 
-7) ⬜ User实기 **미확인**
+7) ⬜ User 실기 **미확인**
 
 #### 다음
 
@@ -3791,7 +3830,7 @@ npx expo start --tunnel --port 8082 --clear
 | **Expo(Metro) 재시작** | ❌ **불필요** |
 | **User** | Vercel **1~2min** · PC **Ctrl+F5** |
 
-#### User实기 (§0 — **cmd 블록 생략 금지**)
+#### User 실기 (§0 — **cmd 블록 생략 금지**)
 
 1) **Win → `cmd` → Enter**
 
@@ -3818,7 +3857,7 @@ npx expo start --tunnel --port 8082 --clear
 
 6) **손님** 반품 신청 다이얼로그 · 보류 주문 수량 — **± 버튼** 동작
 
-7) ⬜ User实기 **미확인**
+7) ⬜ User 실기 **미확인**
 
 #### 다음
 
@@ -3851,7 +3890,7 @@ npx expo start --tunnel --port 8082 --clear
 | **Expo(Metro) 재시작** | ❌ **불필요** |
 | **User** | Vercel **1~2min** · PC **Ctrl+F5** |
 
-#### User实기 (§0 — **cmd 블록 생략 금지**)
+#### User 실기 (§0 — **cmd 블록 생략 금지**)
 
 1) **Win → `cmd` → Enter**
 
@@ -3876,7 +3915,7 @@ npx expo start --tunnel --port 8082 --clear
 
 5) **점주** `demo@owner.com` / `demo` → 매장 관리 → **반품·교환** 탭 → **반품·교환 신청** → 승인/거절
 
-6) ⬜ User实기 **미확인**
+6) ⬜ User 실기 **미확인**
 
 #### 다음
 
@@ -3931,7 +3970,7 @@ npx expo start --tunnel --port 8082 --clear
 | **코드 변경** | ❌ (이번 세션) |
 | **Expo(Metro) 재시작** | ❌ |
 
-#### User实기 (§0 — **cmd 블록 생략 금지**)
+#### User 실기 (§0 — **cmd 블록 생략 금지**)
 
 → **§7.0 「사용자가 지금 해야 할 것」** 과 동일 (반품지 CRUD 실기)
 
@@ -5132,19 +5171,23 @@ npx expo start --tunnel --port 8082 --clear
 - **Changed:** `StoreShopPage` · `StoreShopCatalog` · `ProductDetailModal` · CSS · `ko.ts` · mobile `[storeId].tsx`
 - **Notes:** **Vercel 1~2min** · Expo **`--clear`**
 
-### 2026-10-13 — AD-088 홈 배ner 슬라이드 (§7.110)
-- **Changed:** `homeBanners.ts` · `HomePromoBanner.tsx` · `home.tsx` · §7.96 User实机 ✅
+### 2026-10-13 — AD-088 홈 배너 슬라이드 (§7.110)
+- **Changed:** `homeBanners.ts` · `HomePromoBanner.tsx` · `home.tsx` · §7.96 User 실기 ✅
 - **Notes:** **`apps/mobile`** · Expo **`--clear`**
 
 ### 2026-10-13 — 프로모·가챠 컴팩트 레이아웃 (§7.109c)
 - **Changed:** `owner-promo-gacha.css` · `OwnerPromotionPanel.tsx`
 - **Notes:** **`apps/web`** · Vercel **1~2min**
 
+### 2026-10-14 — §0 한국어 말하기·쓰기 규칙 + 문서 정리 (User)
+- **Changed:** §0 「한국어 말하기·쓰기」 신설 · HANDOFF 표기 정리(배ner·실기) · `ko.ts` · `popup-store-handoff.mdc`
+- **Notes:** 문서만 · 이후 채팅·브리핑도 §0 동일 적용
+
 ### 2026-10-14 — L1 sponsored_banners + 본사 등록 UI (§7.116)
 - **Changed:** migration `20261014_sponsored_banners_l1` · `sponsoredBanners.ts` · `PlatformHomeBannersPage` · `homeBanners.ts` · `HomePromoBanner` · `home.tsx` · `HomePage` · `ko.ts` · §7.116 · §59.5
 - **Notes:** **Expo ✅ `--clear`** · Vercel 1~2min · admin = `profiles.role`
 
-### 2026-10-14 — 홈 배ner 광고 소재·운영 정리 (§7.115 · §59)
+### 2026-10-14 — 홈 배너 광고 소재·운영 정리 (§7.115 · §59)
 - **Changed:** §7.115 · §7.110 · §59.2 · §7.0 — User: 본사 제작 **or** 광고주 완성본
 - **Notes:** 문서만 · 구현 ⬜
 
@@ -5229,7 +5272,7 @@ npx expo start --tunnel --port 8082 --clear
 - **Changed:** `20261012_iss048_store_order_counter.sql` · §6 ISS-045/046/049/051 정리
 - **Notes:** 원격 POPUP 적용 ✅ · **Expo ❌** · Vercel 불필요(DB-only) · PG 전 **동시 주문** smoke 권장
 
-### 2026-10-12 pm — §7.100 User实机 ✅ · ISS-052 §7.101 착수
+### 2026-10-12 pm — §7.100 User 실기 ✅ · ISS-052 §7.101 착수
 - **Notes:** User — 앱 **판매가·장바구니 안내** 확인 ✅ · **ISS-052** snapshot(104) · audit scripts · 원격 `ad090_drop`·`iss055` MCP 이력 보강 · **Expo ❌**
 
 ### 2026-10-12 pm — ISS-052 migration audit (snapshot · scripts)
@@ -5241,8 +5284,8 @@ npx expo start --tunnel --port 8082 --clear
 - **Notes:** **원인** = 「옵션 저장」만 누르면 **옵션만** DB 저장 · 판매가는 아래 **「저장」** 또는 (수정 후) **옵션 저장** 시 함께 반영 · **`apps/web`만** · Expo **재시작 ❌** · Vercel 1~2min + **Ctrl+F5**
 
 ### 2026-10-12 pm — ISS-053 장바구니 가격 갱신 (AD-068)
-- **Changed:** `refreshCartItemPrices.ts` · `CartContext.applyRefreshedItems` · `CartView` · `ko.ts` (`cart.priceUpdatedNotice`) · **§7.100** User实机
-- **Notes:** **`apps/web`만** · Expo(Metro) **재시작 ❌** · Metro **Ctrl+C 불필요** · Vercel **1~2min** · 장바구니 **탭 재진입** · User实机 = **§7.100** (§0 **PC 3줄 + Expo 4줄** 생략 금지)
+- **Changed:** `refreshCartItemPrices.ts` · `CartContext.applyRefreshedItems` · `CartView` · `ko.ts` (`cart.priceUpdatedNotice`) · **§7.100** User 실기
+- **Notes:** **`apps/web`만** · Expo(Metro) **재시작 ❌** · Metro **Ctrl+C 불필요** · Vercel **1~2min** · 장바구니 **탭 재진입** · User 실기 = **§7.100** (§0 **PC 3줄 + Expo 4줄** 생략 금지)
 
 ### 2026-10-12 pm — ISS-055 User: Auth (min 8 · HIBP Pro+)
 - **Notes:** **Sign In / Providers → Email** · **Minimum password length 8** Save ✅ · HIBP ON Save → **Pro Plans and up** (Free 차단 · User 확인) · **Expo ❌**
@@ -5264,10 +5307,10 @@ npx expo start --tunnel --port 8082 --clear
 - **Changed:** `20261012_iss047_place_order_idempotency.sql` · `checkoutIdempotency.ts` · `CartView` · `DisplayProductModal` · `orders.ts` · `ko.ts` · **AD-091** · **§7.99**
 - **Notes:** 원격 POPUP migration 적용 ✅ · **Expo 재시작 ❌** · Vercel + Ctrl+F5 · **PG(AD-061) 착수 시 §7.99 체크리스트 재검수 필수**
 
-### 2026-10-12 pm — §7.96 **엑셀 보류** (CEO 심현우 상의 ·实机 ❌)
+### 2026-10-12 pm — §7.96 **엑셀 보류** (CEO 심현우 상의 ·실기 ❌)
 - **Author:** User / Cursor Agent
 - **Changed:** §7.96 보류 블록 · §7.0 · §7.97 다음 · **다음 코드 = ISS-047**
-- **Notes:** User **재공유·「§7.96 재개」** 전까지 엑셀 추가 작업·实机 안내 **하지 않음**
+- **Notes:** User **재공유·「§7.96 재개」** 전까지 엑셀 추가 작업·실기 안내 **하지 않음**
 
 ### 2026-10-12 — §7.96 매뉴얼 **상품 vs 조합(한 행)** 구분 · 매 행 채우기 OK
 - **Changed:** `bulkUploadGuideFigures` · `OwnerProductBulkGuideModal` · `ko.ts` · 양식 `작성안내`/`그림예시`
@@ -5283,7 +5326,7 @@ npx expo start --tunnel --port 8082 --clear
 
 ### 2026-10-12 — §7.96 **엑셀 작성 매뉴얼**(시각) + 양식 `그림예시` 시트
 - **Changed:** `OwnerProductBulkGuideModal` · `public/guides/bulk-upload/*.svg` · 툴바 **「작성 매뉴얼」** · `styledTemplate` **「그림예시」** 시트 · 양식 **v1.1** · 예시 4행(이어쓰기) · `ko.ts`
-- **Notes:** **Expo 재시작 ❌** · Vercel + Ctrl+F5 · **양식 v1.1 다시 다운로드** · **다음 = User实机 §7.96**
+- **Notes:** **Expo 재시작 ❌** · Vercel + Ctrl+F5 · **양식 v1.1 다시 다운로드** · **다음 = User 실기 §7.96**
 
 ### 2026-10-12 — §7.96 **엑셀 업로드** (5행 힌트·이어쓰기·가격 쉼표)
 - **Changed:** `headerMap` `isInputHintRow` · `parseBulkProductXlsx` — **같은 상품코드 윗줄 상속**(이름·가격·이미지) · 옵션명 불일치 **안내 문구** · `styledTemplate` — **가격·재고 열 `#,##0`** · 작성안내 보강
@@ -5291,11 +5334,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ### 2026-10-12 — §7.96 **양식 다운로드 무반응** (ISS-065)
 - **Changed:** `styledTemplate.ts` — `작성안내` **mergeCells 1회** · 버퍼 캐시·preload · `OwnerProductBulkUpload` — **양식 준비 중…** · 실패 문구 · `ko.ts` · §6 ISS-065
-- **Notes:** **Expo 재시작 ❌** · Vercel 1~2min + **Ctrl+F5** · **엑셀 ▾** → **양식 다운로드** · **다음 = User实机 §7.96**
+- **Notes:** **Expo 재시작 ❌** · Vercel 1~2min + **Ctrl+F5** · **엑셀 ▾** → **양식 다운로드** · **다음 = User 실기 §7.96**
 
 ### 2026-10-12 late2 — §7.96 **엑셀 양식 스마트스토어형 꾸밈** (User 피드백)
 - **Changed:** `exceljs` · `styledTemplate.ts` — **타이틀/안내 밴드** · **헤더(3행)·필수·권장(4행)·입력힌트(5행)** · **칸 너비** · 테두리·zebra 예시 · autofilter · **`작성안내` 시트** 스타일 · `headerMap.ts` — 업로드 시 **헤더 동적 탐색** · legend/hint 행 스kip · 예시 이미지 URL 정리
-- **Notes:** **Expo 재시작 ❌** · Vercel + Ctrl+F5 · **「양식 다운로드」** 다시 받아서 열 너비·상단 5행 확인 · **다음 = User实机 §7.96**
+- **Notes:** **Expo 재시작 ❌** · Vercel + Ctrl+F5 · **「양식 다운로드」** 다시 받아서 열 너비·상단 5행 확인 · **다음 = User 실기 §7.96**
 
 ### 2026-10-12 late — §7.96 **엑셀 UI·양식** 개선 (User 피드백)
 - **Changed:** `OwnerProductBulkUpload` — **툴바 한 줄**(+ 새 상품 · 엑셀 ▾) · 펼치면 **판매 옵션 패널형 카드** · `downloadBulkProductTemplate` — **`작성안내` 시트** · 예시 3행(무옵션+옵션2) · **#예시** 자동 제외 · freeze 헤더 · 파일명 `POPUP-CUBE_상품일괄등록양식_v1.xlsx`
@@ -5304,17 +5347,17 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-12 pm — §7.96 **엑셀 일괄등록 v1** (다운로드·업로드)
 - **Author:** Cursor Agent / User
 - **Changed:** `xlsx` dep · `lib/bulkProductUpload/*` · `OwnerProductBulkUpload.tsx` · `OwnerProductPanel` · `products.ts`(`imageUrl`) · `owner-product-bulk-upload.css` · `ko.ts` · §7.96
-- **Notes:** **Expo 재시작 ❌** · Vercel 1~2min + Ctrl+F5 · 점주 **상품** 탭 → **엑셀 일괄 등록** · **다음 = User实机 §7.96** · 이후 **ISS-047** 또는 엑셀 v2
+- **Notes:** **Expo 재시작 ❌** · Vercel 1~2min + Ctrl+F5 · 점주 **상품** 탭 → **엑셀 일괄 등록** · **다음 = User 실기 §7.96** · 이후 **ISS-047** 또는 엑셀 v2
 
-### 2026-10-12 — §7.97 User实机 ✅ · AD-088 **판매자 상품코드**
+### 2026-10-12 — §7.97 User 실기 ✅ · AD-088 **판매자 상품코드**
 - **Author:** Cursor Agent / User
-- **Changed:** §7.97 User实机 **ISS-064 v2 확인 ✅** · **ISS-044** §6 정리(원격 `iss_audit` 이미 적용 · SKU 취소/거절 0건) · migration `20261012_ad088_product_code.sql` **원격 적용 ✅** · `types.ts` · `products.ts` · `OwnerProductPanel` · `ko.ts` · §7.96 매핑표
+- **Changed:** §7.97 User 실기 **ISS-064 v2 확인 ✅** · **ISS-044** §6 정리(원격 `iss_audit` 이미 적용 · SKU 취소/거절 0건) · migration `20261012_ad088_product_code.sql` **원격 적용 ✅** · `types.ts` · `products.ts` · `OwnerProductPanel` · `ko.ts` · §7.96 매핑표
 - **Notes:** **Expo 재시작 ❌** · Vercel 1~2min + Ctrl+F5 · **다음 = §7.96 엑셀 다운로드·업로드 파서**
 
 ### 2026-10-07 pm9 — ISS-064 v2 **옵션별 할인 표시**(쇼핑몰형) + 칸별 ±
 - **Author:** Cursor Agent / User
 - **Changed:** `skuOptionGroups.ts`(`optionValuePriceSuffix`) · `ProductDetailModal`(드롭다운 ± + 확정 시 `기본·옵션·판매가`) · `OwnerProductSkusEditor`(옵션값 아래 **칸별 ±**) · `productSkus.ts` · `types.ts`(`adjustment`) · `owner-product-skus.css` · `ko.ts` · migration `20261007c_iss064_option_value_adjustment.sql` **원격 적용 ✅** · §7.97 · §6 ISS-064
-- **Notes:** **Git `622d8d6`** · 행 ±만 쓰면 **가격이 갈리는 옵션 칸**에만 ± · **화이트 -5만 + XL +2,500** = **칸별 ±** · pm8(± 전부 숨김) **대체** · **Expo 재시작 ❌** (`apps/web`+`shared`+DB RPC) · Vercel 1~2min + Ctrl+F5 · User实机 = **§7.97** 5)~8)
+- **Notes:** **Git `622d8d6`** · 행 ±만 쓰면 **가격이 갈리는 옵션 칸**에만 ± · **화이트 -5만 + XL +2,500** = **칸별 ±** · pm8(± 전부 숨김) **대체** · **Expo 재시작 ❌** (`apps/web`+`shared`+DB RPC) · Vercel 1~2min + Ctrl+F5 · User 실기 = **§7.97** 5)~8)
 
 ### 2026-10-07 pm8 — ISS-064 손님 옵션 **할인 금액 중복 표시** (드롭다운) — pm9에서 **대체**
 - **Changed:** `ProductDetailModal` — 옵션명 **2개↑** 드롭다운에서 **± 문구 제거** · 조합 확정 후 **한 줄 판매가**만
@@ -5323,7 +5366,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-07 pm7 — ISS-063 **옵션 저장 실패** (주문 FK · DELETE ALL)
 - **Author:** Cursor Agent / User
 - **Changed:** migration `20261007b_save_owner_product_skus_no_delete_orders.sql` **원격 적용 ✅** · `OwnerProductSkusEditor` (비활성 SKU 편집표 제외 · 오류 코드별 문구) · `ko.ts`
-- **Notes:** **원인** = AD-090 저장 RPC가 **옵션 전부 지우고 다시 넣기** → **이미 주문된 옵션 SKU**는 DB가 **지우지 못함** · **Expo 재시작 ❌** · **DB는 이미 반영** → **Vercel 1~2분 + Ctrl+F5** 후 **옵션 저장** 재시도 · §7.97 User实机
+- **Notes:** **원인** = AD-090 저장 RPC가 **옵션 전부 지우고 다시 넣기** → **이미 주문된 옵션 SKU**는 DB가 **지우지 못함** · **Expo 재시작 ❌** · **DB는 이미 반영** → **Vercel 1~2분 + Ctrl+F5** 후 **옵션 저장** 재시도 · §7.97 User 실기
 
 ### 2026-10-07 pm6 — §7.96 **판매자센터 탭 = 엑셀 업로드 동일 데이터** 인수인계 보강
 - **Author:** Cursor Agent / User
@@ -5403,7 +5446,7 @@ npx expo start --tunnel --port 8082 --clear
 - **Author:** Cursor Agent (Composer 2.5 Fast · **작업 채팅**)
 - **Changed:** `20261002_iss_audit_p0_p1_fixes.sql` · `20261002b_iss_place_order_lock.sql` · `CartView`/`CartContext` (ISS-047/050) · `place_order` repo 동기화
 - **DB:** POPUP **`iss_audit_p0_p1_fixes`** 원격 적용 ✅ (044/045/046/049) · **`20261002b` 원격 ⬜**
-- **Notes:** ISS-052/053/054/055 · ISS-044 **역대 오염 집계·보정** · AD-085 **User实机** ⬜
+- **Notes:** ISS-052/053/054/055 · ISS-044 **역대 오염 집계·보정** · AD-085 **User 실기** ⬜
 
 ### 2026-10-02 pm5 — **§63 1차 감사 결과** (읽기 전용 · ISS-044~055 · P0 3건)
 - **Author:** Cursor Agent (**감사 채팅** — 작업 채팅과 분리)
@@ -5421,9 +5464,9 @@ npx expo start --tunnel --port 8082 --clear
 - **Changed:** `product_skus` migrations · `place_order`/`get_*_orders` · `OwnerProductSkusEditor` · `ProductDetailModal` · Cart · `ko.ts` · §7.91
 - **Notes:** POPUP Supabase migration 4건 원격 적용. **User 옵션 실기 ⬜** (§7.91). Vercel = push 후 web 빌드.
 
-### 2026-10-02 pm2 — §7.90 User实机 ✅ · AD-085 착수 (§7.91)
+### 2026-10-02 pm2 — §7.90 User 실기 ✅ · AD-085 착수 (§7.91)
 - **Author:** Cursor Agent / User
-- **Changed:** §7.0 · §7.90实机 ✅ · §7.91 · AD-085 · `product_skus` migration (진행)
+- **Changed:** §7.0 · §7.90실기 ✅ · §7.91 · AD-085 · `product_skus` migration (진행)
 - **Notes:** 다음 = 옵션 E2E 실기 ⬜
 
 ### 2026-10-02 pm — KPI 카피·점주 /home D-day (§7.90)
@@ -5444,7 +5487,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-09-29 pm2 — 점주 KPI·상품별 통계 (§7.90 · AD-084)
 - **Author:** Cursor Agent / User
 - **Changed:** migration `20260929_store_kpi_ad084.sql` · `storeKpi.ts` · `OwnerStoreKpiStrip` · `OwnerProductSalesPanel` · `HomePage` · `OwnerProductPanel` · `ko.ts` · §7.90 · §7.0
-- **Notes:** Supabase POPUP **✅** · **§7.89 User实机 ✅** · **Git `2922a21` pushed** · **Expo ❌** · §0 PC 3줄 실기 ⬜
+- **Notes:** Supabase POPUP **✅** · **§7.89 User 실기 ✅** · **Git `2922a21` pushed** · **Expo ❌** · §0 PC 3줄 실기 ⬜
 
 ### 2026-09-29 pm — 닉네임 변경 카피 (§7.89)
 - **Changed:** mobile `ko.ts` — placeholder · hint (TMI 제거)
@@ -5500,7 +5543,7 @@ npx expo start --tunnel --port 8082 --clear
 - **Changed:** HANDOFF §7.85 · §7.0 PG FAQ 표 · 런칭 게이트 3b
 - **Notes:** 다매장 **결제 1번→정산 분할** · **POS v1 ❌** · **입점 정산 계좌** · **Expo ❌** · `apps/mobile/.gitignore` (Expo debris)
 
-### 2026-09-09 — Google native sign-in + Dev Client User实기 ✅ (§7.84 · AD-079)
+### 2026-09-09 — Google native sign-in + Dev Client User 실기 ✅ (§7.84 · AD-079)
 - **Author:** Cursor Agent + User
 - **Changed:** `googleSignInNative.ts` · `oauthQueryParams.ts` · `oauthRedirect.ts` · `oauthExchange.ts` · `AuthContext.tsx` · `app.config.ts` · `package.json` · `.env` · EAS builds · HANDOFF §7.84 · ISS-040/041/042
 - **Notes:** Expo Go Gmail ISS **Dev Client 네이티브로 우회 ✅** · ExpoCrypto/JWT clock skew 해결 · git **`15dbb4a`** · 실기: §7.84 Dev Client 4줄
@@ -5508,9 +5551,9 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-09-08 pm2 — OAuth stale URL + error flash fix (§7.79)
 - **Author:** Cursor Agent + User
 - **Changed:** `oauthExchange.ts` · `googleSignIn.ts` · `AuthContext.tsx` · `login.tsx` · HANDOFF
-- **Notes:** 반복 로그인 Gmail·빨간 오류 flash 원인 수정 · **User实기 ⬜**
+- **Notes:** 반복 로그인 Gmail·빨간 오류 flash 원인 수정 · **User 실기 ⬜**
 
-### 2026-09-08 pm — ISS-040 Resolved · User实기 ✅ (§7.78)
+### 2026-09-08 pm — ISS-040 Resolved · User 실기 ✅ (§7.78)
 - **Author:** Cursor Agent + User
 - **Changed:** HANDOFF §7.78 · ISS-040 · §7.0
 - **Notes:** User **2026-09-08** — `openBrowserAsync` 후 Google → **홈 ✅** · **commit ⬜**
@@ -5518,17 +5561,17 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-09-08 pm — ISS-040 openBrowserAsync 전환 (§7.78)
 - **Author:** Cursor Agent + User
 - **Changed:** `googleSignIn.ts` · `oauthExchange.ts` · `login.tsx` · `ko.ts` · HANDOFF §7.78
-- **Notes:** §7.77 **❌** 무한로딩 동일 · `openAuthSessionAsync` 제거 · **User实기 ⬜** · **미커밋**
+- **Notes:** §7.77 **❌** 무한로딩 동일 · `openAuthSessionAsync` 제거 · **User 실기 ⬜** · **미커밋**
 
 ### 2026-09-08 — Google OAuth UX 안정화 (AD-078 §7.77)
 - **Author:** Cursor Agent
 - **Changed:** `oauthExchange.ts` · `googleSignIn.ts` · `login-callback.tsx` · `login.tsx` · HANDOFF §7.77
-- **Notes:** deep link coordinator · flow mutex · Android warmUp · `prompt=select_account` · **User实기 ⬜** · **미커밋**
+- **Notes:** deep link coordinator · flow mutex · Android warmUp · `prompt=select_account` · **User 실기 ⬜** · **미커밋**
 
 ### 2026-09-04 — Google OAuth 상태 정정 (§7.76 · ISS-040 Open)
 - **Author:** Cursor Agent + User
 - **Changed:** HANDOFF §7.76 · §7.0 · §5 · ISS-041 Notes
-- **Notes:** User **2026-09-04** — **완전 해결 ❌** · 메일/Gmail 화면·무한로딩·뒤로가기 **간헐** 로그인만 · 이전 「User实기 ✅」 표기 **철회**
+- **Notes:** User **2026-09-04** — **완전 해결 ❌** · 메일/Gmail 화면·무한로딩·뒤로가기 **간헐** 로그인만 · 이전 「User 실기 ✅」 표기 **철회**
 
 ### 2026-09-02 — Google OAuth 간헐 성공 (AD-078 §7.76 · ISS-040/041)
 - **Author:** Cursor Agent + User
@@ -5538,7 +5581,7 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-09-01 — Google sign-in button + OAuth flow (AD-078 Phase 1)
 - **Author:** Cursor Agent
 - **Changed:** `googleSignIn.ts` · `login-callback.tsx` · `login.tsx` · `AuthContext` · §7.73
-- **Notes:** git **`d713567`** · Google console **✅** · Kakao **⏸️** · **Expo ✅ `--clear`** · User实기 ⬜
+- **Notes:** git **`d713567`** · Google console **✅** · Kakao **⏸️** · **Expo ✅ `--clear`** · User 실기 ⬜
 
 ### 2026-09-01 — AD-078 Phase 0 OAuth developer console registration guide
 - **Author:** Cursor Agent
@@ -5548,47 +5591,47 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-09-01 — Notification row dismiss: corner × (no divider column)
 - **Author:** Cursor Agent
 - **Changed:** `NotificationsPanel` CSS · §7.71
-- **Notes:** **Expo ❌** · **Vercel 1~2min** · User实기 ⬜
+- **Notes:** **Expo ❌** · **Vercel 1~2min** · User 실기 ⬜
 
 ### 2026-09-01 — Notification delete confirm: in-app modal (no WebView URL leak)
 - **Author:** Cursor Agent
 - **Changed:** `ShopperConfirmDialog` · `NotificationsPanel` · §7.71
-- **Notes:** **Expo ❌** · **Vercel 1~2min** · User实기 ⬜
+- **Notes:** **Expo ❌** · **Vercel 1~2min** · User 실기 ⬜
 
 ### 2026-09-01 — Shopper notification delete + Realtime duplicate channel fix
 - **Author:** Cursor Agent
 - **Changed:** `NotificationsPanel` · delete RPCs · `ShopperNotificationBadgeContext` · §7.71
-- **Notes:** git **`7143e13`** · POPUP RPC **✅** · **Expo ✅ `--clear`** (mobile Context) · web **Vercel 1~2min** · User实기 ⬜
+- **Notes:** git **`7143e13`** · POPUP RPC **✅** · **Expo ✅ `--clear`** (mobile Context) · web **Vercel 1~2min** · User 실기 ⬜
 
 ### 2026-09-01 — Home notification bell + My tab unread badge (Coupang-style)
 - **Author:** Cursor Agent
 - **Changed:** `ShopperNotificationBell` · `home.tsx` · `ShopperBottomNav` · §7.70
-- **Notes:** git **`8aec67d`** · **Expo ❌** (`r` 리로드) · User实기 ⬜
+- **Notes:** git **`8aec67d`** · **Expo ❌** (`r` 리로드) · User 실기 ⬜
 
 ### 2026-09-01 — Owner return history filter + shopper notifications tab (AD-076)
 - **Author:** Cursor Agent
 - **Changed:** `OwnerReturnsPanel` · `NotificationsPanel` · `ShopperAccountPage` · mobile `me/notifications` · migration `20260901_shopper_notifications_ad076.sql` · §7.69
-- **Notes:** git **`4d3b264`** · POPUP RPC **✅** · **Expo ⚠️ 신규 라우트** · User实기 ⬜
+- **Notes:** git **`4d3b264`** · POPUP RPC **✅** · **Expo ⚠️ 신규 라우트** · User 실기 ⬜
 
 ### 2026-09-01 — Shopper order history Ably-style UX + return-rejected findability
 - **Author:** Cursor Agent
 - **Changed:** `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · `ShopperOrderCardLight` · `ShopperAccordionSection` · `shopperOrderListFilters` · `OrderHistoryPanel` · CSS · i18n · §7.68
-- **Notes:** git **`65b29f7`** · **Expo ❌** · User实기 ⬜
+- **Notes:** git **`65b29f7`** · **Expo ❌** · User 실기 ⬜
 
 ### 2026-09-01 — Shopper order history Coupang-style compact list + detail sheet
 - **Author:** Cursor Agent
 - **Changed:** `ShopperOrderRowCompact` · `ShopperOrderDetailSheet` · `shopperOrderListUtils` · `OrderHistoryPanel` · CSS · §7.67
-- **Notes:** git **`ccacbf7`** · **Expo ❌** · User实기 ⬜
+- **Notes:** git **`ccacbf7`** · **Expo ❌** · User 실기 ⬜
 
-### 2026-09-01 — HANDOFF §7.66 session close (cmd blocks · §7.0 · User实기)
+### 2026-09-01 — HANDOFF §7.66 session close (cmd blocks · §7.0 · User 실기)
 - **Author:** Cursor Agent
-- **Changed:** HANDOFF §7.0 · §7 「사용자가 지금 해야 할 것」 · §7.66 User实기 cmd · §5
+- **Changed:** HANDOFF §7.0 · §7 「사용자가 지금 해야 할 것」 · §7.66 User 실기 cmd · §5
 - **Notes:** §7.66 full §0 cmd · User **「느낌 좋음」** ✅ · **Expo ❌** · 다음 **AD-076**
 
 ### 2026-09-01 — Owner/shopper return UX, store-open date filter, purchase confirm flow
 - **Author:** Cursor Agent
 - **Changed:** `OwnerProductPanel` · `OrderReturnSection` · `OrderReturnRequestDialog` · `ownerOrderFilters` · `useShopperOrderRealtime` · migration `20260901_return_evidence_urls.sql` · §7.66 · §0
-- **Notes:** git **`ffa614f`** · HANDOFF **`33a3de6`** · User §7.60~§7.66实기 ✅ · **Expo ❌**
+- **Notes:** git **`ffa614f`** · HANDOFF **`33a3de6`** · User §7.60~§7.66실기 ✅ · **Expo ❌**
 
 ### 2026-08-31 — Focus scroll once per link navigation (no re-scroll on search clear)
 - **Author:** Cursor Agent
@@ -5627,8 +5670,8 @@ npx expo start --tunnel --port 8082 --clear
 
 ### 2026-08-28 — HANDOFF §7.0·§7.58·§7.59 정리 (R2 착수 준비)
 - **Author:** Cursor Agent
-- **Changed:** §7.0 User实기 · §7.48·§7.49 · AD-076 상태 · §7.59 R2 체크리스트
-- **Notes:** **Expo 재시작 ❌** · 반품지 User实기 ⬜ · **다음 = AD-073 R2** · git **`8371f4e`**
+- **Changed:** §7.0 User 실기 · §7.48·§7.49 · AD-076 상태 · §7.59 R2 체크리스트
+- **Notes:** **Expo 재시작 ❌** · 반품지 User 실기 ⬜ · **다음 = AD-073 R2** · git **`8371f4e`**
 
 ### 2026-08-28 — AD-076 store_return_addresses + OwnerReturnAddressPanel
 - **Author:** Cursor Agent
@@ -5640,9 +5683,9 @@ npx expo start --tunnel --port 8082 --clear
 - **Changed:** AD-078 · §33.1 · §7.57 · §7.0 · §22 · §23 · mobile checklist
 - **Notes:** **구현 ❌** · 카카오·네이버·구글 · **OAuth 무료** · **PG 전 P1** · 손님 앱 우선
 
-### 2026-08-27 — AD-076 AddressSearch User实기 OK (mobile embed)
+### 2026-08-27 — AD-076 AddressSearch User 실기 OK (mobile embed)
 - **Author:** User / Cursor Agent
-- **Changed:** §7.56 · §7.0 User实기 ✅
+- **Changed:** §7.56 · §7.0 User 실기 ✅
 - **Notes:** **모바일 WebView 주소검색 ✅** · **`cfd86d0`** · **Expo 재시작 ❌** · 다음 **store_return_addresses**
 
 ### 2026-08-27 — AD-076 AddressSearch UI + WebView embed modal
@@ -5660,9 +5703,9 @@ npx expo start --tunnel --port 8082 --clear
 - **Changed:** `AddressSearch.tsx` · `daumPostcode.ts` · `AddressFormFields.tsx` · `ko.ts` · §7.55 · §34
 - **Notes:** **Expo 재시작 ❌** · 마이 배송지 + 결제 신규 주소 · DB 변경 없음 · **다음 = store_return_addresses**
 
-### 2026-08-27 — AD-077 User实기 OK · AddressSearch next (§7.54)
+### 2026-08-27 — AD-077 User 실기 OK · AddressSearch next (§7.54)
 - **Author:** Cursor Agent / User
-- **Changed:** §7.0 · §7.54 · AD-077 User实기 ✅ · §7.48 R1.5 · 권장 작업 순서 고정
+- **Changed:** §7.0 · §7.54 · AD-077 User 실기 ✅ · §7.48 R1.5 · 권장 작업 순서 고정
 - **Notes:** **구현 ❌** · User **문의 기록 확인 ✅** · **다음 = AddressSearch** (알림 탭 후순) · **Expo 재시작 ❌**
 
 ### 2026-08-27 — AD-077 R1.5 inquiry history and timestamps (implementation)
@@ -5974,7 +6017,7 @@ npx expo start --tunnel --port 8082 --clear
 
 ### 2026-08-13 — AD-064 수익 모델 · 월드 = B2B 마케팅 (§59)
 - **Author:** Cursor Agent (User 전략)
-- **User 결정:** 월드 = **유료 브랜드 홍보**(배ner·스폰서 팝업존) · 에이블리형 **광고 수익** · v1 **쇼핑몰** 과 **분리**
+- **User 결정:** 월드 = **유료 브랜드 홍보**(배너·스폰서 팝업존) · 에이블리형 **광고 수익** · v1 **쇼핑몰** 과 **분리**
 - **Changed:** AD-064 · §59 · §1 Core Value · §58.3a · layout 탭 = 스폰서는 플랫폼 제작(v2+)
 - **Notes:** v1 런칭 블로커 **아님** — §58 #1~#9 우선 · L3 스폰서 월드 = v2
 
@@ -8337,7 +8380,7 @@ Wave D (플랫폼)   →  기획전  +  타겟 메시지  (트래픽·Admin 후)
 - **v1 런칭:** **[A] 쇼핑몰** 필수 · **[B] 배너**는 수동(운영이 이미지 올림)만 해도 됨
 - **v2:** **[B] 월드** = **프리미엄 광고 상품** (브랜드 캠페인 N주)
 
-**L1 배ner 소재 (User 2026-10-14 — §7.115):** 슬롯에 올리는 것 = **완성 배ner 이미지**. **본사 제작** 또는 **광고주 제공본** → 본사 **등록·노출**. (상품 썸네일만 자동으로 메인 34장처럼 쓰는 모델 **❌** · v1.5 전까지는 §7.110 **자동 썸네일**만.)
+**L1 배너 소재 (User 2026-10-14 — §7.115):** 슬롯에 올리는 것 = **완성 배너 이미지**. **본사 제작** 또는 **광고주 제공본** → 본사 **등록·노출**. (상품 썸네일만 자동으로 메인 34장처럼 쓰는 모델 **❌** · v1.5 전까지는 §7.110 **자동 썸네일**만.)
 
 ### 59.3 제품 티어 (초안)
 
@@ -8382,10 +8425,10 @@ Wave D (플랫폼)   →  기획전  +  타겟 메시지  (트래픽·Admin 후)
 | 수익 축 | 성격 | GMV 작을 때 |
 |---|---|---|
 | **[A] 커merce** | 위탁 판매 · PG 정산 · (장기) **거래 수수료** | GMV 커져야 의미 |
-| **[B] 마케팅** | 홈 **배ner** · **스폰서 팝업존(월드)** · 캠페인 **기간 패키지** | **GMV와 무관** · B2B **선불** |
+| **[B] 마케팅** | 홈 **배너** · **스폰서 팝업존(월드)** · 캠페인 **기간 패키지** | **GMV와 무관** · B2B **선불** |
 
 **→ 월드를 「무료 체험형 쇼핑 공간」**으로 풀면: 정책상 PG만 쓰면서 **고정비는 계속** → **Unit economics 악화**.  
-**→ 월드를 「유료 홍보 SKU」**로 두면: **브랜드 마케팅비**가 **인프라·개발 상각**에 기여 · **에이블리 배ner**와 **같은 축** · **손님 쇼핑(§58)** 과 **역할 분리**로 Google·UX도 맞음.
+**→ 월드를 「유료 홍보 SKU」**로 두면: **브랜드 마케팅비**가 **인프라·개발 상각**에 기여 · **에이블리 배너**와 **같은 축** · **손님 쇼핑(§58)** 과 **역할 분리**로 Google·UX도 맞음.
 
 **내부 정렬 문장:** 「우리는 **몰로 팔고**, **월드는 돈 받고 홍보해준다**. PG만으로는 **플랫폼이 안 남는다** — **광고·스폰서가 두 번째 엔진**.»
 
