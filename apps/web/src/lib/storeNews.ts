@@ -1,3 +1,4 @@
+import type { Area } from 'react-easy-crop';
 import { supabase } from './supabase';
 
 export interface StoreNewsPost {
@@ -5,6 +6,7 @@ export interface StoreNewsPost {
   title: string | null;
   body: string | null;
   image_url: string | null;
+  image_crop: Area | null;
   link_product_id: string | null;
   sort_order: number;
   created_at: string;
@@ -32,7 +34,7 @@ export async function getStoreNewsForShop(storeId: string, limit = 12): Promise<
 export async function listOwnerStoreNewsPosts(storeId: string): Promise<StoreNewsPost[]> {
   const { data, error } = await supabase
     .from('store_news_posts')
-    .select('id, title, body, image_url, link_product_id, sort_order, created_at, is_active')
+    .select('id, title, body, image_url, image_crop, link_product_id, sort_order, created_at, is_active')
     .eq('store_id', storeId)
     .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false });
@@ -65,6 +67,7 @@ export async function insertOwnerStoreNewsPost(
   storeId: string,
   payload: {
     image_url: string;
+    image_crop?: Area | null;
     link_product_id: string | null;
     is_active: boolean;
     sort_order: number;
@@ -75,6 +78,7 @@ export async function insertOwnerStoreNewsPost(
     title: '',
     body: null,
     image_url: payload.image_url.trim(),
+    image_crop: payload.image_crop ?? null,
     link_product_id: payload.link_product_id,
     is_active: payload.is_active,
     sort_order: payload.sort_order,
@@ -88,6 +92,7 @@ export async function updateOwnerStoreNewsPost(
     title: string;
     body: string | null;
     image_url: string | null;
+    image_crop: Area | null;
     link_product_id: string | null;
     is_active: boolean;
     sort_order: number;
@@ -97,6 +102,7 @@ export async function updateOwnerStoreNewsPost(
   if (payload.title !== undefined) patch.title = payload.title.trim();
   if (payload.body !== undefined) patch.body = payload.body?.trim() || null;
   if (payload.image_url !== undefined) patch.image_url = payload.image_url?.trim() || null;
+  if (payload.image_crop !== undefined) patch.image_crop = payload.image_crop;
   if (payload.link_product_id !== undefined) patch.link_product_id = payload.link_product_id;
   if (payload.is_active !== undefined) patch.is_active = payload.is_active;
   if (payload.sort_order !== undefined) patch.sort_order = payload.sort_order;

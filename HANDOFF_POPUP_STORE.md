@@ -2448,7 +2448,7 @@ npx supabase db pull
 |---|---|
 | **회의** | 벤치 **8** — **마켓 새 소식** · **관련 태그** · **태그 전체보기** (`2026.10.02_회의_내용.txt`) |
 | **DB** | `product_tags` · `store_news_posts` · RPC `get_product_tags` · `get_store_news_for_shop` · owner `save_owner_product_tags` · migration `20261013_ad088_product_tags_store_news` **원격 ✅** |
-| **점주** | 상품 수정 — **상품 태그** · **운영·배송** — **매장 새 소식** = **사진·GIF**(5MB · jpg/png/webp/gif) · **탭 이동** = 매장 홈 **or** 연결 상품 · 최대 12 |
+| **점주** | **매장 새 소식** = **사진·GIF** · **1:1 영역 맞추기**(대표 사진과 동일 UX) · §7.119 |
 | **손님** | `ProductDetailInfiniteCarousel` — **매장 새 소식** · **이 매장의 다른 상품**(· **함께 추천**) 동일 UI · **자동 슬로우 + 드래그** · 소식 탭 → 상품 or 매장 |
 | **DB** | `store_news_posts.image_url` · `link_product_id` · RPC `get_store_news_for_shop` 갱신 · migration `20261014_store_news_media_carousel` **원격 ✅** |
 | **2차** | 태그 **검색·필터** · 홈 피드 연동 ⏸ |
@@ -2467,7 +2467,7 @@ npx supabase db pull
 |---|---|
 | **캐러셀** | `ProductDetailInfiniteCarousel` — 자동 슬로우 · **가로 드래그만** 조작(세로 스크롤과 구분) |
 | **뒤로가기** | `StoreShopCatalog` **`detailStack`** · §62.4 |
-| **소식 업로드** | `ImageCropDialog` **1:1** · **GIF** = 크롭 없이 원본 |
+| **소식 업로드** | `ImageCropDialog` **1:1** · **JPEG** = 잘라 저장 · **GIF** = 원본 + `image_crop` JSON(보이는 %) |
 | **규칙** | 상세·피드 **탭 이동** = **스택 + pop** (앞으로 동일) |
 
 #### Expo 재시작
@@ -5306,6 +5306,11 @@ npx expo start --tunnel --port 8082 --clear
 ### 2026-10-14 — 홈 배너 광고 소재·운영 정리 (§7.115 · §59)
 - **Changed:** §7.115 · §7.110 · §59.2 · §7.0 — User: 본사 제작 **or** 광고주 완성본
 - **Notes:** 문서만 · 구현 ⬜
+
+### 2026-10-14 — GIF 소식 영역 맞추기 image_crop (§7.119)
+- **Author:** Cursor Agent
+- **Changed:** `ImageCropDialog` framing mode · `CroppedSquareMedia` · `OwnerStoreNewsEditor` · migration `20261014_store_news_image_crop.sql` · §7.119
+- **Notes:** **POPUP DB ✅** · GIF **「보이는 영역 다시 맞추기」** · **`apps/web` only**
 
 ### 2026-10-14 — 상세 캐러셀·뒤로가기·소식 크롭 (§7.119 · §62.4)
 - **Author:** Cursor Agent

@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Product } from '@popup-cube/shared';
+import type { Area } from 'react-easy-crop';
 import { STORE_NEWS_CARD_ASPECT } from '../lib/cropImage';
+import { parseImageCropPercent } from '../lib/mediaCropDisplay';
 import { useAuth } from '../context/AuthContext';
-import { ImageCropDialog } from './ImageCropDialog';
+import { CroppedSquareMedia } from './CroppedSquareMedia';
+import { ImageCropDialog, type ImageCropDialogResult } from './ImageCropDialog';
 import { listMyProducts } from '../lib/products';
 import type { StoreNewsPost } from '../lib/storeNews';
 import {
@@ -31,7 +34,10 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const replaceTargetRef = useRef<string | null>(null);
+  const pendingUploadRef = useRef<File | null>(null);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropExportMode, setCropExportMode] = useState<'file' | 'framing'>('file');
+  const [cropInitialArea, setCropInitialArea] = useState<Area | undefined>(undefined);
 
   useEffect(() => {
     return () => {
@@ -69,14 +75,14 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
     });
   }
 
-  async function persistUploadedFile(file: File, replaceId: string | null) {
+  async function persistUploadedFile(file: File, replaceId: string | null, imageCrop: Area | null) {
     if (!userId) return;
 
     if (replaceId) {
       setBusyId(replaceId);
       try {
         const url = await uploadStoreNewsMedia(userId, storeId, file);
-        await updateOwnerStoreNewsPost(replaceId, { image_url: url });
+        await updateOwnerStoreNewsPost(replaceId, { image_url: url, image_crop: imageCrop });
         await reload();
       } catch {
         setError(t('ownerStoreNews.saveError'));
@@ -92,6 +98,7 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
       const url = await uploadStoreNewsMedia(userId, storeId, file);
       await insertOwnerStoreNewsPost(storeId, {
         image_url: url,
+        image_crop: imageCrop,
         link_product_id: null,
         is_active: true,
         sort_order: posts.length,
@@ -104,6 +111,15 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
     }
   }
 
+  function openCropUi(src: string, mode: 'file' | 'framing', initial?: Area) {
+    setCropExportMode(mode);
+    setCropInitialArea(initial);
+    setCropSrc((prev) => {
+      if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+      return src;
+    });
+  }
+
   async function handleFileSelected(file: File | undefined) {
     if (!file || !userId) return;
     if (file.size > MAX_STORE_NEWS_MEDIA_BYTES) {
@@ -112,26 +128,54 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
     }
 
     setError(null);
-
-    if (file.type === 'image/gif') {
-      const replaceId = replaceTargetRef.current;
-      replaceTargetRef.current = null;
-      await persistUploadedFile(file, replaceId);
-      return;
-    }
-
-    const url = URL.createObjectURL(file);
-    setCropSrc((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return url;
-    });
+    pendingUploadRef.current = file;
+    const isGif = file.type === 'image/gif';
+    openCropUi(URL.createObjectURL(file), isGif ? 'framing' : 'file');
   }
 
-  async function handleCropped(file: File) {
+  function openReframeCrop(post: StoreNewsPost) {
+    if (!post.image_url) return;
+    replaceTargetRef.current = post.id;
+    pendingUploadRef.current = null;
+    openCropUi(
+      post.image_url,
+      'framing',
+      parseImageCropPercent(post.image_crop) ?? undefined,
+    );
+  }
+
+  async function handleCropConfirm(result: ImageCropDialogResult) {
     const replaceId = replaceTargetRef.current;
     replaceTargetRef.current = null;
     closeCrop();
-    await persistUploadedFile(file, replaceId);
+
+    if (result.kind === 'file') {
+      pendingUploadRef.current = null;
+      await persistUploadedFile(result.file, replaceId, null);
+      return;
+    }
+
+    const crop = result.cropPercent;
+    const pending = pendingUploadRef.current;
+    pendingUploadRef.current = null;
+
+    if (pending) {
+      await persistUploadedFile(pending, replaceId, crop);
+      return;
+    }
+
+    if (replaceId) {
+      setBusyId(replaceId);
+      setError(null);
+      try {
+        await updateOwnerStoreNewsPost(replaceId, { image_crop: crop });
+        await reload();
+      } catch {
+        setError(t('ownerStoreNews.saveError'));
+      } finally {
+        setBusyId(null);
+      }
+    }
   }
 
   async function patchLink(postId: string, linkProductId: string | null) {
@@ -221,7 +265,7 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
                 </div>
                 <div style={styles.previewWrap}>
                   {post.image_url ? (
-                    <img src={post.image_url} alt="" style={styles.previewImg} />
+                    <CroppedSquareMedia src={post.image_url} crop={post.image_crop} />
                   ) : (
                     <div style={styles.previewPlaceholder}>{t('ownerStoreNews.noImageYet')}</div>
                   )}
@@ -234,6 +278,16 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
                 >
                   {post.image_url ? t('ownerStoreNews.changeImage') : t('ownerStoreNews.uploadImage')}
                 </button>
+                {post.image_url && (
+                  <button
+                    type="button"
+                    style={styles.secondaryBtn}
+                    disabled={busyId === post.id}
+                    onClick={() => openReframeCrop(post)}
+                  >
+                    {t('ownerStoreNews.reframeCrop')}
+                  </button>
+                )}
                 <label style={styles.label}>{t('ownerStoreNews.linkLabel')}</label>
                 <select
                   style={styles.select}
@@ -275,11 +329,14 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
           aspect={STORE_NEWS_CARD_ASPECT}
           title={t('imageCrop.storeNewsTitle')}
           previewHint={t('imageCrop.storeNewsHint')}
+          exportMode={cropExportMode}
+          initialCroppedAreaPercentages={cropInitialArea}
           onCancel={() => {
             replaceTargetRef.current = null;
+            pendingUploadRef.current = null;
             closeCrop();
           }}
-          onConfirm={handleCropped}
+          onConfirm={handleCropConfirm}
         />
       )}
     </div>

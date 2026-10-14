@@ -209,7 +209,9 @@ export function CreateStorePage() {
           title={t('imageCrop.storeTitle')}
           previewHint={t('imageCrop.storeHint')}
           onCancel={closeCrop}
-          onConfirm={applyCropped}
+          onConfirm={(result) => {
+            if (result.kind === 'file') applyCropped(result.file);
+          }}
         />
       )}
     </div>

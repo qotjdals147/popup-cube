@@ -113,7 +113,9 @@ export function OwnerStoreThumbnailField({ userId, store, onUpdated }: OwnerStor
           title={t('imageCrop.storeTitle')}
           previewHint={t('imageCrop.storeHint')}
           onCancel={closeCrop}
-          onConfirm={handleCropped}
+          onConfirm={(result) => {
+            if (result.kind === 'file') void handleCropped(result.file);
+          }}
         />
       )}
     </div>

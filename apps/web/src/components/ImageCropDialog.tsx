@@ -5,13 +5,20 @@ import { getCroppedImageBlob, STORE_THUMBNAIL_ASPECT } from '../lib/cropImage';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 
+export type ImageCropDialogResult =
+  | { kind: 'file'; file: File }
+  | { kind: 'framing'; cropPercent: Area };
+
 interface ImageCropDialogProps {
   imageSrc: string;
   title: string;
   aspect?: number;
   previewHint?: string;
+  /** file = JPEG로 잘라 저장 · framing = 원본 유지 + crop % (GIF) */
+  exportMode?: 'file' | 'framing';
+  initialCroppedAreaPercentages?: Area;
   onCancel: () => void;
-  onConfirm: (file: File) => void | Promise<void>;
+  onConfirm: (result: ImageCropDialogResult) => void | Promise<void>;
 }
 
 export function ImageCropDialog({
@@ -19,27 +26,47 @@ export function ImageCropDialog({
   title,
   aspect = STORE_THUMBNAIL_ASPECT,
   previewHint,
+  exportMode = 'file',
+  initialCroppedAreaPercentages,
   onCancel,
   onConfirm,
 }: ImageCropDialogProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
+  const [croppedAreaPercent, setCroppedAreaPercent] = useState<Area | null>(
+    initialCroppedAreaPercentages ?? null,
+  );
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const onCropComplete = useCallback((_: Area, pixels: Area) => {
+  const onCropComplete = useCallback((percentArea: Area, pixels: Area) => {
+    setCroppedAreaPercent(percentArea);
     setCroppedAreaPixels(pixels);
   }, []);
 
   async function handleApply() {
+    if (exportMode === 'framing') {
+      if (!croppedAreaPercent) return;
+      setBusy(true);
+      setErr(null);
+      try {
+        await onConfirm({ kind: 'framing', cropPercent: croppedAreaPercent });
+      } catch {
+        setErr(t('imageCrop.error'));
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
+
     if (!croppedAreaPixels) return;
     setBusy(true);
     setErr(null);
     try {
       const blob = await getCroppedImageBlob(imageSrc, croppedAreaPixels);
       const file = new File([blob], 'store-thumbnail.jpg', { type: 'image/jpeg' });
-      await onConfirm(file);
+      await onConfirm({ kind: 'file', file });
     } catch {
       setErr(t('imageCrop.error'));
     } finally {
@@ -64,6 +91,7 @@ export function ImageCropDialog({
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
+            initialCroppedAreaPercentages={initialCroppedAreaPercentages}
             objectFit="contain"
           />
         </div>
@@ -82,7 +110,9 @@ export function ImageCropDialog({
           style={styles.zoomRange}
         />
 
-        <p style={styles.frameNote}>{t('imageCrop.frameNote')}</p>
+        <p style={styles.frameNote}>
+          {exportMode === 'framing' ? t('imageCrop.frameNoteGif') : t('imageCrop.frameNote')}
+        </p>
 
         {err && <p style={styles.error}>{err}</p>}
 

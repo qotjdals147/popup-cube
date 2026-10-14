@@ -17,6 +17,7 @@ import { getMyReviewKeys, getProductReviews, reviewKey } from '../lib/reviews';
 import { canFileClaim, confirmPurchase, listMyOrders } from '../lib/orders';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { CroppedSquareMedia } from './CroppedSquareMedia';
 import { ProductDetailInfiniteCarousel } from './ProductDetailInfiniteCarousel';
 import { ReviewFormModal } from './ReviewFormModal';
 import { ShopperConfirmDialog } from './ShopperConfirmDialog';
@@ -309,7 +310,11 @@ export function ProductDetailModal({
               style={styleFor(light, S.relatedThumbWrapLayout, S.relatedThumbWrapDark)}
             >
               {post.image_url ? (
-                <img src={post.image_url} alt="" className="product-detail-related-thumb" />
+                <CroppedSquareMedia
+                  src={post.image_url}
+                  crop={post.image_crop}
+                  imgClassName="product-detail-related-thumb"
+                />
               ) : (
                 <span className="product-detail-news-fallback">{post.title?.trim() || t('productDetail.storeNewsTitle')}</span>
               )}
