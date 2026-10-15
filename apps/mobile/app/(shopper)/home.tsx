@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HomeFeedChips } from '../../src/components/HomeFeedChips';
+import { HomeProductTagChips } from '../../src/components/HomeProductTagChips';
 import { HomeProductCard } from '../../src/components/HomeProductCard';
 import { HomePromoBanner } from '../../src/components/HomePromoBanner';
 import { ShopperLineIcon } from '../../src/components/ShopperLineIcon';
@@ -25,6 +26,13 @@ import {
   type HomeFeedSort,
   type HomeProductFeedItem,
 } from '../../src/lib/homeProducts';
+import {
+  buildHomeProductTagMap,
+  buildHomeTagFacets,
+  getHomeProductTagsForFeed,
+  homeProductMatchesTag,
+  type HomeProductTagLink,
+} from '../../src/lib/homeProductTags';
 import { useRestoreSystemChromeOnFocus } from '../../src/hooks/useWorldImmersiveChrome';
 
 /** AD-088 · 벤치 01~02 — 검색 · 배ner · 칩 · 상품 피드 */
@@ -37,15 +45,21 @@ export default function HomeScreen() {
 
   const [search, setSearch] = useState('');
   const [feedSort, setFeedSort] = useState<HomeFeedSort>('all');
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [tagLinks, setTagLinks] = useState<HomeProductTagLink[]>([]);
   const [products, setProducts] = useState<HomeProductFeedItem[]>([]);
   const [banners, setBanners] = useState<HomeBannerSlide[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const sortedProducts = useMemo(
-    () => sortHomeProductFeed(products, feedSort),
-    [products, feedSort],
-  );
+  const tagFacets = useMemo(() => buildHomeTagFacets(tagLinks), [tagLinks]);
+  const productTagMap = useMemo(() => buildHomeProductTagMap(tagLinks), [tagLinks]);
+
+  const sortedProducts = useMemo(() => {
+    const sorted = sortHomeProductFeed(products, feedSort);
+    if (!selectedTag) return sorted;
+    return sorted.filter((p) => homeProductMatchesTag(p.id, selectedTag, productTagMap));
+  }, [products, feedSort, selectedTag, productTagMap]);
 
   const styles = useMemo(
     () =>
@@ -108,6 +122,26 @@ export default function HomeScreen() {
 
   useEffect(() => {
     let active = true;
+    getHomeProductTagsForFeed()
+      .then((links) => {
+        if (active) setTagLinks(links);
+      })
+      .catch(() => {
+        if (active) setTagLinks([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedTag) return;
+    const ok = tagFacets.some((f) => f.label === selectedTag);
+    if (!ok && tagFacets.length > 0) setSelectedTag(null);
+  }, [selectedTag, tagFacets]);
+
+  useEffect(() => {
+    let active = true;
     setLoading(true);
     setError(false);
 
@@ -164,6 +198,11 @@ export default function HomeScreen() {
     <View style={styles.listHeader}>
       <HomePromoBanner slides={banners} onPressSlide={handleBannerPress} />
       <HomeFeedChips sort={feedSort} onChange={setFeedSort} />
+      <HomeProductTagChips
+        facets={tagFacets}
+        selectedTag={selectedTag}
+        onSelectTag={setSelectedTag}
+      />
       <Text style={styles.feedTitle}>{t.home.feedTitle}</Text>
     </View>
   );
@@ -233,7 +272,11 @@ export default function HomeScreen() {
             contentContainerStyle={styles.list}
             style={styles.flex}
             ListHeaderComponent={listHeader}
-            ListEmptyComponent={<Text style={styles.empty}>{t.home.empty}</Text>}
+            ListEmptyComponent={
+              <Text style={styles.empty}>
+                {selectedTag ? t.home.tagFilterEmpty : t.home.empty}
+              </Text>
+            }
             renderItem={({ item }) => (
               <HomeProductCard product={item} onPress={() => handleOpenProduct(item)} />
             )}

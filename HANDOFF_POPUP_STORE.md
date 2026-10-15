@@ -1083,23 +1083,23 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — git **`c24eda3`** · **`main`** · **§7.120** (태그 Why) · **§7.113** · **§7.119**
+**최신** — **§7.113 홈 태그** (`apps/mobile`) · git push 후 **`--clear`** · **§7.120** · **§7.119**
 
 | | |
 |---|---|
-| **다음 우선 (에이전트)** | ① **§7.113** 홈 피드 태그 ⏸ — User 확인 후 · ② Kakao/Naver · PG **사업자+가맹 후** |
-| **User 실기 ⬜** | **§7.113 2차** 태그 필터 · **§7.119** 캐러셀 **✅ 2026-10-15** · 권장 px UI (`7ffe17a`) · **§7.116** 배ner |
-| **점주 (태그 테스트)** | **`demo@owner.com`** → **상품** → **태그** 저장 → 손님 **쇼핑** 상단 칩 |
+| **다음 우선 (에이전트)** | ① Kakao/Naver (§7.0 · AD-078) · PG **사업자+가맹 후** |
+| **User 실기 ⬜** | **홈 태그 칩** (배ner 아래 2번째 줄) · 매장 **쇼핑 태그** · **§7.116** 배ner · 권장 px UI |
+| **점주 (태그)** | **`demo@owner.com`** → 상품 **태그** 저장 → 홈·매장 쇼핑에서 칩 확인 |
 | **PG·OAuth** | **§7.85** · §7.84 Google **✅** |
 
-#### Expo 재시작 여부 (§7.113 2차 · **`apps/web` only**)
+#### Expo 재시작 여부 (§7.113 홈 태그 · **`apps/mobile`**)
 
 | 이번에 볼 기능 | Expo(Metro) | User가 할 일 |
 |---|---|---|
-| **태그 필터 · 캐러셀·소식·뒤로가기** | **❌ Ctrl+C / `--clear` 불필요** | Vercel **1~2min** → 매장 **쇼핑 탭 재진입** · 점주 **`Ctrl+F5`** |
-| **§7.116 홈 배ner만** | **✅ `--clear`** | §0 Expo 4줄 |
-| Metro **꺼져 있음** | §0 **Expo 4줄** (앱 로그인·QR용) | web-only만 보면 **재시작 필수 아님** |
-| **예전 화면만 보임** | ❌ 먼저 재시작 아님 | ① Vercel **1~2분** 더 ② **탭 재진입** ③ Expo Go **앱 완전 종료** ④ 그다음 §0 4줄 |
+| **홈 피드 태그 칩** | **✅ `--clear` 필수** | §0 **Expo 4줄** → QR → **홈** → 신규/마감 칩 **아래** 태그 줄 |
+| **매장 쇼핑 태그만** | **❌** | Vercel **1~2min** · 쇼핑 **재진입** |
+| Metro **꺼져 있음** | §0 **Expo 4줄** | |
+| **예전 화면만 보임** | ① **`--clear` 재시작** ② Expo Go **완전 종료** 후 재시도 | |
 
 #### User 실기 (§0 전체 — **cmd 블록 생략 금지**)
 
@@ -1128,10 +1128,10 @@ npx expo start --tunnel --port 8082 --clear
 
 5) QR → **Expo Go SDK 52** · 손님 로그인 → **홈** → 매장 카드 → **입장** → 상품 **상세**
 
-6) **§7.113 2차 — 태그 (클릭 순서)**
-   - (점주 PC) 상품 **2개 이상**에 같은 태그(예: `신상`) 저장
-   - 손님 **매장 쇼핑** → 상단 **태그 칩** → 목록만 줄어듦 · **전체**로 복귀
-   - 상품 **상세** → 태그 칩 탭 → **목록 필터**로 돌아옴
+6) **§7.113 — 태그 (홈 + 매장)**
+   - (점주 PC) 상품 **2개 이상**·**다른 매장**도 같은 태그(예: `신상`) 저장
+   - **홈** → **신규/마감 임박** 칩 **아래** **태그 칩** → 피드만 줄어듦 · **태그 전체**
+   - **매장 쇼핑** → 상단 태그 · 상세 태그 탭 → 목록 필터
 
 7) **§7.119 — 캐러셀·소식 (User 2026-10-15 캐러셀 ✅)**
    - **매장 새 소식** · **이 매장의 다른 상품** — 자동 넘김 + **좌우 드래그**
@@ -2462,14 +2462,16 @@ npx supabase db pull
 | **점주** | **매장 새 소식** = **사진·GIF** · **1:1 영역 맞추기**(대표 사진과 동일 UX) · §7.119 |
 | **손님** | `ProductDetailInfiniteCarousel` — **매장 새 소식** · **이 매장의 다른 상품**(· **함께 추천**) 동일 UI · **자동 슬로우 + 드래그** · 소식 탭 → 상품 or 매장 |
 | **DB** | `store_news_posts.image_url` · `link_product_id` · RPC `get_store_news_for_shop` 갱신 · migration `20261014_store_news_media_carousel` **원격 ✅** |
-| **2차** | 태그 **검색·필터** ✅ **`c24eda3`** (`get_store_product_tags_for_shop` · `StoreShopTagFilter` · 상세 태그 탭 · `?tag=`) · **홈 피드 연동** ⏸ |
-| **코드** | `storeProductTags.ts` · `StoreShopTagFilter.tsx` · `StoreShopCatalog` · `ProductDetailModal.onFilterByTag` |
+| **2차** | 태그 **검색·필터** ✅ 매장 **`c24eda3`** · **홈 피드** ✅ **`get_home_product_tags_for_feed`** · `HomeProductTagChips` · `home.tsx` (**Expo `--clear`**) |
+| **코드 (매장)** | `storeProductTags.ts` · `StoreShopTagFilter.tsx` · `StoreShopCatalog` · `ProductDetailModal.onFilterByTag` |
+| **코드 (홈)** | `homeProductTags.ts` · `HomeProductTagChips.tsx` · `app/(shopper)/home.tsx` · RPC `get_home_product_tags_for_feed` |
 
 #### Expo 재시작
 
 | | |
 |---|---|
-| `apps/web` only | **❌ Expo** · **Vercel 1~2min** + shop WebView **새로고침** · 점주 PC **Ctrl+F5** |
+| **매장 web-only** | **❌ Expo** · **Vercel 1~2min** + shop WebView **새로고침** · 점주 PC **Ctrl+F5** |
+| **홈 태그 (`apps/mobile`)** | **✅ `--clear`** |
 
 ---
 
@@ -2484,7 +2486,7 @@ npx supabase db pull
 | **UI** | 점주 상품 **상품코드** 칸 | 점주 **상품 태그** · 손님 **칩** · **§7.113 필터** |
 | **회의 출처** | `2026.10.02_회의_내용.txt` 67~77행 (엑셀·코드) | 같은 회의 **벤치 8번** · README `#8` |
 
-**User 2026-10-15:** 위 구분 **이해 ✅** · 다음 에이전트는 **홈 피드 태그** 착수 전 User에게 **필요 여부**만 확인 (§0 — 임의 확장 ❌).
+**User 2026-10-15:** 위 구분 **이해 ✅** · **홈 피드 태그** User **「시작해」** → §7.113 2차 홈 구현.
 
 #### Expo 재시작
 
@@ -5294,13 +5296,17 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-15 — AD-088 홈 피드 태그 (§7.113 2차)
+- **Changed:** migration `20261015_home_product_tags_for_feed` · `homeProductTags.ts` · `HomeProductTagChips` · `home.tsx` · mobile `ko.ts` · §7.113 · §7.0
+- **Notes:** **POPUP DB ✅** · **`apps/mobile`** · Expo **✅ `--clear`** · web-only 변경 **없음**
+
 ### 2026-10-15 — §7.120 태그 Why · §7.0 인수인계 (User)
 - **Changed:** §7.120 · §7.113 Why · §7.119 User 캐러셀 ✅ · §7.0 실기 · §23 Glossary · 벤치 PNG 상태
 - **Notes:** 문서만 · **Expo ❌** · User **태그 vs 상품코드** 이해 ✅
 
 ### 2026-10-15 — AD-088 태그 검색·필터 (§7.113 2차)
 - **Changed:** migration `20261015_store_shop_product_tags` · `storeProductTags.ts` · `StoreShopTagFilter` · `StoreShopCatalog` · `ProductDetailModal` · `store-shop.css` · `ko.ts` · §7.113
-- **Notes:** **POPUP DB ✅** · **`apps/web` only** · Vercel **1~2min** · shop **재진입** · Expo **❌** · URL **`?tag=`** · **홈 피드 태그 연동 ⏸**
+- **Notes:** **POPUP DB ✅** · **`apps/web` only** · Vercel **1~2min** · shop **재진입** · Expo **❌** · URL **`?tag=`** · **홈 피드 = 별도 커밋 §7.113**
 
 ### 2026-10-15 — 점주 사진 권장 크기 가시성 (§7.119)
 - **Changed:** `OwnerImageSizeCallout` · `OwnerStorePolicyPanel` 상단 요약 · 소식/대표/상품 안내 강조 · `ko.ts`
