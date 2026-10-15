@@ -2474,7 +2474,7 @@ npx supabase db pull
 | **뒤로가기** | `StoreShopCatalog` **`detailStack`** · §62.4 |
 | **소식 업로드** | `ImageCropDialog` **1:1** · **JPEG** = 잘라 저장 · **GIF** = 원본 + `image_crop` JSON(보이는 %) |
 | **규칙** | 상세·피드 **탭 이동** = **스택 + pop** (앞으로 동일) |
-| **권장 px** | 대표 **960×720** · 소식 **720×720** · 상품 카드 **1080×1080** · `imageSizeGuide.ts` |
+| **권장 px** | 대표 **960×720** · 소식 **720×720** · 상품 카드 **1080×1080** · `imageSizeGuide.ts` · 점주 **「운영·배송 안내」 맨 위** 요약 + 각 업로드 칸 **파란 띠 안내** |
 
 #### Expo 재시작
 
@@ -5264,6 +5264,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-15 — 점주 사진 권장 크기 가시성 (§7.119)
+- **Changed:** `OwnerImageSizeCallout` · `OwnerStorePolicyPanel` 상단 요약 · 소식/대표/상품 안내 강조 · `ko.ts`
+- **Notes:** **`apps/web` only** · Vercel **1~2min** · 점주 PC **Ctrl+F5** · Expo **❌**
 
 ### 2026-10-15 — §7.0 User 실기 안내 (§7.119 · Metro)
 - **Changed:** §7.0 「사용자가 지금 해야 할 것」·Expo 재시작 표 · §7.119 실기 체크리스트

@@ -10,6 +10,13 @@ import {
 } from '../lib/formatInteger';
 import { OwnerReturnAddressPanel } from './OwnerReturnAddressPanel';
 import { OwnerStoreNewsEditor } from './OwnerStoreNewsEditor';
+import { OwnerImageSizeCallout } from './OwnerImageSizeCallout';
+import {
+  formatPxSize,
+  PRODUCT_CARD_IMAGE_PX,
+  STORE_NEWS_CARD_PX,
+  STORE_THUMBNAIL_PX,
+} from '../lib/imageSizeGuide';
 
 interface OwnerStorePolicyPanelProps {
   storeId: string;
@@ -90,6 +97,23 @@ export function OwnerStorePolicyPanel({ storeId }: OwnerStorePolicyPanelProps) {
   return (
     <section style={styles.panel}>
       <p style={styles.intro}>{t('ownerPolicy.intro')}</p>
+
+      <div style={styles.imageGuideBlock}>
+        <h3 style={styles.imageGuideTitle}>{t('ownerPolicy.imageSizeGuideTitle')}</h3>
+        <OwnerImageSizeCallout>
+          {t('ownerPolicy.imageSizeGuideThumb', {
+            size: formatPxSize(STORE_THUMBNAIL_PX.width, STORE_THUMBNAIL_PX.height),
+          })}
+          <br />
+          {t('ownerPolicy.imageSizeGuideNews', {
+            size: formatPxSize(STORE_NEWS_CARD_PX.width, STORE_NEWS_CARD_PX.height),
+          })}
+          <br />
+          {t('ownerPolicy.imageSizeGuideProduct', {
+            size: formatPxSize(PRODUCT_CARD_IMAGE_PX.width, PRODUCT_CARD_IMAGE_PX.height),
+          })}
+        </OwnerImageSizeCallout>
+      </div>
 
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>{t('ownerPolicy.csSection')}</h3>
@@ -240,6 +264,8 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: oc.shadow,
   },
   intro: { color: oc.textSecondary, fontSize: fs.base, lineHeight: 1.55, margin: '0 0 20px' },
+  imageGuideBlock: { marginBottom: 20 },
+  imageGuideTitle: { margin: '0 0 8px', fontSize: fs.md, color: oc.text, fontWeight: 700 },
   section: {
     marginBottom: 20,
     paddingBottom: 20,

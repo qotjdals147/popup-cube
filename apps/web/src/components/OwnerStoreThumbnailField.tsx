@@ -6,6 +6,7 @@ import type { StoreSummary } from '@popup-cube/shared';
 import { ownerColors as oc, ownerFieldLabel, ownerFontSize as fs, ownerHelpText } from '../styles/ownerAdminTheme';
 import { formatPxSize, STORE_THUMBNAIL_PX } from '../lib/imageSizeGuide';
 import { t } from '../i18n';
+import { OwnerImageSizeCallout } from './OwnerImageSizeCallout';
 
 interface OwnerStoreThumbnailFieldProps {
   userId: string;
@@ -85,12 +86,12 @@ export function OwnerStoreThumbnailField({ userId, store, onUpdated }: OwnerStor
         <span style={styles.label}>{t('ownerEdit.thumbnailLabel')}</span>
         {saving && <span style={styles.saving}>{t('ownerEdit.thumbnailSaving')}</span>}
       </div>
-      <p style={styles.help}>
-        {t('ownerEdit.thumbnailHint')}{' '}
+      <p style={styles.help}>{t('ownerEdit.thumbnailHint')}</p>
+      <OwnerImageSizeCallout>
         {t('ownerEdit.thumbnailSizeHint', {
           size: formatPxSize(STORE_THUMBNAIL_PX.width, STORE_THUMBNAIL_PX.height),
         })}
-      </p>
+      </OwnerImageSizeCallout>
 
       <div style={styles.row}>
         <div style={styles.thumbWrap}>

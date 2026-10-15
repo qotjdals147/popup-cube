@@ -29,6 +29,8 @@ import type { OwnerProductSectionSaveHandle } from '../lib/ownerProductSectionSa
 import { OwnerProductSkusEditor } from './OwnerProductSkusEditor';
 import { OwnerStatsShortcutBanner } from './OwnerStatsShortcutBanner';
 import { ProductDetailModal } from './ProductDetailModal';
+import { OwnerImageSizeCallout } from './OwnerImageSizeCallout';
+import { formatPxSize, PRODUCT_CARD_IMAGE_PX } from '../lib/imageSizeGuide';
 
 interface OwnerProductPanelProps {
   storeId: string;
@@ -393,7 +395,11 @@ export function OwnerProductPanel({
             maxLength={16}
           />
           <label style={styles.fieldLabel}>{t('ownerProducts.editImageLabel')}</label>
-          <p style={styles.imageSizeHint}>{t('ownerProducts.editImageSizeHint')}</p>
+          <OwnerImageSizeCallout>
+            {t('ownerProducts.editImageSizeHint', {
+              size: formatPxSize(PRODUCT_CARD_IMAGE_PX.width, PRODUCT_CARD_IMAGE_PX.height),
+            })}
+          </OwnerImageSizeCallout>
           <div style={styles.formRow}>
             <div style={styles.imagePreviewWrap}>
               {previewUrl ? (
@@ -497,7 +503,11 @@ export function OwnerProductPanel({
                           rows={2}
                         />
                         <label style={styles.fieldLabel}>{t('ownerProducts.editImageLabel')}</label>
-                        <p style={styles.imageSizeHint}>{t('ownerProducts.editImageSizeHint')}</p>
+                        <OwnerImageSizeCallout>
+                          {t('ownerProducts.editImageSizeHint', {
+                            size: formatPxSize(PRODUCT_CARD_IMAGE_PX.width, PRODUCT_CARD_IMAGE_PX.height),
+                          })}
+                        </OwnerImageSizeCallout>
                         <div style={styles.formRow}>
                           <div style={styles.imagePreviewWrapLarge}>
                             {editPreviewUrl ? (

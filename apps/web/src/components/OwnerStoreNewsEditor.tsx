@@ -3,6 +3,7 @@ import type { Product } from '@popup-cube/shared';
 import type { Area } from 'react-easy-crop';
 import { STORE_NEWS_CARD_ASPECT } from '../lib/cropImage';
 import { formatPxSize, STORE_NEWS_CARD_PX } from '../lib/imageSizeGuide';
+import { OwnerImageSizeCallout } from './OwnerImageSizeCallout';
 import { parseImageCropPercent } from '../lib/mediaCropDisplay';
 import { useAuth } from '../context/AuthContext';
 import { CroppedSquareMedia } from './CroppedSquareMedia';
@@ -235,6 +236,11 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
         }}
       />
       <h3 style={styles.sectionTitle}>{t('ownerStoreNews.sectionTitle')}</h3>
+      <OwnerImageSizeCallout>
+        {t('ownerStoreNews.sizeHint', {
+          size: formatPxSize(STORE_NEWS_CARD_PX.width, STORE_NEWS_CARD_PX.height),
+        })}
+      </OwnerImageSizeCallout>
       <p style={styles.intro}>{t('ownerStoreNews.introMedia')}</p>
       {loading ? (
         <p style={styles.hint}>{t('ownerStoreNews.loading')}</p>
@@ -318,9 +324,6 @@ export function OwnerStoreNewsEditor({ storeId }: OwnerStoreNewsEditorProps) {
           >
             {busyId === 'new' ? t('ownerStoreNews.uploading') : t('ownerStoreNews.addMedia')}
           </button>
-          <p style={styles.help}>
-            {t('ownerStoreNews.sizeHint', { size: formatPxSize(STORE_NEWS_CARD_PX.width, STORE_NEWS_CARD_PX.height) })}
-          </p>
           <p style={styles.help}>{t('ownerStoreNews.cropNote')}</p>
           <p style={styles.help}>{t('ownerStoreNews.limitHint', { max: MAX_POSTS })}</p>
         </>
