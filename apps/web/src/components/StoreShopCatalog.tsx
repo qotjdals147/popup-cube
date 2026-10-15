@@ -1,9 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Product } from '@popup-cube/shared';
 import { listActiveProducts } from '../lib/products';
 import { getProductSkus } from '../lib/productSkus';
+import {
+  buildProductTagLabelMap,
+  buildStoreTagFacets,
+  getStoreProductTagsForShop,
+  productMatchesTag,
+  type StoreProductTagLink,
+} from '../lib/storeProductTags';
 import { useCart } from '../context/CartContext';
 import { ProductDetailModal } from './ProductDetailModal';
+import { StoreShopTagFilter } from './StoreShopTagFilter';
 import { t } from '../i18n';
 
 export interface StoreShopCatalogProps {
@@ -15,6 +23,8 @@ export interface StoreShopCatalogProps {
   shoppingBlocked?: boolean;
   /** AD-088 — 홈 피드 등에서 들어올 때 해당 상품 상세 자동 오픈 */
   initialProductId?: string | null;
+  /** AD-088 2차 — URL `?tag=` 등 초기 태그 필터 */
+  initialTagLabel?: string | null;
   /** 홈·배ner 딥링크 — false면 상품 그리드 숨김 · 뒤로 = 피드 */
   storeBrowseUnlocked?: boolean;
   storeName?: string | null;
@@ -27,6 +37,15 @@ function formatPrice(price: number): string {
   return `${price.toLocaleString('ko-KR')}원`;
 }
 
+function syncUrlTagParam(tag: string | null) {
+  if (typeof window === 'undefined') return;
+  const params = new URLSearchParams(window.location.search);
+  if (tag) params.set('tag', tag);
+  else params.delete('tag');
+  const qs = params.toString();
+  window.history.replaceState(null, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
+}
+
 /** 매장 활성 상품 목록 · ShopPanel · StoreShopPage 공용 */
 export function StoreShopCatalog({
   storeId,
@@ -34,6 +53,7 @@ export function StoreShopCatalog({
   onOpenCart,
   shoppingBlocked = false,
   initialProductId = null,
+  initialTagLabel = null,
   storeBrowseUnlocked = true,
   storeName = null,
   storeThumbnailUrl = null,
@@ -42,10 +62,13 @@ export function StoreShopCatalog({
 }: StoreShopCatalogProps) {
   const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
+  const [tagLinks, setTagLinks] = useState<StoreProductTagLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [addedId, setAddedId] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(initialTagLabel?.trim() || null);
+  const [tagQuery, setTagQuery] = useState('');
   /** 상세 스택 — 연관·소식 탭 시 push · ← 뒤로가기 시 pop (§7.119) */
   const [detailStack, setDetailStack] = useState<Product[]>([]);
   /** 매장 홈으로 나갔을 때 복귀용 상세 스택 */
@@ -54,13 +77,23 @@ export function StoreShopCatalog({
   const detailProduct = detailStack.length > 0 ? detailStack[detailStack.length - 1] : null;
   const detailCanPop = detailStack.length > 1;
 
+  const tagFacets = useMemo(() => buildStoreTagFacets(tagLinks), [tagLinks]);
+  const productTagMap = useMemo(() => buildProductTagLabelMap(tagLinks), [tagLinks]);
+
+  const filteredProducts = useMemo(
+    () => products.filter((p) => productMatchesTag(p.id, selectedTag, productTagMap)),
+    [products, selectedTag, productTagMap]
+  );
+
   useEffect(() => {
     let mounted = true;
     setLoading(true);
     setError(null);
-    listActiveProducts(storeId)
-      .then((data) => {
-        if (mounted) setProducts(data);
+    void Promise.all([listActiveProducts(storeId), getStoreProductTagsForShop(storeId)])
+      .then(([data, links]) => {
+        if (!mounted) return;
+        setProducts(data);
+        setTagLinks(links);
       })
       .catch(() => {
         if (mounted) setError(t('shop.errorLoad'));
@@ -72,6 +105,21 @@ export function StoreShopCatalog({
       mounted = false;
     };
   }, [storeId]);
+
+  useEffect(() => {
+    const raw = initialTagLabel?.trim();
+    if (!raw) return;
+    setSelectedTag(raw);
+  }, [initialTagLabel]);
+
+  useEffect(() => {
+    if (!selectedTag) return;
+    const ok = tagFacets.some((f) => f.label === selectedTag);
+    if (!ok && tagFacets.length > 0) {
+      setSelectedTag(null);
+      syncUrlTagParam(null);
+    }
+  }, [selectedTag, tagFacets]);
 
   useEffect(() => {
     if (!initialProductId || products.length === 0) return;
@@ -97,6 +145,17 @@ export function StoreShopCatalog({
     if (!p) return;
     openDetailProduct(p, detailStack.length > 0 ? 'push' : 'reset');
   }
+
+  const applyTagFilter = useCallback(
+    (label: string | null) => {
+      setSelectedTag(label);
+      syncUrlTagParam(label);
+      setDetailStack([]);
+      setReturnDetailStack(null);
+      onEnterStoreBrowse?.();
+    },
+    [onEnterStoreBrowse]
+  );
 
   function getQty(productId: string): number {
     return quantities[productId] ?? 1;
@@ -163,6 +222,8 @@ export function StoreShopCatalog({
     setReturnDetailStack(null);
   }
 
+  const gridProducts = filteredProducts;
+
   return (
     <>
       {returnDetailStack && returnDetailStack.length > 0 && storeBrowseUnlocked && !detailProduct && (
@@ -173,9 +234,23 @@ export function StoreShopCatalog({
         </div>
       )}
 
-      {storeBrowseUnlocked && (
+      {storeBrowseUnlocked && tagFacets.length > 0 && (
+        <StoreShopTagFilter
+          facets={tagFacets}
+          selectedTag={selectedTag}
+          tagQuery={tagQuery}
+          onSelectTag={applyTagFilter}
+          onTagQueryChange={setTagQuery}
+        />
+      )}
+
+      {storeBrowseUnlocked && selectedTag && gridProducts.length === 0 && (
+        <p className="store-shop-hint">{t('shop.tagFilterEmpty')}</p>
+      )}
+
+      {storeBrowseUnlocked && gridProducts.length > 0 && (
       <div className={gridClass}>
-        {products.map((product) => (
+        {gridProducts.map((product) => (
           <article key={product.id} className="store-shop-card">
             <div className="store-shop-card__thumb-wrap">
               {product.image_url ? (
@@ -246,6 +321,7 @@ export function StoreShopCatalog({
           relatedProducts={relatedForDetail}
           onSelectRelated={(p) => openDetailProduct(p, 'push')}
           onOpenProductId={navigateToProductId}
+          onFilterByTag={(label) => applyTagFilter(label)}
           storeEntry={
             variant === 'page' && storeName
               ? {

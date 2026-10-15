@@ -455,3 +455,75 @@ html:has(.store-shop-page) body {
   min-width: 44px;
   min-height: 44px;
 }
+
+/* AD-088 — 매장 태그 필터 */
+.store-shop-tag-filter {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--shop-surface, #fff);
+  border: 1px solid var(--shop-border, #e5e8eb);
+}
+
+.store-shop-tag-filter__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.store-shop-tag-filter__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--shop-text, #191f28);
+}
+
+.store-shop-tag-filter__search {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--shop-border, #e5e8eb);
+  background: var(--shop-surface-muted, #f9fafb);
+  color: var(--shop-text, #191f28);
+  font-size: 14px;
+}
+
+.store-shop-tag-filter__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.store-shop-tag-filter__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--shop-border, #e5e8eb);
+  background: var(--shop-surface-muted, #f9fafb);
+  color: var(--shop-text-secondary, #4e5968);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.store-shop-tag-filter__chip--active {
+  border-color: var(--shop-primary, #3182f6);
+  background: #eef2ff;
+  color: var(--shop-primary, #3182f6);
+}
+
+.store-shop-tag-filter__count {
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.store-shop-tag-filter__no-match {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--shop-text-muted, #8b95a1);
+}

@@ -61,6 +61,10 @@ export function StoreShopPage() {
     const raw = new URLSearchParams(window.location.search).get('product');
     return raw?.trim() || null;
   }, []);
+  const initialTagLabel = useMemo(() => {
+    const raw = new URLSearchParams(window.location.search).get('tag');
+    return raw?.trim() || null;
+  }, []);
   const pageStyle = useMemo(
     () => ({ '--shop-inset-top': `${insetTop}px` }) as CSSProperties,
     [insetTop]
@@ -213,6 +217,7 @@ export function StoreShopPage() {
           onOpenCart={openCart}
           shoppingBlocked={shoppingBlocked}
           initialProductId={initialProductId}
+          initialTagLabel={initialTagLabel}
           storeBrowseUnlocked={storeBrowseUnlocked}
           storeName={storeName}
           storeThumbnailUrl={storeThumbnailUrl}

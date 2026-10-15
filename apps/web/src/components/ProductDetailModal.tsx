@@ -44,6 +44,8 @@ interface ProductDetailModalProps {
   onOpenProductId?: (productId: string) => void;
   /** 홈 딥링크 — 매장 전체 보기 진입 */
   storeEntry?: { name: string; thumbnailUrl?: string | null; onEnter: () => void };
+  /** AD-088 2차 — 태그 탭 시 매장 목록 필터 */
+  onFilterByTag?: (label: string) => void;
 }
 
 /** layout = 항상 적용 · dark = 다크일 때만 추가(색·테두리) */
@@ -100,6 +102,7 @@ export function ProductDetailModal({
   onSelectRelated,
   onOpenProductId,
   storeEntry,
+  onFilterByTag,
 }: ProductDetailModalProps) {
   const light = appearance === 'light';
   const rootClass = light ? 'product-detail--light' : undefined;
@@ -525,11 +528,23 @@ export function ProductDetailModal({
                     {t('productDetail.tagsTitle')}
                   </h4>
                   <div className="product-detail-tags">
-                    {visibleTags.map((tag) => (
-                      <span key={`${tag.sort_order}-${tag.label}`} className="product-detail-tag-chip">
-                        {tag.label}
-                      </span>
-                    ))}
+                    {visibleTags.map((tag) =>
+                      onFilterByTag && !previewMode ? (
+                        <button
+                          key={`${tag.sort_order}-${tag.label}`}
+                          type="button"
+                          className="product-detail-tag-chip product-detail-tag-chip--btn"
+                          onClick={() => onFilterByTag(tag.label)}
+                          aria-label={t('productDetail.tagBrowseProducts', { tag: tag.label })}
+                        >
+                          {tag.label}
+                        </button>
+                      ) : (
+                        <span key={`${tag.sort_order}-${tag.label}`} className="product-detail-tag-chip">
+                          {tag.label}
+                        </span>
+                      )
+                    )}
                   </div>
                   {tagsCanExpand && (
                     <button

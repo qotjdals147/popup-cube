@@ -1088,7 +1088,7 @@ popup_store/                          # Turborepo root
 | | |
 |---|---|
 | **다음 우선 (에이전트)** | ① Google 로그아웃×3 · ② Kakao/Naver · PG는 **사업자+가맹 후** |
-| **User 실기 ⬜** | **§7.119** 체크리스트 (아래 §0 블록 + 클릭 순서) |
+| **User 실기 ⬜** | **§7.113 2차** 태그 필터 · **§7.119** 캐러셀 **✅** · §7.116 배ner |
 | **점주 (선택)** | PC **`demo@owner.com`** — 소식 **사진·GIF** · **보이는 영역 맞추기** · 권장 px = §7.119 |
 | **PG·OAuth 상세** | **§7.85** · §7.84 Google **✅** |
 
@@ -2456,7 +2456,7 @@ npx supabase db pull
 | **점주** | **매장 새 소식** = **사진·GIF** · **1:1 영역 맞추기**(대표 사진과 동일 UX) · §7.119 |
 | **손님** | `ProductDetailInfiniteCarousel` — **매장 새 소식** · **이 매장의 다른 상품**(· **함께 추천**) 동일 UI · **자동 슬로우 + 드래그** · 소식 탭 → 상품 or 매장 |
 | **DB** | `store_news_posts.image_url` · `link_product_id` · RPC `get_store_news_for_shop` 갱신 · migration `20261014_store_news_media_carousel` **원격 ✅** |
-| **2차** | 태그 **검색·필터** · 홈 피드 연동 ⏸ |
+| **2차** | 태그 **검색·필터** ✅ (`get_store_product_tags_for_shop` · `StoreShopTagFilter` · 상세 태그 탭) · **홈 피드 연동** ⏸ |
 
 #### Expo 재시작
 
@@ -5264,6 +5264,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-15 — AD-088 태그 검색·필터 (§7.113 2차)
+- **Changed:** migration `20261015_store_shop_product_tags` · `storeProductTags.ts` · `StoreShopTagFilter` · `StoreShopCatalog` · `ProductDetailModal` · `store-shop.css` · `ko.ts` · §7.113
+- **Notes:** **POPUP DB ✅** · **`apps/web` only** · Vercel **1~2min** · shop **재진입** · Expo **❌** · URL **`?tag=`** · **홈 피드 태그 연동 ⏸**
 
 ### 2026-10-15 — 점주 사진 권장 크기 가시성 (§7.119)
 - **Changed:** `OwnerImageSizeCallout` · `OwnerStorePolicyPanel` 상단 요약 · 소식/대표/상품 안내 강조 · `ko.ts`

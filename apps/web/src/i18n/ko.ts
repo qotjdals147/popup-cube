@@ -478,6 +478,11 @@ export const ko = {
     added: '담았어요 ✅',
     viewDetail: '상품 상세 보기',
     returnToPreviousProduct: '← 이전 상품 상세로',
+    tagFilterTitle: '태그',
+    tagFilterAll: '전체',
+    tagSearchPlaceholder: '태그 검색',
+    tagSearchNoMatch: '검색과 맞는 태그가 없어요.',
+    tagFilterEmpty: '이 태그에 해당하는 상품이 없어요.',
   },
   display: {
     title: '진열 상품',
@@ -614,6 +619,7 @@ export const ko = {
     tagsTitle: '태그',
     tagsShowAll: '태그 전체보기',
     tagsCollapse: '태그 접기',
+    tagBrowseProducts: '{tag} 상품 모아보기',
     storeNewsTitle: '매장 새 소식',
   },
   /** §54 — 리뷰 작성 (구매확정 게이트) */

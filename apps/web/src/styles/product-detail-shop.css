@@ -240,6 +240,22 @@
   font-weight: 600;
 }
 
+.product-detail-tag-chip--btn {
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  line-height: inherit;
+}
+
+.product-detail-tag-chip--btn:hover {
+  background: #dbe4ff;
+}
+
+.product-detail-tag-chip--btn:focus-visible {
+  outline: 2px solid #3182f6;
+  outline-offset: 2px;
+}
+
 .product-detail-tags-toggle {
   margin-top: 10px;
 }
