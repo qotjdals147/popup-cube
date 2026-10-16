@@ -1083,13 +1083,13 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — **§7.113 홈 태그** (`apps/mobile`) · git push 후 **`--clear`** · **§7.120** · **§7.119**
+**최신** — **§7.113 태그** User **✅ 2026-10-16** · **`c71421d`** · **§7.119** · 다음 코드 = **Kakao/Naver**
 
 | | |
 |---|---|
-| **다음 우선 (에이전트)** | ① Kakao/Naver (§7.0 · AD-078) · PG **사업자+가맹 후** |
-| **User 실기 ⬜** | **홈 태그 칩** (배ner 아래 2번째 줄) · 매장 **쇼핑 태그** · **§7.116** 배ner · 권장 px UI |
-| **점주 (태그)** | **`demo@owner.com`** → 상품 **태그** 저장 → 홈·매장 쇼핑에서 칩 확인 |
+| **다음 우선 (에이전트)** | **Kakao → Naver** 소셜 로그인 (§7.84 · AD-078 · Google Dev Client ✅ 다음) · PG **사업자+가맹 후** |
+| **User 실기 ⬜** | **§7.116** 홈 배ner (admin · **Expo `--clear`**) · **권장 px** UI (`7ffe17a` · 점주 **Ctrl+F5**) · §7.119 뒤로가기 스택 |
+| **User 실기 ✅** | **§7.113** 홈·매장 **태그** (2026-10-16) · **§7.119** 캐러셀 (2026-10-15) |
 | **PG·OAuth** | **§7.85** · §7.84 Google **✅** |
 
 #### Expo 재시작 여부 (§7.113 홈 태그 · **`apps/mobile`**)
@@ -1137,10 +1137,11 @@ npx expo start --tunnel --port 8082 --clear
    - **매장 새 소식** · **이 매장의 다른 상품** — 자동 넘김 + **좌우 드래그**
    - 소식 탭 · **← 이전 상품 상세로** (§62.4)
 
-8) **합격 (태그 ⬜ · 캐러셀 ✅)**
-   - ⬜ 태그 칩 **없으면** 점주 태그 미등록 — §7.120
-   - ✅ 캐러셀 드래그 (User 확인)
+8) **합격**
+   - ✅ **태그** 홈·매장 (User **2026-10-16**)
+   - ✅ 캐러셀 드래그 (User **2026-10-15**)
    - ⬜ **운영·배송 안내** 맨 위 **사진 권장 크기** 박스 (`7ffe17a`)
+   - ⬜ **§7.116** 홈 배ner
 
 #### 사용자가 지금 해야 할 것 (과거 — §7.66)
 
@@ -2462,7 +2463,7 @@ npx supabase db pull
 | **점주** | **매장 새 소식** = **사진·GIF** · **1:1 영역 맞추기**(대표 사진과 동일 UX) · §7.119 |
 | **손님** | `ProductDetailInfiniteCarousel` — **매장 새 소식** · **이 매장의 다른 상품**(· **함께 추천**) 동일 UI · **자동 슬로우 + 드래그** · 소식 탭 → 상품 or 매장 |
 | **DB** | `store_news_posts.image_url` · `link_product_id` · RPC `get_store_news_for_shop` 갱신 · migration `20261014_store_news_media_carousel` **원격 ✅** |
-| **2차** | 태그 **검색·필터** ✅ 매장 **`c24eda3`** · **홈 피드** ✅ **`get_home_product_tags_for_feed`** · `HomeProductTagChips` · `home.tsx` (**Expo `--clear`**) |
+| **2차** | 태그 **검색·필터** ✅ · User 실기 **✅ 2026-10-16** · 매장 **`c24eda3`** · 홈 **`c71421d`** |
 | **코드 (매장)** | `storeProductTags.ts` · `StoreShopTagFilter.tsx` · `StoreShopCatalog` · `ProductDetailModal.onFilterByTag` |
 | **코드 (홈)** | `homeProductTags.ts` · `HomeProductTagChips.tsx` · `app/(shopper)/home.tsx` · RPC `get_home_product_tags_for_feed` |
 
@@ -5295,6 +5296,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-16 — §7.113 태그 User 실기 ✅ · §7.0 다음 Kakao/Naver
+- **Changed:** §7.113 · §7.0 · §7.117
+- **Notes:** User **홈·매장 태그** 확인 · **Expo ❌** (문서만)
 
 ### 2026-10-15 — AD-088 홈 피드 태그 (§7.113 2차)
 - **Changed:** migration `20261015_home_product_tags_for_feed` · `homeProductTags.ts` · `HomeProductTagChips` · `home.tsx` · mobile `ko.ts` · §7.113 · §7.0
