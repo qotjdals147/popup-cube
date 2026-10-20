@@ -2579,7 +2579,7 @@ npx supabase db pull
 #### User 실기 ⬜
 
 - [ ] 가이드 열기 · 목차 점프 · **바깥 클릭 안 닫힘** · ✕ 닫기
-- [ ] **13장(또는 12+월드)** SVG **잘림 없음** · 메뉴명 일치
+- [ ] **13장(또는 12+월드)** 예시 화면 **잘림 없음** · 메뉴·버튼 문구 일치 · **동작 원리** 블록 표시
 
 ---
 
@@ -5382,6 +5382,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-20 late — §7.121 가이드 사이드바 탭 잘림 수정
+- **Changed:** `owner-seller-center-guide.css` · `ownerSellerGuideScreenMocks.tsx`
+- **Notes:** shell max-height 제거 · nav 전체 노출 · 좁은 화면은 nav 스크롤 · active 탭 scrollIntoView
 
 ### 2026-10-20 eve — §7.121 가이드 **실 UI HTML 목업** (User 2차)
 - **Changed:** `ownerSellerGuideScreenMocks.tsx` · CSS · SVG 제거 · 순서=원리→**예시 화면**→할 일

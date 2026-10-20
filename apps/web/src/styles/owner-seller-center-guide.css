@@ -230,8 +230,9 @@
 
 .owner-sc-guide-mock__shell {
   display: flex;
-  min-height: 420px;
-  max-height: 520px;
+  align-items: stretch;
+  min-height: 480px;
+  /* max-height 제거 — 하단 메뉴(반품·프로모션·운영…)가 footer에 가리지 않게 전체 탭 노출 */
   border: 1px solid #e5e8eb;
   border-radius: 12px;
   overflow: hidden;
@@ -240,11 +241,12 @@
 }
 
 .owner-sc-guide-mock__sidebar {
-  width: 200px;
+  width: 212px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   color: #b8c0cc;
+  min-height: 100%;
 }
 
 .owner-sc-guide-mock__brand {
@@ -276,24 +278,29 @@
 }
 
 .owner-sc-guide-mock__nav {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  padding: 4px 8px;
+  flex: 0 0 auto;
+  overflow: visible;
+  padding: 2px 6px 6px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .owner-sc-guide-mock__nav-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  padding: 9px 10px;
+  gap: 4px;
+  padding: 7px 8px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 1.35;
   color: #b8c0cc;
+}
+
+.owner-sc-guide-mock__nav-item > span:first-child {
+  flex: 1;
+  min-width: 0;
 }
 
 .owner-sc-guide-mock__nav-item--active {
@@ -596,11 +603,15 @@
   }
   .owner-sc-guide-mock__shell {
     flex-direction: column;
-    max-height: none;
   }
   .owner-sc-guide-mock__sidebar {
     width: 100%;
-    max-height: 200px;
+  }
+  .owner-sc-guide-mock__nav {
+    flex: 1 1 auto;
+    max-height: 320px;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 }
 

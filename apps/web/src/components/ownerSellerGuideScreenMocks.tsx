@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { t } from '../i18n';
 import { isWorldEnabled } from '../lib/featureFlags';
 import type { OwnerSellerGuideFigureId } from '../lib/ownerSellerCenterGuideManifest';
@@ -51,6 +51,11 @@ function GuideSellerChrome({
 }) {
   const tabs = GUIDE_TABS.filter((tab) => tab.id !== 'layout' || isWorldEnabled());
   const activeLabel = t(GUIDE_TABS.find((x) => x.id === activeTab)?.labelKey ?? 'ownerEdit.tabProducts');
+  const activeNavRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    activeNavRef.current?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+  }, [activeTab]);
 
   return (
     <div className="owner-sc-guide-mock" role="img" aria-label={ariaLabel}>
@@ -68,6 +73,7 @@ function GuideSellerChrome({
               return (
                 <div
                   key={tab.id}
+                  ref={active ? activeNavRef : undefined}
                   className={
                     active
                       ? 'owner-sc-guide-mock__nav-item owner-sc-guide-mock__nav-item--active'
