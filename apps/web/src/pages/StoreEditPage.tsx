@@ -23,6 +23,7 @@ import { isWorldEnabled } from '../lib/featureFlags';
 import { t } from '../i18n';
 import type { StoreSummary } from '@popup-cube/shared';
 import { getStoreReviews } from '../lib/reviews';
+import { OwnerSellerCenterGuideModal } from '../components/OwnerSellerCenterGuideModal';
 
 type EditTab =
   | 'overview'
@@ -71,6 +72,7 @@ export function StoreEditPage() {
   const [returnsSubTab, setReturnsSubTab] = useState<'requests' | 'claims'>('requests');
   const [returnsListFilter, setReturnsListFilter] = useState<'active' | 'history'>('active');
   const [focusOrder, setFocusOrder] = useState<OwnerOrderFocus | null>(null);
+  const [sellerGuideOpen, setSellerGuideOpen] = useState(false);
 
   const navigateOwnerRelated = useCallback((target: OwnerNavigateTarget) => {
     if (
@@ -374,6 +376,13 @@ export function StoreEditPage() {
             <button style={styles.sidebarGhostBtn} type="button" onClick={() => navigate('/home')}>
               {t('ownerEdit.backDashboard')}
             </button>
+            <button
+              style={styles.sidebarGuideBtn}
+              type="button"
+              onClick={() => setSellerGuideOpen(true)}
+            >
+              {t('ownerSellerGuide.button')}
+            </button>
             <button style={styles.sidebarGhostBtn} type="button" onClick={() => void handleSignOut()}>
               {t('common.logout')}
             </button>
@@ -386,6 +395,9 @@ export function StoreEditPage() {
             <div style={styles.topBarActions}>
               <button style={styles.topBarBackBtn} type="button" onClick={() => navigate('/home')}>
                 {t('ownerEdit.backDashboard')}
+              </button>
+              <button style={styles.topBarGuideBtn} type="button" onClick={() => setSellerGuideOpen(true)}>
+                {t('ownerSellerGuide.button')}
               </button>
               <button style={styles.topBarLogoutBtn} type="button" onClick={() => void handleSignOut()}>
                 {t('common.logout')}
@@ -645,6 +657,7 @@ export function StoreEditPage() {
       </div>
 
       <DemoToast message={toastMessage} onDismiss={dismissToast} />
+      <OwnerSellerCenterGuideModal open={sellerGuideOpen} onClose={() => setSellerGuideOpen(false)} />
     </div>
   );
 }
@@ -731,6 +744,17 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     textAlign: 'left',
   },
+  sidebarGuideBtn: {
+    padding: '9px 12px',
+    borderRadius: 8,
+    border: `1px solid ${oc.sidebarNavActiveBorder}`,
+    background: oc.sidebarNavActiveBg,
+    color: oc.sidebarTextActive,
+    fontSize: fs.sm,
+    fontWeight: 600,
+    cursor: 'pointer',
+    textAlign: 'left',
+  },
   navItem: {
     display: 'flex',
     alignItems: 'center',
@@ -806,6 +830,17 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: 8,
+    flexShrink: 0,
+  },
+  topBarGuideBtn: {
+    padding: '8px 14px',
+    borderRadius: 8,
+    border: `1px solid ${oc.primary}`,
+    background: oc.navActiveBg,
+    color: oc.navActiveText,
+    fontSize: fs.sm,
+    fontWeight: 600,
+    cursor: 'pointer',
     flexShrink: 0,
   },
   topBarLogoutBtn: {

@@ -10,6 +10,7 @@ import { DEMO_STORE_ID } from '@popup-cube/shared';
 import { ownerColors as oc, ownerFont, ownerFontSize as fs } from '../styles/ownerAdminTheme';
 import { t } from '../i18n';
 import type { StoreSummary } from '@popup-cube/shared';
+import { OwnerSellerCenterGuideModal } from '../components/OwnerSellerCenterGuideModal';
 
 /** AD-037 — PC 웹 점주 대시보드 (매장 목록·쇼핑 허브 아님) */
 export function HomePage() {
@@ -20,6 +21,7 @@ export function HomePage() {
   const [loading, setLoading] = useState(false);
   const [kpiByStore, setKpiByStore] = useState<Record<string, StoreKpi | null>>({});
   const [kpiLoading, setKpiLoading] = useState(false);
+  const [sellerGuideOpen, setSellerGuideOpen] = useState(false);
 
   const reload = useCallback(async () => {
     if (!userId || role !== 'owner') {
@@ -92,9 +94,16 @@ export function HomePage() {
           <h1 style={styles.title}>{t('ownerDashboard.title')}</h1>
           <p style={styles.tagline}>{t('ownerDashboard.tagline')}</p>
         </div>
-        <button style={styles.logoutButton} type="button" onClick={handleSignOut}>
-          {t('common.logout')}
-        </button>
+        <div style={styles.headerActions}>
+          {role === 'owner' && (
+            <button style={styles.guideButton} type="button" onClick={() => setSellerGuideOpen(true)}>
+              {t('ownerSellerGuide.button')}
+            </button>
+          )}
+          <button style={styles.logoutButton} type="button" onClick={handleSignOut}>
+            {t('common.logout')}
+          </button>
+        </div>
       </header>
 
       <main style={styles.main}>
@@ -197,6 +206,7 @@ export function HomePage() {
           </section>
         )}
       </main>
+      <OwnerSellerCenterGuideModal open={sellerGuideOpen} onClose={() => setSellerGuideOpen(false)} />
     </div>
   );
 }
@@ -220,6 +230,17 @@ const styles: Record<string, React.CSSProperties> = {
   },
   title: { fontSize: fs.xxl, margin: 0, color: oc.text, fontWeight: 700 },
   tagline: { margin: '4px 0 0', fontSize: fs.sm, color: oc.textMuted },
+  headerActions: { display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 },
+  guideButton: {
+    background: oc.navActiveBg,
+    border: `1px solid ${oc.primary}`,
+    color: oc.navActiveText,
+    borderRadius: 8,
+    padding: '8px 14px',
+    cursor: 'pointer',
+    fontSize: fs.sm,
+    fontWeight: 600,
+  },
   logoutButton: {
     background: oc.surface,
     border: `1px solid ${oc.borderStrong}`,
