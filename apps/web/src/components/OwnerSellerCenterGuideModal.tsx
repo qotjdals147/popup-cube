@@ -121,14 +121,14 @@ export function OwnerSellerCenterGuideModal({ open, onClose }: OwnerSellerCenter
                     ))}
                   </ul>
                 </div>
+                <p className="owner-sc-guide__figure-caption">{t('ownerSellerGuide.figureCaption')}</p>
+                <OwnerSellerGuideFigure id={sec.figure} />
                 <h4 className="owner-sc-guide__subhead">{t('ownerSellerGuide.stepsHeading')}</h4>
                 <ol className="owner-sc-guide__steps">
                   {sec.stepKeys.map((key) => (
                     <li key={key}>{t(key)}</li>
                   ))}
                 </ol>
-                <p className="owner-sc-guide__figure-caption">{t('ownerSellerGuide.figureCaption')}</p>
-                <OwnerSellerGuideFigure id={sec.figure} />
               </section>
             ))}
           </div>

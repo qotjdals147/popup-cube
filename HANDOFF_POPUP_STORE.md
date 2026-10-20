@@ -2555,7 +2555,7 @@ npx supabase db pull
 | | |
 |---|---|
 | **버튼 위치** | **`StoreEditPage`** — 「대시보드로 이동」과 「로그아웃」 **사이** (왼쪽 아래·오른쪽 위 동일) · **`HomePage`** — 점주 헤더 (로그아웃 앞) |
-| **코드** | `OwnerSellerCenterGuideModal` · `ownerSellerCenterGuideManifest.ts` · `ownerSellerCenterGuideFigures.tsx` · `ko.ts` **`ownerSellerGuide.*`** |
+| **코드** | `OwnerSellerCenterGuideModal` · `ownerSellerGuideScreenMocks.tsx` (**실 UI HTML·점주 CSS**) · manifest · `ko.ts` **`ownerSellerGuide.*`** |
 | **범위** | 대시보드 · 매장 개요 · 통계 · 상품(·엑셀) · 리뷰 · 주문·수정대기·발주·반품·프로모션 · 운영·배송 · (월드 ON 시) 매장 꾸미기 |
 | **엑셀 상세** | 상품 탭 **「작성 매뉴얼」** = `OwnerProductBulkGuideModal` (별도) · 통합 가이드 **7장**에서 연결 |
 
@@ -2564,7 +2564,7 @@ npx supabase db pull
 **`apps/web`에서 점주·판매자센터(`StoreEditPage` 탭, `Owner*` 패널, `HomePage` 대시)를 바꾼 커밋**은 **같은 작업 흐름에서** 아래를 **무조건** 대조한다.
 
 1. `ownerSellerCenterGuideManifest.ts` — 섹션·단계 키 추가/삭제/순서
-2. `ownerSellerCenterGuideFigures.tsx` — 해당 메뉴 **SVG 목업** (잘림 없이 viewBox 확인)
+2. `ownerSellerGuideScreenMocks.tsx` — 해당 메뉴 **HTML 목업** (실제 `ko.ts` 버튼·카드·프로모션 CSS와 동일)
 3. `ko.ts` **`ownerSellerGuide`** — 문구·메뉴명 **실제 UI와 동일**
 4. HANDOFF **§7.121** · Changelog 한 줄
 
@@ -5382,6 +5382,10 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-20 eve — §7.121 가이드 **실 UI HTML 목업** (User 2차)
+- **Changed:** `ownerSellerGuideScreenMocks.tsx` · CSS · SVG 제거 · 순서=원리→**예시 화면**→할 일
+- **Notes:** `owner-promo-gacha.css` 등 **실제 점주 CSS** · web · **Ctrl+F5** (캐시)
 
 ### 2026-10-20 pm — §7.121 가이드 로직·시각자료 보강 (User 피드백)
 - **Changed:** `ownerSellerCenterGuideFigures` · manifest `logicKeys` · modal · `ko.ts` ownerSellerGuide

@@ -221,6 +221,435 @@
   border: 1px solid #e5e8eb;
 }
 
+/* —— 실제 판매자센터와 같은 HTML 목업 (§7.121) —— */
+.owner-sc-guide-mock {
+  margin: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.owner-sc-guide-mock__shell {
+  display: flex;
+  min-height: 420px;
+  max-height: 520px;
+  border: 1px solid #e5e8eb;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f4f5f7;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.owner-sc-guide-mock__sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  color: #b8c0cc;
+}
+
+.owner-sc-guide-mock__brand {
+  padding: 14px 12px 10px;
+  flex-shrink: 0;
+}
+
+.owner-sc-guide-mock__kicker {
+  margin: 0 0 4px;
+  font-size: 11px;
+  color: #b8c0cc;
+}
+
+.owner-sc-guide-mock__store-name {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.owner-sc-guide-mock__status-pill {
+  display: inline-block;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ebfbee;
+  color: #087f5b;
+  border: 1px solid #b2f2bb;
+}
+
+.owner-sc-guide-mock__nav {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.owner-sc-guide-mock__nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #b8c0cc;
+}
+
+.owner-sc-guide-mock__nav-item--active {
+  background: #3d4f63;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 #60a5fa;
+}
+
+.owner-sc-guide-mock__nav-badge {
+  flex-shrink: 0;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #f04452;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+}
+
+.owner-sc-guide-mock__sidebar-foot {
+  flex-shrink: 0;
+  padding: 10px 8px 12px;
+  border-top: 1px solid #3d4654;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.owner-sc-guide-mock__foot-btn {
+  display: block;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  text-align: left;
+  border: 1px solid #3d4654;
+  background: rgba(255, 255, 255, 0.06);
+  color: #b8c0cc;
+}
+
+.owner-sc-guide-mock__foot-btn--guide {
+  background: #3d4f63;
+  border-color: #60a5fa;
+  color: #fff;
+  font-weight: 600;
+}
+
+.owner-sc-guide-mock__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #f4f5f7;
+}
+
+.owner-sc-guide-mock__topbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #fff;
+  border-bottom: 1px solid #e5e8eb;
+  flex-wrap: wrap;
+}
+
+.owner-sc-guide-mock__topbar-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #191f28;
+}
+
+.owner-sc-guide-mock__topbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.owner-sc-guide-mock__top-btn {
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 12px;
+  border: 1px solid #d1d6db;
+  background: #fff;
+  color: #4e5968;
+}
+
+.owner-sc-guide-mock__top-btn--guide {
+  border-color: #3182f6;
+  background: #eef4ff;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.owner-sc-guide-mock__content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px 16px 16px;
+}
+
+.owner-sc-guide-mock__panel {
+  background: #fff;
+  border: 1px solid #e5e8eb;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.owner-sc-guide-mock__panel-title {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.owner-sc-guide-mock__field-label {
+  margin: 12px 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #191f28;
+}
+
+.owner-sc-guide-mock__help,
+.owner-sc-guide-mock__muted {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #4e5968;
+}
+
+.owner-sc-guide-mock__fake-input {
+  display: inline-block;
+  padding: 8px 10px;
+  border: 1px solid #d1d6db;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #fff;
+  color: #191f28;
+}
+
+.owner-sc-guide-mock__fake-input--wide {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.owner-sc-guide-mock__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.owner-sc-guide-mock__demo-btn {
+  pointer-events: none;
+  font-size: 13px !important;
+  padding: 8px 14px !important;
+}
+
+.owner-sc-guide-mock__product-row,
+.owner-sc-guide-mock__order-card,
+.owner-sc-guide-mock__review-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  margin-top: 10px;
+  border: 1px solid #e5e8eb;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.owner-sc-guide-mock__callout {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  background: #fff9db;
+  border: 1px solid #ffe066;
+  border-radius: 8px;
+  color: #191f28;
+}
+
+.owner-sc-guide-mock__save-dock {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e8eb;
+}
+
+.owner-sc-guide-mock__thumb-placeholder {
+  height: 100px;
+  background: #eef4ff;
+  border: 1px dashed #3182f6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #2563eb;
+  margin-bottom: 8px;
+}
+
+.owner-sc-guide-mock__input-row,
+.owner-sc-guide-mock__actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.owner-sc-guide-mock__link {
+  font-size: 13px;
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.owner-sc-guide-mock__chart-placeholder {
+  height: 120px;
+  margin: 10px 0;
+  background: linear-gradient(180deg, #eef4ff 0%, #fff 100%);
+  border: 1px solid #e5e8eb;
+  border-radius: 8px;
+}
+
+.owner-sc-guide-mock__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  margin: 8px 0;
+}
+
+.owner-sc-guide-mock__sku-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border: 1px solid #e5e8eb;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.owner-sc-guide-mock__subnav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.owner-sc-guide-mock__subnav-active {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #3d4f63;
+  color: #fff;
+  font-size: 13px;
+}
+
+.owner-sc-guide-mock__subnav span:not(.owner-sc-guide-mock__subnav-active) {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #4e5968;
+}
+
+.owner-sc-guide-mock__textarea-placeholder {
+  min-height: 56px;
+  padding: 10px;
+  border: 1px solid #d1d6db;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #8b95a1;
+  margin-bottom: 10px;
+}
+
+.owner-sc-guide-mock__promo-wrap {
+  pointer-events: none;
+}
+
+.owner-sc-guide-mock--plain {
+  border: 1px solid #e5e8eb;
+  border-radius: 12px;
+  padding: 16px;
+  background: #f9fafb;
+}
+
+.owner-sc-guide-mock__split-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .owner-sc-guide-mock__split-cards {
+    grid-template-columns: 1fr;
+  }
+  .owner-sc-guide-mock__shell {
+    flex-direction: column;
+    max-height: none;
+  }
+  .owner-sc-guide-mock__sidebar {
+    width: 100%;
+    max-height: 200px;
+  }
+}
+
+.owner-sc-guide-mock__card {
+  background: #fff;
+  border: 1px solid #e5e8eb;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.owner-sc-guide-mock__card h5 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.owner-sc-guide-mock__dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.owner-sc-guide-mock__store-card {
+  background: #fff;
+  border: 2px solid #d1d6db;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.owner-sc-guide-mock__store-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.owner-sc-guide-mock__kpi-hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #4e5968;
+}
+
+.owner-sc-guide-mock__hint {
+  margin: 6px 0;
+  font-size: 12px;
+  color: #4e5968;
+}
+
 .owner-sc-guide__foot {
   flex-shrink: 0;
   padding: 12px 20px;
