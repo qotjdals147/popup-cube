@@ -19,6 +19,7 @@ alwaysApply: true
 - **점주·손님 신규 기능** — 숫자/차트만 던지지 말고 **메뉴명(탭)·섹션 제목·한 줄 안내**로 「어디서 무엇인지」를 **첫 화면에서** 알 수 있게 (§0 UI/UX · AD-068).
 - **`ko.ts`·HANDOFF 카피** — **AI/매뉴얼 톤 금지** (§0 UI·i18n · User 2026-10-02): 짧게 · 소리 내어 읽었을 때 자연스러운지 확인.
 - **한국어 (User 2026-10-14)** — 채팅·HANDOFF **§0 「한국어 말하기·쓰기」** 준수 · 영어·깨진 글자 섞지 말 것 · **쉬운 말·완전한 문장**.
+- **판매자센터(점주 PC) 기능·탭·UI 변경 시** — **§7.121 필수 검수**: 작업과 `ownerSellerCenterGuideManifest.ts` · `ownerSellerCenterGuideFigures.tsx` · `ko.ts` `ownerSellerGuide.*` **대조** 후 **같은 커밋 흐름**에 가이드 반영.
 
 ## 출시 전 감사 (§63 · AD-086 · User 2026-10-02)
 
