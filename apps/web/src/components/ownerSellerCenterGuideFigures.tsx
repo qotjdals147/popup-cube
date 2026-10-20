@@ -99,48 +99,135 @@ function GuideDashboardFigure() {
 
 const C_borderStrong = '#d1d6db';
 
-function GuideShellFigure() {
-  const tabs = ['매장 개요', '통계', '상품', '주문', '발주·배송', '반품·교환'];
+/** 점주 PC — 왼쪽 사이드 + 상단 바 (StoreEditPage와 동일 구조) */
+function SidebarNavMock({
+  activeIndex,
+  badgeIndex,
+}: {
+  activeIndex: number;
+  badgeIndex?: number;
+}) {
+  const tabs = [
+    '매장 개요',
+    '통계',
+    '상품',
+    '리뷰',
+    '주문',
+    '수정 대기',
+    '발주·배송',
+    '반품·교환·문의',
+  ];
   return (
-    <Wrap label="왼쪽 메뉴와 본문">
-      <svg viewBox="0 0 720 240" className="owner-sc-guide__svg" role="img">
-        <rect width="720" height="240" fill={C.page} rx="8" />
-        <rect x="16" y="16" width="168" height="208" fill={C.sidebar} rx="10" />
-        <text x="28" y="40" fontSize="10" fill={C.sidebarText}>
-          스토어 관리
+    <>
+      <text x="28" y="36" fontSize="9" fill={C.sidebarText}>
+        스토어 관리
+      </text>
+      <text x="28" y="54" fontSize="12" fontWeight="700" fill="#fff">
+        GUCCI
+      </text>
+      <rect x="28" y="60" width="52" height="18" fill="#fff9db" stroke="#ffe066" rx="999" />
+      <text x="54" y="73" textAnchor="middle" fontSize="8" fill={C.warn}>
+        출시됨
+      </text>
+      {tabs.map((label, i) => (
+        <g key={label}>
+          <rect
+            x="20"
+            y={82 + i * 24}
+            width="160"
+            height="22"
+            fill={i === activeIndex ? C.sidebarActive : 'transparent'}
+            rx="6"
+          />
+          <text
+            x="30"
+            y={97 + i * 24}
+            fontSize="9.5"
+            fill={i === activeIndex ? '#fff' : C.sidebarText}
+          >
+            {label.length > 9 ? `${label.slice(0, 9)}…` : label}
+          </text>
+          {badgeIndex === i && (
+            <>
+              <circle cx="168" cy={88 + i * 24} r="9" fill={C.badge} />
+              <text x="168" y={91 + i * 24} textAnchor="middle" fontSize="8" fill="#fff" fontWeight="700">
+                3
+              </text>
+            </>
+          )}
+        </g>
+      ))}
+      <line x1="20" y1="278" x2="180" y2="278" stroke="#3d4654" />
+      {[
+        { y: 286, label: '대시보드로 이동', hi: false },
+        { y: 312, label: '판매자센터 가이드', hi: true },
+        { y: 338, label: '로그아웃', hi: false },
+      ].map((b) => (
+        <g key={b.label}>
+          <rect
+            x="20"
+            y={b.y}
+            width="160"
+            height="22"
+            fill={b.hi ? C.sidebarActive : 'rgba(255,255,255,0.06)'}
+            stroke={b.hi ? '#60a5fa' : '#3d4654'}
+            rx="6"
+          />
+          <text x="30" y={b.y + 15} fontSize="9" fill={b.hi ? '#fff' : C.sidebarText}>
+            {b.label}
+          </text>
+        </g>
+      ))}
+    </>
+  );
+}
+
+function TopBarMock({ title }: { title: string }) {
+  return (
+    <>
+      <text x="208" y="38" fontSize="14" fontWeight="700" fill={C.text}>
+        {title}
+      </text>
+      <rect x="418" y="22" width="88" height="26" fill={C.white} stroke={C_borderStrong} rx="6" />
+      <text x="462" y="39" textAnchor="middle" fontSize="8" fill={C.muted}>
+        대시보드로 이동
+      </text>
+      <rect x="512" y="22" width="96" height="26" fill="#eef4ff" stroke={C.primary} rx="6" />
+      <text x="560" y="39" textAnchor="middle" fontSize="8" fill="#2563eb" fontWeight="600">
+        판매자센터 가이드
+      </text>
+      <rect x="614" y="22" width="56" height="26" fill={C.white} stroke={C_borderStrong} rx="6" />
+      <text x="642" y="39" textAnchor="middle" fontSize="8" fill={C.muted}>
+        로그아웃
+      </text>
+    </>
+  );
+}
+
+function GuideShellFigure() {
+  return (
+    <Wrap label="판매자센터 레이아웃">
+      <svg viewBox="0 0 720 368" className="owner-sc-guide__svg" role="img">
+        <rect width="720" height="368" fill={C.page} rx="8" />
+        <rect x="8" y="8" width="184" height="352" fill={C.sidebar} rx="10" />
+        <SidebarNavMock activeIndex={2} badgeIndex={4} />
+        <rect x="200" y="8" width="512" height="352" fill={C.page} rx="10" />
+        <rect x="200" y="8" width="512" height="52" fill={C.white} stroke={C.border} />
+        <TopBarMock title="상품" />
+        <rect x="212" y="72" width="488" height="276" fill={C.white} stroke={C.border} rx="8" />
+        <text x="224" y="96" fontSize="11" fontWeight="600" fill={C.text}>
+          상품 목록 · + 새 상품 · 엑셀 일괄 등록
         </text>
-        <text x="28" y="58" fontSize="13" fontWeight="700" fill="#fff">
-          매장 이름
+        <rect x="224" y="108" width="464" height="48" fill="#f9fafb" stroke={C.border} rx="6" />
+        <text x="236" y="128" fontSize="10" fill={C.text}>
+          스카프 · 29,000원
         </text>
-        {tabs.map((label, i) => (
-          <g key={label}>
-            <rect
-              x="24"
-              y={72 + i * 22}
-              width="152"
-              height="20"
-              fill={i === 2 ? C.sidebarActive : 'transparent'}
-              rx="4"
-            />
-            <text x="32" y={86 + i * 22} fontSize="10" fill={i === 2 ? '#fff' : C.sidebarText}>
-              {label}
-            </text>
-            {i === 3 && (
-              <circle cx="162" cy={76 + i * 22} r="8" fill={C.badge} />
-            )}
-          </g>
-        ))}
-        <rect x="24" y="188" width="152" height="22" fill="rgba(255,255,255,0.08)" rx="4" />
-        <text x="32" y="203" fontSize="9" fill={C.sidebarText}>
-          대시보드 · 가이드 · 로그아웃
+        <text x="236" y="144" fontSize="9" fill={C.muted}>
+          판매자 상품코드 SCARF-01 · 자동수락 2/5
         </text>
-        <rect x="196" y="16" width="508" height="208" fill={C.white} stroke={C.border} rx="10" />
-        <rect x="196" y="16" width="508" height="36" fill={C.white} stroke={C.border} />
-        <text x="212" y="38" fontSize="13" fontWeight="700" fill={C.text}>
-          상품
-        </text>
-        <text x="212" y="72" fontSize="11" fill={C.muted}>
-          선택한 메뉴 내용이 오른쪽에 표시됩니다.
+        <rect x="580" y="118" width="96" height="28" fill={C.primary} rx="6" />
+        <text x="628" y="136" textAnchor="middle" fontSize="9" fill="#fff">
+          수정
         </text>
       </svg>
     </Wrap>
@@ -218,36 +305,33 @@ function GuideStatsFigure() {
 }
 
 function GuideProductsFigure() {
+  const fields = [
+    '상품명',
+    '판매자 상품코드',
+    '판매가 · 재고',
+    '자동으로 주문 수락 (ON)',
+    '판매 옵션 (컬러 / M,L)',
+    '상품 태그 · 함께 추천',
+  ];
   return (
-    <Wrap label="상품 탭">
-      <svg viewBox="0 0 720 320" className="owner-sc-guide__svg" role="img">
-        <rect width="720" height="320" fill={C.page} rx="8" />
-        <rect x="24" y="20" width="672" height="40" fill={C.white} stroke={C.border} rx="8" />
-        <text x="40" y="44" fontSize="11" fill={C.text}>
-          상품 목록 · + 새 상품 · 손님 미리보기
+    <Wrap label="상품 수정 화면">
+      <svg viewBox="0 0 720 340" className="owner-sc-guide__svg" role="img">
+        <rect width="720" height="340" fill={C.page} rx="8" />
+        <rect x="16" y="16" width="688" height="44" fill={C.white} stroke={C.border} rx="8" />
+        <text x="28" y="42" fontSize="11" fill={C.text}>
+          ← 목록 · 손님 미리보기
         </text>
-        <rect x="24" y="72" width="320" height="228" fill={C.white} stroke={C.border} rx="8" />
-        <text x="36" y="94" fontSize="11" fontWeight="700" fill={C.text}>
-          상품 수정 (한 화면)
-        </text>
-        {['판매자 상품코드', '옵션·재고', '상품 태그', '함께 추천', '상세 블록'].map((l, i) => (
+        {fields.map((l, i) => (
           <g key={l}>
-            <rect x="36" y={104 + i * 36} width="288" height="28" fill={C.page} stroke={C.border} rx="4" />
-            <text x="44" y={122 + i * 36} fontSize="10" fill={C.muted}>
+            <text x="28" y={78 + i * 38} fontSize="10" fontWeight="600" fill={C.text}>
               {l}
             </text>
+            <rect x="28" y={84 + i * 38} width="664" height="26" fill={C.white} stroke={C.borderStrong} rx="6" />
           </g>
         ))}
-        <rect x="360" y="72" width="336" height="48" fill={C.primary} rx="8" />
-        <text x="528" y="100" textAnchor="middle" fontSize="12" fill="#fff" fontWeight="700">
-          저장 (하단 고정)
-        </text>
-        <rect x="360" y="132" width="336" height="168" fill={C.white} stroke={C.border} rx="8" />
-        <text x="376" y="154" fontSize="10" fill={C.muted}>
-          자동 수락 · 발주·배송 탭 이동 설정
-        </text>
-        <text x="376" y="174" fontSize="10" fill={C.muted}>
-          권장 이미지 크기 안내
+        <rect x="16" y="298" width="688" height="28" fill={C.primary} rx="8" />
+        <text x="360" y="316" textAnchor="middle" fontSize="11" fill="#fff" fontWeight="700">
+          저장
         </text>
       </svg>
     </Wrap>
@@ -311,42 +395,49 @@ function GuideReviewsFigure() {
 
 function GuideOrdersPipelineFigure() {
   return (
-    <Wrap label="주문 흐름">
-      <svg viewBox="0 0 720 200" className="owner-sc-guide__svg" role="img">
-        <rect width="720" height="200" fill={C.page} rx="8" />
-        {[
-          { x: 24, t: '주문', s: '수락 대기' },
-          { x: 196, t: '수정 대기', s: '손님 보완' },
-          { x: 368, t: '발주·배송', s: '송장·발송' },
-        ].map((b, i) => (
-          <g key={b.t}>
-            <rect x={b.x} y="48" width="160" height="88" fill={C.white} stroke={i === 0 ? C.primary : C.border} rx="8" />
-            <text x={b.x + 80} y="76" textAnchor="middle" fontSize="12" fontWeight="700" fill={C.text}>
-              {b.t}
-            </text>
-            <text x={b.x + 80} y="96" textAnchor="middle" fontSize="10" fill={C.muted}>
-              {b.s}
-            </text>
-            {i < 2 && (
-              <>
-                <path d={`M${b.x + 168} 92h20`} stroke={C.muted} strokeWidth="2" />
-                <polygon points={`${b.x + 188},92 ${b.x + 180},88 ${b.x + 180},96`} fill={C.muted} />
-              </>
-            )}
-          </g>
-        ))}
-        <rect x="540" y="48" width="156" height="88" fill="#ebfbee" stroke="#b2f2bb" rx="8" />
-        <text x="618" y="76" textAnchor="middle" fontSize="11" fontWeight="700" fill={C.success}>
-          자동 수락 ON
+    <Wrap label="주문 탭 — 실제 버튼">
+      <svg viewBox="0 0 720 280" className="owner-sc-guide__svg" role="img">
+        <rect width="720" height="280" fill={C.page} rx="8" />
+        <text x="24" y="28" fontSize="12" fontWeight="700" fill={C.text}>
+          주문 (수락·거절) 탭
         </text>
-        <text x="618" y="96" textAnchor="middle" fontSize="9" fill={C.muted}>
-          주문 탭 건너뛰고
+        <rect x="24" y="40" width="672" height="120" fill={C.white} stroke={C.border} rx="8" />
+        <text x="40" y="64" fontSize="10" fontWeight="600" fill={C.text}>
+          GUCCI-1042 · demo@shopper.com
         </text>
-        <text x="618" y="112" textAnchor="middle" fontSize="9" fill={C.muted}>
-          발주·배송으로
+        <text x="40" y="82" fontSize="9" fill={C.muted}>
+          스카프 · 블랙 / M · 29,000원
         </text>
-        <text x="24" y="168" fontSize="11" fill={C.muted}>
-          결제 후 목록·빨간 숫자는 새로고침 없이 갱신 (PC 화면 켜 둔 상태)
+        <rect x="40" y="92" width="72" height="24" fill={C.primary} rx="5" />
+        <text x="76" y="108" textAnchor="middle" fontSize="9" fill="#fff">
+          주문 수락
+        </text>
+        <rect x="120" y="92" width="96" height="24" fill={C.white} stroke={C_borderStrong} rx="5" />
+        <text x="168" y="108" textAnchor="middle" fontSize="8" fill={C.muted}>
+          주문 취소(거절)
+        </text>
+        <rect x="224" y="92" width="104" height="24" fill="#fff9db" stroke="#ffe066" rx="5" />
+        <text x="276" y="108" textAnchor="middle" fontSize="8" fill={C.warn}>
+          손님에게 수정 요청
+        </text>
+        <rect x="24" y="172" width="672" height="96" fill={C.white} stroke={C.border} rx="8" />
+        <text x="40" y="196" fontSize="10" fontWeight="600" fill={C.text}>
+          발주·배송 탭 (수락 후)
+        </text>
+        <rect x="40" y="208" width="200" height="22" fill="#f9fafb" stroke={C.border} rx="4" />
+        <text x="48" y="223" fontSize="8" fill={C.muted}>
+          송장 번호 (선택)
+        </text>
+        <rect x="248" y="204" width="72" height="26" fill={C.primary} rx="5" />
+        <text x="284" y="221" textAnchor="middle" fontSize="9" fill="#fff">
+          배송 시작
+        </text>
+        <rect x="328" y="204" width="72" height="26" fill={C.white} stroke={C_borderStrong} rx="5" />
+        <text x="364" y="221" textAnchor="middle" fontSize="9" fill={C.muted}>
+          배송 완료
+        </text>
+        <text x="40" y="252" fontSize="9" fill={C.success}>
+          ⚡ 자동 수락된 주문은 이 탭에 바로 올 수 있음
         </text>
       </svg>
     </Wrap>

@@ -113,11 +113,21 @@ export function OwnerSellerCenterGuideModal({ open, onClose }: OwnerSellerCenter
               >
                 <h3>{t(sec.titleKey)}</h3>
                 <p className="owner-sc-guide__section-intro">{t(sec.introKey)}</p>
+                <div className="owner-sc-guide__logic">
+                  <h4 className="owner-sc-guide__subhead">{t('ownerSellerGuide.logicHeading')}</h4>
+                  <ul className="owner-sc-guide__logic-list">
+                    {sec.logicKeys.map((key) => (
+                      <li key={key}>{t(key)}</li>
+                    ))}
+                  </ul>
+                </div>
+                <h4 className="owner-sc-guide__subhead">{t('ownerSellerGuide.stepsHeading')}</h4>
                 <ol className="owner-sc-guide__steps">
                   {sec.stepKeys.map((key) => (
                     <li key={key}>{t(key)}</li>
                   ))}
                 </ol>
+                <p className="owner-sc-guide__figure-caption">{t('ownerSellerGuide.figureCaption')}</p>
                 <OwnerSellerGuideFigure id={sec.figure} />
               </section>
             ))}

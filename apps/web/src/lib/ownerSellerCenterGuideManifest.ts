@@ -27,6 +27,9 @@ export interface OwnerSellerGuideSection {
   figure: OwnerSellerGuideFigureId;
   titleKey: string;
   introKey: string;
+  /** 「왜 이렇게 동작하나요」 — 탭·기능 로직 (User 2026-10-20) */
+  logicKeys: readonly string[];
+  /** 화면에서 따라 할 일 */
   stepKeys: readonly string[];
   /** world 플래그 켜졌을 때만 노출 */
   requiresWorld?: boolean;
@@ -38,6 +41,10 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     figure: 'intro',
     titleKey: 'ownerSellerGuide.sec_intro_title',
     introKey: 'ownerSellerGuide.sec_intro_intro',
+    logicKeys: [
+      'ownerSellerGuide.sec_intro_logic1',
+      'ownerSellerGuide.sec_intro_logic2',
+    ],
     stepKeys: [
       'ownerSellerGuide.sec_intro_step1',
       'ownerSellerGuide.sec_intro_step2',
@@ -49,6 +56,11 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     figure: 'dashboard',
     titleKey: 'ownerSellerGuide.sec_dashboard_title',
     introKey: 'ownerSellerGuide.sec_dashboard_intro',
+    logicKeys: [
+      'ownerSellerGuide.sec_dashboard_logic1',
+      'ownerSellerGuide.sec_dashboard_logic2',
+      'ownerSellerGuide.sec_dashboard_logic3',
+    ],
     stepKeys: [
       'ownerSellerGuide.sec_dashboard_step1',
       'ownerSellerGuide.sec_dashboard_step2',
@@ -61,6 +73,12 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     figure: 'shell',
     titleKey: 'ownerSellerGuide.sec_shell_title',
     introKey: 'ownerSellerGuide.sec_shell_intro',
+    logicKeys: [
+      'ownerSellerGuide.sec_shell_logic1',
+      'ownerSellerGuide.sec_shell_logic2',
+      'ownerSellerGuide.sec_shell_logic3',
+      'ownerSellerGuide.sec_shell_logic4',
+    ],
     stepKeys: [
       'ownerSellerGuide.sec_shell_step1',
       'ownerSellerGuide.sec_shell_step2',
@@ -72,6 +90,11 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     figure: 'overview',
     titleKey: 'ownerSellerGuide.sec_overview_title',
     introKey: 'ownerSellerGuide.sec_overview_intro',
+    logicKeys: [
+      'ownerSellerGuide.sec_overview_logic1',
+      'ownerSellerGuide.sec_overview_logic2',
+      'ownerSellerGuide.sec_overview_logic3',
+    ],
     stepKeys: [
       'ownerSellerGuide.sec_overview_step1',
       'ownerSellerGuide.sec_overview_step2',
@@ -85,6 +108,7 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     figure: 'stats',
     titleKey: 'ownerSellerGuide.sec_stats_title',
     introKey: 'ownerSellerGuide.sec_stats_intro',
+    logicKeys: ['ownerSellerGuide.sec_stats_logic1', 'ownerSellerGuide.sec_stats_logic2'],
     stepKeys: [
       'ownerSellerGuide.sec_stats_step1',
       'ownerSellerGuide.sec_stats_step2',
@@ -95,6 +119,12 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     figure: 'products',
     titleKey: 'ownerSellerGuide.sec_products_title',
     introKey: 'ownerSellerGuide.sec_products_intro',
+    logicKeys: [
+      'ownerSellerGuide.sec_products_logic1',
+      'ownerSellerGuide.sec_products_logic2',
+      'ownerSellerGuide.sec_products_logic3',
+      'ownerSellerGuide.sec_products_logic4',
+    ],
     stepKeys: [
       'ownerSellerGuide.sec_products_step1',
       'ownerSellerGuide.sec_products_step2',
@@ -109,6 +139,10 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     figure: 'productsBulk',
     titleKey: 'ownerSellerGuide.sec_productsBulk_title',
     introKey: 'ownerSellerGuide.sec_productsBulk_intro',
+    logicKeys: [
+      'ownerSellerGuide.sec_productsBulk_logic1',
+      'ownerSellerGuide.sec_productsBulk_logic2',
+    ],
     stepKeys: [
       'ownerSellerGuide.sec_productsBulk_step1',
       'ownerSellerGuide.sec_productsBulk_step2',
@@ -120,6 +154,7 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     figure: 'reviews',
     titleKey: 'ownerSellerGuide.sec_reviews_title',
     introKey: 'ownerSellerGuide.sec_reviews_intro',
+    logicKeys: ['ownerSellerGuide.sec_reviews_logic1', 'ownerSellerGuide.sec_reviews_logic2'],
     stepKeys: [
       'ownerSellerGuide.sec_reviews_step1',
       'ownerSellerGuide.sec_reviews_step2',
@@ -130,6 +165,12 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     figure: 'ordersPipeline',
     titleKey: 'ownerSellerGuide.sec_ordersPipeline_title',
     introKey: 'ownerSellerGuide.sec_ordersPipeline_intro',
+    logicKeys: [
+      'ownerSellerGuide.sec_ordersPipeline_logic1',
+      'ownerSellerGuide.sec_ordersPipeline_logic2',
+      'ownerSellerGuide.sec_ordersPipeline_logic3',
+      'ownerSellerGuide.sec_ordersPipeline_logic4',
+    ],
     stepKeys: [
       'ownerSellerGuide.sec_ordersPipeline_step1',
       'ownerSellerGuide.sec_ordersPipeline_step2',
@@ -143,6 +184,10 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     figure: 'returns',
     titleKey: 'ownerSellerGuide.sec_returns_title',
     introKey: 'ownerSellerGuide.sec_returns_intro',
+    logicKeys: [
+      'ownerSellerGuide.sec_returns_logic1',
+      'ownerSellerGuide.sec_returns_logic2',
+    ],
     stepKeys: [
       'ownerSellerGuide.sec_returns_step1',
       'ownerSellerGuide.sec_returns_step2',
@@ -154,6 +199,10 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     figure: 'promotions',
     titleKey: 'ownerSellerGuide.sec_promotions_title',
     introKey: 'ownerSellerGuide.sec_promotions_intro',
+    logicKeys: [
+      'ownerSellerGuide.sec_promotions_logic1',
+      'ownerSellerGuide.sec_promotions_logic2',
+    ],
     stepKeys: [
       'ownerSellerGuide.sec_promotions_step1',
       'ownerSellerGuide.sec_promotions_step2',
@@ -164,6 +213,11 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     figure: 'policy',
     titleKey: 'ownerSellerGuide.sec_policy_title',
     introKey: 'ownerSellerGuide.sec_policy_intro',
+    logicKeys: [
+      'ownerSellerGuide.sec_policy_logic1',
+      'ownerSellerGuide.sec_policy_logic2',
+      'ownerSellerGuide.sec_policy_logic3',
+    ],
     stepKeys: [
       'ownerSellerGuide.sec_policy_step1',
       'ownerSellerGuide.sec_policy_step2',
@@ -176,6 +230,7 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     figure: 'layout',
     titleKey: 'ownerSellerGuide.sec_layout_title',
     introKey: 'ownerSellerGuide.sec_layout_intro',
+    logicKeys: ['ownerSellerGuide.sec_layout_logic1', 'ownerSellerGuide.sec_layout_logic2'],
     stepKeys: [
       'ownerSellerGuide.sec_layout_step1',
       'ownerSellerGuide.sec_layout_step2',

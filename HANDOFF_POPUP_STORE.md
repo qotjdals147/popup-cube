@@ -5383,6 +5383,10 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-20 pm — §7.121 가이드 로직·시각자료 보강 (User 피드백)
+- **Changed:** `ownerSellerCenterGuideFigures` · manifest `logicKeys` · modal · `ko.ts` ownerSellerGuide
+- **Notes:** shell SVG 겹침 수정 · 탭별 「동작 원리」 · web only · Ctrl+F5
+
 ### 2026-10-20 — 판매자센터 통합 가이드 (§7.121 · AD-092)
 - **Changed:** `OwnerSellerCenterGuideModal` · manifest · figures · CSS · `StoreEditPage` · `HomePage` · `ko.ts` · §0 · §7.121 · `.cursor/rules/popup-store-handoff.mdc`
 - **Notes:** **web only** · Vercel **1~2min** · **Ctrl+F5** · 팝업 **바깥 클릭 닫기 ❌** · User 실기 ⬜

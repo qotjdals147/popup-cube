@@ -160,6 +160,43 @@
   color: #4e5968;
 }
 
+.owner-sc-guide__subhead {
+  margin: 16px 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #191f28;
+}
+
+.owner-sc-guide__logic {
+  margin: 0 0 4px;
+  padding: 12px 14px;
+  background: #eef4ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+}
+
+.owner-sc-guide__logic-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #191f28;
+}
+
+.owner-sc-guide__logic-list li {
+  margin-bottom: 8px;
+}
+
+.owner-sc-guide__logic-list li:last-child {
+  margin-bottom: 0;
+}
+
+.owner-sc-guide__figure-caption {
+  margin: 16px 0 8px;
+  font-size: 12px;
+  color: #8b95a1;
+}
+
 .owner-sc-guide__steps {
   margin: 0 0 14px;
   padding-left: 20px;
