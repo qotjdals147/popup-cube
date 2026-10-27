@@ -947,15 +947,15 @@ popup_store/                          # Turborepo root
 | ISS-058 | ~~모달·상세·장바구니 뒤 배경 스크롤~~ | **Fixed (web+mobile · ISS-058)** | **`overlayScrollLock.ts`** + **`useOverlayScrollLock`** (상품상세·장바구니 drawer·confirm·반품·리뷰·우편번호) · 앱 **`webview_scroll_lock`** → WebView **`scrollEnabled`** |
 | ISS-066 | ~~매장 새 소식 — 점주 입력이 DB에 안 남고 손님 상세에 「새 소식」만~~ | **Fixed (web+DB · 2026-10-14)** | **원인** = `OwnerStoreNewsEditor` `onBlur`가 `onChange`와 같은 React state와 비교해 **항상 “변경 없음”** · DB `body` **null** · **조치** = 서버에 마지막으로 저장된 값(`persistedRef`)과 비교 · 카드 **「소식 저장」** · migration `20261014_store_news_posts_grants` (**INSERT GRANT** · 별건 ISS-012 계열) **원격 ✅** |
 
-**↓ §63 2차 중간 감사(2026-10-27 · 읽기 전용) — 1차 ISS-044~055는 운영 DB에서 재확인 ✅. 상세 = §63.15**
+**↓ §63 2차 중간 감사(2026-10-27) — 1차 ISS-044~055는 재확인 ✅ · ISS-067~071 **Fixed** (`iss067_071_audit_fixes`). 상세 = §63.15 · §7.122**
 
 | ID | Issue | Severity | Action |
 |---|---|---|---|
-| ISS-067 | **손님이 REST로 가짜 주문을 직접 INSERT 가능** — `authenticated`에 `orders`·`order_items` **INSERT GRANT** + RLS `orders_insert_own`/`order_items_insert_own`이 **user_id=나** 만 확인 | **P1 (데이터 오염)** | `POST /rest/v1/orders`로 `status`·`total_amount`·`store_id` 임의 생성 → 점주 주문함·KPI에 **가짜 매출**. 재고는 안 깎임. 클라이언트 `.from('orders').insert` **0건**(SELECT만) → **GRANT+INSERT 정책 제거해도 기능 영향 없음**. 주문 생성은 `place_order`만 |
-| ISS-068 | **반품 완료해도 재고가 안 돌아옴** — `approve_return`·`complete_return`이 `_restore_order_stock`을 **호출하지 않음** | **P1 (§52.2)** | §52.2는 「배송 후 반품 = **입고·검수 후 복구**」. 지금 복구 호출자는 **취소·거절 2곳뿐**. 반품이 끝나면 옵션/대표 재고가 **영구히 빠진 채**. 조치 = `complete_return`(또는 입고 확인 RPC)에서 SKU 분기 restore. **정책 확인 후 수정** |
-| ISS-070 | **주문 없이 가챠를 뽑을 수 있음** — `roll_gacha(store_id, order_id)`가 `p_order_id IS NULL`이면 **소유·결제 검증을 건너뛰고 추첨** | **P1** | 로그인만 하면 `/rpc/roll_gacha`로 매장 풀을 **무제한 무료 뽑기**. 1인자 오버로드 `roll_gacha(store_id)`도 동일. 클라 `rollGacha`는 보통 `orderId`를 넘기지만 **생략 가능**(`orderId ?? null`). 조치 = NULL이면 거부 · 1인자 오버로드 DROP |
-| ISS-069 | **반품 증빙이 공개 URL** — `store-assets` 버킷 **public=true** · 경로 `{uid}/return-evidence/…` · `getPublicUrl` | **P2** | URL만 알면 **비로그인으로 열람**. 상품 이미지는 public이 맞지만 증빙은 개인정보. 조치 = 증빙 전용 **private 버킷** + signed URL · mime/용량 제한 |
-| ISS-071 | **반품 처리 RPC가 anon에서도 EXECUTE 가능** — `approve_return`·`complete_return`·`reject_return`·`set_gacha_return_status` | **P3** | 본문은 `owner_id` 검사 → anon은 `not_store_owner`로 실패. **실피해 없음**. 방어 = `REVOKE EXECUTE FROM anon, PUBLIC` |
+| ISS-067 | ~~손님이 REST로 가짜 주문을 직접 INSERT 가능~~ | **Fixed (DB · `iss067_071_audit_fixes` · 2026-10-27)** | `orders`/`order_items` **INSERT GRANT·정책 제거** · 주문 생성은 `place_order`만 · **1차 ISS-044 재수정 없음** |
+| ISS-068 | ~~반품 완료해도 재고가 안 돌아옴~~ | **Fixed (DB · 2026-10-27 · §52.2)** | `complete_return` → `_restore_return_stock` — **신청 품목만** 옵션/대표 재고 복구 · 취소·거절용 `_restore_order_stock`(ISS-044)는 **그대로** |
+| ISS-070 | ~~주문 없이 가챠를 뽑을 수 있음~~ | **Fixed (DB+web · 2026-10-27)** | 1인자 `roll_gacha` **DROP** · `p_order_id` NULL = `order_required` · 클라 `rollGacha(storeId, orderId)` **필수** |
+| ISS-069 | ~~반품 증빙이 공개 URL~~ | **Fixed (DB+web · 2026-10-27)** | 버킷 **`return-evidence`** (비공개 · 5MB · 이미지 mime) · 저장은 경로 · 조회 시 **서명 URL** · 예전 `store-assets` 공개 URL은 그대로 표시 |
+| ISS-071 | ~~반품 처리 RPC가 anon에서도 EXECUTE 가능~~ | **Fixed (DB · 2026-10-27)** | `approve_return`·`complete_return`·`reject_return`·`set_gacha_return_status` **PUBLIC/anon REVOKE** · `authenticated`만 |
 | ISS-052 | **운영 DB ↔ repo migration 이력 불일치** | **P2 (완화 · §7.101)** | 1차와 동일 · **1:1 이력 비목표** · declarative `supabase/schemas` ✅ |
 
 ---
@@ -973,7 +973,7 @@ popup_store/                          # Turborepo root
 | **출시 불안·건강검진** | **§63 (AD-086)** — **1차 (2026-10-02) ✅** · **2차 중간 (2026-10-27) ✅ §63.15** · **2차 최종** = 베타 필수 기능 끝난 뒤 한 번 더 (§63.8) |
 | **🚨 즉시 (User 2026-10-06~07)** | **ISS-056~062** ✅ push 후 Vercel 1~2분 · **앱 `apps/mobile` 변경 → Expo `--clear`** · **옵션 주문 「안 들어옴」 = 자동수락 → 발주·배송 탭** (ISS-061 · 주문 탭에 안내 추가) |
 | **📦 발주·배송 방향 (CEO 2026-10-07)** | **셀메이트 전제 · 자체 딥 개발 ❌** — 발주·배송 기능 착수 전 **§7.95 체크리스트** · **AD-089** |
-| **🚨 감사 Open (2026-10-27 2차 중간)** | **ISS-067** 가짜 주문 INSERT · **ISS-068** 반품 완료 재고 미복구 · **ISS-070** 주문 없이 가챠 · **ISS-069** 증빙 public URL · **ISS-071** anon 반품 RPC REVOKE · 상세 **§63.15** · 수정은 §63.4 D |
+| **🚨 감사 Open** | 2차 중간 **ISS-067~071 Fixed** (`iss067_071_audit_fixes` · **§7.122**) · **2차 최종**은 베타 한 사이클 뒤 (§63.8) |
 | **§7.96 엑셀** | v1 **코드 ✅** · **User 실기 ✅** (2026-10-13 · 문제 없음) · **카테고리 열·양식 대개편**만 CEO 합의 후 |
 | **⏸ 예약 (User 2026-10-12)** | **「TMI 작업」** — **§7.98** · User 말할 때까지 **본격 착수 ❌** |
 | **채팅 분리 (User 2026-10-02)** | 점검은 **별도 채팅** → 착수 전 **`## 6` Open ISS + §63.15**(현재) · §63.14는 **1차 스냅샷** · 수정 시 ISS **Fixed(hash)** + §63.15 B표 **둘 다** 갱신 |
@@ -1096,12 +1096,12 @@ popup_store/                          # Turborepo root
 
 #### 사용자가 지금 해야 할 것
 
-**최신** — **§7.121 가이드** User **사이드바·예시 화면 ✅ 2026-10-20** (`8a2361c`) · **§7.116** 배ner · **§7.119** 백스택 ⬜ · 회의 = **§7.94**
+**최신** — **§7.122 ISS-067~071 수정 ✅ 2026-10-27** · **§7.121** 가이드 사이드바 ✅ · **§7.116** 배너 · **§7.119** 백스택 ⬜ · 회의 = **§7.94**
 
 | | |
 |---|---|
 | **다음 우선 (에이전트)** | **입점·베타 운영** (아래 「회의록 잔여」) · **Kakao/Naver = 사업자 등록 후** (§7.72 ⏸) · **PG·셀메이트 = 입점 계약·가맹 후** (AD-061 · AD-089 · CEO) |
-| **User 실기 ⬜** | **§7.116** 홈 배ner (admin · **Expo `--clear`**) · **권장 px** UI (`7ffe17a` · 점주 **Ctrl+F5**) · §7.119 뒤로가기 스택 |
+| **User 실기 ⬜** | **§7.122** 반품 완료 후 재고 복구 · **§7.116** 홈 배너 (admin · **Expo `--clear`**) · 권장 px · §7.119 뒤로가기 스택 |
 | **User 실기 ✅** | **§7.113** 홈·매장 **태그** (2026-10-16) · **§7.119** 캐러셀 (2026-10-15) |
 | **PG·OAuth** | **§7.85** · §7.84 Google **✅** · Kakao/Naver **⏸ 사업자 후** |
 
@@ -1109,7 +1109,7 @@ popup_store/                          # Turborepo root
 
 | 구분 | 회의·CEO 항목 | 상태 |
 |---|---|---|
-| **✅ v1 쇼핑 UX** | 오류 1~3 · 홈 배ner·**상품 피드** · 상세·연관·**함께 추천** · 소식·**태그** · 상품코드·엑셀 v1 · 라인 아이콘 | **대부분 ✅** (베치 1~2·5~8) |
+| **✅ v1 쇼핑 UX** | 오류 1~3 · 홈 배너·**상품 피드** · 상세·연관·**함께 추천** · 소식·**태그** · 상품코드·엑셀 v1 · 라인 아이콘 | **대부분 ✅** (베치 1~2·5~8) |
 | **⬜ CEO·운영** | **홈 카테고리**(의류/뷰티…) · **본사 사이트**(§7.118) · **베타 건의 탭** · **CRM·단체 푸시** · **주문 배치**(시간 일괄) | **미착수 또는 기획만** |
 | **✅ 점주 PC** | **판매자센터 통합 가이드** (§7.121) | **v1 ✅** · User **예시 UI·왼쪽 탭 ✅ 2026-10-20** · 목차·✕닫기 등 **⬜** |
 | **⬜ 사업·계약 후** | **PG 실결제** · **셀메이트** (주문 엑셀 내보내기·송장 역반영) · **Kakao/Naver** | **mock·Google만** · CEO **입점 선행** |
@@ -1192,7 +1192,7 @@ npx expo start --tunnel --port 8082 --clear
 | **배송 후** | 손님 **「문의하기」** (`create_order_claim`) · 점주 **답변=종료** (`resolve_order_claim`) | **반품 신청** · **사유 코드** · **품목/수량** · **상태 머신** |
 | **점주 UI** | **발주·배송** 등 주문 카드 **안에** 보라색 「손님 문의」 블록 | **「반품·교환」전용 탭** · **뱃지** · **필터** |
 | **손님 UI** | 주문내역 **「문의하기」** 자유 텍스트 · **(R1.5)** 이력·타임스탬프 · **(R2)** **「반품·교환 신청」** 별도 버튼 | **반품지 안내** · 사유·품목·상태 머신 |
-| **재고** | §52.2 — **입고·검수 후** 복구 (문서만) | `complete_return` RPC |
+| **재고** | §52.2 — **입고·검수 후** 복구 | `complete_return` → `_restore_return_stock` (**ISS-068 ✅**) |
 | **돈** | mock · 점주 답변에 「환불 처리」 **수동** | PG **부분/전액 환불** (AD-061 후) |
 
 #### 주문 여정별 정리 (헷갈리지 않게)
@@ -2593,6 +2593,37 @@ npx supabase db pull
 - [ ] 가이드 열기 · 목차 점프 · **바깥 클릭 안 닫힘** · ✕ 닫기
 - [x] 예시 화면 — **왼쪽 전체 탭**(반품·교환·문의 ~ 프로모션·가챠 ~ 운영·배송 안내) **잘림 없음** · **동작 원리** 블록 · HTML 목업 — User **✅ 2026-10-20** (`8a2361c` · Vercel 후 **Ctrl+F5**)
 - [ ] 장별 **로직·버튼 문구** 전수 검수 (필요 시 User 피드백 반영)
+
+---
+
+### 7.122 **2차 중간 감사 수정** (ISS-067~071 · User 2026-10-27)
+
+> **쉬운 말:** 다른 채팅에서 찾은 **5가지를 이 채팅에서 고쳤습니다.** 1차(044)는 **다시 안 엽니다.** 상세는 `## 6` · **§63.15**.
+
+| ISS | 한 일 |
+|---|---|
+| **070** | 주문 없이 가챠 뽑기 **막음** · 1인자 함수 삭제 |
+| **067** | 손님이 주문 테이블에 **직접 넣기 막음** (결제는 기존처럼 됨) |
+| **068** | 점주가 반품 **완료**를 누르면 **신청한 품목만** 재고가 돌아옴 |
+| **069** | 반품 사진은 **비공개** 저장 · 볼 때만 잠깐 열리는 주소 |
+| **071** | 로그인 안 한 사람은 반품 처리 함수를 **호출 자체가 안 됨** |
+
+| | |
+|---|---|
+| **DB** | `iss067_071_audit_fixes` · 원격 적용 ✅ |
+| **클라** | `gacha.ts` · `orderReturns.ts` |
+| **안 건드린 것** | ISS-044 `_restore_order_stock` · 상품 이미지 `store-assets` |
+
+#### Expo 재시작
+
+| 이번에 수정한 곳 | Expo(Metro) | User가 할 일 |
+|---|---|---|
+| **DB + `apps/web`** | ❌ **안 해도 됨** | Vercel **1~2분** · 쇼핑·반품 **탭 재진입** |
+
+#### User 실기 ⬜
+
+- [ ] 테스트 매장 — 배송 끝난 주문 **반품 승인 → 완료** 후 **옵션 재고가 신청 수량만큼 돌아오는지**
+- [ ] 가챠는 **결제(주문) 후에만** 뽑히는지 (주문 없이 뽑기 시도는 하지 말 것)
 
 ---
 
@@ -5396,6 +5427,11 @@ npx expo start --tunnel --port 8082 --clear
 
 ## 8. Changelog
 
+### 2026-10-27 — **ISS-067~071 수정** (§63.15 D · §7.122)
+- **Author:** Cursor Agent (작업 채팅)
+- **Changed:** `20261027_iss067_071_audit_fixes.sql` · `roll_gacha` · `complete_return` · `_restore_return_stock` · `gacha.ts` · `orderReturns.ts` · HANDOFF `## 6` · §63.15
+- **Notes:** 1차 ISS-044 **재수정 없음**. 운영 DB 원격 적용 ✅. 웹 배포 후 1~2분 · **Expo 재시작 불필요**. 손님 가챠는 주문 있어야만 뽑힘. 점주가 반품 **완료**를 누르면 신청한 옵션/상품 재고가 돌아옴. 새 반품 사진은 비공개 저장.
+
 ### 2026-10-27 — **§63 2차 중간 감사** (읽기 전용 · ISS-067~071)
 - **Author:** Cursor Agent (**감사 채팅** — 작업 채팅과 분리)
 - **Changed:** **HANDOFF만** — `## 6` **ISS-067~071** · **§63.15** · §63.14에 **스냅샷 경고**(F절 「오염 중」은 당시 문장) · §7.0 Open 줄
@@ -8021,7 +8057,7 @@ where email = 'demo@owner.com';
 | 점주 **거절** (수락 전) | ✅ **전량 복구** (주문 수량만큼 `products` 재고 +) |
 | **발송 전** 취소 (점주 또는 손님, 정책 허용 시) | ✅ **전량 복구** |
 | **자동 수락**된 뒤 **발송 전** 취소/거절 | ✅ 재고 복구 **+** 자동수락 **남은 건수 +1** (§52.4) |
-| **배송중·배송완료** 후 취소 | ❌ 즉시 +1 하지 않음 → **반품 입고·검수 후** 복구 (§7.49 가챠 3상태) |
+| **배송중·배송완료** 후 취소 | ❌ 즉시 +1 하지 않음 → **반품 입고·검수 후** 복구 (`complete_return` · ISS-068 ✅) |
 | 디지털·즉시 지급·이미 소비된 혜택 | 실물 재고와 별도 정책 (팝업 실물 MVP 이후) |
 | 위탁 판매 (남의 재고) | 우리 DB 재고 없음 — 해당 모델 도입 시 예외 표 |
 
@@ -9273,17 +9309,19 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 
 **다만 1차 이후에 쌓인 기능 옆에서 P1 3건이 남아 있다.** ① 손님이 REST로 **가짜 주문을 직접 넣을 수 있고**(ISS-067 · UPDATE는 막혔지만 INSERT는 남음), ② 반품을 끝내도 **재고가 안 돌아온다**(ISS-068 · §52.2 위반), ③ `order_id` 없이 가챠 RPC를 치면 **결제 없이 무한 뽑기**(ISS-070). P0(출시 즉시 중단)는 이번 중간 감사에서 **새로 나오지 않았다.**
 
+**↓ D단계 (작업 채팅 · 2026-10-27)** — 위 P1 3건 + ISS-069/071 **전부 Fixed**. 본문 A는 감사 당시 문장. 현재 = B표 · **§7.122**.
+
 #### B. P0~P3 · **담당 채팅 추적**
 
 | ISS | 한 줄 | 등급 | 상태 | **담당 채팅** |
 |---|---|---|---|---|
 | **ISS-044~051·053~055** | 1차 발견분 | P0~P3 | **Fixed 재확인 (원격 2026-10-27)** | 작업 채팅 완료 · **재수정 금지** |
 | **ISS-052** | 원격 vs repo migration 이력 | **P2** | 완화 | §7.101 · 1:1 비목표 |
-| **ISS-067** | 손님 `orders`/`order_items` 직접 INSERT → 가짜 주문 | **P1** | Open | 감사 발견 → **작업 채팅 수정 대기** |
-| **ISS-068** | 반품 완료 시 재고 미복구 | **P1** | Open | 감사 발견 → **작업 채팅 수정 대기** |
-| **ISS-070** | `roll_gacha` NULL order_id → 무료 무한 뽑기 | **P1** | Open | 감사 발견 → **작업 채팅 수정 대기** |
-| **ISS-069** | 반품 증빙 public URL | **P2** | Open | 감사 발견 |
-| **ISS-071** | 반품 RPC anon EXECUTE (본문 owner 검사로 실패) | **P3** | Open | 감사 발견 |
+| **ISS-067** | 손님 `orders`/`order_items` 직접 INSERT → 가짜 주문 | **P1** | **Fixed (2026-10-27)** | 작업 채팅 · `iss067_071_audit_fixes` |
+| **ISS-068** | 반품 완료 시 재고 미복구 | **P1** | **Fixed (2026-10-27)** | 작업 채팅 · `complete_return` + `_restore_return_stock` |
+| **ISS-070** | `roll_gacha` NULL order_id → 무료 무한 뽑기 | **P1** | **Fixed (2026-10-27)** | 작업 채팅 · 1인자 DROP · `order_required` |
+| **ISS-069** | 반품 증빙 public URL | **P2** | **Fixed (2026-10-27)** | 작업 채팅 · `return-evidence` private + 서명 URL |
+| **ISS-071** | 반품 RPC anon EXECUTE (본문 owner 검사로 실패) | **P3** | **Fixed (2026-10-27)** | 작업 채팅 · PUBLIC/anon REVOKE |
 | **ISS-055 잔여** | Auth 유출 비밀번호 차단 | **P3** | ⏸ | Free 플랜 Save 거부 · User 2026-10-12 확인 |
 
 **정상 확인(이번 재검)** — ISS-044 restore SKU 분기 ✅ · ISS-045 `orders` UPDATE GRANT/정책 없음 ✅ · ISS-046 알림 헬퍼 anon/auth EXECUTE 불가 ✅ · ISS-049 `profiles` UPDATE 없음 ✅ · `place_order` 멱등·counter·delta·quota ✅ · `get_store_order_counts` anon이어도 `not_store_owner` ✅ · 신규 테이블 RLS ON ✅ · `sponsored_banners` admin-only ✅ · `store_news_posts` 점주만 ✅ · `order_place_idempotency`/`store_order_counters` 직접 API 차단 ✅ · `save_owner_product_*` owner 검사 ✅
@@ -9298,37 +9336,31 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 | **진열 fixture 인덱스** | 월드 freeze · 우선순위 낮음 |
 | **PG 웹훅·승인키** | AD-061 착수 금지 · ISS-047은 mock만 |
 | **E2E S1~S10** | User 실기 전수 **미실행** |
-| **Storage mime/용량** | 버킷 `file_size_limit`·`allowed_mime_types` **둘 다 null** (ISS-069과 별건 · 미이슈화) |
+| **Storage mime/용량** | `store-assets` 는 여전히 제한 없음 (미이슈화) · **`return-evidence`는 5MB·이미지 mime ✅ (ISS-069)** |
 
 #### D. §62 연관
 
 | 연관점 | 결과 |
 |---|---|
-| **재고 연쇄** | 차감·취소/거절 복구 ✅ · **반품 완료 복구 ❌ (ISS-068)** |
-| **주문 생성** | `place_order` only **의도** · REST INSERT **아직 열림 (ISS-067)** |
-| **가챠** | 주문 묶음 경로 ✅ · **NULL order 우회 ❌ (ISS-070)** |
+| **재고 연쇄** | 차감·취소/거절 복구 ✅ · **반품 완료 복구 ✅ (ISS-068)** |
+| **주문 생성** | `place_order` only · REST INSERT **닫힘 (ISS-067)** |
+| **가챠** | 주문 묶음 경로 ✅ · NULL order **거부 (ISS-070)** |
 | **알림** | 1차 ISS-046 닫힘 ✅ |
 | **옵션 라벨** | 주문·반품·KPI 반영 ✅ (ISS-054) |
 
 #### E. User 실기 (코드 수정 없이 · **테스트 매장만**)
 
 1. **ISS-044 회귀** — 옵션 재고 10 → 2개 주문 → 거절 → **10으로 돌아오는지**(1차 E와 동일 · 이제 **돌아와야 정상**)
-2. **ISS-068** — 배송 끝난 주문을 반품 완료까지 보낸 뒤 **옵션 재고가 그대로인지** 확인. 안 돌아오면 재현 성공.
-3. **ISS-070** — 하지 말 것(운영 풀이 소진됨). 작업 채팅에서 RPC 가드만 닫으면 됨.
+2. **ISS-068 회귀** — 배송 끝난 주문을 반품 완료까지 보낸 뒤 **옵션 재고가 신청 수량만큼 돌아오는지** (이제 **돌아와야 정상**)
+3. **ISS-070** — 하지 말 것(운영 풀이 소진됨). RPC 가드는 닫힘.
 
 #### F. **다음 수정은 승인 후** (§63.4 D)
 
-이 중간 감사에서도 **코드·DB는 안 바꿨다.** 권장 순서:
-
-1. **ISS-070** — `p_order_id` NULL 거부 + 1인자 `roll_gacha` DROP (한 함수 · 회귀 작음)
-2. **ISS-067** — `orders`/`order_items` INSERT GRANT·정책 제거 (클라 사용처 0건)
-3. **ISS-068** — `complete_return`에 SKU 분기 restore (**§52.2 정책 한 줄 확인** 후)
-4. **ISS-069** — 증빙 private 버킷 (상품 이미지 public은 유지)
-5. **ISS-071** — anon REVOKE (기능 영향 없음)
+**↓ 작업 채팅 D단계 (2026-10-27 · User 「조치」)** — 권장 순서 5건 **전부 적용**. 상세 **§7.122**. 1차 ISS-044~055는 **다시 열지 않음**.
 
 **2차 최종(§63.8)** 은 베타 필수 기능이 한 사이클 더 끝난 뒤에 다시 돌린다. 기능 추가할 때마다 전수 감사는 하지 말고, **이번처럼 중간 감사**를 요청하면 된다.
 
-*§63 Last updated: 2026-10-27 (2차 중간 A+B · §63.15 · ISS-067~071)*
+*§63 Last updated: 2026-10-27 (2차 중간 D · ISS-067~071 Fixed · §7.122)*
 
 ---
 

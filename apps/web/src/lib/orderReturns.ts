@@ -5,6 +5,8 @@ import { OrderError } from './orders';
 
 export const MAX_RETURN_EVIDENCE_BYTES = 5 * 1024 * 1024;
 export const MAX_RETURN_EVIDENCE_IMAGES = 3;
+const RETURN_EVIDENCE_BUCKET = 'return-evidence';
+const RETURN_EVIDENCE_SIGNED_TTL_SEC = 60 * 60;
 
 export interface RequestReturnInput {
   kind: OrderReturnKind;
@@ -17,16 +19,23 @@ export interface RequestReturnInput {
 
 async function uploadReturnEvidence(userId: string, file: File): Promise<string> {
   const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-  const path = `${userId}/return-evidence/${Date.now()}-${Math.round(Math.random() * 1e6)}.${ext}`;
+  const path = `${userId}/${Date.now()}-${Math.round(Math.random() * 1e6)}.${ext}`;
 
   const { error } = await supabase.storage
-    .from('store-assets')
+    .from(RETURN_EVIDENCE_BUCKET)
     .upload(path, file, { contentType: file.type || 'image/jpeg', upsert: false });
 
   if (error) throw new OrderError(error.message);
+  return path;
+}
 
-  const { data } = supabase.storage.from('store-assets').getPublicUrl(path);
-  return data.publicUrl;
+async function resolveEvidenceUrl(value: string): Promise<string> {
+  if (/^https?:\/\//i.test(value)) return value;
+  const { data, error } = await supabase.storage
+    .from(RETURN_EVIDENCE_BUCKET)
+    .createSignedUrl(value, RETURN_EVIDENCE_SIGNED_TTL_SEC);
+  if (error || !data?.signedUrl) return value;
+  return data.signedUrl;
 }
 
 export async function uploadReturnEvidenceFiles(userId: string, files: File[]): Promise<string[]> {
@@ -38,13 +47,14 @@ export async function uploadReturnEvidenceFiles(userId: string, files: File[]): 
   return urls;
 }
 
-function mapReturnDetail(row: Record<string, unknown>): OrderReturnDetail {
+async function mapReturnDetail(row: Record<string, unknown>): Promise<OrderReturnDetail> {
   const rawItems = row.items;
   const items = Array.isArray(rawItems)
     ? (rawItems as OrderReturnDetail['items'])
     : [];
   const rawEvidence = row.evidence_urls;
-  const evidence_urls = Array.isArray(rawEvidence) ? (rawEvidence as string[]) : [];
+  const stored = Array.isArray(rawEvidence) ? (rawEvidence as string[]) : [];
+  const evidence_urls = await Promise.all(stored.map(resolveEvidenceUrl));
 
   return {
     return_id: String(row.return_id),

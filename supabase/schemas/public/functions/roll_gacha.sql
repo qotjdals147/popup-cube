@@ -1,77 +1,6 @@
 CREATE OR REPLACE FUNCTION public.roll_gacha (
-  p_store_id character varying
-)
-  RETURNS TABLE (
-    entry_id            uuid,
-    product_id          uuid,
-    product_name        character varying,
-    product_image_url   text,
-    exclusive_name      character varying,
-    exclusive_image_url text
-  )
-  LANGUAGE plpgsql
-  SECURITY DEFINER
-  SET search_path TO 'public'
-  AS $function$
-declare
-  v_pool_id uuid;
-  v_total_weight integer;
-  v_rand numeric;
-  v_entry_id uuid;
-begin
-  if auth.uid() is null then
-    raise exception 'not_authenticated';
-  end if;
-
-  select gp.id into v_pool_id
-  from gacha_pools gp
-  where gp.store_id = p_store_id and gp.linked_product_id is null and gp.is_active = true
-  limit 1;
-
-  if v_pool_id is null then
-    raise exception 'no_active_pool';
-  end if;
-
-  select coalesce(sum(gpe.weight), 0) into v_total_weight
-  from gacha_pool_entries gpe
-  where gpe.pool_id = v_pool_id and gpe.is_active = true;
-
-  if v_total_weight <= 0 then
-    raise exception 'empty_pool';
-  end if;
-
-  v_rand := floor(random() * v_total_weight) + 1;
-
-  select gpe.id into v_entry_id
-  from (
-    select gpe2.id, sum(gpe2.weight) over (order by gpe2.created_at, gpe2.id) as running_weight
-    from gacha_pool_entries gpe2
-    where gpe2.pool_id = v_pool_id and gpe2.is_active = true
-  ) gpe
-  where gpe.running_weight >= v_rand
-  order by gpe.running_weight
-  limit 1;
-
-  insert into gacha_rolls (user_id, store_id, pool_entry_id)
-  values (auth.uid(), p_store_id, v_entry_id);
-
-  return query
-  select
-    e.id,
-    e.product_id,
-    p.name,
-    p.image_url,
-    e.exclusive_name,
-    e.exclusive_image_url
-  from gacha_pool_entries e
-  left join products p on p.id = e.product_id
-  where e.id = v_entry_id;
-end;
-$function$;
-
-CREATE OR REPLACE FUNCTION public.roll_gacha (
   p_store_id character varying,
-  p_order_id uuid              DEFAULT NULL::uuid
+  p_order_id uuid
 )
   RETURNS TABLE (
     entry_id            uuid,
@@ -95,19 +24,22 @@ BEGIN
     RAISE EXCEPTION 'not_authenticated';
   END IF;
 
-  IF p_order_id IS NOT NULL THEN
-    IF NOT EXISTS (
-      SELECT 1 FROM public.orders o
-      WHERE o.id = p_order_id
-        AND o.store_id = p_store_id
-        AND o.user_id = auth.uid()
-        AND o.reward_type = 'gacha'
-    ) THEN
-      RAISE EXCEPTION 'invalid_gacha_order';
-    END IF;
-    IF EXISTS (SELECT 1 FROM public.gacha_rolls gr WHERE gr.order_id = p_order_id) THEN
-      RAISE EXCEPTION 'gacha_already_rolled';
-    END IF;
+  IF p_order_id IS NULL THEN
+    RAISE EXCEPTION 'order_required';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM public.orders o
+    WHERE o.id = p_order_id
+      AND o.store_id = p_store_id
+      AND o.user_id = auth.uid()
+      AND o.reward_type = 'gacha'
+  ) THEN
+    RAISE EXCEPTION 'invalid_gacha_order';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM public.gacha_rolls gr WHERE gr.order_id = p_order_id) THEN
+    RAISE EXCEPTION 'gacha_already_rolled';
   END IF;
 
   SELECT gp.id INTO v_pool_id
@@ -156,18 +88,6 @@ BEGIN
 END;
 $function$;
 
-GRANT EXECUTE ON FUNCTION "public"."roll_gacha"(character varying) TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."roll_gacha"(character varying, uuid) FROM PUBLIC, "anon";
 
-GRANT EXECUTE ON FUNCTION "public"."roll_gacha"(character varying, uuid) TO PUBLIC;
-
-REVOKE ALL ON FUNCTION "public"."roll_gacha"(character varying) FROM "postgres";
-
-GRANT EXECUTE ON FUNCTION "public"."roll_gacha"(character varying) TO "postgres";
-
-REVOKE ALL ON FUNCTION "public"."roll_gacha"(character varying, uuid) FROM "postgres";
-
-GRANT EXECUTE ON FUNCTION "public"."roll_gacha"(character varying, uuid) TO "postgres";
-
-REVOKE ALL ON FUNCTION "public"."roll_gacha"(character varying, uuid) FROM "anon", "authenticated", "service_role";
-
-REVOKE ALL ON FUNCTION "public"."roll_gacha"(character varying) FROM PUBLIC, "anon", "service_role";
+GRANT EXECUTE ON FUNCTION "public"."roll_gacha"(character varying, uuid) TO "authenticated";

@@ -23,10 +23,11 @@ export class GachaError extends Error {}
  * 가챠 뽑기 — 서버(`roll_gacha` SECURITY DEFINER 함수)가 가중치 랜덤으로 결과를 정하고
  * 기록까지 남김. 클라이언트는 결과만 받아서 보여줌(조작 불가능).
  */
-export async function rollGacha(storeId: string, orderId?: string | null): Promise<GachaRollResult> {
+export async function rollGacha(storeId: string, orderId: string): Promise<GachaRollResult> {
+  if (!orderId) throw new GachaError('order_required');
   const { data, error } = await supabase.rpc('roll_gacha', {
     p_store_id: storeId,
-    p_order_id: orderId ?? null,
+    p_order_id: orderId,
   });
 
   if (error) throw new GachaError(error.message);

@@ -20,13 +20,6 @@ ALTER TABLE "public"."order_items"
 
 CREATE INDEX order_items_order_id_idx ON public.order_items USING btree (order_id);
 
-CREATE POLICY "order_items_insert_own" ON "public"."order_items"
-  FOR INSERT
-  TO PUBLIC
-  WITH CHECK ((EXISTS ( SELECT 1
-   FROM public.orders o
-  WHERE ((o.id = order_items.order_id) AND (o.user_id = auth.uid())))));
-
 CREATE POLICY "order_items_select_own" ON "public"."order_items"
   FOR SELECT
   TO PUBLIC
@@ -48,7 +41,7 @@ GRANT MAINTAIN, REFERENCES, TRIGGER, TRUNCATE ON TABLE "public"."order_items" TO
 
 REVOKE ALL ON TABLE "public"."order_items" FROM "authenticated";
 
-GRANT INSERT, MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE ON TABLE "public"."order_items" TO "authenticated";
+GRANT MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE ON TABLE "public"."order_items" TO "authenticated";
 
 REVOKE ALL ON TABLE "public"."order_items" FROM "postgres";
 

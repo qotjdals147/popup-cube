@@ -80,11 +80,6 @@ CREATE UNIQUE INDEX orders_store_id_order_number_key ON public.orders USING btre
 
 CREATE INDEX orders_user_id_idx ON public.orders USING btree (user_id);
 
-CREATE POLICY "orders_insert_own" ON "public"."orders"
-  FOR INSERT
-  TO PUBLIC
-  WITH CHECK ((auth.uid() = user_id));
-
 CREATE POLICY "orders_select_own" ON "public"."orders"
   FOR SELECT
   TO PUBLIC
@@ -103,7 +98,7 @@ GRANT MAINTAIN, REFERENCES, TRIGGER, TRUNCATE ON TABLE "public"."orders" TO "ano
 
 REVOKE ALL ON TABLE "public"."orders" FROM "authenticated";
 
-GRANT INSERT, MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE ON TABLE "public"."orders" TO "authenticated";
+GRANT MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE ON TABLE "public"."orders" TO "authenticated";
 
 REVOKE ALL ON TABLE "public"."orders" FROM "postgres";
 
