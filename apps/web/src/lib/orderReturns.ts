@@ -72,6 +72,7 @@ async function mapReturnDetail(row: Record<string, unknown>): Promise<OrderRetur
     return_address_line2: (row.return_address_line2 as string | null) ?? null,
     gacha_return_status: (row.gacha_return_status as OrderReturnDetail['gacha_return_status']) ?? null,
     owner_reply: (row.owner_reply as string | null) ?? null,
+    stock_restored: typeof row.stock_restored === 'boolean' ? row.stock_restored : null,
     evidence_urls,
     requested_at: String(row.requested_at),
     resolved_at: (row.resolved_at as string | null) ?? null,
@@ -115,8 +116,11 @@ export async function rejectReturn(returnId: string, reply: string): Promise<voi
   if (error) throw new OrderError(error.message);
 }
 
-export async function completeReturn(returnId: string): Promise<void> {
-  const { error } = await supabase.rpc('complete_return', { p_return_id: returnId });
+export async function completeReturn(returnId: string, restoreStock = true): Promise<void> {
+  const { error } = await supabase.rpc('complete_return', {
+    p_return_id: returnId,
+    p_restore_stock: restoreStock,
+  });
   if (error) {
     if (error.message.includes('gacha_return_pending')) throw new OrderError('gacha_return_pending');
     throw new OrderError(error.message);

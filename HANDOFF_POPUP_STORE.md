@@ -952,7 +952,7 @@ popup_store/                          # Turborepo root
 | ID | Issue | Severity | Action |
 |---|---|---|---|
 | ISS-067 | ~~손님이 REST로 가짜 주문을 직접 INSERT 가능~~ | **Fixed (DB · `iss067_071_audit_fixes` · 2026-10-27)** | `orders`/`order_items` **INSERT GRANT·정책 제거** · 주문 생성은 `place_order`만 · **1차 ISS-044 재수정 없음** |
-| ISS-068 | ~~반품 완료해도 재고가 안 돌아옴~~ | **Fixed (DB · 2026-10-27 · §52.2)** | `complete_return` → `_restore_return_stock` — **신청 품목만** 옵션/대표 재고 복구 · 취소·거절용 `_restore_order_stock`(ISS-044)는 **그대로** |
+| ISS-068 | ~~반품 완료해도 재고가 안 돌아옴~~ | **Fixed (DB+web · 2026-10-27 · §52.2)** | **입고 완료** = 신청 품목 재고 복구 · **회수 없이 완료** = 재고 그대로 · `_restore_order_stock`(ISS-044)는 **그대로** |
 | ISS-070 | ~~주문 없이 가챠를 뽑을 수 있음~~ | **Fixed (DB+web · 2026-10-27)** | 1인자 `roll_gacha` **DROP** · `p_order_id` NULL = `order_required` · 클라 `rollGacha(storeId, orderId)` **필수** |
 | ISS-069 | ~~반품 증빙이 공개 URL~~ | **Fixed (DB+web · 2026-10-27)** | 버킷 **`return-evidence`** (비공개 · 5MB · 이미지 mime) · 저장은 경로 · 조회 시 **서명 URL** · 예전 `store-assets` 공개 URL은 그대로 표시 |
 | ISS-071 | ~~반품 처리 RPC가 anon에서도 EXECUTE 가능~~ | **Fixed (DB · 2026-10-27)** | `approve_return`·`complete_return`·`reject_return`·`set_gacha_return_status` **PUBLIC/anon REVOKE** · `authenticated`만 |
@@ -1192,7 +1192,7 @@ npx expo start --tunnel --port 8082 --clear
 | **배송 후** | 손님 **「문의하기」** (`create_order_claim`) · 점주 **답변=종료** (`resolve_order_claim`) | **반품 신청** · **사유 코드** · **품목/수량** · **상태 머신** |
 | **점주 UI** | **발주·배송** 등 주문 카드 **안에** 보라색 「손님 문의」 블록 | **「반품·교환」전용 탭** · **뱃지** · **필터** |
 | **손님 UI** | 주문내역 **「문의하기」** 자유 텍스트 · **(R1.5)** 이력·타임스탬프 · **(R2)** **「반품·교환 신청」** 별도 버튼 | **반품지 안내** · 사유·품목·상태 머신 |
-| **재고** | §52.2 — **입고·검수 후** 복구 | `complete_return` → `_restore_return_stock` (**ISS-068 ✅**) |
+| **재고** | 입고 완료 = 복구 · 회수 없음 = 그대로 | `complete_return(p_restore_stock)` (**ISS-068 ✅**) |
 | **돈** | mock · 점주 답변에 「환불 처리」 **수동** | PG **부분/전액 환불** (AD-061 후) |
 
 #### 주문 여정별 정리 (헷갈리지 않게)
@@ -2604,7 +2604,7 @@ npx supabase db pull
 |---|---|
 | **070** | 주문 없이 가챠 뽑기 **막음** · 1인자 함수 삭제 |
 | **067** | 손님이 주문 테이블에 **직접 넣기 막음** (결제는 기존처럼 됨) |
-| **068** | 점주가 반품 **완료**를 누르면 **신청한 품목만** 재고가 돌아옴 |
+| **068** | 점주 완료는 **두 갈래** — **입고 완료**(재고 +) / **회수 없이 완료**(재고 그대로) |
 | **069** | 반품 사진은 **비공개** 저장 · 볼 때만 잠깐 열리는 주소 |
 | **071** | 로그인 안 한 사람은 반품 처리 함수를 **호출 자체가 안 됨** |
 
@@ -2622,7 +2622,7 @@ npx supabase db pull
 
 #### User 실기 ⬜
 
-- [ ] 테스트 매장 — 배송 끝난 주문 **반품 승인 → 완료** 후 **옵션 재고가 신청 수량만큼 돌아오는지**
+- [ ] 테스트 매장 — **입고 완료** 하면 신청 수량만큼 재고가 돌아오고, **회수 없이 완료** 하면 재고가 그대로인지
 - [ ] 가챠는 **결제(주문) 후에만** 뽑히는지 (주문 없이 뽑기 시도는 하지 말 것)
 
 ---
@@ -5426,6 +5426,11 @@ npx expo start --tunnel --port 8082 --clear
 ---
 
 ## 8. Changelog
+
+### 2026-10-27 — ISS-068 **회수 없이 완료** (User 확인)
+- **Author:** Cursor Agent
+- **Changed:** `complete_return(p_restore_stock)` · `OwnerReturnsPanel` 두 버튼 · 가이드 반품 장 · §7.122
+- **Notes:** 물건을 안 받는 반품은 재고를 올리지 않음. 웹 배포 후 1~2분 · Expo 재시작 불필요.
 
 ### 2026-10-27 — **ISS-067~071 수정** (§63.15 D · §7.122)
 - **Author:** Cursor Agent (작업 채팅)
@@ -9318,7 +9323,7 @@ A. 건강 요약 (1단락) · B. P0~P3 목록 · C. **미검증** · D. §62 연
 | **ISS-044~051·053~055** | 1차 발견분 | P0~P3 | **Fixed 재확인 (원격 2026-10-27)** | 작업 채팅 완료 · **재수정 금지** |
 | **ISS-052** | 원격 vs repo migration 이력 | **P2** | 완화 | §7.101 · 1:1 비목표 |
 | **ISS-067** | 손님 `orders`/`order_items` 직접 INSERT → 가짜 주문 | **P1** | **Fixed (2026-10-27)** | 작업 채팅 · `iss067_071_audit_fixes` |
-| **ISS-068** | 반품 완료 시 재고 미복구 | **P1** | **Fixed (2026-10-27)** | 작업 채팅 · `complete_return` + `_restore_return_stock` |
+| **ISS-068** | 반품 완료 시 재고 미복구 | **P1** | **Fixed (2026-10-27)** | 입고 완료 / 회수 없이 완료 |
 | **ISS-070** | `roll_gacha` NULL order_id → 무료 무한 뽑기 | **P1** | **Fixed (2026-10-27)** | 작업 채팅 · 1인자 DROP · `order_required` |
 | **ISS-069** | 반품 증빙 public URL | **P2** | **Fixed (2026-10-27)** | 작업 채팅 · `return-evidence` private + 서명 URL |
 | **ISS-071** | 반품 RPC anon EXECUTE (본문 owner 검사로 실패) | **P3** | **Fixed (2026-10-27)** | 작업 채팅 · PUBLIC/anon REVOKE |

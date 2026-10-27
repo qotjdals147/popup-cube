@@ -316,6 +316,8 @@ function MockReturnsFigure() {
         <div className="owner-sc-guide-mock__toolbar">
           <span className="owner-btn-primary owner-sc-guide-mock__demo-btn">{t('ownerReturns.approve')}</span>
           <span className="owner-btn-ghost owner-sc-guide-mock__demo-btn">{t('ownerReturns.reject')}</span>
+          <span className="owner-btn-primary owner-sc-guide-mock__demo-btn">{t('ownerReturns.complete')}</span>
+          <span className="owner-btn-ghost owner-sc-guide-mock__demo-btn">{t('ownerReturns.completeNoReceive')}</span>
         </div>
         <MockCallout step={1}>{t('ownerReturns.listFilterActive')} / {t('ownerReturns.listFilterHistory')} 로 목록을 바꿉니다.</MockCallout>
       </div>

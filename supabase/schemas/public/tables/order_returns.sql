@@ -20,6 +20,7 @@ CREATE TABLE "public"."order_returns" (
   "requested_at"          timestamp with time zone NOT NULL DEFAULT now(),
   "resolved_at"           timestamp with time zone,
   "evidence_urls"         text[]                   DEFAULT '{}'::text[],
+  "stock_restored"        boolean,
   CONSTRAINT "order_returns_gacha_status_check"
     CHECK
     (((gacha_return_status IS NULL) OR ((gacha_return_status)::text = ANY ((ARRAY['pending'::character varying, 'returned'::character varying, 'not_returnable'::character

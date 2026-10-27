@@ -1206,8 +1206,12 @@ export const ko = {
     rejectRequired: '거절 사유를 입력해 주세요.',
     confirmApprove: '반품·교환 신청을 승인할까요?',
     confirmReject: '반품·교환 신청을 거절할까요?',
-    complete: '처리 완료',
-    confirmComplete: '반품·교환 건을 완료 처리할까요?',
+    complete: '입고 완료',
+    completeNoReceive: '회수 없이 완료',
+    confirmComplete: '물건을 받아 입고 완료할까요?',
+    confirmCompleteNoReceive: '물건을 받지 않고 끝낼까요? 재고는 그대로입니다.',
+    stockRestoredYes: '재고 반영',
+    stockRestoredNo: '회수 없음',
     gachaLegend: '가챠 당첨: {name}',
     gachaStatus: {
       pending: '반납 예정',
@@ -1350,7 +1354,9 @@ export const ko = {
       '반품·교환 신청은 손님 앱에서 접수됩니다. 승인 전까지는 배송·정산 흐름과 별도로 이 탭에서만 다룹니다.',
     sec_returns_logic2:
       '가챠 당첨품은 반품·교환 화면에 「반납 예정/완료」 등 추가 상태가 붙을 수 있습니다. 프로모션·가챠 탭과 함께 확인하세요.',
-    sec_returns_step1: '「반품·교환 신청」: 승인·거절(사유)·완료. 「처리 대기 / 거절·완료」로 목록을 바꿉니다.',
+    sec_returns_logic3:
+      '승인 뒤 완료는 두 갈래입니다. 물건을 받았으면 「입고 완료」(재고 +). 회수하지 않으면 「회수 없이 완료」(재고 그대로).',
+    sec_returns_step1: '「반품·교환 신청」: 승인·거절(사유)·입고 완료 / 회수 없이 완료. 「처리 대기 / 거절·완료」로 목록을 바꿉니다.',
     sec_returns_step2: '「손님 문의」: 1:1 문의 답변.',
     sec_returns_step3: '주문·반품 화면의 연결 링크로 관련 주문으로 이동할 수 있습니다.',
     sec_promotions_title: '11. 프로모션·가챠',

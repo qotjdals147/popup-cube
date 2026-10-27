@@ -445,6 +445,7 @@ export interface OrderReturnDetail {
   return_address_line2: string | null;
   gacha_return_status: GachaReturnStatus | null;
   owner_reply: string | null;
+  stock_restored?: boolean | null;
   evidence_urls?: string[];
   requested_at: string;
   resolved_at: string | null;

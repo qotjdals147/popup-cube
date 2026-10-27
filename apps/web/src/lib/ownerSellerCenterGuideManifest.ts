@@ -187,6 +187,7 @@ export const OWNER_SELLER_GUIDE_SECTIONS: readonly OwnerSellerGuideSection[] = [
     logicKeys: [
       'ownerSellerGuide.sec_returns_logic1',
       'ownerSellerGuide.sec_returns_logic2',
+      'ownerSellerGuide.sec_returns_logic3',
     ],
     stepKeys: [
       'ownerSellerGuide.sec_returns_step1',

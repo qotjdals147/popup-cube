@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.complete_return (
-  p_return_id uuid
+  p_return_id uuid,
+  p_restore_stock boolean DEFAULT true
 )
   RETURNS void
   LANGUAGE plpgsql
@@ -11,6 +12,7 @@ DECLARE
   v_status character varying;
   v_store_id character varying;
   v_gacha_status character varying;
+  v_restore boolean := COALESCE(p_restore_stock, true);
 BEGIN
   SELECT r.order_id, r.status, r.store_id, r.gacha_return_status
   INTO v_order_id, v_status, v_store_id, v_gacha_status
@@ -36,10 +38,14 @@ BEGIN
     RAISE EXCEPTION 'gacha_return_pending';
   END IF;
 
-  PERFORM public._restore_return_stock(p_return_id);
+  IF v_restore THEN
+    PERFORM public._restore_return_stock(p_return_id);
+  END IF;
 
   UPDATE public.order_returns
-  SET status = 'completed', resolved_at = now()
+  SET status = 'completed',
+      resolved_at = now(),
+      stock_restored = v_restore
   WHERE id = p_return_id;
 
   UPDATE public.orders
@@ -50,6 +56,6 @@ BEGIN
 END;
 $function$;
 
-REVOKE ALL ON FUNCTION "public"."complete_return"(uuid) FROM PUBLIC, "anon";
+REVOKE ALL ON FUNCTION "public"."complete_return"(uuid, boolean) FROM PUBLIC, "anon";
 
-GRANT EXECUTE ON FUNCTION "public"."complete_return"(uuid) TO "authenticated";
+GRANT EXECUTE ON FUNCTION "public"."complete_return"(uuid, boolean) TO "authenticated";

@@ -19,7 +19,8 @@ CREATE OR REPLACE FUNCTION public.get_order_return (
     gacha_return_status   character varying,
     owner_reply           text,
     requested_at          timestamp with time zone,
-    resolved_at           timestamp with time zone
+    resolved_at           timestamp with time zone,
+    stock_restored        boolean
   )
   LANGUAGE plpgsql
   SECURITY DEFINER
@@ -80,7 +81,8 @@ BEGIN
     r.gacha_return_status,
     r.owner_reply,
     r.requested_at,
-    r.resolved_at
+    r.resolved_at,
+    r.stock_restored
   FROM public.order_returns r
   WHERE r.order_id = p_order_id
   ORDER BY r.requested_at DESC

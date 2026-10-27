@@ -54,6 +54,7 @@ export function OwnerReturnsPanel({
   const [rejectErrorId, setRejectErrorId] = useState<string | null>(null);
   const [gachaStatus, setGachaStatus] = useState<Record<string, GachaReturnStatus>>({});
   const [returnEvidence, setReturnEvidence] = useState<Record<string, string[]>>({});
+  const [stockRestored, setStockRestored] = useState<Record<string, boolean>>({});
   const scrolledFocusKeyRef = useRef<string | null>(null);
 
   const reload = useCallback(async () => {
@@ -134,6 +135,9 @@ export function OwnerReturnsPanel({
         }
         if (detail.evidence_urls?.length) {
           setReturnEvidence((prev) => ({ ...prev, [order.id]: detail.evidence_urls! }));
+        }
+        if (typeof detail.stock_restored === 'boolean') {
+          setStockRestored((prev) => ({ ...prev, [order.id]: detail.stock_restored! }));
         }
       });
     }
@@ -268,6 +272,13 @@ export function OwnerReturnsPanel({
               evidenceUrls={returnEvidence[order.id] ?? []}
               variant="owner"
             />
+            {order.return_status === 'completed' && order.id in stockRestored && (
+              <p style={styles.stockNote}>
+                {stockRestored[order.id]
+                  ? t('ownerReturns.stockRestoredYes')
+                  : t('ownerReturns.stockRestoredNo')}
+              </p>
+            )}
 
             {onNavigateRelated && (
               <OwnerOrderRelatedLinks
@@ -363,17 +374,30 @@ export function OwnerReturnsPanel({
                 </>
               )}
               {order.return_status === 'approved' && returnId && (
-                <button
-                  type="button"
-                  style={styles.completeBtn}
-                  disabled={busy || (order.gacha_prize_name && (gachaStatus[order.id] ?? 'pending') === 'pending')}
-                  onClick={() => {
-                    if (!window.confirm(t('ownerReturns.confirmComplete'))) return;
-                    void runAction(order.id, returnId, () => completeReturn(returnId));
-                  }}
-                >
-                  {t('ownerReturns.complete')}
-                </button>
+                <div style={styles.actionRow}>
+                  <button
+                    type="button"
+                    style={styles.completeBtn}
+                    disabled={busy || (order.gacha_prize_name && (gachaStatus[order.id] ?? 'pending') === 'pending')}
+                    onClick={() => {
+                      if (!window.confirm(t('ownerReturns.confirmComplete'))) return;
+                      void runAction(order.id, returnId, () => completeReturn(returnId, true));
+                    }}
+                  >
+                    {t('ownerReturns.complete')}
+                  </button>
+                  <button
+                    type="button"
+                    style={styles.completeNoReceiveBtn}
+                    disabled={busy || (order.gacha_prize_name && (gachaStatus[order.id] ?? 'pending') === 'pending')}
+                    onClick={() => {
+                      if (!window.confirm(t('ownerReturns.confirmCompleteNoReceive'))) return;
+                      void runAction(order.id, returnId, () => completeReturn(returnId, false));
+                    }}
+                  >
+                    {t('ownerReturns.completeNoReceive')}
+                  </button>
+                </div>
               )}
             </div>
           </article>
@@ -535,5 +559,23 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     cursor: 'pointer',
     fontFamily: ownerFont,
+  },
+  completeNoReceiveBtn: {
+    alignSelf: 'flex-start',
+    padding: '10px 18px',
+    borderRadius: 8,
+    border: `1.5px solid ${oc.borderStrong}`,
+    background: oc.surface,
+    color: oc.textMuted,
+    fontSize: fs.sm,
+    fontWeight: 600,
+    cursor: 'pointer',
+    fontFamily: ownerFont,
+  },
+  stockNote: {
+    margin: '8px 0 0',
+    fontSize: fs.xs,
+    fontWeight: 700,
+    color: oc.textMuted,
   },
 };
